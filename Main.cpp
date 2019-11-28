@@ -13,6 +13,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
+	this->m_sizer->AddGrowableRow(0);
+	this->m_sizer->AddGrowableCol(0);
+
+	this->SetSizer(this->m_sizer);
+	this->Centre(wxBOTH);
+	this->Layout();
 }
 
 Main::~Main()
