@@ -11,7 +11,10 @@ class Main : public wxFrame
 {
 private:
 	wxGridBagSizer* m_sizer;
-	wxGLCanvas* m_glcanvas;
+	EngineCanvas* m_glcanvas;
+	wxButton* m_btn_render;
+
+	void btn_render_OnClick(wxCommandEvent& evt);
 
 public:
 	Main();
