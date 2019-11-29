@@ -21,7 +21,7 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 
 void EngineCanvas::Render()
 {
-	float scale = 0.2;
+	GLfloat scale = 0.2;
 
 	this->SetCurrent(*this->m_glcontext);
 
