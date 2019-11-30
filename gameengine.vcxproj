@@ -135,14 +135,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="EngineCanvas.cpp" />
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\engine\render\opengl\EngineCanvas.cpp" />
+    <ClCompile Include="src\engine\render\opengl\EngineModel.cpp" />
+    <ClCompile Include="src\wxfrontend\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="EngineCanvas.h" />
-    <ClInclude Include="Main.h" />
+    <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\engine\render\opengl\EngineCanvas.h" />
+    <ClInclude Include="src\engine\render\opengl\EngineModel.h" />
+    <ClInclude Include="src\wxfrontend\Main.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\shaders\simple.txt" />

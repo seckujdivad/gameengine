@@ -4,7 +4,7 @@
 #include <wx/glcanvas.h>
 #include <wx/gbsizer.h>
 
-#include "EngineCanvas.h"
+#include "../engine/render/opengl/EngineCanvas.h"
 
 
 class Main : public wxFrame

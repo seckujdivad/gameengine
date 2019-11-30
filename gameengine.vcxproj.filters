@@ -13,32 +13,65 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\shaders">
+      <UniqueIdentifier>{37997472-0c7f-4823-88a6-e0fb85d875b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\wxfrontend">
+      <UniqueIdentifier>{9e1fb3d7-a9dc-4dd4-b11c-d43235e6a7cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\wxfrontend">
+      <UniqueIdentifier>{1c3213b8-9000-4d1b-8a0a-c62440051e65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{02ab8ffb-daea-42a5-9dea-181eedb6497e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine\render">
+      <UniqueIdentifier>{9b11a33c-3249-498d-806d-af1fa626de31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine\render\opengl">
+      <UniqueIdentifier>{59d2a705-cd08-4a4a-b0b2-373b667f5f16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine">
+      <UniqueIdentifier>{3c90c765-696d-48f9-9ef4-0c0aed189aaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine\render">
+      <UniqueIdentifier>{e6c832b0-65b5-4b83-aa76-de166d54279a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine\render\opengl">
+      <UniqueIdentifier>{82c76458-3869-424f-93f4-563e9b574178}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp">
+    <ClCompile Include="src\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\wxfrontend\Main.cpp">
+      <Filter>Source Files\wxfrontend</Filter>
     </ClCompile>
-    <ClCompile Include="EngineCanvas.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\engine\render\opengl\EngineCanvas.cpp">
+      <Filter>Source Files\engine\render\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\render\opengl\EngineModel.cpp">
+      <Filter>Source Files\engine\render\opengl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h">
+    <ClInclude Include="src\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\wxfrontend\Main.h">
+      <Filter>Header Files\wxfrontend</Filter>
     </ClInclude>
-    <ClInclude Include="EngineCanvas.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\engine\render\opengl\EngineCanvas.h">
+      <Filter>Header Files\engine\render\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\render\opengl\EngineModel.h">
+      <Filter>Header Files\engine\render\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\shaders\simple.txt">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\shaders</Filter>
     </Text>
   </ItemGroup>
 </Project>
