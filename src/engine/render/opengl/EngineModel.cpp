@@ -139,32 +139,59 @@ std::vector<GLfloat>* EngineModel::GetScale()
 
 int EngineModel::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 {
-	return 0;
+	std::vector<GLfloat>* vertex = new std::vector<GLfloat>;
+
+	vertex->push_back(x);
+	vertex->push_back(y);
+	vertex->push_back(z);
+
+	this->m_vertices->push_back(vertex);
+
+	return this->m_vertices->size() - 1;
 }
 
 int EngineModel::AddVertex(std::vector<GLfloat>* vertex)
 {
-	return 0;
+	return this->AddVertex(vertex->at(0), vertex->at(1), vertex->at(2));
 }
 
 bool EngineModel::RemoveVertex(int index)
 {
-	return false;
+	if ((index >= 0) && (index < this->m_vertices->size()))
+	{
+		this->m_vertices->erase(this->m_vertices->begin() + index);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 int EngineModel::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 {
-	return 0;
+	std::vector<GLfloat>* current_item;
+
+	for (int i = 0; i < this->m_vertices->size(); i++)
+	{
+		current_item = this->m_vertices->at(i);
+		
+		if ((current_item->at(0) == x) && (current_item->at(1) == y) && (current_item->at(2) == z))
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 int EngineModel::FindVertex(std::vector<int>* vertex)
 {
-	return 0;
+	return this->FindVertex(vertex->at(0), vertex->at(1), vertex->at(2));
 }
 
 std::vector<GLfloat>* EngineModel::GetVertex(int index)
 {
-	return nullptr;
+	return this->m_vertices->at(index);
 }
 
 int EngineModel::AddEdge(std::vector<int>* vertex_indexes)
