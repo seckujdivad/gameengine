@@ -17,11 +17,36 @@ EngineModel::EngineModel()
 
 EngineModel::~EngineModel()
 {
-	
+	for (int i = 0; i < this->m_vertices->size(); i++)
+	{
+		delete this->m_vertices->at(i);
+	}
+	delete this->m_vertices;
+
+	for (int i = 0; i < this->m_edges->size(); i++)
+	{
+		delete this->m_edges->at(i);
+	}
+	delete this->m_edges;
+
+	for (int i = 0; i < this->m_faces->size(); i++)
+	{
+		delete this->m_faces->at(i);
+	}
+	delete this->m_faces;
+
+	delete this->m_fragment_shaders;
+	delete this->m_shaders;
+	delete this->m_position;
+	delete this->m_rotation;
+	delete this->m_scale;
 }
 
 void EngineModel::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 {
+	this->m_position->at(0) = x;
+	this->m_position->at(1) = y;
+	this->m_position->at(2) = z;
 }
 
 void EngineModel::SetPosition(std::vector<GLfloat>* point)
