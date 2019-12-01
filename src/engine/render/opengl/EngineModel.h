@@ -6,37 +6,51 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <map>
 
 class EngineModel
 {
 private:
-	std::vector<GLfloat*> m_vertices;
-	std::vector<std::vector<int>> m_edges;
-	std::vector<std::vector<int>> m_faces;
-	std::vector<std::string> m_fragment_shaders;
+	std::vector<std::vector<GLfloat>*>* m_vertices;
+	std::vector<std::vector<int>*>* m_edges;
+	std::vector<std::vector<int>*>* m_faces;
+	std::vector<std::string>* m_fragment_shaders;
+
+	std::map<std::string, int>* m_shaders; //shader name, count
 
 public:
 	EngineModel();
 	~EngineModel();
 
+	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
+	void SetPosition(std::vector<GLfloat>* point);
+	std::vector<GLfloat>* GetPosition();
+
+	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
+	void SetRotation(std::vector<GLfloat>* rotation);
+	std::vector<GLfloat>* GetRotation();
+
+	void SetScale(GLfloat x, GLfloat y, GLfloat z);
+	void SetScale(std::vector<GLfloat>* scale);
+	std::vector<GLfloat>* GetScale();
+
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
-	int AddVertex(GLfloat vertex[3]);
+	int AddVertex(std::vector<GLfloat>* vertex);
 	bool RemoveVertex(int index);
-	int GetIndex(GLfloat x, GLfloat y, GLfloat z);
-	int GetIndex(GLfloat vertex[3]);
+	int FindVertex(GLfloat x, GLfloat y, GLfloat z);
+	int FindVertex(std::vector<int>* vertex);
+	std::vector<GLfloat>* GetVertex(int index);
 
-	int AddEdge(int* vertex_indexes);
-	int AddEdge(std::vector<int> vertex_indexes);
+	int AddEdge(std::vector<int>* vertex_indexes);
 	bool RemoveEdge(int index);
-	int GetEdge(int* vertex_indexes);
-	int GetEdge(std::vector<int> vertex_indexes);
+	int FindEdge(std::vector<int>* vertex_indexes);
+	std::vector<int>* GetEdge(int index);
 
-	int AddFace(int* vertex_indexes, std::string fragment_shader);
-	int AddFace(std::vector<int> vertex_indices, std::string fragment_shader);
+	int AddFace(std::vector<int>* vertex_indices, std::string fragment_shader);
 	bool RemoveFace(int index);
-	int GetFace(int* vertex_indeces);
-	int GetFace(std::vector<int> vertex_indices);
+	int FindFace(std::vector<int>* vertex_indices);
+	std::vector<int>* GetFace(int index);
 
-	std::vector<std::vector<GLfloat>> GetTriFans();
+	std::vector<std::vector<GLfloat>*>* GetTriFans();
 };
 
