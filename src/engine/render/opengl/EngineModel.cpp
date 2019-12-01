@@ -51,37 +51,90 @@ void EngineModel::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 
 void EngineModel::SetPosition(std::vector<GLfloat>* point)
 {
+	if (point->size() == 3)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			this->m_position->at(i) = point->at(i);
+		}
+	}
+	else
+	{
+		throw std::length_error("'point' must contain exactly 3 items");
+	}
 }
 
 std::vector<GLfloat>* EngineModel::GetPosition()
 {
-	return nullptr;
+	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	for (int i = 0; i < 3; i++)
+	{
+		result->push_back(this->m_position->at(i));
+	}
+	return result;
 }
 
 void EngineModel::SetRotation(GLfloat x, GLfloat y, GLfloat z)
 {
+	this->m_rotation->at(0) = x;
+	this->m_rotation->at(1) = y;
+	this->m_rotation->at(2) = z;
 }
 
 void EngineModel::SetRotation(std::vector<GLfloat>* rotation)
 {
+	if (rotation->size() == 3)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			this->m_rotation->at(i) = rotation->at(i);
+		}
+	}
+	else
+	{
+		throw std::length_error("'rotation' must contain exactly 3 items");
+	}
 }
 
 std::vector<GLfloat>* EngineModel::GetRotation()
 {
-	return nullptr;
+	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	for (int i = 0; i < 3; i++)
+	{
+		result->push_back(this->m_rotation->at(i));
+	}
 }
 
 void EngineModel::SetScale(GLfloat x, GLfloat y, GLfloat z)
 {
+	this->m_scale->at(0) = x;
+	this->m_scale->at(1) = y;
+	this->m_scale->at(2) = z;
 }
 
 void EngineModel::SetScale(std::vector<GLfloat>* scale)
 {
+	if (scale->size() == 3)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			this->m_scale->at(i) = scale->at(i);
+		}
+	}
+	else
+	{
+		throw std::length_error("'scale' must contain exactly 3 items");
+	}
 }
 
 std::vector<GLfloat>* EngineModel::GetScale()
 {
-	return nullptr;
+	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	for (int i = 0; i < 3; i++)
+	{
+		result->push_back(this->m_scale->at(i));
+	}
+	return result;
 }
 
 int EngineModel::AddVertex(GLfloat x, GLfloat y, GLfloat z)
