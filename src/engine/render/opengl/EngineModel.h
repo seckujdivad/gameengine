@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <array>
 
 class EngineModel
 {
@@ -17,6 +18,10 @@ private:
 	std::vector<std::string>* m_fragment_shaders;
 
 	std::map<std::string, int>* m_shaders; //shader name, count
+
+	std::array<GLfloat, 3> m_position = {0, 0, 0};
+	std::array<GLfloat, 3> m_rotation = {0, 0, 0};
+	std::array<GLfloat, 3> m_scale = {0, 0, 0};
 
 public:
 	EngineModel();
