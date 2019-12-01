@@ -57,6 +57,7 @@ public:
 	int FindFace(std::vector<int>* vertex_indices);
 	std::vector<int>* GetFace(int index);
 
-	std::vector<std::vector<GLfloat>*>* GetTriFans();
+	std::vector<std::vector<std::vector<GLfloat>*>*>* GetTriFans();
+	std::vector<std::vector<std::vector<GLfloat>*>*>* GetTriStrips();
 };
 
