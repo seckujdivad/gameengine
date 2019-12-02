@@ -8,12 +8,13 @@
 #include <string>
 #include <map>
 #include <array>
+#include <tuple>
 
 class EngineModel
 {
 private:
 	std::vector<std::vector<GLfloat>*>* m_vertices;
-	std::vector<std::vector<int>*>* m_edges;
+	std::vector<std::tuple<int, int>*>* m_edges;
 	std::vector<std::vector<int>*>* m_faces;
 
 	std::vector<std::string>* m_fragment_shaders;
@@ -47,10 +48,15 @@ public:
 	int FindVertex(std::vector<int>* vertex);
 	std::vector<GLfloat>* GetVertex(int index);
 
-	int AddEdge(std::vector<int>* vertex_indexes);
+	int AddEdge(std::vector<int> vertex_indexes);
+	int AddEdge(int index0, int index1);
+	int AddEdge(std::tuple<int, int> vertex_indexes);
 	bool RemoveEdge(int index);
-	int FindEdge(std::vector<int>* vertex_indexes);
-	std::vector<int>* GetEdge(int index);
+	int FindEdge(std::vector<int> vertex_indexes);
+	int FindEdge(int index0, int index1);
+	int FindEdge(std::tuple<int, int> vertex_indexes);
+	std::tuple<int, int>* GetEdge(int index);
+	std::vector<int> GetEdgeVec(int index);
 
 	int AddFace(std::vector<int>* vertex_indices, std::string fragment_shader);
 	bool RemoveFace(int index);

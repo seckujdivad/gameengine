@@ -3,7 +3,7 @@
 EngineModel::EngineModel()
 {
 	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
-	this->m_edges = new std::vector<std::vector<int>*>;
+	this->m_edges = new std::vector<std::tuple<int, int>*>;
 	this->m_faces = new std::vector<std::vector<int>*>;
 
 	this->m_fragment_shaders = new std::vector<std::string>;
@@ -194,24 +194,94 @@ std::vector<GLfloat>* EngineModel::GetVertex(int index)
 	return this->m_vertices->at(index);
 }
 
-int EngineModel::AddEdge(std::vector<int>* vertex_indexes)
+int EngineModel::AddEdge(int index0, int index1)
 {
-	return 0;
+	std::tuple<int, int>* vertex_indexes = &std::make_tuple(index0, index1);
+	this->m_edges->push_back(vertex_indexes);
+	return this->m_edges->size() - 1;
+}
+
+int EngineModel::AddEdge(std::vector<int> vertex_indexes)
+{
+	if (vertex_indexes.size() == 2)
+	{
+		return this->AddEdge(vertex_indexes.at(0), vertex_indexes.at(1));
+	}
+	else
+	{
+		throw std::length_error("'vertex_indexes' must contain exactly 2 items");
+	}
+}
+
+int EngineModel::AddEdge(std::tuple<int, int> vertex_indexes)
+{
+	return this->AddEdge(std::get<0>(vertex_indexes), std::get<1>(vertex_indexes));
 }
 
 bool EngineModel::RemoveEdge(int index)
 {
-	return false;
+	if ((0 < index) || (index >= this->m_edges->size()))
+	{
+		return false;
+	}
+	else
+	{
+		this->m_edges->erase(this->m_edges->begin() + index);
+		return true;
+	}
 }
 
-int EngineModel::FindEdge(std::vector<int>* vertex_indexes)
+int EngineModel::FindEdge(int index0, int index1)
 {
-	return 0;
+	std::tuple<int, int>* current_edge;
+	for (int i = 0; i < this->m_edges->size(); i++)
+	{
+		current_edge = this->m_edges->at(i);
+		if (((std::get<0>(*current_edge) == index0) && (std::get<1>(*current_edge) == index1))
+			|| ((std::get<1>(*current_edge) == index0) && (std::get<0>(*current_edge) == index1)))
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
-std::vector<int>* EngineModel::GetEdge(int index)
+int EngineModel::FindEdge(std::vector<int> vertex_indexes)
 {
-	return nullptr;
+	if (vertex_indexes.size() == 2)
+	{
+		return this->FindEdge(vertex_indexes.at(0), vertex_indexes.at(1));
+	}
+	else
+	{
+		throw std::length_error("'vertex_indexes' must contain exactly 2 items");
+	}
+}
+
+int EngineModel::FindEdge(std::tuple<int, int> vertex_indexes)
+{
+	return this->FindEdge(std::get<0>(vertex_indexes), std::get<1>(vertex_indexes));
+}
+
+std::tuple<int, int>* EngineModel::GetEdge(int index)
+{
+	if ((index >= 0) && (index < this->m_edges->size()))
+	{
+		return this->m_edges->at(index);
+	}
+	else
+	{
+		throw std::range_error("index doesn't point to an edge");
+	}
+}
+
+std::vector<int> EngineModel::GetEdgeVec(int index)
+{
+	std::tuple<int, int> edge = *this->GetEdge(index);
+	std::vector<int> vector;
+	vector.push_back(std::get<0>(edge));
+	vector.push_back(std::get<0>(edge));
+	return vector;
 }
 
 int EngineModel::AddFace(std::vector<int>* vertex_indices, std::string fragment_shader)
