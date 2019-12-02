@@ -42,10 +42,10 @@ public:
 	std::vector<GLfloat> GetScale();
 
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
-	int AddVertex(std::vector<GLfloat>* vertex);
+	int AddVertex(std::vector<GLfloat> vertex);
 	bool RemoveVertex(int index);
 	int FindVertex(GLfloat x, GLfloat y, GLfloat z);
-	int FindVertex(std::vector<int>* vertex);
+	int FindVertex(std::vector<int> vertex);
 	std::vector<GLfloat>* GetVertex(int index);
 
 	int AddEdge(std::vector<int> vertex_indexes);

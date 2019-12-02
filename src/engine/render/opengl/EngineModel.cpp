@@ -151,9 +151,9 @@ int EngineModel::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 	return this->m_vertices->size() - 1;
 }
 
-int EngineModel::AddVertex(std::vector<GLfloat>* vertex)
+int EngineModel::AddVertex(std::vector<GLfloat> vertex)
 {
-	return this->AddVertex(vertex->at(0), vertex->at(1), vertex->at(2));
+	return this->AddVertex(vertex.at(0), vertex.at(1), vertex.at(2));
 }
 
 bool EngineModel::RemoveVertex(int index)
@@ -185,9 +185,9 @@ int EngineModel::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 	return -1;
 }
 
-int EngineModel::FindVertex(std::vector<int>* vertex)
+int EngineModel::FindVertex(std::vector<int> vertex)
 {
-	return this->FindVertex(vertex->at(0), vertex->at(1), vertex->at(2));
+	return this->FindVertex(vertex.at(0), vertex.at(1), vertex.at(2));
 }
 
 std::vector<GLfloat>* EngineModel::GetVertex(int index)
