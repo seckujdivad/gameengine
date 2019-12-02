@@ -30,16 +30,16 @@ public:
 	~EngineModel();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
-	void SetPosition(std::vector<GLfloat>* point);
-	std::vector<GLfloat>* GetPosition();
+	void SetPosition(std::vector<GLfloat> point);
+	std::vector<GLfloat> GetPosition();
 
 	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
-	void SetRotation(std::vector<GLfloat>* rotation);
-	std::vector<GLfloat>* GetRotation();
+	void SetRotation(std::vector<GLfloat> rotation);
+	std::vector<GLfloat> GetRotation();
 
 	void SetScale(GLfloat x, GLfloat y, GLfloat z);
-	void SetScale(std::vector<GLfloat>* scale);
-	std::vector<GLfloat>* GetScale();
+	void SetScale(std::vector<GLfloat> scale);
+	std::vector<GLfloat> GetScale();
 
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
 	int AddVertex(std::vector<GLfloat>* vertex);

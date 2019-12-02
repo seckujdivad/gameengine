@@ -49,13 +49,13 @@ void EngineModel::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 	this->m_position->at(2) = z;
 }
 
-void EngineModel::SetPosition(std::vector<GLfloat>* point)
+void EngineModel::SetPosition(std::vector<GLfloat> point)
 {
-	if (point->size() == 3)
+	if (point.size() == 3)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_position->at(i) = point->at(i);
+			this->m_position->at(i) = point.at(i);
 		}
 	}
 	else
@@ -64,12 +64,12 @@ void EngineModel::SetPosition(std::vector<GLfloat>* point)
 	}
 }
 
-std::vector<GLfloat>* EngineModel::GetPosition()
+std::vector<GLfloat> EngineModel::GetPosition()
 {
-	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result->push_back(this->m_position->at(i));
+		result.push_back(this->m_position->at(i));
 	}
 	return result;
 }
@@ -81,13 +81,13 @@ void EngineModel::SetRotation(GLfloat x, GLfloat y, GLfloat z)
 	this->m_rotation->at(2) = z;
 }
 
-void EngineModel::SetRotation(std::vector<GLfloat>* rotation)
+void EngineModel::SetRotation(std::vector<GLfloat> rotation)
 {
-	if (rotation->size() == 3)
+	if (rotation.size() == 3)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_rotation->at(i) = rotation->at(i);
+			this->m_rotation->at(i) = rotation.at(i);
 		}
 	}
 	else
@@ -96,13 +96,14 @@ void EngineModel::SetRotation(std::vector<GLfloat>* rotation)
 	}
 }
 
-std::vector<GLfloat>* EngineModel::GetRotation()
+std::vector<GLfloat> EngineModel::GetRotation()
 {
-	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result->push_back(this->m_rotation->at(i));
+		result.push_back(this->m_rotation->at(i));
 	}
+	return result;
 }
 
 void EngineModel::SetScale(GLfloat x, GLfloat y, GLfloat z)
@@ -112,13 +113,13 @@ void EngineModel::SetScale(GLfloat x, GLfloat y, GLfloat z)
 	this->m_scale->at(2) = z;
 }
 
-void EngineModel::SetScale(std::vector<GLfloat>* scale)
+void EngineModel::SetScale(std::vector<GLfloat> scale)
 {
-	if (scale->size() == 3)
+	if (scale.size() == 3)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_scale->at(i) = scale->at(i);
+			this->m_scale->at(i) = scale.at(i);
 		}
 	}
 	else
@@ -127,9 +128,9 @@ void EngineModel::SetScale(std::vector<GLfloat>* scale)
 	}
 }
 
-std::vector<GLfloat>* EngineModel::GetScale()
+std::vector<GLfloat> EngineModel::GetScale()
 {
-	std::vector<GLfloat>* result = new std::vector<GLfloat>;
+	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
 		result->push_back(this->m_scale->at(i));
