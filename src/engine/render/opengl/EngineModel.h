@@ -58,9 +58,9 @@ public:
 	std::tuple<int, int>* GetEdge(int index);
 	std::vector<int> GetEdgeVec(int index);
 
-	int AddFace(std::vector<int>* vertex_indices, std::string fragment_shader);
+	int AddFace(std::vector<int> edge_indexes, std::string fragment_shader);
 	bool RemoveFace(int index);
-	int FindFace(std::vector<int>* vertex_indices);
+	int FindFace(std::vector<int> edge_indexes);
 	std::vector<int>* GetFace(int index);
 
 	std::vector<std::vector<std::vector<GLfloat>*>*>* GetTriFans();

@@ -285,17 +285,34 @@ std::vector<int> EngineModel::GetEdgeVec(int index)
 	return vector;
 }
 
-int EngineModel::AddFace(std::vector<int>* vertex_indices, std::string fragment_shader)
+int EngineModel::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 {
-	return 0;
+	std::vector<int>* edges_copy = new std::vector<int>;
+
+	for (int i = 0; i < edge_indexes.size(); i++)
+	{
+		edges_copy->push_back(edge_indexes.at(i));
+	}
+
+	this->m_faces->push_back(edges_copy);
+
+	return this->m_faces->size() - 1;
 }
 
 bool EngineModel::RemoveFace(int index)
 {
-	return false;
+	if ((index >= 0) && (index < this->m_faces->size()))
+	{
+		this->m_faces->erase(this->m_faces->begin() + index);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
-int EngineModel::FindFace(std::vector<int>* vertex_indices)
+int EngineModel::FindFace(std::vector<int> edge_indexes)
 {
 	return 0;
 }
