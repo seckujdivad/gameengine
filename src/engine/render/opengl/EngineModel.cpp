@@ -133,7 +133,7 @@ std::vector<GLfloat> EngineModel::GetScale()
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result->push_back(this->m_scale->at(i));
+		result.push_back(this->m_scale->at(i));
 	}
 	return result;
 }
