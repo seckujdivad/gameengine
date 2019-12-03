@@ -9,6 +9,7 @@
 #include <map>
 #include <array>
 #include <tuple>
+#include <set>
 
 class EngineModel
 {
@@ -64,5 +65,5 @@ public:
 	std::vector<int>* GetFace(int index);
 
 	std::vector<std::vector<GLfloat>*> GetTriFans();
-	std::vector<std::vector<std::vector<GLfloat>*>*>* GetTriStrips();
+	std::vector<std::vector<GLfloat>*> GetTriStrips();
 };

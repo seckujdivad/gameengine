@@ -371,7 +371,10 @@ std::vector<std::vector<GLfloat>*> EngineModel::GetTriFans()
 	return trifans;
 }
 
-std::vector<std::vector<std::vector<GLfloat>*>*>* EngineModel::GetTriStrips()
+std::vector<std::vector<GLfloat>*> EngineModel::GetTriStrips()
 {
-	return nullptr;
+	std::set<int> added_tris;
+	std::set<int> tris_to_add;
+
+	throw std::logic_error("Not implemented");
 }
