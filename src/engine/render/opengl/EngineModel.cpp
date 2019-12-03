@@ -293,6 +293,7 @@ int EngineModel::AddFace(std::vector<int> edge_indexes, std::string fragment_sha
 	{
 		edges_copy->push_back(edge_indexes.at(i));
 	}
+	std::sort(edges_copy->begin(), edges_copy->end());
 
 	this->m_faces->push_back(edges_copy);
 
@@ -314,12 +315,37 @@ bool EngineModel::RemoveFace(int index)
 
 int EngineModel::FindFace(std::vector<int> edge_indexes)
 {
-	return 0;
+	std::sort(edge_indexes.begin(), edge_indexes.end());
+
+	bool is_match;
+	
+	for (int i = 0; i < this->m_faces->size(); i++)
+	{
+		if (this->m_faces->at(i)->size() == edge_indexes.size())
+		{
+			is_match = true;
+			for (int j = 0; j < edge_indexes.size(); j++)
+			{
+				if (is_match)
+				{
+					if (edge_indexes.at(j) != this->m_faces->at(i)->at(j))
+					{
+						is_match = false;
+					}
+				}
+			}
+			if (is_match)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 std::vector<int>* EngineModel::GetFace(int index)
 {
-	return nullptr;
+	return this->m_faces->at(index);
 }
 
 std::vector<std::vector<std::vector<GLfloat>*>*>* EngineModel::GetTriFans()
