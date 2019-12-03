@@ -348,9 +348,27 @@ std::vector<int>* EngineModel::GetFace(int index)
 	return this->m_faces->at(index);
 }
 
-std::vector<std::vector<std::vector<GLfloat>*>*>* EngineModel::GetTriFans()
+std::vector<std::vector<GLfloat>*> EngineModel::GetTriFans()
 {
-	return nullptr;
+	std::vector<std::vector<GLfloat>*> trifans;
+	std::vector<GLfloat>* current_fan;
+	std::vector<int>* current_face;
+
+	for (int i = 0; i < this->m_faces->size(); i++)
+	{
+		current_face = this->m_faces->at(i);
+		if (current_face->size() > 0)
+		{
+			current_fan = new std::vector<GLfloat>;
+			for (int j = 0; j < current_face->size(); j++)
+			{
+				current_fan->push_back(std::get<0>(*this->m_edges->at(current_face->at(j))));
+			}
+		}
+		trifans.push_back(current_fan);
+	}
+
+	return trifans;
 }
 
 std::vector<std::vector<std::vector<GLfloat>*>*>* EngineModel::GetTriStrips()
