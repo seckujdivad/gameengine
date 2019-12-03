@@ -70,7 +70,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="resources\shaders\simple.txt">
+    <Text Include="resources\shaders\simple.frag">
       <Filter>Resource Files\shaders</Filter>
     </Text>
   </ItemGroup>

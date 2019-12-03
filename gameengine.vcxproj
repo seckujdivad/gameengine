@@ -147,7 +147,7 @@
     <ClInclude Include="src\wxfrontend\Main.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="resources\shaders\simple.txt" />
+    <Text Include="resources\shaders\simple.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
