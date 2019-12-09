@@ -136,14 +136,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\engine\render\opengl\EngineCanvas.cpp" />
-    <ClCompile Include="src\engine\render\opengl\EngineModel.cpp" />
+    <ClCompile Include="src\engine\EngineModel.cpp" />
+    <ClCompile Include="src\engine\EngineScene.cpp" />
+    <ClCompile Include="src\engine\render\EngineCanvas.cpp" />
     <ClCompile Include="src\wxfrontend\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
-    <ClInclude Include="src\engine\render\opengl\EngineCanvas.h" />
-    <ClInclude Include="src\engine\render\opengl\EngineModel.h" />
+    <ClInclude Include="src\engine\EngineModel.h" />
+    <ClInclude Include="src\engine\EngineScene.h" />
+    <ClInclude Include="src\engine\render\EngineCanvas.h" />
     <ClInclude Include="src\wxfrontend\Main.h" />
   </ItemGroup>
   <ItemGroup>
