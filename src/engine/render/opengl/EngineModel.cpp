@@ -348,9 +348,9 @@ std::vector<int>* EngineModel::GetFace(int index)
 	return this->m_faces->at(index);
 }
 
-std::vector<std::vector<GLfloat>*> EngineModel::GetTriFans()
+std::vector<std::vector<GLfloat>> EngineModel::GetTriFans()
 {
-	std::vector<std::vector<GLfloat>*> trifans;
+	std::vector<std::vector<GLfloat>> trifans;
 	std::vector<GLfloat>* current_fan;
 	std::vector<int>* current_face;
 
@@ -365,7 +365,7 @@ std::vector<std::vector<GLfloat>*> EngineModel::GetTriFans()
 				current_fan->push_back(std::get<0>(*this->m_edges->at(current_face->at(j))));
 			}
 		}
-		trifans.push_back(current_fan);
+		trifans.push_back(*current_fan);
 	}
 
 	return trifans;

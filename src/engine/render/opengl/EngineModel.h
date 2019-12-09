@@ -64,6 +64,6 @@ public:
 	int FindFace(std::vector<int> edge_indexes);
 	std::vector<int>* GetFace(int index);
 
-	std::vector<std::vector<GLfloat>*> GetTriFans();
+	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
 };
