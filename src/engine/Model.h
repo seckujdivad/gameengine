@@ -11,7 +11,7 @@
 #include <tuple>
 #include <set>
 
-class EngineModel
+class Model
 {
 private:
 	std::vector<std::vector<GLfloat>*>* m_vertices;
@@ -27,8 +27,8 @@ private:
 	std::array<GLfloat, 3>* m_scale;
 
 public:
-	EngineModel();
-	~EngineModel();
+	Model();
+	~Model();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
 	void SetPosition(std::vector<GLfloat> point);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -136,16 +136,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\engine\EngineModel.cpp" />
-    <ClCompile Include="src\engine\EngineScene.cpp" />
+    <ClCompile Include="src\engine\Camera.cpp" />
+    <ClCompile Include="src\engine\Model.cpp" />
     <ClCompile Include="src\engine\render\EngineCanvas.cpp" />
+    <ClCompile Include="src\engine\Scene.cpp" />
     <ClCompile Include="src\wxfrontend\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
-    <ClInclude Include="src\engine\EngineModel.h" />
-    <ClInclude Include="src\engine\EngineScene.h" />
+    <ClInclude Include="src\engine\Camera.h" />
+    <ClInclude Include="src\engine\Model.h" />
     <ClInclude Include="src\engine\render\EngineCanvas.h" />
+    <ClInclude Include="src\engine\Scene.h" />
     <ClInclude Include="src\wxfrontend\Main.h" />
   </ItemGroup>
   <ItemGroup>

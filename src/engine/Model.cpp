@@ -1,6 +1,6 @@
-#include "EngineModel.h"
+#include "Model.h"
 
-EngineModel::EngineModel()
+Model::Model()
 {
 	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
 	this->m_edges = new std::vector<std::tuple<int, int>*>;
@@ -15,7 +15,7 @@ EngineModel::EngineModel()
 	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
 }
 
-EngineModel::~EngineModel()
+Model::~Model()
 {
 	for (int i = 0; i < this->m_vertices->size(); i++)
 	{
@@ -42,14 +42,14 @@ EngineModel::~EngineModel()
 	delete this->m_scale;
 }
 
-void EngineModel::SetPosition(GLfloat x, GLfloat y, GLfloat z)
+void Model::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 {
 	this->m_position->at(0) = x;
 	this->m_position->at(1) = y;
 	this->m_position->at(2) = z;
 }
 
-void EngineModel::SetPosition(std::vector<GLfloat> point)
+void Model::SetPosition(std::vector<GLfloat> point)
 {
 	if (point.size() == 3)
 	{
@@ -64,7 +64,7 @@ void EngineModel::SetPosition(std::vector<GLfloat> point)
 	}
 }
 
-std::vector<GLfloat> EngineModel::GetPosition()
+std::vector<GLfloat> Model::GetPosition()
 {
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
@@ -74,14 +74,14 @@ std::vector<GLfloat> EngineModel::GetPosition()
 	return result;
 }
 
-void EngineModel::SetRotation(GLfloat x, GLfloat y, GLfloat z)
+void Model::SetRotation(GLfloat x, GLfloat y, GLfloat z)
 {
 	this->m_rotation->at(0) = x;
 	this->m_rotation->at(1) = y;
 	this->m_rotation->at(2) = z;
 }
 
-void EngineModel::SetRotation(std::vector<GLfloat> rotation)
+void Model::SetRotation(std::vector<GLfloat> rotation)
 {
 	if (rotation.size() == 3)
 	{
@@ -96,7 +96,7 @@ void EngineModel::SetRotation(std::vector<GLfloat> rotation)
 	}
 }
 
-std::vector<GLfloat> EngineModel::GetRotation()
+std::vector<GLfloat> Model::GetRotation()
 {
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
@@ -106,14 +106,14 @@ std::vector<GLfloat> EngineModel::GetRotation()
 	return result;
 }
 
-void EngineModel::SetScale(GLfloat x, GLfloat y, GLfloat z)
+void Model::SetScale(GLfloat x, GLfloat y, GLfloat z)
 {
 	this->m_scale->at(0) = x;
 	this->m_scale->at(1) = y;
 	this->m_scale->at(2) = z;
 }
 
-void EngineModel::SetScale(std::vector<GLfloat> scale)
+void Model::SetScale(std::vector<GLfloat> scale)
 {
 	if (scale.size() == 3)
 	{
@@ -128,7 +128,7 @@ void EngineModel::SetScale(std::vector<GLfloat> scale)
 	}
 }
 
-std::vector<GLfloat> EngineModel::GetScale()
+std::vector<GLfloat> Model::GetScale()
 {
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
@@ -138,7 +138,7 @@ std::vector<GLfloat> EngineModel::GetScale()
 	return result;
 }
 
-int EngineModel::AddVertex(GLfloat x, GLfloat y, GLfloat z)
+int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 {
 	std::vector<GLfloat>* vertex = new std::vector<GLfloat>;
 
@@ -151,12 +151,12 @@ int EngineModel::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 	return this->m_vertices->size() - 1;
 }
 
-int EngineModel::AddVertex(std::vector<GLfloat> vertex)
+int Model::AddVertex(std::vector<GLfloat> vertex)
 {
 	return this->AddVertex(vertex.at(0), vertex.at(1), vertex.at(2));
 }
 
-bool EngineModel::RemoveVertex(int index)
+bool Model::RemoveVertex(int index)
 {
 	if ((index >= 0) && (index < this->m_vertices->size()))
 	{
@@ -169,7 +169,7 @@ bool EngineModel::RemoveVertex(int index)
 	}
 }
 
-int EngineModel::FindVertex(GLfloat x, GLfloat y, GLfloat z)
+int Model::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 {
 	std::vector<GLfloat>* current_item;
 
@@ -185,24 +185,24 @@ int EngineModel::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 	return -1;
 }
 
-int EngineModel::FindVertex(std::vector<int> vertex)
+int Model::FindVertex(std::vector<int> vertex)
 {
 	return this->FindVertex(vertex.at(0), vertex.at(1), vertex.at(2));
 }
 
-std::vector<GLfloat>* EngineModel::GetVertex(int index)
+std::vector<GLfloat>* Model::GetVertex(int index)
 {
 	return this->m_vertices->at(index);
 }
 
-int EngineModel::AddEdge(int index0, int index1)
+int Model::AddEdge(int index0, int index1)
 {
 	std::tuple<int, int>* vertex_indexes = &std::make_tuple(index0, index1);
 	this->m_edges->push_back(vertex_indexes);
 	return this->m_edges->size() - 1;
 }
 
-int EngineModel::AddEdge(std::vector<int> vertex_indexes)
+int Model::AddEdge(std::vector<int> vertex_indexes)
 {
 	if (vertex_indexes.size() == 2)
 	{
@@ -214,12 +214,12 @@ int EngineModel::AddEdge(std::vector<int> vertex_indexes)
 	}
 }
 
-int EngineModel::AddEdge(std::tuple<int, int> vertex_indexes)
+int Model::AddEdge(std::tuple<int, int> vertex_indexes)
 {
 	return this->AddEdge(std::get<0>(vertex_indexes), std::get<1>(vertex_indexes));
 }
 
-bool EngineModel::RemoveEdge(int index)
+bool Model::RemoveEdge(int index)
 {
 	if ((0 < index) || (index >= this->m_edges->size()))
 	{
@@ -232,7 +232,7 @@ bool EngineModel::RemoveEdge(int index)
 	}
 }
 
-int EngineModel::FindEdge(int index0, int index1)
+int Model::FindEdge(int index0, int index1)
 {
 	std::tuple<int, int>* current_edge;
 	for (int i = 0; i < this->m_edges->size(); i++)
@@ -247,7 +247,7 @@ int EngineModel::FindEdge(int index0, int index1)
 	return -1;
 }
 
-int EngineModel::FindEdge(std::vector<int> vertex_indexes)
+int Model::FindEdge(std::vector<int> vertex_indexes)
 {
 	if (vertex_indexes.size() == 2)
 	{
@@ -259,12 +259,12 @@ int EngineModel::FindEdge(std::vector<int> vertex_indexes)
 	}
 }
 
-int EngineModel::FindEdge(std::tuple<int, int> vertex_indexes)
+int Model::FindEdge(std::tuple<int, int> vertex_indexes)
 {
 	return this->FindEdge(std::get<0>(vertex_indexes), std::get<1>(vertex_indexes));
 }
 
-std::tuple<int, int>* EngineModel::GetEdge(int index)
+std::tuple<int, int>* Model::GetEdge(int index)
 {
 	if ((index >= 0) && (index < this->m_edges->size()))
 	{
@@ -276,7 +276,7 @@ std::tuple<int, int>* EngineModel::GetEdge(int index)
 	}
 }
 
-std::vector<int> EngineModel::GetEdgeVec(int index)
+std::vector<int> Model::GetEdgeVec(int index)
 {
 	std::tuple<int, int> edge = *this->GetEdge(index);
 	std::vector<int> vector;
@@ -285,7 +285,7 @@ std::vector<int> EngineModel::GetEdgeVec(int index)
 	return vector;
 }
 
-int EngineModel::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
+int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 {
 	std::vector<int>* edges_copy = new std::vector<int>;
 
@@ -300,7 +300,7 @@ int EngineModel::AddFace(std::vector<int> edge_indexes, std::string fragment_sha
 	return this->m_faces->size() - 1;
 }
 
-bool EngineModel::RemoveFace(int index)
+bool Model::RemoveFace(int index)
 {
 	if ((index >= 0) && (index < this->m_faces->size()))
 	{
@@ -343,12 +343,12 @@ int EngineModel::FindFace(std::vector<int> edge_indexes)
 	return -1;
 }
 
-std::vector<int>* EngineModel::GetFace(int index)
+std::vector<int>* Model::GetFace(int index)
 {
 	return this->m_faces->at(index);
 }
 
-std::vector<std::vector<GLfloat>> EngineModel::GetTriFans()
+std::vector<std::vector<GLfloat>> Model::GetTriFans()
 {
 	std::vector<std::vector<GLfloat>> trifans;
 	std::vector<GLfloat>* current_fan;
@@ -371,7 +371,7 @@ std::vector<std::vector<GLfloat>> EngineModel::GetTriFans()
 	return trifans;
 }
 
-std::vector<std::vector<GLfloat>*> EngineModel::GetTriStrips()
+std::vector<std::vector<GLfloat>*> Model::GetTriStrips()
 {
 	std::set<int> added_tris;
 	std::set<int> tris_to_add;

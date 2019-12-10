@@ -2,17 +2,17 @@
 
 #include <vector>
 
-#include "EngineModel.h"
+#include "Model.h"
 #include "render/EngineCanvas.h"
 
-class EngineScene
+class Scene
 {
 private:
-	std::vector<EngineModel> m_models;
+	std::vector<Model> m_models;
 	
 public:
-	EngineScene();
-	~EngineScene();
+	Scene();
+	~Scene();
 
 	void Render(EngineCanvas* canvas);
 };
