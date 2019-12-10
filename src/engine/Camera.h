@@ -1,25 +1,25 @@
 #pragma once
 
 #include <wx/glcanvas.h>
-#include <tuple>
+#include <array>
 
 class Camera
 {
 private:
-	std::tuple<GLfloat, GLfloat, GLfloat> m_position;
-	std::tuple<GLfloat, GLfloat, GLfloat> m_rotation;
+	std::array<GLfloat, 3>* m_position;
+	std::array<GLfloat, 3>* m_rotation;
 public:
 	Camera();
 	~Camera();
 
-	std::tuple<GLfloat, GLfloat, GLfloat>* GetPosition();
+	std::array<GLfloat, 3> GetPosition();
 	GLfloat GetPosition(int index);
-	void SetPosition(std::tuple<GLfloat, GLfloat, GLfloat> position);
+	void SetPosition(std::array<GLfloat, 3> position);
 	void SetPosition(int index, GLfloat value);
 
-	std::tuple<GLfloat, GLfloat, GLfloat>* GetRotation();
+	std::array<GLfloat, 3> GetRotation();
 	GLfloat GetRotation(int index);
-	void SetRotation(std::tuple<GLfloat, GLfloat, GLfloat> rotation);
+	void SetRotation(std::array<GLfloat, 3> rotation);
 	void SetRotation(int index, GLfloat value);
 };
 
