@@ -158,6 +158,11 @@ int Model::AddVertex(std::vector<GLfloat> vertex)
 
 bool Model::RemoveVertex(int index)
 {
+	return this->RemoveVertex((size_t)index);
+}
+
+bool Model::RemoveVertex(size_t index)
+{
 	if ((index >= 0) && (index < this->m_vertices->size()))
 	{
 		this->m_vertices->erase(this->m_vertices->begin() + index);
@@ -221,6 +226,11 @@ int Model::AddEdge(std::tuple<int, int> vertex_indexes)
 
 bool Model::RemoveEdge(int index)
 {
+	return this->RemoveEdge((size_t)index);
+}
+
+bool Model::RemoveEdge(size_t index)
+{
 	if ((0 < index) || (index >= this->m_edges->size()))
 	{
 		return false;
@@ -266,6 +276,11 @@ int Model::FindEdge(std::tuple<int, int> vertex_indexes)
 
 std::tuple<int, int>* Model::GetEdge(int index)
 {
+	return this->GetEdge((size_t)index);
+}
+
+std::tuple<int, int>* Model::GetEdge(size_t index)
+{
 	if ((index >= 0) && (index < this->m_edges->size()))
 	{
 		return this->m_edges->at(index);
@@ -301,6 +316,11 @@ int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 }
 
 bool Model::RemoveFace(int index)
+{
+	return this->RemoveFace((size_t)index);
+}
+
+bool Model::RemoveFace(size_t index)
 {
 	if ((index >= 0) && (index < this->m_faces->size()))
 	{
