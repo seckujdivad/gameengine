@@ -77,7 +77,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(WXWIN)\include\;$(WXWIN)\include\msvc\;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(WXWIN)\include\;$(WXWIN)\include\msvc\;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(WXWIN)\include\;$(WXWIN)\include\msvc\;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(WXWIN)\include\;$(WXWIN)\include\msvc\;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -2,14 +2,11 @@
 
 #include <wx/glcanvas.h>
 
-#include <windows.data.json.h>
-#include <fstream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <map>
 #include <array>
 #include <tuple>
-#include <set>
 
 class Model
 {

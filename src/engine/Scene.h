@@ -18,7 +18,7 @@ private:
 	int GetCameraIndex(Camera* camera);
 	
 public:
-	Scene();
+	Scene(Camera* active_camera);
 	~Scene();
 
 	void AddModel(Model* model);

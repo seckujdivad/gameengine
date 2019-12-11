@@ -17,19 +17,19 @@ Model::Model()
 
 Model::~Model()
 {
-	for (int i = 0; i < this->m_vertices->size(); i++)
+	for (size_t i = 0; i < this->m_vertices->size(); i++)
 	{
 		delete this->m_vertices->at(i);
 	}
 	delete this->m_vertices;
 
-	for (int i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges->size(); i++)
 	{
 		delete this->m_edges->at(i);
 	}
 	delete this->m_edges;
 
-	for (int i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces->size(); i++)
 	{
 		delete this->m_faces->at(i);
 	}
@@ -173,7 +173,7 @@ int Model::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 {
 	std::vector<GLfloat>* current_item;
 
-	for (int i = 0; i < this->m_vertices->size(); i++)
+	for (size_t i = 0; i < this->m_vertices->size(); i++)
 	{
 		current_item = this->m_vertices->at(i);
 		
@@ -235,7 +235,7 @@ bool Model::RemoveEdge(int index)
 int Model::FindEdge(int index0, int index1)
 {
 	std::tuple<int, int>* current_edge;
-	for (int i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges->size(); i++)
 	{
 		current_edge = this->m_edges->at(i);
 		if (((std::get<0>(*current_edge) == index0) && (std::get<1>(*current_edge) == index1))
@@ -289,7 +289,7 @@ int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 {
 	std::vector<int>* edges_copy = new std::vector<int>;
 
-	for (int i = 0; i < edge_indexes.size(); i++)
+	for (size_t i = 0; i < edge_indexes.size(); i++)
 	{
 		edges_copy->push_back(edge_indexes.at(i));
 	}
@@ -313,18 +313,18 @@ bool Model::RemoveFace(int index)
 	}
 }
 
-int EngineModel::FindFace(std::vector<int> edge_indexes)
+int Model::FindFace(std::vector<int> edge_indexes)
 {
 	std::sort(edge_indexes.begin(), edge_indexes.end());
 
 	bool is_match;
 	
-	for (int i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces->size(); i++)
 	{
 		if (this->m_faces->at(i)->size() == edge_indexes.size())
 		{
 			is_match = true;
-			for (int j = 0; j < edge_indexes.size(); j++)
+			for (size_t j = 0; j < edge_indexes.size(); j++)
 			{
 				if (is_match)
 				{
@@ -354,27 +354,23 @@ std::vector<std::vector<GLfloat>> Model::GetTriFans()
 	std::vector<GLfloat>* current_fan;
 	std::vector<int>* current_face;
 
-	for (int i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces->size(); i++)
 	{
 		current_face = this->m_faces->at(i);
 		if (current_face->size() > 0)
 		{
 			current_fan = new std::vector<GLfloat>;
-			for (int j = 0; j < current_face->size(); j++)
+			for (size_t j = 0; j < current_face->size(); j++)
 			{
 				current_fan->push_back(std::get<0>(*this->m_edges->at(current_face->at(j))));
 			}
+			trifans.push_back(*current_fan);
 		}
-		trifans.push_back(*current_fan);
 	}
-
 	return trifans;
 }
 
 std::vector<std::vector<GLfloat>*> Model::GetTriStrips()
 {
-	std::set<int> added_tris;
-	std::set<int> tris_to_add;
-
 	throw std::logic_error("Not implemented");
 }

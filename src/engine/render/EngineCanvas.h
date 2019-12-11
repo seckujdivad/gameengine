@@ -3,8 +3,6 @@
 #include <wx/glcanvas.h>
 #include <wx/dcclient.h>
 
-#include <gl/GL.h>
-
 class EngineCanvas : public wxGLCanvas
 {
 private:

@@ -45,13 +45,13 @@
     <ClCompile Include="src\engine\render\EngineCanvas.cpp">
       <Filter>Source Files\engine\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\Scene.cpp">
+    <ClCompile Include="src\engine\Model.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\Camera.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\Model.cpp">
+    <ClCompile Include="src\engine\Scene.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,10 +65,10 @@
     <ClInclude Include="src\engine\render\EngineCanvas.h">
       <Filter>Header Files\engine\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Camera.h">
+    <ClInclude Include="src\engine\Model.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Model.h">
+    <ClInclude Include="src\engine\Camera.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\Scene.h">

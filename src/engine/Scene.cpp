@@ -2,7 +2,7 @@
 
 int Scene::GetModelIndex(Model* model)
 {
-	for (int i = 0; i < this->m_models.size(); i++)
+	for (size_t i = 0; i < this->m_models.size(); i++)
 	{
 		if (model == this->m_models.at(i))
 		{
@@ -14,7 +14,7 @@ int Scene::GetModelIndex(Model* model)
 
 int Scene::GetCameraIndex(Camera* camera)
 {
-	for (int i = 0; i < this->m_cameras.size(); i++)
+	for (size_t i = 0; i < this->m_cameras.size(); i++)
 	{
 		if (camera == this->m_cameras.at(i))
 		{
@@ -24,8 +24,9 @@ int Scene::GetCameraIndex(Camera* camera)
 	return -1;
 }
 
-Scene::Scene()
+Scene::Scene(Camera* active_camera)
 {
+	this->m_active_camera = active_camera;
 }
 
 Scene::~Scene()
