@@ -5,6 +5,7 @@
 #include <wx/gbsizer.h>
 
 #include "../engine/render/EngineCanvas.h"
+#include "../engine/Engine.h"
 
 class Main : public wxFrame
 {
