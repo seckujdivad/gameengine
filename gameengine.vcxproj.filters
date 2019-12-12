@@ -34,6 +34,9 @@
     <Filter Include="Header Files\engine\render">
       <UniqueIdentifier>{e6c832b0-65b5-4b83-aa76-de166d54279a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{3716ac1c-f14d-4b0b-bdd9-418fd862e4e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp">
@@ -89,6 +92,9 @@
   <ItemGroup>
     <None Include="resources\simplescene.json">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\models\cube.stl">
+      <Filter>Resource Files\models</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -156,6 +156,7 @@
     <Text Include="resources\shaders\simple.frag" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\models\cube.stl" />
     <None Include="resources\simplescene.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
