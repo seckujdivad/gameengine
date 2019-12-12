@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "name": "Simple Scene",
+    "default camera": "main",
+    "background shader": "background"
+  },
+  "models": {
+    "cube": {
+      "type": "stl",
+      "geometry": "models/cube.stl",
+      "position": [ 10, 0, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ],
+      "shader": {
+        "vertex": "simple",
+        "fragment": "simple"
+      }
+    }
+  },
+  "cameras": {
+    "main": {
+      "position": [ 0, 0, 0 ],
+      "rotation": [ 90, 0, 0 ],
+      "fov":  90
+    }
+  },
+  "shaders": {
+    "fragment": {
+      "simple": "shaders/simple.frag",
+      "background":  "shaders/background.frag"
+    },
+    "vertex": {
+      "simple": "shaders/simple.vert"
+    }
+  }
+}
