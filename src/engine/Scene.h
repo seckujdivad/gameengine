@@ -28,5 +28,11 @@ public:
 	void SetActiveCamera(Camera* camera);
 	Camera* GetActiveCamera();
 
+	size_t NumModels();
+	size_t NumCameras();
+
+	void ClearAllModels(bool destroy = false);
+	void ClearAllCameras(bool destroy = false);
+
 	void Render(EngineCanvas* canvas);
 };

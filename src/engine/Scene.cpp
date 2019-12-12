@@ -62,6 +62,42 @@ Camera* Scene::GetActiveCamera()
 	return this->m_active_camera;
 }
 
+size_t Scene::NumModels()
+{
+	return this->m_models.size();
+}
+
+size_t Scene::NumCameras()
+{
+	return this->m_cameras.size();
+}
+
+void Scene::ClearAllModels(bool destroy)
+{
+	if (destroy)
+	{
+		for (size_t i = 0; i < this->m_models.size(); i++)
+		{
+			delete this->m_models.at(i);
+		}
+	}
+	
+	this->m_models.clear();
+}
+
+void Scene::ClearAllCameras(bool destroy)
+{
+	if (destroy)
+	{
+		for (size_t i = 0; i < this->m_cameras.size(); i++)
+		{
+			delete this->m_cameras.at(i);
+		}
+	}
+
+	this->m_cameras.clear();
+}
+
 void Scene::Render(EngineCanvas* canvas)
 {
 
