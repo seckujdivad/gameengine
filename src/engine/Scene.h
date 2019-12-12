@@ -9,9 +9,6 @@
 class Scene
 {
 private:
-	std::vector<Model*> m_models;
-	std::vector<Camera*> m_cameras;
-
 	Camera* m_active_camera;
 
 	int GetModelIndex(Model* model);
@@ -20,6 +17,9 @@ private:
 public:
 	Scene(Camera* active_camera);
 	~Scene();
+
+	std::vector<Model*> models;
+	std::vector<Camera*> cameras;
 
 	void AddModel(Model* model);
 	void RemoveModel(Model* model);
