@@ -54,6 +54,9 @@
     <ClCompile Include="src\engine\Scene.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\Engine.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">
@@ -74,10 +77,18 @@
     <ClInclude Include="src\engine\Scene.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\Engine.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\shaders\simple.frag">
       <Filter>Resource Files\shaders</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\simplescene.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

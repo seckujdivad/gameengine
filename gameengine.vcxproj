@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\engine\Camera.cpp" />
+    <ClCompile Include="src\engine\Engine.cpp" />
     <ClCompile Include="src\engine\Model.cpp" />
     <ClCompile Include="src\engine\render\EngineCanvas.cpp" />
     <ClCompile Include="src\engine\Scene.cpp" />
@@ -145,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\engine\Camera.h" />
+    <ClInclude Include="src\engine\Engine.h" />
     <ClInclude Include="src\engine\Model.h" />
     <ClInclude Include="src\engine\render\EngineCanvas.h" />
     <ClInclude Include="src\engine\Scene.h" />
@@ -152,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\shaders\simple.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\simplescene.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
