@@ -156,6 +156,7 @@
     <Text Include="resources\shaders\simple.frag" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\models\cube.ply" />
     <None Include="resources\models\cube.stl" />
     <None Include="resources\shaders\simple.vert" />
     <None Include="resources\simplescene.json" />

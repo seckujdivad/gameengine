@@ -99,5 +99,8 @@
     <None Include="resources\shaders\simple.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="resources\models\cube.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
   </ItemGroup>
 </Project>

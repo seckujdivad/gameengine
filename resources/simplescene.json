@@ -6,8 +6,8 @@
   },
   "models": {
     "cube": {
-      "type": "stl",
-      "geometry": "models/cube.stl",
+      "type": "ply",
+      "geometry": "models/cube.ply",
       "position": [ 10, 0, 0 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
