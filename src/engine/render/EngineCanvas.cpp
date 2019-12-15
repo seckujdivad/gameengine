@@ -50,3 +50,8 @@ void EngineCanvas::Render()
 	glFlush();
 	this->SwapBuffers();
 }
+
+void EngineCanvas::SetScene(Scene* scene)
+{
+	
+}
