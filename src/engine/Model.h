@@ -15,16 +15,13 @@ private:
 	std::vector<std::tuple<int, int>*>* m_edges;
 	std::vector<std::vector<int>*>* m_faces;
 
-	std::vector<std::string>* m_fragment_shaders;
-
-	std::map<std::string, int>* m_shaders; //shader name, count
-
 	std::array<GLfloat, 3>* m_position;
 	std::array<GLfloat, 3>* m_rotation;
 	std::array<GLfloat, 3>* m_scale;
 
 public:
 	Model();
+	Model(Model* copy_from);
 	~Model();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
@@ -46,6 +43,7 @@ public:
 	int FindVertex(GLfloat x, GLfloat y, GLfloat z);
 	int FindVertex(std::vector<int> vertex);
 	std::vector<GLfloat>* GetVertex(int index);
+	std::vector<std::vector<GLfloat>> GetVerticesCopy();
 
 	int AddEdge(std::vector<int> vertex_indexes);
 	int AddEdge(int index0, int index1);
@@ -58,12 +56,14 @@ public:
 	std::tuple<int, int>* GetEdge(int index);
 	std::tuple<int, int>* GetEdge(size_t index);
 	std::vector<int> GetEdgeVec(int index);
+	std::vector<std::tuple<int, int>> GetEdgesCopy();
 
 	int AddFace(std::vector<int> edge_indexes, std::string fragment_shader); //edges must form a loop end-to-end in the given order
 	bool RemoveFace(int index);
 	bool RemoveFace(size_t index);
 	int FindFace(std::vector<int> edge_indexes);
 	std::vector<int>* GetFace(int index);
+	std::vector<std::vector<int>> GetFacesCopy();
 
 	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();

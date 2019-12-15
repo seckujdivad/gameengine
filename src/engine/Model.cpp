@@ -6,13 +6,67 @@ Model::Model()
 	this->m_edges = new std::vector<std::tuple<int, int>*>;
 	this->m_faces = new std::vector<std::vector<int>*>;
 
-	this->m_fragment_shaders = new std::vector<std::string>;
+	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
+}
 
-	this->m_shaders = new std::map<std::string, int>;
+Model::Model(Model* copy_from)
+{
+	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
+	this->m_edges = new std::vector<std::tuple<int, int>*>;
+	this->m_faces = new std::vector<std::vector<int>*>;
 
 	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
 	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
 	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
+
+	//copy transform data
+	std::vector<GLfloat> pos = copy_from->GetPosition();
+	std::vector<GLfloat> rot = copy_from->GetRotation();
+	std::vector<GLfloat> sca = copy_from->GetScale();
+	for (int i = 0; i < 3; i++)
+	{
+		this->m_position->at(i) = pos.at(i);
+		this->m_rotation->at(i) = rot.at(i);
+		this->m_scale->at(i) = sca.at(i);
+	}
+
+	//copy geometry
+	std::vector<std::vector<GLfloat>> vertices = copy_from->GetVerticesCopy();
+	std::vector<GLfloat>* vertex_subvector;
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		vertex_subvector = new std::vector<GLfloat>;
+		vertex_subvector->reserve(vertices.at(i).size());
+		for (size_t j = 0; j < vertices.at(i).size(); j++)
+		{
+			vertex_subvector->push_back(vertices.at(i).at(j));
+		}
+		this->m_vertices->push_back(vertex_subvector);
+	}
+
+	std::vector<std::tuple<int, int>> edges = copy_from->GetEdgesCopy();
+	std::tuple<int, int>* edge_tuple;
+	for (size_t i = 0; i < edges.size(); i++)
+	{
+		edge_tuple = new std::tuple<int, int>;
+		std::get<0>(*edge_tuple) = std::get<0>(edges.at(i));
+		this->m_edges->push_back(edge_tuple);
+	}
+
+	std::vector<std::vector<int>> faces = copy_from->GetFacesCopy();
+	std::vector<int>* faces_subvector;
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		faces_subvector = new std::vector<int>;
+		faces_subvector->reserve(faces.at(i).size());
+		for (size_t j = 0; j < faces.at(i).size(); j++)
+		{
+			faces_subvector->push_back(faces.at(i).at(j));
+		}
+		this->m_faces->push_back(faces_subvector);
+	}
 }
 
 Model::~Model()
@@ -35,8 +89,6 @@ Model::~Model()
 	}
 	delete this->m_faces;
 
-	delete this->m_fragment_shaders;
-	delete this->m_shaders;
 	delete this->m_position;
 	delete this->m_rotation;
 	delete this->m_scale;
@@ -200,6 +252,24 @@ std::vector<GLfloat>* Model::GetVertex(int index)
 	return this->m_vertices->at(index);
 }
 
+std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
+{
+	std::vector<std::vector<GLfloat>> output;
+	std::vector<GLfloat> vertex;
+
+	for (size_t i = 0; i < this->m_vertices->size(); i++)
+	{
+		vertex.clear();
+		vertex.reserve(this->m_vertices->at(i)->size());
+		for (size_t j = 0; j < this->m_vertices->at(i)->size(); j++)
+		{
+			vertex.push_back(this->m_vertices->at(i)->at(j));
+		}
+		output.push_back(vertex);
+	}
+	return output;
+}
+
 int Model::AddEdge(int index0, int index1)
 {
 	std::tuple<int, int>* vertex_indexes = &std::make_tuple(index0, index1);
@@ -300,6 +370,20 @@ std::vector<int> Model::GetEdgeVec(int index)
 	return vector;
 }
 
+std::vector<std::tuple<int, int>> Model::GetEdgesCopy()
+{
+	std::vector<std::tuple<int, int>> output;
+	std::tuple<int, int> vertex_pair;
+
+	for (size_t i = 0; i < this->m_edges->size(); i++)
+	{
+		std::get<0>(vertex_pair) = std::get<0>(*this->m_edges->at(i));
+		std::get<1>(vertex_pair) = std::get<1>(*this->m_edges->at(i));
+		output.push_back(vertex_pair);
+	}
+	return output;
+}
+
 int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 {
 	std::vector<int>* edges_copy = new std::vector<int>;
@@ -366,6 +450,25 @@ int Model::FindFace(std::vector<int> edge_indexes)
 std::vector<int>* Model::GetFace(int index)
 {
 	return this->m_faces->at(index);
+}
+
+std::vector<std::vector<int>> Model::GetFacesCopy()
+{
+	std::vector<std::vector<int>> output;
+	std::vector<int> face;
+	output.reserve(this->m_faces->size());
+	
+	for (size_t i = 0; i < this->m_faces->size(); i++)
+	{
+		face.clear();
+		face.reserve(this->m_faces->at(i)->size());
+		for (size_t j = 0; j < this->m_faces->at(i)->size(); j++)
+		{
+			face.push_back(this->m_faces->at(i)->at(j));
+		}
+		output.push_back(face);
+	}
+	return output;
 }
 
 std::vector<std::vector<GLfloat>> Model::GetTriFans()
