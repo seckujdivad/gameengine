@@ -2,5 +2,6 @@
 
 Scene* InitialiseScene(std::string path)
 {
-
+	json j;
+	return nullptr;
 }
