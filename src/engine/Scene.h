@@ -6,6 +6,8 @@
 #include "Camera.h"
 #include "render/EngineCanvas.h"
 
+class EngineCanvas;
+
 class Scene
 {
 private:
