@@ -7,6 +7,7 @@
 #include <map>
 #include <array>
 #include <tuple>
+#include <string>
 
 class Model
 {
@@ -19,10 +20,15 @@ private:
 	std::array<GLfloat, 3>* m_rotation;
 	std::array<GLfloat, 3>* m_scale;
 
+	std::string m_identifier;
+
 public:
 	Model();
 	Model(Model* copy_from);
 	~Model();
+
+	void SetIdentifier(std::string identifier);
+	std::string GetIdentifier();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
 	void SetPosition(std::vector<GLfloat> point);

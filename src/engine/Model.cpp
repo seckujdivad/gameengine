@@ -67,6 +67,8 @@ Model::Model(Model* copy_from)
 		}
 		this->m_faces->push_back(faces_subvector);
 	}
+
+	this->m_identifier = copy_from->GetIdentifier();
 }
 
 Model::~Model()
@@ -92,6 +94,16 @@ Model::~Model()
 	delete this->m_position;
 	delete this->m_rotation;
 	delete this->m_scale;
+}
+
+void Model::SetIdentifier(std::string identifier)
+{
+	this->m_identifier = identifier;
+}
+
+std::string Model::GetIdentifier()
+{
+	return this->m_identifier;
 }
 
 void Model::SetPosition(GLfloat x, GLfloat y, GLfloat z)
