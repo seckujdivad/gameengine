@@ -7,7 +7,13 @@
   "models": {
     "cube": {
       "type": "ply",
-      "geometry": "models/cube.ply",
+      "geometry": "models/cube.ply"
+    }
+  },
+  "layout": [
+    {
+      "model": "cube",
+      "name": "simple cube",
       "position": [ 10, 0, 0 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
@@ -16,7 +22,7 @@
         "fragment": "simple"
       }
     }
-  },
+  ],
   "cameras": {
     "main": {
       "position": [ 0, 0, 0 ],
