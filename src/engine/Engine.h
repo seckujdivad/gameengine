@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "Scene.h"
 #include "Model.h"
@@ -13,4 +14,6 @@
 
 using nlohmann::json;
 
-Scene* InitialiseScene(std::string path);
+Scene* InitialiseScene(std::string path, std::string filename);
+
+Model* ModelFromPly(std::string path);
