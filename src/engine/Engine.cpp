@@ -17,7 +17,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	}
 	else
 	{
-		throw std::invalid_argument("Can't open file at '" + path + "'");
+		throw std::invalid_argument("Can't open file at '" + path + "/" + filename + "'");
 	}
 
 	json config = json::parse(contents);
@@ -90,5 +90,46 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 Model* ModelFromPly(std::string path)
 {
-	return nullptr;
+	std::ifstream file;
+	std::string line;
+	std::string type_definition;
+	std::string type_name;
+	std::string type_id;
+
+	std::vector<std::vector<std::string>> elements;
+
+	bool in_header = true;
+	int element_index = -1;
+
+	file.open(path);
+	if (file.is_open())
+	{
+		while (std::getline(file, line))
+		{
+			if (line == "end_header")
+			{
+				in_header = false;
+			}
+			else if (line.substr(0, 9) == "element ")
+			{
+				int element_index = (size_t)elements.size();
+				elements.push_back({});
+			}
+			else if ((element_index != -1) && (line.substr(0, 10) == "property "))
+			{
+				type_definition = line.substr(10, line.size() - 10);
+
+				for (size_t i = 0; i < type_definition.size(); i++)
+				{
+
+				}
+
+				elements.at(element_index).push_back("");
+			}
+		}
+	}
+	else
+	{
+		throw std::invalid_argument("Can't open ply file at '" + path + "'");
+	}
 }

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include "Scene.h"
 #include "Model.h"
