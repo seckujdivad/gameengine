@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
+#include <regex>
 
 #include "Scene.h"
 #include "Model.h"

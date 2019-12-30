@@ -4,6 +4,7 @@
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
 {
 	this->SetBackgroundColour("#EEEEEE");
+	this->SetMinSize(wxSize(500, 400));
 
 	this->m_sizer = new wxGridBagSizer(0, 0);
 	this->m_sizer->SetFlexibleDirection(wxBOTH);

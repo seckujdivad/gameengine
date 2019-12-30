@@ -96,6 +96,12 @@ Model* ModelFromPly(std::string path)
 	std::string type_name;
 	std::string type_id;
 
+	std::map<std::string, int> regex_map;
+	std::vector<std::regex*> regex_store;
+	std::regex* float_pattern = new std::regex("[n]");
+	regex_store.push_back(float_pattern);
+	;
+
 	std::vector<std::vector<std::string>> elements;
 
 	bool in_header = true;
@@ -125,6 +131,7 @@ Model* ModelFromPly(std::string path)
 				}
 
 				elements.at(element_index).push_back("");
+				
 			}
 		}
 	}
