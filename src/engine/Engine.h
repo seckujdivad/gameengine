@@ -18,4 +18,11 @@ using nlohmann::json;
 
 Scene* InitialiseScene(std::string path, std::string filename);
 
+struct PlyElement
+{
+	std::string name;
+	int num_elements;
+	std::vector<std::string> types;
+};
+
 Model* ModelFromPly(std::string path);

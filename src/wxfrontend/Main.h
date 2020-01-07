@@ -14,6 +14,8 @@ private:
 	EngineCanvas* m_glcanvas;
 	wxButton* m_btn_render;
 
+	Scene* m_scene;
+
 	void btn_render_OnClick(wxCommandEvent& evt);
 
 public:

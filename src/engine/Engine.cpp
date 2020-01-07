@@ -100,39 +100,61 @@ Model* ModelFromPly(std::string path)
 	std::vector<std::regex*> regex_store;
 	std::regex* float_pattern = new std::regex("[n]");
 	regex_store.push_back(float_pattern);
-	;
-
-	std::vector<std::vector<std::string>> elements;
+	
+	PlyElement new_element;
+	std::vector<PlyElement> elements;
 
 	bool in_header = true;
 	int element_index = -1;
+	int line_index = 0;
 
 	file.open(path);
 	if (file.is_open())
 	{
 		while (std::getline(file, line))
 		{
-			if (line == "end_header")
+			if ((line_index == 0) && (line != "ply"))
 			{
-				in_header = false;
+				throw std::runtime_error("Invalid file format: line 1 of header should be \"ply\", not \"" + line + "\"");
 			}
-			else if (line.substr(0, 9) == "element ")
+			else if ((line_index == 1) && (line != "format ascii 1.0"))
 			{
-				int element_index = (size_t)elements.size();
-				elements.push_back({});
+				throw std::runtime_error("Invalid file format subtype: line 2 must be \"format ascii 1.0\", not \"" + line + "\"");
 			}
-			else if ((element_index != -1) && (line.substr(0, 10) == "property "))
-			{
-				type_definition = line.substr(10, line.size() - 10);
 
-				for (size_t i = 0; i < type_definition.size(); i++)
+			if (in_header) //interpret data formats
+			{
+				if (line == "end_header")
 				{
+					in_header = false;
+				}
+				else if (line.substr(0, 9) == "element ")
+				{
+					int element_index = (int)elements.size();
+					new_element.name = "";
+					new_element.num_elements = 0;
+					new_element.types.clear();
+					elements.push_back(new_element);
+				}
+				else if ((element_index != -1) && (line.substr(0, 10) == "property "))
+				{
+					type_definition = line.substr(10, line.size() - 10);
+
+					for (size_t i = 0; i < type_definition.size(); i++)
+					{
+
+					}
+
+					elements.at(element_index).types.push_back("");
 
 				}
-
-				elements.at(element_index).push_back("");
-				
 			}
+			else //search for data matching patterns
+			{
+
+			}
+
+			line_index++;
 		}
 	}
 	else

@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 
+
 class Camera
 {
 private:

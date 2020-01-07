@@ -1,16 +1,15 @@
-/*
-The second include shouldn't be necessary (and should stop the compile completely), but it seems to be.
-If this is stopping a compile on another setup, just comment it out and ignore.
-*/
-
-#include <gtest/gtest.h>
 #include "pch.h"
-
+//#include "engine/Camera.h"
+#include <engine/Camera.h>
 
 namespace CameraTests
 {
-	TEST(Identifier, Set)
+	TEST(Identifier, SetGet)
 	{
-		EXPECT_EQ(1, 1);
+		Camera* cam = new Camera();
+		
+
+		cam->SetIdentifier("Test identifier");
+		EXPECT_EQ(cam->GetIdentifier(), "Test identifier");
 	}
 }

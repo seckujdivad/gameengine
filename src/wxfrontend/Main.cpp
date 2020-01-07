@@ -6,6 +6,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	this->SetBackgroundColour("#EEEEEE");
 	this->SetMinSize(wxSize(500, 400));
 
+	//load scene
+	//this->m_scene = InitialiseScene("resources", "simplescene.json");
+
 	this->m_sizer = new wxGridBagSizer(0, 0);
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
@@ -33,5 +36,6 @@ Main::~Main()
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
 	this->m_glcanvas->Render();
+	this->m_scene->Render(this->m_glcanvas);
 	evt.Skip();
 }
