@@ -2,7 +2,7 @@
 #include "Camera.h"
 
 
-TEST(CameraTests, SetGet) {
+TEST(CameraTests, Identifier_SetGet) {
     Camera* cam = new Camera();
     EXPECT_EQ(cam->GetIdentifier(), "");
 
