@@ -1,8 +1,9 @@
 #pragma once
 
+#include <wx/wxprec.h>
 #include <wx/wx.h>
 
-#include "wxfrontend/Main.h"
+#include "Main.h"
 
 class App : public wxApp
 {

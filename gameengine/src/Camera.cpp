@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "Camera.h"
 
 Camera::Camera()

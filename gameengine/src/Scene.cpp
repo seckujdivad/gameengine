@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "Scene.h"
 
 int Scene::GetModelIndex(Model* model)

@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "Engine.h"
 
 Scene* InitialiseScene(std::string path, std::string filename)

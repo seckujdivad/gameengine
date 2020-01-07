@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="src\CameraTests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tests">
+      <UniqueIdentifier>{fdd1d3d7-cf49-49b6-ac9e-1d3310197f90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\render">
+      <UniqueIdentifier>{d7f1e82a-91fa-4ffe-b52b-8bc50cb0f5bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

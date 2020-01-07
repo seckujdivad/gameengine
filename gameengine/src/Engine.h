@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <wx/wxprec.h>
+
 #include <string>
 #include <fstream>
 #include <iostream>

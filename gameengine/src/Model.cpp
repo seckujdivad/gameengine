@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "Model.h"
 
 Model::Model()

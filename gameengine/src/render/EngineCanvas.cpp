@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "EngineCanvas.h"
 
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id) : wxGLCanvas(parent, id)
