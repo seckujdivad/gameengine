@@ -93,21 +93,14 @@ Model* ModelFromPly(std::string path)
 {
 	std::ifstream file;
 	std::string line;
-	std::string type_definition;
-	std::string type_name;
-	std::string type_id;
 
-	std::map<std::string, int> regex_map;
-	std::vector<std::regex*> regex_store;
-	std::regex* float_pattern = new std::regex("[n]");
-	regex_store.push_back(float_pattern);
-	
-	PlyElement new_element;
-	std::vector<PlyElement> elements;
+	std::vector<PlyElement*> header_layout;
 
 	bool in_header = true;
 	int element_index = -1;
 	int line_index = 0;
+	int pattern_index = -1;
+	int pattern_subindex = -1;
 
 	file.open(path);
 	if (file.is_open())
@@ -129,26 +122,7 @@ Model* ModelFromPly(std::string path)
 				{
 					in_header = false;
 				}
-				else if (line.substr(0, 9) == "element ")
-				{
-					int element_index = (int)elements.size();
-					new_element.name = "";
-					new_element.num_elements = 0;
-					new_element.types.clear();
-					elements.push_back(new_element);
-				}
-				else if ((element_index != -1) && (line.substr(0, 10) == "property "))
-				{
-					type_definition = line.substr(10, line.size() - 10);
-
-					for (size_t i = 0; i < type_definition.size(); i++)
-					{
-
-					}
-
-					elements.at(element_index).types.push_back("");
-
-				}
+				
 			}
 			else //search for data matching patterns
 			{
