@@ -26,7 +26,10 @@ private:
 public:
 	Model();
 	Model(Model* copy_from);
+	Model(Model& copy_from);
 	~Model();
+
+	void CopyFrom(Model copy_from);
 
 	void SetIdentifier(std::string identifier);
 	std::string GetIdentifier();

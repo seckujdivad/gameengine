@@ -12,64 +12,14 @@ Model::Model()
 	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
 }
 
+Model::Model(Model& copy_from)
+{
+	this->CopyFrom(copy_from);
+}
+
 Model::Model(Model* copy_from)
 {
-	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
-	this->m_edges = new std::vector<std::tuple<int, int>*>;
-	this->m_faces = new std::vector<std::vector<int>*>;
-
-	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
-
-	//copy transform data
-	std::vector<GLfloat> pos = copy_from->GetPosition();
-	std::vector<GLfloat> rot = copy_from->GetRotation();
-	std::vector<GLfloat> sca = copy_from->GetScale();
-	for (int i = 0; i < 3; i++)
-	{
-		this->m_position->at(i) = pos.at(i);
-		this->m_rotation->at(i) = rot.at(i);
-		this->m_scale->at(i) = sca.at(i);
-	}
-
-	//copy geometry
-	std::vector<std::vector<GLfloat>> vertices = copy_from->GetVerticesCopy();
-	std::vector<GLfloat>* vertex_subvector;
-	for (size_t i = 0; i < vertices.size(); i++)
-	{
-		vertex_subvector = new std::vector<GLfloat>;
-		vertex_subvector->reserve(vertices.at(i).size());
-		for (size_t j = 0; j < vertices.at(i).size(); j++)
-		{
-			vertex_subvector->push_back(vertices.at(i).at(j));
-		}
-		this->m_vertices->push_back(vertex_subvector);
-	}
-
-	std::vector<std::tuple<int, int>> edges = copy_from->GetEdgesCopy();
-	std::tuple<int, int>* edge_tuple;
-	for (size_t i = 0; i < edges.size(); i++)
-	{
-		edge_tuple = new std::tuple<int, int>;
-		std::get<0>(*edge_tuple) = std::get<0>(edges.at(i));
-		this->m_edges->push_back(edge_tuple);
-	}
-
-	std::vector<std::vector<int>> faces = copy_from->GetFacesCopy();
-	std::vector<int>* faces_subvector;
-	for (size_t i = 0; i < faces.size(); i++)
-	{
-		faces_subvector = new std::vector<int>;
-		faces_subvector->reserve(faces.at(i).size());
-		for (size_t j = 0; j < faces.at(i).size(); j++)
-		{
-			faces_subvector->push_back(faces.at(i).at(j));
-		}
-		this->m_faces->push_back(faces_subvector);
-	}
-
-	this->m_identifier = copy_from->GetIdentifier();
+	this->CopyFrom(*copy_from);
 }
 
 Model::~Model()
@@ -95,6 +45,66 @@ Model::~Model()
 	delete this->m_position;
 	delete this->m_rotation;
 	delete this->m_scale;
+}
+
+void Model::CopyFrom(Model copy_from)
+{
+	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
+	this->m_edges = new std::vector<std::tuple<int, int>*>;
+	this->m_faces = new std::vector<std::vector<int>*>;
+
+	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
+
+	//copy transform data
+	std::vector<GLfloat> pos = copy_from.GetPosition();
+	std::vector<GLfloat> rot = copy_from.GetRotation();
+	std::vector<GLfloat> sca = copy_from.GetScale();
+	for (int i = 0; i < 3; i++)
+	{
+		this->m_position->at(i) = pos.at(i);
+		this->m_rotation->at(i) = rot.at(i);
+		this->m_scale->at(i) = sca.at(i);
+	}
+
+	//copy geometry
+	std::vector<std::vector<GLfloat>> vertices = copy_from.GetVerticesCopy();
+	std::vector<GLfloat>* vertex_subvector;
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		vertex_subvector = new std::vector<GLfloat>;
+		vertex_subvector->reserve(vertices.at(i).size());
+		for (size_t j = 0; j < vertices.at(i).size(); j++)
+		{
+			vertex_subvector->push_back(vertices.at(i).at(j));
+		}
+		this->m_vertices->push_back(vertex_subvector);
+	}
+
+	std::vector<std::tuple<int, int>> edges = copy_from.GetEdgesCopy();
+	std::tuple<int, int>* edge_tuple;
+	for (size_t i = 0; i < edges.size(); i++)
+	{
+		edge_tuple = new std::tuple<int, int>;
+		std::get<0>(*edge_tuple) = std::get<0>(edges.at(i));
+		this->m_edges->push_back(edge_tuple);
+	}
+
+	std::vector<std::vector<int>> faces = copy_from.GetFacesCopy();
+	std::vector<int>* faces_subvector;
+	for (size_t i = 0; i < faces.size(); i++)
+	{
+		faces_subvector = new std::vector<int>;
+		faces_subvector->reserve(faces.at(i).size());
+		for (size_t j = 0; j < faces.at(i).size(); j++)
+		{
+			faces_subvector->push_back(faces.at(i).at(j));
+		}
+		this->m_faces->push_back(faces_subvector);
+	}
+
+	this->m_identifier = copy_from.GetIdentifier();
 }
 
 void Model::SetIdentifier(std::string identifier)
