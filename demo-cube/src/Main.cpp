@@ -4,7 +4,7 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
 {
-	this->SetBackgroundColour("#EEEEEE");
+	this->SetBackgroundColour(wxColor(238, 238, 238));
 	this->SetMinSize(wxSize(500, 400));
 
 	//load scene
