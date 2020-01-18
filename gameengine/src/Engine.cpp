@@ -54,6 +54,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	// make scene object
 	Scene* scene = new Scene(main_camera);
+	
+	// add cameras to scene
+	for (size_t i = 0; i < cameras.size(); i++)
+	{
+		scene->AddCamera(cameras.at(i));
+	}
 
 	// create model object
 	std::map<std::string, Model*> model_lib;
