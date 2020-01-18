@@ -308,3 +308,16 @@ std::vector<std::string> SplitOnChar(std::string string, std::string splitter, b
 		throw std::runtime_error("Splitter must have length 1");
 	}
 }
+
+template<typename T>
+int FindInVector(std::vector<T> to_search, T search_item)
+{
+	for (size_t i = 0; i < to_search.size(); i++)
+	{
+		if (to_search.at(i) == search_item)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
