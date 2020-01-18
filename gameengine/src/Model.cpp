@@ -47,7 +47,7 @@ Model::~Model()
 	delete this->m_scale;
 }
 
-void Model::CopyFrom(Model copy_from)
+void Model::CopyFrom(Model& copy_from)
 {
 	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
 	this->m_edges = new std::vector<std::tuple<int, int>*>;
