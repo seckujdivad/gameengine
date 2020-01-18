@@ -86,6 +86,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	// load shaders
 
+	// delete model lib
+	for (std::map<std::string, Model*>::iterator it = model_lib.begin(); it != model_lib.end(); it++)
+	{
+		delete it->second;
+	}
+
 	return scene;
 }
 
