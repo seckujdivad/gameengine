@@ -32,6 +32,15 @@ Scene::Scene(Camera* active_camera)
 
 Scene::~Scene()
 {
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		delete this->models.at(i);
+	}
+
+	for (size_t i = 0; i < this->cameras.size(); i++)
+	{
+		delete this->cameras.at(i);
+	}
 }
 
 void Scene::AddModel(Model* model)
