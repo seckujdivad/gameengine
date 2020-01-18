@@ -6,7 +6,7 @@
 #include <wx/gbsizer.h>
 
 #include "render/EngineCanvas.h"
-//#include "Engine.h"
+#include "Engine.h"
 
 class Main : public wxFrame
 {
@@ -15,7 +15,7 @@ private:
 	EngineCanvas* m_glcanvas;
 	wxButton* m_btn_render;
 
-	//Scene* m_scene;
+	Scene* m_scene;
 
 	void btn_render_OnClick(wxCommandEvent& evt);
 

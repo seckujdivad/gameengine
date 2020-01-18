@@ -8,7 +8,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	this->SetMinSize(wxSize(500, 400));
 
 	//load scene
-	//this->m_scene = InitialiseScene("resources", "simplescene.json");
+	this->m_scene = InitialiseScene("resources", "simplescene.json");
 
 	this->m_sizer = new wxGridBagSizer(0, 0);
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
@@ -31,7 +31,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 
 Main::~Main()
 {
-
+	delete this->m_scene;
 }
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
