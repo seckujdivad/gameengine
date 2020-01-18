@@ -295,7 +295,7 @@ std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
 
 int Model::AddEdge(int index0, int index1)
 {
-	std::tuple<int, int>* vertex_indexes = &std::make_tuple(index0, index1);
+	std::tuple<int, int>* vertex_indexes = new std::tuple<int, int>(index0, index1);
 	this->m_edges->push_back(vertex_indexes);
 	return this->m_edges->size() - 1;
 }
