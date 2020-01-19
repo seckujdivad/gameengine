@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <wx/glcanvas.h>
+
 #include "Model.h"
 #include "Camera.h"
 #include "render/EngineCanvas.h"
