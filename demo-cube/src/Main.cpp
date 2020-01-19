@@ -17,7 +17,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	int gl_args[] = {
 		WX_GL_CORE_PROFILE,
 		WX_GL_MAJOR_VERSION, 4,
-		WX_GL_MINOR_VERSION, 3,
+		WX_GL_MINOR_VERSION, 0,
 		0
 	};
 
