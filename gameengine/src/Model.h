@@ -77,4 +77,6 @@ public:
 
 	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
+
+	int MergeVertices();
 };

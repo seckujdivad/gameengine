@@ -521,3 +521,72 @@ std::vector<std::vector<GLfloat>*> Model::GetTriStrips()
 {
 	throw std::logic_error("Not implemented");
 }
+
+int Model::MergeVertices()
+{
+	std::vector<int> merged_vertices;
+	std::tuple<int, int>* current_edge;
+
+	std::map<int, std::vector<int>> vertex_joins;
+	std::map<int, std::vector<int>>::iterator vertex_match;
+	
+	//find duplicate vertices
+	for (int i = 0; i < (int)this->m_vertices->size(); i++)
+	{
+		vertex_match = vertex_joins.end();
+		for (std::map<int, std::vector<int>>::iterator it = vertex_joins.begin(); it != vertex_joins.end(); it++)
+		{
+			if (this->m_vertices->at(it->first)->at(0) == this->m_vertices->at(i)->at(0)
+				&& this->m_vertices->at(it->first)->at(1) == this->m_vertices->at(i)->at(1)
+				&& this->m_vertices->at(it->first)->at(2) == this->m_vertices->at(i)->at(2))
+			{
+				vertex_match = it;
+			}
+		}
+
+		if (vertex_match == vertex_joins.end())
+		{
+			vertex_joins.insert({ i, std::vector<int>() });
+		}
+		else
+		{
+			vertex_joins.at(vertex_match->first).push_back(i);
+			merged_vertices.push_back(i);
+		}
+	}
+
+	//change edges that use duplicated vertices to use the first vertex instance
+	for (std::map<int, std::vector<int>>::iterator it = vertex_joins.begin(); it != vertex_joins.end(); it++)
+	{
+		for (int i = 0; i < (int)it->second.size(); i++)
+		{
+			for (size_t j = 0; j < this->m_edges->size(); j++)
+			{
+				current_edge = nullptr;
+				if (std::get<0>(*this->m_edges->at(j)) == it->second.at(i)) //can't use run-time tuple indexing
+				{
+					current_edge = new std::tuple<int, int>(it->first, std::get<1>(*this->m_edges->at(j)));
+				}
+				else if (std::get<1>(*this->m_edges->at(j)) == it->second.at(i))
+				{
+					current_edge = new std::tuple<int, int>(std::get<0>(*this->m_edges->at(j)), it->first);
+				}
+
+				if (current_edge != nullptr)
+				{
+					delete this->m_edges->at(j);
+					this->m_edges->at(j) = current_edge;
+				}
+			}
+		}
+	}
+
+	//remove unreferenced vertices
+	for (int i = (int)merged_vertices.size() - 1; i >= 0; i--)
+	{
+		delete this->m_vertices->at(i);
+		this->m_vertices->erase(this->m_vertices->begin() + i);
+	}
+
+	return (int)merged_vertices.size();
+}
