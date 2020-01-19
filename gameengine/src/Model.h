@@ -29,6 +29,8 @@ public:
 	Model(Model& copy_from);
 	~Model();
 
+	unsigned int vertex_buffer = 0;
+
 	void CopyFrom(Model& copy_from);
 
 	void SetIdentifier(std::string identifier);

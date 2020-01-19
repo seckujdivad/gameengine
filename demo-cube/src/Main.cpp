@@ -43,7 +43,7 @@ Main::~Main()
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
-	//this->m_glcanvas->Render();
-	this->m_scene->Render(this->m_glcanvas);
+	this->m_glcanvas->Render();
+	//this->m_scene->Render(this->m_glcanvas);
 	evt.Skip();
 }

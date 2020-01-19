@@ -5,6 +5,7 @@
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : wxGLCanvas(parent, id, args)
 {
 	this->m_glcontext = new wxGLContext(this);
+	this->SetCurrent(*this->m_glcontext);
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Render();
@@ -24,7 +25,6 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 void EngineCanvas::Render()
 {
 	GLfloat scale = 0.2;
-	this->SetCurrent(*this->m_glcontext);
 
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
