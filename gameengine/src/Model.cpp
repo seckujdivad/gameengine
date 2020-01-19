@@ -590,3 +590,63 @@ int Model::MergeVertices()
 
 	return (int)merged_vertices.size();
 }
+
+int Model::MergeEdges()
+{
+	std::vector<int> merged_edges;
+	std::map<int, std::vector<int>> edge_joins;
+	std::map<int, std::vector<int>>::iterator edges_match;
+
+	//find duplicate edges
+	for (size_t i = 0; i < this->m_edges->size(); i++)
+	{
+		edges_match = edge_joins.end();
+		for (std::map<int, std::vector<int>>::iterator it = edge_joins.begin(); it != edge_joins.end(); it++)
+		{
+			if ((std::get<0>(*this->m_edges->at(it->first)) == std::get<0>(*this->m_edges->at(i))
+				&& std::get<1>(*this->m_edges->at(it->first)) == std::get<1>(*this->m_edges->at(i)))
+				|| (std::get<0>(*this->m_edges->at(it->first)) == std::get<1>(*this->m_edges->at(i))
+					&& std::get<1>(*this->m_edges->at(it->first)) == std::get<0>(*this->m_edges->at(i))))
+			{
+				edges_match = it;
+			}
+		}
+
+		if (edges_match == edge_joins.end())
+		{
+			edge_joins.insert({ i, std::vector<int>() });
+		}
+		else
+		{
+			edge_joins.at(edges_match->first).push_back(i);
+			merged_edges.push_back(i);
+		}
+	}
+
+	//change faces that use duplicate edges to use first instance of that edge
+	for (std::map<int, std::vector<int>>::iterator it = edge_joins.begin(); it != edge_joins.end(); it++)
+	{
+		for (size_t i = 0; i < it->second.size(); i++)
+		{
+			for (size_t j = 0; j < this->m_faces->size(); j++)
+			{
+				for (size_t k = 0; k < this->m_faces->at(j)->size(); k++)
+				{
+					if (this->m_faces->at(j)->at(k) == it->second.at(i))
+					{
+						this->m_faces->at(j)->at(k) = it->first;
+					}
+				}
+			}
+		}
+	}
+
+	//remove unreferenced edges
+	for (int i = (int)merged_edges.size() - 1; i >= 0; i--)
+	{
+		delete this->m_edges->at(i);
+		this->m_edges->erase(this->m_edges->begin() + i);
+	}
+
+	return (int)merged_edges.size();
+}

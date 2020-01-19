@@ -79,4 +79,5 @@ public:
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
 
 	int MergeVertices();
+	int MergeEdges();
 };
