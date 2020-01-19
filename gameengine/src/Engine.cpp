@@ -75,6 +75,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			if (it.value()["merge geometry"].get<bool>())
 			{
 				model->MergeVertices();
+				model->MergeEdges();
 			}
 		}
 
