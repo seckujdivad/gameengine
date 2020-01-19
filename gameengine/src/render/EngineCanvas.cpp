@@ -1,10 +1,11 @@
 #include <wx/wxprec.h>
+#include <GL/glew.h>
 #include "EngineCanvas.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id) : wxGLCanvas(parent, id)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : wxGLCanvas(parent, id, args)
 {
 	this->m_glcontext = new wxGLContext(this);
-	
+
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Render();
 }
@@ -23,7 +24,6 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 void EngineCanvas::Render()
 {
 	GLfloat scale = 0.2;
-
 	this->SetCurrent(*this->m_glcontext);
 
 	glClearColor(0, 0, 0, 0);

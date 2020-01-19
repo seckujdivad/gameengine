@@ -1,4 +1,5 @@
 #include <wx/wxprec.h>
+#include <GL/glew.h>
 #include "Scene.h"
 
 Scene::Scene(Camera* active_camera)
@@ -110,5 +111,5 @@ void Scene::ClearAllCameras(bool destroy)
 
 void Scene::Render(EngineCanvas* canvas)
 {
-
+	
 }

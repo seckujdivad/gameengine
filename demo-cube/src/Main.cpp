@@ -14,7 +14,14 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-	this->m_glcanvas = new EngineCanvas(this, wxID_ANY);
+	int gl_args[] = {
+		WX_GL_CORE_PROFILE,
+		WX_GL_MAJOR_VERSION, 4,
+		WX_GL_MINOR_VERSION, 3,
+		0
+	};
+
+	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, gl_args);
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
 	this->m_btn_render = new wxButton(this, wxID_ANY, wxString("Render"));
@@ -36,7 +43,7 @@ Main::~Main()
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
-	this->m_glcanvas->Render();
-	//this->m_scene->Render(this->m_glcanvas);
+	//this->m_glcanvas->Render();
+	this->m_scene->Render(this->m_glcanvas);
 	evt.Skip();
 }

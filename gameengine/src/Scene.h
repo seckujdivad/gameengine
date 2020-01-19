@@ -1,12 +1,14 @@
 #pragma once
 
-#include <vector>
-
+#include <wx/wxprec.h>
 #include <wx/glcanvas.h>
+
+#include <vector>
 
 #include "Model.h"
 #include "Camera.h"
 #include "render/EngineCanvas.h"
+
 
 class EngineCanvas;
 

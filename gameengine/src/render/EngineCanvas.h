@@ -15,7 +15,7 @@ private:
 	Scene* m_scene;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id = -1);
+	EngineCanvas(wxWindow* parent, wxWindowID id, const int* args);
 	~EngineCanvas();
 
 	void SetScene(Scene* scene);
