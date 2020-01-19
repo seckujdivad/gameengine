@@ -88,6 +88,7 @@ void Model::CopyFrom(Model& copy_from)
 	{
 		edge_tuple = new std::tuple<int, int>;
 		std::get<0>(*edge_tuple) = std::get<0>(edges.at(i));
+		std::get<1>(*edge_tuple) = std::get<1>(edges.at(i));
 		this->m_edges->push_back(edge_tuple);
 	}
 
