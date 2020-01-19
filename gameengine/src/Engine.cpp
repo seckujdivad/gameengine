@@ -117,6 +117,7 @@ Model* ModelFromPly(std::string path)
 	int line_index = 0; //line index in the ply file
 	int pattern_index = 0; //current pattern index (post header)
 	int pattern_subindex = 0; //number of elements of the current pattern that have been read (post header)
+	std::vector<int> edge_indexes;
 
 	std::vector<std::string> sliced_string;
 
@@ -169,7 +170,6 @@ Model* ModelFromPly(std::string path)
 					{
 						if (current_element != nullptr)
 						{
-							current_element->num_elements++;
 							sliced_string = SplitOnChar(line, ' ');
 
 							if (sliced_string.size() == 3)
@@ -204,10 +204,23 @@ Model* ModelFromPly(std::string path)
 				{
 					sliced_string = SplitOnChar(line, ' ');
 
-					for (size_t i = 0; i < sliced_string.size(); )
+					if (header_layout.at(pattern_index)->name == "vertex")
 					{
+						result->AddVertex((GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("x")))),
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("y")))),
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("z")))));
+					}
+					else if (header_layout.at(pattern_index)->name == "face")
+					{
+						edge_indexes.clear();
 
-						i++;
+						for (int i = 1; i < std::stoi(sliced_string.at(0)); i++)
+						{
+							edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(i)), std::stoi(sliced_string.at(i + 1))));
+						}
+						edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(edge_indexes.size() + 1)), std::stoi(sliced_string.at(1))));
+
+						result->AddFace(edge_indexes, "");
 					}
 
 					//move to next subpattern
