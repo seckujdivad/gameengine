@@ -61,7 +61,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		scene->AddCamera(cameras.at(i));
 	}
 
-	// create model object
+	// create model object library
 	std::map<std::string, Model*> model_lib;
 	Model* model = nullptr;
 	for (auto it = config["models"].begin(); it != config["models"].end(); it++)
@@ -71,6 +71,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			std::string full_path = path + "/";
 			full_path = full_path + it.value()["geometry"].get<std::string>();
 			model = ModelFromPly(full_path);
+
+			if (it.value()["merge geometry"].get<bool>())
+			{
+				model->MergeVertices();
+			}
 		}
 
 		model_lib[it.key()] = model;
