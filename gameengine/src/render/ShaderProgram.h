@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <fstream>
 
 #include <GL/glew.h>
 
@@ -8,9 +9,9 @@ class ShaderProgram
 {
 private:
 public:
-	GLuint program_id;
+	GLuint program_id; //OpenGL identifier of the program the shaders have been linked into
 	
-	ShaderProgram(std::string vert_path, std::string frag_path, bool throw_errors = true);
+	ShaderProgram(std::string vert_path, std::string frag_path);
 	~ShaderProgram();
 
 	void Select();
