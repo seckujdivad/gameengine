@@ -162,6 +162,7 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
+    <ClInclude Include="src\render\Shader.h" />
     <ClInclude Include="src\Scene.h" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +170,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
+    <ClCompile Include="src\render\Shader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
