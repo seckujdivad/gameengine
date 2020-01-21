@@ -17,19 +17,15 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	char infoLog[512];
 	int msglen;
 
-	//verts
-	float verts[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f
-	};
-
 	//vert shader
 	const char* vertex_shader_src = "#version 400 core\n"
 		"layout (location = 0) in vec3 aPos;\n"
+		"out vec3 vpos;\n"
+		"uniform float z_transform;"
 		"void main()\n"
 		"{\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+		"	gl_Position = vec4(aPos.x + z_transform, aPos.y, aPos.z, 1.0f);\n"
+		"	vpos = aPos;\n"
 		"}\n";
 
 	unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -39,9 +35,10 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	//frag shader
 	const char* frag_shader_src = "#version 400 core\n"
 		"out vec4 gl_FragColor;\n"
+		"in vec3 vpos;\n"
 		"void main()\n"
 		"{\n"
-		"	gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+		"	gl_FragColor = vec4(vpos.xyz, 1.0);\n"//vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 		"}\n";
 
 	unsigned int frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -62,6 +59,9 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glLinkProgram(this->m_shader_program);
 	glUseProgram(this->m_shader_program);
 
+	GLuint z_transform = glGetUniformLocation(this->m_shader_program, "z_transform");
+	glUniform1f(z_transform, 0.0);
+
 	// check for linking errors
 	
 	std::string k;
@@ -75,6 +75,13 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	unsigned int* vao = &this->m_VAO;
 	glGenVertexArrays(1, vao);
 	glBindVertexArray(this->m_VAO);
+
+	//verts
+	float verts[] = {
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f, 0.5f, 0.0f
+	};
 
 	GLuint vertex_buffer;
 	GLuint* v = &vertex_buffer;
