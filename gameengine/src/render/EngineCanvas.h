@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wx/wxprec.h>
 #include <wx/glcanvas.h>
 #include <wx/dcclient.h>
 
