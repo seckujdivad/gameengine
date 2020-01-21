@@ -38,7 +38,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 		"in vec3 vpos;\n"
 		"void main()\n"
 		"{\n"
-		"	gl_FragColor = vec4(vpos.xyz, 1.0);\n"//vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+		"	gl_FragColor = vec4(vpos.xyz, 1.0);\n"
 		"}\n";
 
 	unsigned int frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -99,8 +99,6 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Render();
-
-
 }
 
 EngineCanvas::~EngineCanvas()
@@ -121,25 +119,6 @@ void EngineCanvas::Render()
 	glClearColor(0, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
-
-	
-	/*glBegin(GL_POLYGON);
-	glColor3f(1.0, 1.0, 1.0);
-	glVertex2f(-0.5, -0.5);
-	glVertex2f(-0.5, 0.5);
-	glVertex2f(0.5, 0.5);
-	glVertex2f(0.5, -0.5);
-	glColor3f(0.4, 0.5, 0.4);
-	glVertex2f(0.0, -0.8);
-	glEnd();
-
-	glBegin(GL_POLYGON);
-	glColor3f(0.5, 0.5, 0.5);
-	glVertex2f(-scale, -scale);
-	glVertex2f(scale, -scale);
-	glVertex2f(scale, scale);
-	glVertex2f(-scale, scale);
-	glEnd();*/
 
 	glUseProgram(this->m_shader_program);
 	glBindVertexArray(this->m_VAO);
