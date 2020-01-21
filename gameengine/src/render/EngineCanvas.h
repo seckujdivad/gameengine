@@ -15,6 +15,9 @@ private:
 	Scene* m_scene;
 
 public:
+	unsigned int m_VAO;
+	unsigned int m_shader_program;
+
 	EngineCanvas(wxWindow* parent, wxWindowID id, const int* args);
 	~EngineCanvas();
 
