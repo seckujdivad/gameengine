@@ -3,6 +3,8 @@
 #include <wx/glcanvas.h>
 #include <wx/dcclient.h>
 
+#include <glm/glm.hpp>
+
 #include "../Scene.h"
 
 class Scene;
