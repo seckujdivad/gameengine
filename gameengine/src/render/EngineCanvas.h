@@ -15,10 +15,10 @@ private:
 	wxGLContext* m_glcontext;
 	Scene* m_scene;
 
-public:
 	unsigned int m_VAO;
 	unsigned int m_shader_program;
 
+public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, const int* args);
 	~EngineCanvas();
 
