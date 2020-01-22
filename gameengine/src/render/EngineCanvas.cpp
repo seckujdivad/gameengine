@@ -114,7 +114,7 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 
 void EngineCanvas::Render()
 {
-	GLfloat scale = 0.2;
+	GLfloat scale = 0.2f;
 
 	glClearColor(0, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
