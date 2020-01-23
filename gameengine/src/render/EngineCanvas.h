@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wx/glcanvas.h>
+#include "../GLComponents.h"
 #include <wx/dcclient.h>
 
 #include <glm/glm.hpp>

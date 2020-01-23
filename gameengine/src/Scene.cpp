@@ -1,5 +1,4 @@
 #include <wx/wxprec.h>
-#include <GL/glew.h>
 #include "Scene.h"
 
 Scene::Scene(Camera* active_camera)

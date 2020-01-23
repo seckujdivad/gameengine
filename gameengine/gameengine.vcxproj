@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Engine.h" />
+    <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />

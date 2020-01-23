@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wx/wxprec.h>
-#include <wx/glcanvas.h>
+#include "GLComponents.h"
 
 #include <string>
 #include <vector>
@@ -29,7 +29,7 @@ public:
 	Model(Model& copy_from);
 	~Model();
 
-	unsigned int vertex_buffer = 0;
+	GLuint vertex_buffer;
 
 	void CopyFrom(Model& copy_from);
 

@@ -6,7 +6,7 @@
 #include <tuple>
 #include <map>
 
-#include <GL/glew.h>
+#include "../GLComponents.h"
 #include <glm/glm.hpp>
 
 class ShaderProgram

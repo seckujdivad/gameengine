@@ -1,5 +1,5 @@
 #include <wx/wxprec.h>
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include "EngineCanvas.h"
 
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : wxGLCanvas(parent, id, args)
