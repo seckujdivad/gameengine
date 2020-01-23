@@ -2,9 +2,9 @@
 
 #include <wx/wxprec.h>
 #include <wx/wx.h>
-#include <wx/glcanvas.h>
 #include <wx/gbsizer.h>
 
+#include "GLComponents.h"
 #include "render/EngineCanvas.h"
 #include "Engine.h"
 
