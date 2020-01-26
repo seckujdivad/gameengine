@@ -3,13 +3,9 @@
 
 Model::Model()
 {
-	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
-	this->m_edges = new std::vector<std::tuple<int, int>*>;
-	this->m_faces = new std::vector<std::vector<int>*>;
-
-	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_position = {0, 0, 0};
+	this->m_rotation = {0, 0, 0};
+	this->m_scale = {0, 0, 0};
 }
 
 Model::Model(Model& copy_from)
@@ -24,38 +20,27 @@ Model::Model(Model* copy_from)
 
 Model::~Model()
 {
-	for (size_t i = 0; i < this->m_vertices->size(); i++)
+	for (size_t i = 0; i < this->m_vertices.size(); i++)
 	{
-		delete this->m_vertices->at(i);
+		delete this->m_vertices.at(i);
 	}
-	delete this->m_vertices;
 
-	for (size_t i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges.size(); i++)
 	{
-		delete this->m_edges->at(i);
+		delete this->m_edges.at(i);
 	}
-	delete this->m_edges;
 
-	for (size_t i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
-		delete this->m_faces->at(i);
+		delete this->m_faces.at(i);
 	}
-	delete this->m_faces;
-
-	delete this->m_position;
-	delete this->m_rotation;
-	delete this->m_scale;
 }
 
 void Model::CopyFrom(Model& copy_from)
 {
-	this->m_vertices = new std::vector<std::vector<GLfloat>*>;
-	this->m_edges = new std::vector<std::tuple<int, int>*>;
-	this->m_faces = new std::vector<std::vector<int>*>;
-
-	this->m_position = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_rotation = new std::array<GLfloat, 3> {0, 0, 0};
-	this->m_scale = new std::array<GLfloat, 3> {0, 0, 0};
+	this->m_position = {0, 0, 0};
+	this->m_rotation = {0, 0, 0};
+	this->m_scale = {0, 0, 0};
 
 	//copy transform data
 	std::vector<GLfloat> pos = copy_from.GetPosition();
@@ -63,9 +48,9 @@ void Model::CopyFrom(Model& copy_from)
 	std::vector<GLfloat> sca = copy_from.GetScale();
 	for (int i = 0; i < 3; i++)
 	{
-		this->m_position->at(i) = pos.at(i);
-		this->m_rotation->at(i) = rot.at(i);
-		this->m_scale->at(i) = sca.at(i);
+		this->m_position.at(i) = pos.at(i);
+		this->m_rotation.at(i) = rot.at(i);
+		this->m_scale.at(i) = sca.at(i);
 	}
 
 	//copy geometry
@@ -79,7 +64,7 @@ void Model::CopyFrom(Model& copy_from)
 		{
 			vertex_subvector->push_back(vertices.at(i).at(j));
 		}
-		this->m_vertices->push_back(vertex_subvector);
+		this->m_vertices.push_back(vertex_subvector);
 	}
 
 	std::vector<std::tuple<int, int>> edges = copy_from.GetEdgesCopy();
@@ -89,7 +74,7 @@ void Model::CopyFrom(Model& copy_from)
 		edge_tuple = new std::tuple<int, int>;
 		std::get<0>(*edge_tuple) = std::get<0>(edges.at(i));
 		std::get<1>(*edge_tuple) = std::get<1>(edges.at(i));
-		this->m_edges->push_back(edge_tuple);
+		this->m_edges.push_back(edge_tuple);
 	}
 
 	std::vector<std::vector<int>> faces = copy_from.GetFacesCopy();
@@ -102,7 +87,7 @@ void Model::CopyFrom(Model& copy_from)
 		{
 			faces_subvector->push_back(faces.at(i).at(j));
 		}
-		this->m_faces->push_back(faces_subvector);
+		this->m_faces.push_back(faces_subvector);
 	}
 
 	this->m_identifier = copy_from.GetIdentifier();
@@ -120,9 +105,9 @@ std::string Model::GetIdentifier()
 
 void Model::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 {
-	this->m_position->at(0) = x;
-	this->m_position->at(1) = y;
-	this->m_position->at(2) = z;
+	this->m_position.at(0) = x;
+	this->m_position.at(1) = y;
+	this->m_position.at(2) = z;
 }
 
 void Model::SetPosition(std::vector<GLfloat> point)
@@ -131,7 +116,7 @@ void Model::SetPosition(std::vector<GLfloat> point)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_position->at(i) = point.at(i);
+			this->m_position.at(i) = point.at(i);
 		}
 	}
 	else
@@ -145,16 +130,16 @@ std::vector<GLfloat> Model::GetPosition()
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result.push_back(this->m_position->at(i));
+		result.push_back(this->m_position.at(i));
 	}
 	return result;
 }
 
 void Model::SetRotation(GLfloat x, GLfloat y, GLfloat z)
 {
-	this->m_rotation->at(0) = x;
-	this->m_rotation->at(1) = y;
-	this->m_rotation->at(2) = z;
+	this->m_rotation.at(0) = x;
+	this->m_rotation.at(1) = y;
+	this->m_rotation.at(2) = z;
 }
 
 void Model::SetRotation(std::vector<GLfloat> rotation)
@@ -163,7 +148,7 @@ void Model::SetRotation(std::vector<GLfloat> rotation)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_rotation->at(i) = rotation.at(i);
+			this->m_rotation.at(i) = rotation.at(i);
 		}
 	}
 	else
@@ -177,16 +162,16 @@ std::vector<GLfloat> Model::GetRotation()
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result.push_back(this->m_rotation->at(i));
+		result.push_back(this->m_rotation.at(i));
 	}
 	return result;
 }
 
 void Model::SetScale(GLfloat x, GLfloat y, GLfloat z)
 {
-	this->m_scale->at(0) = x;
-	this->m_scale->at(1) = y;
-	this->m_scale->at(2) = z;
+	this->m_scale.at(0) = x;
+	this->m_scale.at(1) = y;
+	this->m_scale.at(2) = z;
 }
 
 void Model::SetScale(std::vector<GLfloat> scale)
@@ -195,7 +180,7 @@ void Model::SetScale(std::vector<GLfloat> scale)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			this->m_scale->at(i) = scale.at(i);
+			this->m_scale.at(i) = scale.at(i);
 		}
 	}
 	else
@@ -209,7 +194,7 @@ std::vector<GLfloat> Model::GetScale()
 	std::vector<GLfloat> result;
 	for (int i = 0; i < 3; i++)
 	{
-		result.push_back(this->m_scale->at(i));
+		result.push_back(this->m_scale.at(i));
 	}
 	return result;
 }
@@ -222,9 +207,9 @@ int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 	vertex->push_back(y);
 	vertex->push_back(z);
 
-	this->m_vertices->push_back(vertex);
+	this->m_vertices.push_back(vertex);
 
-	return this->m_vertices->size() - 1;
+	return this->m_vertices.size() - 1;
 }
 
 int Model::AddVertex(std::vector<GLfloat> vertex)
@@ -239,9 +224,9 @@ bool Model::RemoveVertex(int index)
 
 bool Model::RemoveVertex(size_t index)
 {
-	if ((index >= 0) && (index < this->m_vertices->size()))
+	if ((index >= 0) && (index < this->m_vertices.size()))
 	{
-		this->m_vertices->erase(this->m_vertices->begin() + index);
+		this->m_vertices.erase(this->m_vertices.begin() + index);
 		return true;
 	}
 	else
@@ -254,9 +239,9 @@ int Model::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 {
 	std::vector<GLfloat>* current_item;
 
-	for (size_t i = 0; i < this->m_vertices->size(); i++)
+	for (size_t i = 0; i < this->m_vertices.size(); i++)
 	{
-		current_item = this->m_vertices->at(i);
+		current_item = this->m_vertices.at(i);
 		
 		if ((current_item->at(0) == x) && (current_item->at(1) == y) && (current_item->at(2) == z))
 		{
@@ -273,7 +258,7 @@ int Model::FindVertex(std::vector<int> vertex)
 
 std::vector<GLfloat>* Model::GetVertex(int index)
 {
-	return this->m_vertices->at(index);
+	return this->m_vertices.at(index);
 }
 
 std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
@@ -281,13 +266,13 @@ std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
 	std::vector<std::vector<GLfloat>> output;
 	std::vector<GLfloat> vertex;
 
-	for (size_t i = 0; i < this->m_vertices->size(); i++)
+	for (size_t i = 0; i < this->m_vertices.size(); i++)
 	{
 		vertex.clear();
-		vertex.reserve(this->m_vertices->at(i)->size());
-		for (size_t j = 0; j < this->m_vertices->at(i)->size(); j++)
+		vertex.reserve(this->m_vertices.at(i)->size());
+		for (size_t j = 0; j < this->m_vertices.at(i)->size(); j++)
 		{
-			vertex.push_back(this->m_vertices->at(i)->at(j));
+			vertex.push_back(this->m_vertices.at(i)->at(j));
 		}
 		output.push_back(vertex);
 	}
@@ -297,8 +282,8 @@ std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
 int Model::AddEdge(int index0, int index1)
 {
 	std::tuple<int, int>* vertex_indexes = new std::tuple<int, int>(index0, index1);
-	this->m_edges->push_back(vertex_indexes);
-	return this->m_edges->size() - 1;
+	this->m_edges.push_back(vertex_indexes);
+	return this->m_edges.size() - 1;
 }
 
 int Model::AddEdge(std::vector<int> vertex_indexes)
@@ -325,13 +310,13 @@ bool Model::RemoveEdge(int index)
 
 bool Model::RemoveEdge(size_t index)
 {
-	if ((0 < index) || (index >= this->m_edges->size()))
+	if ((0 < index) || (index >= this->m_edges.size()))
 	{
 		return false;
 	}
 	else
 	{
-		this->m_edges->erase(this->m_edges->begin() + index);
+		this->m_edges.erase(this->m_edges.begin() + index);
 		return true;
 	}
 }
@@ -339,9 +324,9 @@ bool Model::RemoveEdge(size_t index)
 int Model::FindEdge(int index0, int index1)
 {
 	std::tuple<int, int>* current_edge;
-	for (size_t i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges.size(); i++)
 	{
-		current_edge = this->m_edges->at(i);
+		current_edge = this->m_edges.at(i);
 		if (((std::get<0>(*current_edge) == index0) && (std::get<1>(*current_edge) == index1))
 			|| ((std::get<1>(*current_edge) == index0) && (std::get<0>(*current_edge) == index1)))
 		{
@@ -375,9 +360,9 @@ std::tuple<int, int>* Model::GetEdge(int index)
 
 std::tuple<int, int>* Model::GetEdge(size_t index)
 {
-	if ((index >= 0) && (index < this->m_edges->size()))
+	if ((index >= 0) && (index < this->m_edges.size()))
 	{
-		return this->m_edges->at(index);
+		return this->m_edges.at(index);
 	}
 	else
 	{
@@ -399,10 +384,10 @@ std::vector<std::tuple<int, int>> Model::GetEdgesCopy()
 	std::vector<std::tuple<int, int>> output;
 	std::tuple<int, int> vertex_pair;
 
-	for (size_t i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges.size(); i++)
 	{
-		std::get<0>(vertex_pair) = std::get<0>(*this->m_edges->at(i));
-		std::get<1>(vertex_pair) = std::get<1>(*this->m_edges->at(i));
+		std::get<0>(vertex_pair) = std::get<0>(*this->m_edges.at(i));
+		std::get<1>(vertex_pair) = std::get<1>(*this->m_edges.at(i));
 		output.push_back(vertex_pair);
 	}
 	return output;
@@ -418,9 +403,9 @@ int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 	}
 	std::sort(edges_copy->begin(), edges_copy->end());
 
-	this->m_faces->push_back(edges_copy);
+	this->m_faces.push_back(edges_copy);
 
-	return this->m_faces->size() - 1;
+	return this->m_faces.size() - 1;
 }
 
 bool Model::RemoveFace(int index)
@@ -430,9 +415,9 @@ bool Model::RemoveFace(int index)
 
 bool Model::RemoveFace(size_t index)
 {
-	if ((index >= 0) && (index < this->m_faces->size()))
+	if ((index >= 0) && (index < this->m_faces.size()))
 	{
-		this->m_faces->erase(this->m_faces->begin() + index);
+		this->m_faces.erase(this->m_faces.begin() + index);
 		return true;
 	}
 	else
@@ -447,16 +432,16 @@ int Model::FindFace(std::vector<int> edge_indexes)
 
 	bool is_match;
 	
-	for (size_t i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
-		if (this->m_faces->at(i)->size() == edge_indexes.size())
+		if (this->m_faces.at(i)->size() == edge_indexes.size())
 		{
 			is_match = true;
 			for (size_t j = 0; j < edge_indexes.size(); j++)
 			{
 				if (is_match)
 				{
-					if (edge_indexes.at(j) != this->m_faces->at(i)->at(j))
+					if (edge_indexes.at(j) != this->m_faces.at(i)->at(j))
 					{
 						is_match = false;
 					}
@@ -473,22 +458,22 @@ int Model::FindFace(std::vector<int> edge_indexes)
 
 std::vector<int>* Model::GetFace(int index)
 {
-	return this->m_faces->at(index);
+	return this->m_faces.at(index);
 }
 
 std::vector<std::vector<int>> Model::GetFacesCopy()
 {
 	std::vector<std::vector<int>> output;
 	std::vector<int> face;
-	output.reserve(this->m_faces->size());
+	output.reserve(this->m_faces.size());
 	
-	for (size_t i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
 		face.clear();
-		face.reserve(this->m_faces->at(i)->size());
-		for (size_t j = 0; j < this->m_faces->at(i)->size(); j++)
+		face.reserve(this->m_faces.at(i)->size());
+		for (size_t j = 0; j < this->m_faces.at(i)->size(); j++)
 		{
-			face.push_back(this->m_faces->at(i)->at(j));
+			face.push_back(this->m_faces.at(i)->at(j));
 		}
 		output.push_back(face);
 	}
@@ -501,15 +486,15 @@ std::vector<std::vector<GLfloat>> Model::GetTriFans()
 	std::vector<GLfloat>* current_fan;
 	std::vector<int>* current_face;
 
-	for (size_t i = 0; i < this->m_faces->size(); i++)
+	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
-		current_face = this->m_faces->at(i);
+		current_face = this->m_faces.at(i);
 		if (current_face->size() > 0)
 		{
 			current_fan = new std::vector<GLfloat>;
 			for (size_t j = 0; j < current_face->size(); j++)
 			{
-				current_fan->push_back(std::get<0>(*this->m_edges->at(current_face->at(j))));
+				current_fan->push_back(std::get<0>(*this->m_edges.at(current_face->at(j))));
 			}
 			trifans.push_back(*current_fan);
 		}
@@ -531,14 +516,14 @@ int Model::MergeVertices()
 	std::map<int, std::vector<int>>::iterator vertex_match;
 	
 	//find duplicate vertices
-	for (int i = 0; i < (int)this->m_vertices->size(); i++)
+	for (int i = 0; i < (int)this->m_vertices.size(); i++)
 	{
 		vertex_match = vertex_joins.end();
 		for (std::map<int, std::vector<int>>::iterator it = vertex_joins.begin(); it != vertex_joins.end(); it++)
 		{
-			if (this->m_vertices->at(it->first)->at(0) == this->m_vertices->at(i)->at(0)
-				&& this->m_vertices->at(it->first)->at(1) == this->m_vertices->at(i)->at(1)
-				&& this->m_vertices->at(it->first)->at(2) == this->m_vertices->at(i)->at(2))
+			if (this->m_vertices.at(it->first)->at(0) == this->m_vertices.at(i)->at(0)
+				&& this->m_vertices.at(it->first)->at(1) == this->m_vertices.at(i)->at(1)
+				&& this->m_vertices.at(it->first)->at(2) == this->m_vertices.at(i)->at(2))
 			{
 				vertex_match = it;
 			}
@@ -560,22 +545,22 @@ int Model::MergeVertices()
 	{
 		for (int i = 0; i < (int)it->second.size(); i++)
 		{
-			for (size_t j = 0; j < this->m_edges->size(); j++)
+			for (size_t j = 0; j < this->m_edges.size(); j++)
 			{
 				current_edge = nullptr;
-				if (std::get<0>(*this->m_edges->at(j)) == it->second.at(i)) //can't use run-time tuple indexing
+				if (std::get<0>(*this->m_edges.at(j)) == it->second.at(i)) //can't use run-time tuple indexing
 				{
-					current_edge = new std::tuple<int, int>(it->first, std::get<1>(*this->m_edges->at(j)));
+					current_edge = new std::tuple<int, int>(it->first, std::get<1>(*this->m_edges.at(j)));
 				}
-				else if (std::get<1>(*this->m_edges->at(j)) == it->second.at(i))
+				else if (std::get<1>(*this->m_edges.at(j)) == it->second.at(i))
 				{
-					current_edge = new std::tuple<int, int>(std::get<0>(*this->m_edges->at(j)), it->first);
+					current_edge = new std::tuple<int, int>(std::get<0>(*this->m_edges.at(j)), it->first);
 				}
 
 				if (current_edge != nullptr)
 				{
-					delete this->m_edges->at(j);
-					this->m_edges->at(j) = current_edge;
+					delete this->m_edges.at(j);
+					this->m_edges.at(j) = current_edge;
 				}
 			}
 		}
@@ -584,8 +569,8 @@ int Model::MergeVertices()
 	//remove unreferenced vertices
 	for (int i = (int)merged_vertices.size() - 1; i >= 0; i--)
 	{
-		delete this->m_vertices->at(i);
-		this->m_vertices->erase(this->m_vertices->begin() + i);
+		delete this->m_vertices.at(i);
+		this->m_vertices.erase(this->m_vertices.begin() + i);
 	}
 
 	return (int)merged_vertices.size();
@@ -598,15 +583,15 @@ int Model::MergeEdges()
 	std::map<int, std::vector<int>>::iterator edges_match;
 
 	//find duplicate edges
-	for (size_t i = 0; i < this->m_edges->size(); i++)
+	for (size_t i = 0; i < this->m_edges.size(); i++)
 	{
 		edges_match = edge_joins.end();
 		for (std::map<int, std::vector<int>>::iterator it = edge_joins.begin(); it != edge_joins.end(); it++)
 		{
-			if ((std::get<0>(*this->m_edges->at(it->first)) == std::get<0>(*this->m_edges->at(i))
-				&& std::get<1>(*this->m_edges->at(it->first)) == std::get<1>(*this->m_edges->at(i)))
-				|| (std::get<0>(*this->m_edges->at(it->first)) == std::get<1>(*this->m_edges->at(i))
-					&& std::get<1>(*this->m_edges->at(it->first)) == std::get<0>(*this->m_edges->at(i))))
+			if ((std::get<0>(*this->m_edges.at(it->first)) == std::get<0>(*this->m_edges.at(i))
+				&& std::get<1>(*this->m_edges.at(it->first)) == std::get<1>(*this->m_edges.at(i)))
+				|| (std::get<0>(*this->m_edges.at(it->first)) == std::get<1>(*this->m_edges.at(i))
+					&& std::get<1>(*this->m_edges.at(it->first)) == std::get<0>(*this->m_edges.at(i))))
 			{
 				edges_match = it;
 			}
@@ -628,13 +613,13 @@ int Model::MergeEdges()
 	{
 		for (size_t i = 0; i < it->second.size(); i++)
 		{
-			for (size_t j = 0; j < this->m_faces->size(); j++)
+			for (size_t j = 0; j < this->m_faces.size(); j++)
 			{
-				for (size_t k = 0; k < this->m_faces->at(j)->size(); k++)
+				for (size_t k = 0; k < this->m_faces.at(j)->size(); k++)
 				{
-					if (this->m_faces->at(j)->at(k) == it->second.at(i))
+					if (this->m_faces.at(j)->at(k) == it->second.at(i))
 					{
-						this->m_faces->at(j)->at(k) = it->first;
+						this->m_faces.at(j)->at(k) = it->first;
 					}
 				}
 			}
@@ -644,8 +629,8 @@ int Model::MergeEdges()
 	//remove unreferenced edges
 	for (int i = (int)merged_edges.size() - 1; i >= 0; i--)
 	{
-		delete this->m_edges->at(i);
-		this->m_edges->erase(this->m_edges->begin() + i);
+		delete this->m_edges.at(i);
+		this->m_edges.erase(this->m_edges.begin() + i);
 	}
 
 	return (int)merged_edges.size();

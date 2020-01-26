@@ -13,13 +13,13 @@
 class Model
 {
 private:
-	std::vector<std::vector<GLfloat>*>* m_vertices;
-	std::vector<std::tuple<int, int>*>* m_edges;
-	std::vector<std::vector<int>*>* m_faces;
+	std::vector<std::vector<GLfloat>*> m_vertices;
+	std::vector<std::tuple<int, int>*> m_edges;
+	std::vector<std::vector<int>*> m_faces;
 
-	std::array<GLfloat, 3>* m_position;
-	std::array<GLfloat, 3>* m_rotation;
-	std::array<GLfloat, 3>* m_scale;
+	std::array<GLfloat, 3> m_position;
+	std::array<GLfloat, 3> m_rotation;
+	std::array<GLfloat, 3> m_scale;
 
 	std::string m_identifier;
 
