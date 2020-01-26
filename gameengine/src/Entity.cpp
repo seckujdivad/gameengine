@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include "Entity.h"
 
 Entity::Entity()
@@ -5,6 +6,8 @@ Entity::Entity()
 	this->m_position = { 0.0f, 0.0f, 0.0f };
 	this->m_rotation = { 0.0f, 0.0f, 0.0f };
 	this->m_scale = { 0.0f, 0.0f, 0.0f };
+
+	this->m_identifier = "";
 }
 
 Entity::Entity(Entity& copyfrom)
@@ -12,6 +15,8 @@ Entity::Entity(Entity& copyfrom)
 	this->m_position = copyfrom.GetPosition();
 	this->m_rotation = copyfrom.GetRotation();
 	this->m_scale = copyfrom.GetScale();
+
+	this->m_identifier = copyfrom.GetIdentifier();
 }
 
 Entity::~Entity()
@@ -34,7 +39,7 @@ void Entity::SetPosition(GLfloat x, GLfloat y, GLfloat z)
 	this->m_position = { x, y, z };
 }
 
-void Entity::SetPosition(std::vector<GLfloat> point)
+void Entity::SetPosition(std::array<GLfloat, 3> point)
 {
 	this->m_position = point;
 }
@@ -44,7 +49,7 @@ void Entity::SetPosition(int index, GLfloat value)
 	this->m_position.at(index) = value;
 }
 
-std::vector<GLfloat> Entity::GetPosition()
+std::array<GLfloat, 3> Entity::GetPosition()
 {
 	return this->m_position;
 }
@@ -59,7 +64,7 @@ void Entity::SetRotation(GLfloat x, GLfloat y, GLfloat z)
 	this->m_rotation = { x, y, z };
 }
 
-void Entity::SetRotation(std::vector<GLfloat> rotation)
+void Entity::SetRotation(std::array<GLfloat, 3> rotation)
 {
 	this->m_rotation = rotation;
 }
@@ -69,7 +74,7 @@ void Entity::SetRotation(int index, GLfloat value)
 	this->m_rotation.at(index) = value;
 }
 
-std::vector<GLfloat> Entity::GetRotation()
+std::array<GLfloat, 3> Entity::GetRotation()
 {
 	return this->m_rotation;
 }
@@ -84,7 +89,7 @@ void Entity::SetScale(GLfloat x, GLfloat y, GLfloat z)
 	this->m_scale = { x, y, z };
 }
 
-void Entity::SetScale(std::vector<GLfloat> scale)
+void Entity::SetScale(std::array<GLfloat, 3> scale)
 {
 	this->m_scale = scale;
 }
@@ -94,7 +99,7 @@ void Entity::SetScale(int index, GLfloat value)
 	this->m_scale.at(index) = value;
 }
 
-std::vector<GLfloat> Entity::GetScale()
+std::array<GLfloat, 3> Entity::GetScale()
 {
 	return this->m_scale;
 }

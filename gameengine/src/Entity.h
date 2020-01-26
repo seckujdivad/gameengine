@@ -1,16 +1,18 @@
 #pragma once
 
-#include <vector>
+#include <wx/wxprec.h>
+#include "GLComponents.h"
+
+#include <array>
 #include <string>
 
-#include "GLComponents.h"
 
 class Entity
 {
 private:
-	std::vector<GLfloat> m_position;
-	std::vector<GLfloat> m_rotation;
-	std::vector<GLfloat> m_scale;
+	std::array<GLfloat, 3> m_position;
+	std::array<GLfloat, 3> m_rotation;
+	std::array<GLfloat, 3> m_scale;
 
 	std::string m_identifier;
 
@@ -23,20 +25,20 @@ public:
 	std::string GetIdentifier();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
-	void SetPosition(std::vector<GLfloat> point);
+	void SetPosition(std::array<GLfloat, 3> point);
 	void SetPosition(int index, GLfloat value);
-	std::vector<GLfloat> GetPosition();
+	std::array<GLfloat, 3> GetPosition();
 	GLfloat GetPosition(int index);
 
 	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
-	void SetRotation(std::vector<GLfloat> rotation);
+	void SetRotation(std::array<GLfloat, 3> rotation);
 	void SetRotation(int index, GLfloat value);
-	std::vector<GLfloat> GetRotation();
+	std::array<GLfloat, 3> GetRotation();
 	GLfloat GetRotation(int index);
 
 	void SetScale(GLfloat x, GLfloat y, GLfloat z);
-	void SetScale(std::vector<GLfloat> scale);
+	void SetScale(std::array<GLfloat, 3> scale);
 	void SetScale(int index, GLfloat value);
-	std::vector<GLfloat> GetScale();
+	std::array<GLfloat, 3> GetScale();
 	GLfloat GetScale(int index);
 };
