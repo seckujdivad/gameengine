@@ -5,6 +5,9 @@
     <ClCompile Include="src\CameraTests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModelTests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
