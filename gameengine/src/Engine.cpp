@@ -85,7 +85,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	// clone model objects into scene
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
 	{
-		model = new Model(model_lib.at(it.value()["model"].get<std::string>()));
+		model = new Model(*model_lib.at(it.value()["model"].get<std::string>()));
 
 		model->SetPosition(it.value()["position"][0].get<GLfloat>(), it.value()["position"][1].get<GLfloat>(), it.value()["position"][2].get<GLfloat>());
 		model->SetRotation(it.value()["rotation"][0].get<GLfloat>(), it.value()["rotation"][1].get<GLfloat>(), it.value()["rotation"][2].get<GLfloat>());
