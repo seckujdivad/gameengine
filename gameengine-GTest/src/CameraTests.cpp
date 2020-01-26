@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Camera.h"
 
-TEST(CameraTests, Identifier_SetGet) {
+TEST(CameraTests, Identifier_SetGet)
+{
     Camera* cam = new Camera();
     EXPECT_EQ(cam->GetIdentifier(), "");
 
@@ -9,7 +10,8 @@ TEST(CameraTests, Identifier_SetGet) {
     EXPECT_EQ(cam->GetIdentifier(), "Hello World!");
 }
 
-TEST(CameraTests, FOV_SetGet) {
+TEST(CameraTests, FOV_SetGet)
+{
     Camera* cam = new Camera();
     EXPECT_EQ(cam->GetFOV(), 45);
 
@@ -17,7 +19,8 @@ TEST(CameraTests, FOV_SetGet) {
     EXPECT_EQ(cam->GetFOV(), 90);
 }
 
-TEST(CameraTests, Position_SetGet_Individual) {
+TEST(CameraTests, Position_SetGet_Individual)
+{
     Camera* cam = new Camera();
 
     cam->SetPosition(0, 90);
@@ -29,7 +32,8 @@ TEST(CameraTests, Position_SetGet_Individual) {
     EXPECT_EQ(cam->GetPosition(2), -19);
 }
 
-TEST(CameraTests, Position_SetGet_Group) {
+TEST(CameraTests, Position_SetGet_Group)
+{
     Camera* cam = new Camera();
 
     cam->SetPosition(52, 89, -1);
@@ -39,7 +43,8 @@ TEST(CameraTests, Position_SetGet_Group) {
     EXPECT_EQ(cam->GetPosition(2), -1);
 }
 
-TEST(CameraTests, Position_SetGet_Array) {
+TEST(CameraTests, Position_SetGet_Array)
+{
     Camera* cam = new Camera();
 
     std::array<GLfloat, 3> position_testdata;
@@ -55,7 +60,8 @@ TEST(CameraTests, Position_SetGet_Array) {
     EXPECT_EQ(position_testdata, position);
 }
 
-TEST(CameraTests, Rotation_SetGet_Individual) {
+TEST(CameraTests, Rotation_SetGet_Individual)
+{
     Camera* cam = new Camera();
 
     cam->SetRotation(0, 90);
@@ -67,7 +73,8 @@ TEST(CameraTests, Rotation_SetGet_Individual) {
     EXPECT_EQ(cam->GetRotation(2), -19);
 }
 
-TEST(CameraTests, Rotation_SetGet_Group) {
+TEST(CameraTests, Rotation_SetGet_Group)
+{
     Camera* cam = new Camera();
 
     cam->SetRotation(52, 89, -1);
@@ -77,7 +84,8 @@ TEST(CameraTests, Rotation_SetGet_Group) {
     EXPECT_EQ(cam->GetRotation(2), -1);
 }
 
-TEST(CameraTests, Rotation_SetGet_Array) {
+TEST(CameraTests, Rotation_SetGet_Array)
+{
     Camera* cam = new Camera();
 
     std::array<GLfloat, 3> rotation_testdata;
