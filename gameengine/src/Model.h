@@ -10,43 +10,21 @@
 #include <tuple>
 #include <string>
 
-class Model
+#include "Entity.h"
+
+class Model : public Entity
 {
 private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
 	std::vector<std::tuple<int, int>*> m_edges;
 	std::vector<std::vector<int>*> m_faces;
 
-	std::array<GLfloat, 3> m_position;
-	std::array<GLfloat, 3> m_rotation;
-	std::array<GLfloat, 3> m_scale;
-
-	std::string m_identifier;
-
 public:
 	Model();
-	Model(Model* copy_from);
 	Model(Model& copy_from);
 	~Model();
 
 	GLuint vertex_buffer;
-
-	void CopyFrom(Model& copy_from);
-
-	void SetIdentifier(std::string identifier);
-	std::string GetIdentifier();
-
-	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
-	void SetPosition(std::vector<GLfloat> point);
-	std::vector<GLfloat> GetPosition();
-
-	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
-	void SetRotation(std::vector<GLfloat> rotation);
-	std::vector<GLfloat> GetRotation();
-
-	void SetScale(GLfloat x, GLfloat y, GLfloat z);
-	void SetScale(std::vector<GLfloat> scale);
-	std::vector<GLfloat> GetScale();
 
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
 	int AddVertex(std::vector<GLfloat> vertex);

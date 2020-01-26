@@ -1,58 +1,13 @@
 #include <wx/wxprec.h>
 #include "Model.h"
 
-Model::Model()
+Model::Model() : Entity()
 {
-	this->m_position = {0, 0, 0};
-	this->m_rotation = {0, 0, 0};
-	this->m_scale = {0, 0, 0};
+	
 }
 
-Model::Model(Model& copy_from)
+Model::Model(Model& copy_from) : Entity(copy_from)
 {
-	this->CopyFrom(copy_from);
-}
-
-Model::Model(Model* copy_from)
-{
-	this->CopyFrom(*copy_from);
-}
-
-Model::~Model()
-{
-	for (size_t i = 0; i < this->m_vertices.size(); i++)
-	{
-		delete this->m_vertices.at(i);
-	}
-
-	for (size_t i = 0; i < this->m_edges.size(); i++)
-	{
-		delete this->m_edges.at(i);
-	}
-
-	for (size_t i = 0; i < this->m_faces.size(); i++)
-	{
-		delete this->m_faces.at(i);
-	}
-}
-
-void Model::CopyFrom(Model& copy_from)
-{
-	this->m_position = {0, 0, 0};
-	this->m_rotation = {0, 0, 0};
-	this->m_scale = {0, 0, 0};
-
-	//copy transform data
-	std::vector<GLfloat> pos = copy_from.GetPosition();
-	std::vector<GLfloat> rot = copy_from.GetRotation();
-	std::vector<GLfloat> sca = copy_from.GetScale();
-	for (int i = 0; i < 3; i++)
-	{
-		this->m_position.at(i) = pos.at(i);
-		this->m_rotation.at(i) = rot.at(i);
-		this->m_scale.at(i) = sca.at(i);
-	}
-
 	//copy geometry
 	std::vector<std::vector<GLfloat>> vertices = copy_from.GetVerticesCopy();
 	std::vector<GLfloat>* vertex_subvector;
@@ -89,114 +44,24 @@ void Model::CopyFrom(Model& copy_from)
 		}
 		this->m_faces.push_back(faces_subvector);
 	}
-
-	this->m_identifier = copy_from.GetIdentifier();
 }
 
-void Model::SetIdentifier(std::string identifier)
+Model::~Model()
 {
-	this->m_identifier = identifier;
-}
-
-std::string Model::GetIdentifier()
-{
-	return this->m_identifier;
-}
-
-void Model::SetPosition(GLfloat x, GLfloat y, GLfloat z)
-{
-	this->m_position.at(0) = x;
-	this->m_position.at(1) = y;
-	this->m_position.at(2) = z;
-}
-
-void Model::SetPosition(std::vector<GLfloat> point)
-{
-	if (point.size() == 3)
+	for (size_t i = 0; i < this->m_vertices.size(); i++)
 	{
-		for (int i = 0; i < 3; i++)
-		{
-			this->m_position.at(i) = point.at(i);
-		}
+		delete this->m_vertices.at(i);
 	}
-	else
-	{
-		throw std::length_error("'point' must contain exactly 3 items");
-	}
-}
 
-std::vector<GLfloat> Model::GetPosition()
-{
-	std::vector<GLfloat> result;
-	for (int i = 0; i < 3; i++)
+	for (size_t i = 0; i < this->m_edges.size(); i++)
 	{
-		result.push_back(this->m_position.at(i));
+		delete this->m_edges.at(i);
 	}
-	return result;
-}
 
-void Model::SetRotation(GLfloat x, GLfloat y, GLfloat z)
-{
-	this->m_rotation.at(0) = x;
-	this->m_rotation.at(1) = y;
-	this->m_rotation.at(2) = z;
-}
-
-void Model::SetRotation(std::vector<GLfloat> rotation)
-{
-	if (rotation.size() == 3)
+	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
-		for (int i = 0; i < 3; i++)
-		{
-			this->m_rotation.at(i) = rotation.at(i);
-		}
+		delete this->m_faces.at(i);
 	}
-	else
-	{
-		throw std::length_error("'rotation' must contain exactly 3 items");
-	}
-}
-
-std::vector<GLfloat> Model::GetRotation()
-{
-	std::vector<GLfloat> result;
-	for (int i = 0; i < 3; i++)
-	{
-		result.push_back(this->m_rotation.at(i));
-	}
-	return result;
-}
-
-void Model::SetScale(GLfloat x, GLfloat y, GLfloat z)
-{
-	this->m_scale.at(0) = x;
-	this->m_scale.at(1) = y;
-	this->m_scale.at(2) = z;
-}
-
-void Model::SetScale(std::vector<GLfloat> scale)
-{
-	if (scale.size() == 3)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			this->m_scale.at(i) = scale.at(i);
-		}
-	}
-	else
-	{
-		throw std::length_error("'scale' must contain exactly 3 items");
-	}
-}
-
-std::vector<GLfloat> Model::GetScale()
-{
-	std::vector<GLfloat> result;
-	for (int i = 0; i < 3; i++)
-	{
-		result.push_back(this->m_scale.at(i));
-	}
-	return result;
 }
 
 int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
