@@ -3,7 +3,8 @@
 
 Model::Model() : Entity()
 {
-	
+	this->vertex_buffer = NULL;
+	this->position_matrix = glm::mat4(1.0f);
 }
 
 Model::Model(Model& copy_from) : Entity(copy_from)
@@ -499,4 +500,14 @@ int Model::MergeEdges()
 	}
 
 	return (int)merged_edges.size();
+}
+
+void Model::GenPosMat()
+{
+	this->position_matrix = glm::mat4(1.0f);
+	this->position_matrix = glm::scale(this->position_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
+	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	this->position_matrix = glm::translate(this->position_matrix, glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2)));
 }

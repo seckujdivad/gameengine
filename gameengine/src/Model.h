@@ -3,6 +3,9 @@
 #include <wx/wxprec.h>
 #include "GLComponents.h"
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 #include <string>
 #include <vector>
 #include <map>
@@ -23,6 +26,8 @@ public:
 	Model();
 	Model(Model& copy_from);
 	~Model();
+
+	glm::mat4 position_matrix;
 
 	GLuint vertex_buffer;
 
@@ -60,4 +65,6 @@ public:
 
 	int MergeVertices();
 	int MergeEdges();
+
+	void GenPosMat();
 };
