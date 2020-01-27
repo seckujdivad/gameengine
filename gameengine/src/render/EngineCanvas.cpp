@@ -101,8 +101,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	};
 
 	GLuint vertex_buffer;
-	GLuint* v = &vertex_buffer;
-	glGenBuffers(1, v);
+	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
