@@ -13,6 +13,7 @@
 #include "Scene.h"
 #include "Model.h"
 #include "Camera.h"
+#include "render/ShaderProgram.h"
 
 using nlohmann::json;
 

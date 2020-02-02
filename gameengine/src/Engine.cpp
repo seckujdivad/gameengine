@@ -93,10 +93,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		model->SetIdentifier(it.value()["name"].get<std::string>());
 
+		//load shader
+		model->shader_program = ShaderProgram({{it.value()["shader"]["vertex"].get<std::string>(), GL_VERTEX_SHADER}, {it.value()["shader"]["fragment"].get<std::string>(), GL_FRAGMENT_SHADER}});
+
 		scene->AddModel(model);
 	}
-
-	// load shaders
 
 	// delete model lib
 	for (std::map<std::string, Model*>::iterator it = model_lib.begin(); it != model_lib.end(); it++)
