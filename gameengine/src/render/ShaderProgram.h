@@ -19,6 +19,7 @@ private:
 public:
 	GLuint program_id; //OpenGL identifier of the program the shaders have been linked into
 	
+	ShaderProgram();
 	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders);
 	~ShaderProgram();
 

@@ -1,6 +1,11 @@
 #include <wx/wxprec.h>
 #include "ShaderProgram.h"
 
+ShaderProgram::ShaderProgram()
+{
+	this->program_id = NULL;
+}
+
 ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders)
 {
 	std::vector<GLuint> shader_ids;
@@ -40,7 +45,10 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(this->program_id);
+	if (this->program_id != NULL)
+	{
+		glDeleteProgram(this->program_id);
+	}
 }
 
 GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
@@ -89,17 +97,38 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
 
 GLuint ShaderProgram::RegisterUniform(std::string name)
 {
-	GLuint uniform_id = glGetUniformLocation(this->program_id, name.c_str());
-	this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
-	return uniform_id;
+	if (this->program_id == NULL)
+	{
+		throw std::runtime_error("ShaderProgram has not been initialised");
+	}
+	else
+	{
+		GLuint uniform_id = glGetUniformLocation(this->program_id, name.c_str());
+		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
+		return uniform_id;
+	}
 }
 
 void ShaderProgram::Select()
 {
-	glUseProgram(this->program_id);
+	if (this->program_id == NULL)
+	{
+		throw std::runtime_error("ShaderProgram has not been initialised");
+	}
+	else
+	{
+		glUseProgram(this->program_id);
+	}
 }
 
 GLuint ShaderProgram::GetUniform(std::string name)
 {
-	return this->m_uniforms.at(name);
+	if (this->program_id == NULL)
+	{
+		throw std::runtime_error("ShaderProgram has not been initialised");
+	}
+	else
+	{
+		return this->m_uniforms.at(name);
+	}
 }
