@@ -563,6 +563,9 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), fan_data.data(), GL_STATIC_DRAW);
 			this->vertex_buffers.push_back(vertex_buffer);
 			this->vertex_buffers_count.push_back(trifans.at(i).size());
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
 		}
 	}
 
