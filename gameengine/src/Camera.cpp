@@ -57,3 +57,15 @@ void Camera::GenPerspMat(float window_width, float window_height)
 {
 	this->perspective_matrix = glm::perspective(glm::radians(this->m_fov), window_width / window_height, this->m_clip_near, this->m_clip_far);
 }
+
+void Camera::RegisterUniforms(ShaderProgram* shader_program)
+{
+	shader_program->RegisterUniform("view");
+	shader_program->RegisterUniform("projection");
+}
+
+void Camera::SetUniforms(ShaderProgram* shader_program)
+{
+	glUniformMatrix4fv(shader_program->GetUniform("view"), 1, GL_FALSE, glm::value_ptr(this->view_matrix));
+	glUniformMatrix4fv(shader_program->GetUniform("projection"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));
+}

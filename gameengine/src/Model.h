@@ -14,6 +14,7 @@
 #include <string>
 
 #include "Entity.h"
+#include "render/ShaderProgram.h"
 
 class Model : public Entity
 {
@@ -27,9 +28,14 @@ public:
 	Model(Model& copy_from);
 	~Model();
 
+	ShaderProgram shader_program;
+
 	glm::mat4 position_matrix;
 
-	GLuint vertex_buffer;
+	GLuint triangle_mode;
+	GLuint vao = NULL;
+	std::vector<GLuint> vertex_buffers;
+	std::vector<GLint> vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
 
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
 	int AddVertex(std::vector<GLfloat> vertex);
@@ -68,4 +74,8 @@ public:
 	int MergeEdges();
 
 	void GenPosMat();
+	void GenVertexBuffer(GLuint triangle_mode);
+
+	void RegisterUniforms();
+	void SetUniforms();
 };

@@ -4,11 +4,10 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
 {
+	GL_CHECK_ERROR();
+
 	this->SetBackgroundColour(wxColor(238, 238, 238));
 	this->SetMinSize(wxSize(500, 400));
-
-	//load scene
-	this->m_scene = InitialiseScene("resources", "simplescene.json");
 
 	this->m_sizer = new wxGridBagSizer(0, 0);
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
@@ -21,7 +20,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 		0
 	};
 
+	GL_CHECK_ERROR();
+
 	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, gl_args);
+
+	GL_CHECK_ERROR();
+
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
 	this->m_btn_render = new wxButton(this, wxID_ANY, wxString("Render"));
@@ -30,6 +34,11 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
+
+	//load scene
+	this->m_scene = InitialiseScene("resources", "simplescene.json");
+	this->m_glcanvas->SetScene(this->m_scene);
+	this->m_scene->PushUniforms();
 
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
@@ -44,6 +53,5 @@ Main::~Main()
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
 	this->m_glcanvas->Render();
-	//this->m_scene->Render(this->m_glcanvas);
 	evt.Skip();
 }

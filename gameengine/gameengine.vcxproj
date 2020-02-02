@@ -171,6 +171,7 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
     <ClCompile Include="src\render\ShaderProgram.cpp" />

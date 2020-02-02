@@ -14,7 +14,7 @@ class EngineCanvas : public wxGLCanvas
 {
 private:
 	wxGLContext* m_glcontext;
-	Scene* m_scene;
+	Scene* m_scene = nullptr;
 
 	unsigned int m_VAO;
 	unsigned int m_shader_program;

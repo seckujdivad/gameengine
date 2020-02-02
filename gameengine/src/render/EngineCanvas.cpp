@@ -13,6 +13,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glLoadIdentity();
 	glewInit();
 
+	/*
 	int success;
 	char infoLog[512];
 	int msglen;
@@ -111,7 +112,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	///////////////
+	///////////////*/
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Render();
@@ -130,9 +131,7 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 
 void EngineCanvas::Render()
 {
-	GLfloat scale = 0.2f;
-
-	glClearColor(0, 1, 0, 0);
+	/*glClearColor(0, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
 
@@ -141,7 +140,14 @@ void EngineCanvas::Render()
 
 	glUseProgram(this->m_shader_program);
 	glBindVertexArray(this->m_VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLES, 0, 6);*/
+
+	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
+	
+	if (this->m_scene != nullptr)
+	{
+		this->m_scene->Render(this);
+	}
 
 	glFlush();
 	this->SwapBuffers();
@@ -149,5 +155,5 @@ void EngineCanvas::Render()
 
 void EngineCanvas::SetScene(Scene* scene)
 {
-	
+	this->m_scene = scene;
 }

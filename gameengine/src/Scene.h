@@ -41,4 +41,6 @@ public:
 	void ClearAllCameras(bool destroy = false);
 
 	void Render(EngineCanvas* canvas);
+
+	void PushUniforms();
 };

@@ -47,23 +47,7 @@ void Scene::AddModel(Model* model)
 {
 	this->models.push_back(model);
 
-	if (model->vertex_buffer != 0)
-	{
-		glGenBuffers(1, &model->vertex_buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, model->vertex_buffer);
-
-		std::vector<std::vector<GLfloat>> trifan = model->GetTriFans();
-		std::vector<GLfloat> trifan_to_load;
-		for (size_t i = 0; i < trifan.size(); i++)
-		{
-			for (size_t j = 0; j < trifan.at(i).size(); j++)
-			{
-				trifan_to_load.push_back(trifan.at(i).at(j));
-			}
-		}
-
-		glBufferData(GL_ARRAY_BUFFER, trifan_to_load.size() * sizeof(GLfloat), trifan_to_load.data(), GL_STATIC_DRAW);
-	}
+	model->GenVertexBuffer(GL_TRIANGLE_FAN);
 }
 
 void Scene::RemoveModel(Model* model)
@@ -128,5 +112,45 @@ void Scene::ClearAllCameras(bool destroy)
 
 void Scene::Render(EngineCanvas* canvas)
 {
+	GL_CHECK_ERROR();
+
+	glClearColor(0, 1, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	this->m_active_camera->GenPerspMat((float)canvas->GetSize().x, (float)canvas->GetSize().y);
+	this->m_active_camera->GenViewMat();
 	
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->GenPosMat();
+
+		this->models.at(i)->shader_program.Select();
+
+		this->m_active_camera->SetUniforms(&this->models.at(i)->shader_program);
+		this->models.at(i)->SetUniforms();
+
+		glBindVertexArray(this->models.at(i)->vao);
+		
+		for (size_t j = 0; j < this->models.at(i)->vertex_buffers_count.size(); j++)
+		{
+			glDrawArrays(this->models.at(i)->triangle_mode, 0, this->models.at(i)->vertex_buffers_count.at(j));
+		}
+	}
+
+	GL_CHECK_ERROR();
+}
+
+void Scene::PushUniforms()
+{
+	GL_CHECK_ERROR();
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->RegisterUniforms();
+
+		for (size_t j = 0; j < this->cameras.size(); j++)
+		{
+			this->cameras.at(j)->RegisterUniforms(&this->models.at(i)->shader_program);
+		}
+	}
+	GL_CHECK_ERROR();
 }

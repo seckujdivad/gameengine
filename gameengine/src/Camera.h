@@ -10,6 +10,7 @@
 #include <string>
 
 #include "Entity.h"
+#include "render/ShaderProgram.h"
 
 class Camera : public Entity
 {
@@ -38,4 +39,7 @@ public:
 
 	void GenViewMat();
 	void GenPerspMat(float window_width, float window_height);
+
+	void RegisterUniforms(ShaderProgram* shader_program);
+	void SetUniforms(ShaderProgram* shader_program);
 };

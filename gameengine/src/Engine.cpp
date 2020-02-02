@@ -23,6 +23,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	json config = json::parse(contents);
 
+	GL_CHECK_ERROR();
+
 	//create scene
 	// make cameras
 	std::vector<Camera*> cameras;
@@ -43,6 +45,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		}
 	}
 
+	GL_CHECK_ERROR();
+
 	if (main_camera == nullptr)
 	{
 		if (cameras.size() == 0)
@@ -60,6 +64,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	{
 		scene->AddCamera(cameras.at(i));
 	}
+	GL_CHECK_ERROR();
 
 	// create model object library
 	std::map<std::string, Model*> model_lib;
@@ -81,6 +86,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		model_lib[it.key()] = model;
 	}
+	GL_CHECK_ERROR();
 
 	// clone model objects into scene
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
@@ -94,17 +100,21 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetIdentifier(it.value()["name"].get<std::string>());
 
 		//load shader
-		model->shader_program = ShaderProgram({{it.value()["shader"]["vertex"].get<std::string>(), GL_VERTEX_SHADER}, {it.value()["shader"]["fragment"].get<std::string>(), GL_FRAGMENT_SHADER}});
+		model->shader_program = ShaderProgram({
+			{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
+			{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
+			});
 
 		scene->AddModel(model);
 	}
+	GL_CHECK_ERROR();
 
 	// delete model lib
 	for (std::map<std::string, Model*>::iterator it = model_lib.begin(); it != model_lib.end(); it++)
 	{
 		delete it->second;
 	}
-
+	GL_CHECK_ERROR();
 	return scene;
 }
 

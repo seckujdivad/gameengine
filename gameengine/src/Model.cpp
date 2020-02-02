@@ -3,7 +3,6 @@
 
 Model::Model() : Entity()
 {
-	this->vertex_buffer = NULL;
 	this->position_matrix = glm::mat4(1.0f);
 }
 
@@ -437,12 +436,13 @@ int Model::MergeVertices(GLfloat threshold)
 		}
 	}
 
+	/*
 	//remove unreferenced vertices
 	for (int i = (int)merged_vertices.size() - 1; i >= 0; i--)
 	{
 		delete this->m_vertices.at(i);
 		this->m_vertices.erase(this->m_vertices.begin() + i);
-	}
+	}*/
 
 	return (int)merged_vertices.size();
 }
@@ -497,12 +497,13 @@ int Model::MergeEdges()
 		}
 	}
 
+	/*
 	//remove unreferenced edges
 	for (int i = (int)merged_edges.size() - 1; i >= 0; i--)
 	{
 		delete this->m_edges.at(i);
 		this->m_edges.erase(this->m_edges.begin() + i);
-	}
+	}*/
 
 	return (int)merged_edges.size();
 }
@@ -515,4 +516,60 @@ void Model::GenPosMat()
 	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
 	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
 	this->position_matrix = glm::translate(this->position_matrix, glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2)));
+}
+
+void Model::GenVertexBuffer(GLuint triangle_mode)
+{
+	//delete left over arrays and buffers
+	if (this->vao == NULL)
+	{
+		glDeleteVertexArrays(1, &this->vao);
+	}
+
+	glGenVertexArrays(1, &this->vao);
+	glBindVertexArray(this->vao);
+
+	for (size_t i = 0; i < this->vertex_buffers.size(); i++)
+	{
+		glDeleteBuffers(1, &this->vertex_buffers.at(i));
+	}
+	this->vertex_buffers.clear();
+	this->vertex_buffers_count.clear();
+
+	//get verts in correct format
+	this->triangle_mode = triangle_mode;
+
+	if (triangle_mode == GL_TRIANGLE_FAN)
+	{
+		std::vector<std::vector<GLfloat>> trifans = this->GetTriFans();
+
+		for (size_t i = 0; i < trifans.size(); i++)
+		{
+			std::vector<GLfloat> tri_array;
+			for (size_t j = 0; j < trifans.at(i).size(); j++)
+			{
+				tri_array.push_back(trifans.at(i).at(j));
+			}
+
+			GLuint vertex_buffer;
+			glGenBuffers(1, &vertex_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), tri_array.data(), GL_STATIC_DRAW);
+			this->vertex_buffers.push_back(vertex_buffer);
+			this->vertex_buffers_count.push_back(trifans.at(i).size());
+		}
+	}
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+}
+
+void Model::RegisterUniforms()
+{
+	this->shader_program.RegisterUniform("model");
+}
+
+void Model::SetUniforms()
+{
+	glUniformMatrix4fv(this->shader_program.GetUniform("model"), 1, GL_FALSE, glm::value_ptr(this->position_matrix));
 }
