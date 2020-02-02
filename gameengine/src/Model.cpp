@@ -349,7 +349,7 @@ std::vector<std::vector<int>> Model::GetFacesCopy()
 std::vector<std::vector<GLfloat>> Model::GetTriFans()
 {
 	std::vector<std::vector<GLfloat>> trifans;
-	std::vector<GLfloat>* current_fan;
+	std::vector<GLfloat> current_fan;
 	std::vector<int>* current_face;
 
 	for (size_t i = 0; i < this->m_faces.size(); i++)
@@ -357,12 +357,12 @@ std::vector<std::vector<GLfloat>> Model::GetTriFans()
 		current_face = this->m_faces.at(i);
 		if (current_face->size() > 0)
 		{
-			current_fan = new std::vector<GLfloat>;
+			current_fan.clear();
 			for (size_t j = 0; j < current_face->size(); j++)
 			{
-				current_fan->push_back(std::get<0>(*this->m_edges.at(current_face->at(j))));
+				current_fan.push_back(std::get<0>(*this->m_edges.at(current_face->at(j))));
 			}
-			trifans.push_back(*current_fan);
+			trifans.push_back(current_fan);
 		}
 	}
 	return trifans;
