@@ -375,6 +375,11 @@ std::vector<std::vector<GLfloat>*> Model::GetTriStrips()
 
 int Model::MergeVertices()
 {
+	return this->MergeVertices(0.0f);
+}
+
+int Model::MergeVertices(GLfloat threshold)
+{
 	std::vector<int> merged_vertices;
 	std::tuple<int, int>* current_edge;
 
@@ -387,9 +392,9 @@ int Model::MergeVertices()
 		vertex_match = vertex_joins.end();
 		for (std::map<int, std::vector<int>>::iterator it = vertex_joins.begin(); it != vertex_joins.end(); it++)
 		{
-			if (this->m_vertices.at(it->first)->at(0) == this->m_vertices.at(i)->at(0)
-				&& this->m_vertices.at(it->first)->at(1) == this->m_vertices.at(i)->at(1)
-				&& this->m_vertices.at(it->first)->at(2) == this->m_vertices.at(i)->at(2))
+			if (std::abs(this->m_vertices.at(it->first)->at(0) - this->m_vertices.at(i)->at(0)) < threshold
+				&& std::abs(this->m_vertices.at(it->first)->at(1) - this->m_vertices.at(i)->at(1)) < threshold
+				&& std::abs(this->m_vertices.at(it->first)->at(2) - this->m_vertices.at(i)->at(2)) < threshold)
 			{
 				vertex_match = it;
 			}

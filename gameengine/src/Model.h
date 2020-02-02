@@ -64,6 +64,7 @@ public:
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
 
 	int MergeVertices();
+	int MergeVertices(GLfloat threshold);
 	int MergeEdges();
 
 	void GenPosMat();

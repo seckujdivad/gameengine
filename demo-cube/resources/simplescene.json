@@ -8,7 +8,8 @@
     "cube": {
       "type": "ply",
       "geometry": "models/cube.ply",
-      "merge geometry": true
+      "merge geometry": true,
+      "merge distance":  0.01
     }
   },
   "layout": [
