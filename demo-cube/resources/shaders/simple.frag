@@ -1,4 +1,8 @@
+#version 400 core
+out vec4 gl_FragColor;
+in vec3 vpos;
+
 void main()
 {
-	gl_FragColor = vec4(0.4,0.4,0.8,1.0);
+	gl_FragColor = vec4(vpos.xyz, 1.0f);
 }
