@@ -112,8 +112,6 @@ void Scene::ClearAllCameras(bool destroy)
 
 void Scene::Render(EngineCanvas* canvas)
 {
-	GL_CHECK_ERROR();
-
 	glClearColor(0, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -136,13 +134,10 @@ void Scene::Render(EngineCanvas* canvas)
 			glDrawArrays(this->models.at(i)->triangle_mode, 0, this->models.at(i)->vertex_buffers_count.at(j));
 		}
 	}
-
-	GL_CHECK_ERROR();
 }
 
 void Scene::PushUniforms()
 {
-	GL_CHECK_ERROR();
 	for (size_t i = 0; i < this->models.size(); i++)
 	{
 		this->models.at(i)->RegisterUniforms();
@@ -152,5 +147,4 @@ void Scene::PushUniforms()
 			this->cameras.at(j)->RegisterUniforms(&this->models.at(i)->shader_program);
 		}
 	}
-	GL_CHECK_ERROR();
 }

@@ -4,8 +4,6 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
 {
-	GL_CHECK_ERROR();
-
 	this->SetBackgroundColour(wxColor(238, 238, 238));
 	this->SetMinSize(wxSize(500, 400));
 
@@ -20,11 +18,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 		0
 	};
 
-	GL_CHECK_ERROR();
-
 	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, gl_args);
-
-	GL_CHECK_ERROR();
 
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
