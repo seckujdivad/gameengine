@@ -364,6 +364,7 @@ std::vector<std::vector<GLfloat>> Model::GetTriFans()
 			trifans.push_back(current_fan);
 		}
 	}
+
 	return trifans;
 }
 
@@ -543,18 +544,23 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 	{
 		std::vector<std::vector<GLfloat>> trifans = this->GetTriFans();
 
+		std::vector<GLfloat> fan_data;
+
 		for (size_t i = 0; i < trifans.size(); i++)
 		{
-			std::vector<GLfloat> tri_array;
+			fan_data.clear();
 			for (size_t j = 0; j < trifans.at(i).size(); j++)
 			{
-				tri_array.push_back(trifans.at(i).at(j));
+				for (size_t k = 0; k < this->m_vertices.at(trifans.at(i).at(j))->size(); k++)
+				{
+					fan_data.push_back(this->m_vertices.at(trifans.at(i).at(j))->at(k));
+				}
 			}
 
 			GLuint vertex_buffer;
 			glGenBuffers(1, &vertex_buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), tri_array.data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), fan_data.data(), GL_STATIC_DRAW);
 			this->vertex_buffers.push_back(vertex_buffer);
 			this->vertex_buffers_count.push_back(trifans.at(i).size());
 		}
