@@ -6,7 +6,14 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <iostream>
+#include <fstream>
+
 #include "../Scene.h"
+
+#ifndef ENGINECANVAS_LOG_PATH
+#define ENGINECANVAS_LOG_PATH "gameengine_GL.log"
+#endif
 
 class Scene;
 
@@ -36,3 +43,5 @@ public:
 
 	void Paint(wxPaintEvent& evt);
 };
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam);
