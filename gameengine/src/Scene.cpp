@@ -47,7 +47,7 @@ void Scene::AddModel(Model* model)
 {
 	this->models.push_back(model);
 
-	model->GenVertexBuffer(GL_TRIANGLE_FAN);
+	model->GenVertexBuffer(GL_TRIANGLES);
 }
 
 void Scene::RemoveModel(Model* model)

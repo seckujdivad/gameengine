@@ -563,10 +563,39 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), fan_data.data(), GL_STATIC_DRAW);
 			this->vertex_buffers.push_back(vertex_buffer);
 			this->vertex_buffers_count.push_back(trifans.at(i).size());
-
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-			glEnableVertexAttribArray(0);
 		}
+	}
+	else if (triangle_mode == GL_TRIANGLES)
+	{
+		std::vector<GLfloat> triangles;
+		std::vector<std::vector<GLfloat>> trifans = this->GetTriFans();
+		for (size_t i = 0; i < trifans.size(); i++)
+		{
+			for (size_t j = 2; j < trifans.at(i).size(); j++)
+			{
+				for (size_t k = 0; k < 3; k++)
+				{
+					triangles.push_back(this->m_vertices.at(trifans.at(i).at(0))->at(k));
+				}
+
+				for (size_t k = 0; k < 3; k++)
+				{
+					triangles.push_back(this->m_vertices.at(trifans.at(i).at(j - 1))->at(k));
+				}
+
+				for (size_t k = 0; k < 3; k++)
+				{
+					triangles.push_back(this->m_vertices.at(trifans.at(i).at(j))->at(k));
+				}
+			}
+		}
+
+		GLuint vertex_buffer;
+		glGenBuffers(1, &vertex_buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
+		this->vertex_buffers.push_back(vertex_buffer);
+		this->vertex_buffers_count.push_back(triangles.size());
 	}
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
@@ -580,5 +609,6 @@ void Model::RegisterUniforms()
 
 void Model::SetUniforms()
 {
+	this->shader_program.GetUniform("model");
 	glUniformMatrix4fv(this->shader_program.GetUniform("model"), 1, GL_FALSE, glm::value_ptr(this->position_matrix));
 }
