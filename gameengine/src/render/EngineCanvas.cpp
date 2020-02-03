@@ -148,8 +148,6 @@ void EngineCanvas::Render()
 	glBindVertexArray(this->m_VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);*/
 
-	glClearColor(0, 1, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
 	
 	if (this->m_scene != nullptr)
