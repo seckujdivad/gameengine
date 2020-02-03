@@ -31,7 +31,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 	//check for errors
 	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
-	glGetShaderiv(this->program_id, GL_LINK_STATUS, &link_was_successful);
+	glGetProgramiv(this->program_id, GL_LINK_STATUS, &link_was_successful);
 	if (!link_was_successful) //get error message from GPU
 	{
 		char err_info[512];
