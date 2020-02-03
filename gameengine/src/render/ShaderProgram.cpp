@@ -3,7 +3,7 @@
 
 ShaderProgram::ShaderProgram()
 {
-	this->program_id = NULL;
+	this->m_program_id = NULL;
 }
 
 ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders)
@@ -15,13 +15,13 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	}
 
 	//link shaders
-	this->program_id = glCreateProgram();
+	this->m_program_id = glCreateProgram();
 	for (size_t i = 0; i < shader_ids.size(); i++)
 	{
-		glAttachShader(this->program_id, shader_ids.at(i));
+		glAttachShader(this->m_program_id, shader_ids.at(i));
 	}
-	glLinkProgram(this->program_id);
-	glUseProgram(this->program_id);
+	glLinkProgram(this->m_program_id);
+	glUseProgram(this->m_program_id);
 
 	//clean up shaders as they have already been linked
 	for (size_t i = 0; i < shader_ids.size(); i++)
@@ -31,12 +31,12 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 	//check for errors
 	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
-	glGetProgramiv(this->program_id, GL_LINK_STATUS, &link_was_successful);
+	glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
 	if (!link_was_successful) //get error message from GPU
 	{
 		char err_info[512];
 		int err_len;
-		glGetProgramInfoLog(this->program_id, 512, &err_len, err_info);
+		glGetProgramInfoLog(this->m_program_id, 512, &err_len, err_info);
 		std::string errmsg = std::string(err_info);
 		errmsg = errmsg.substr(0, err_len);
 		throw std::runtime_error("Shader link exception: " + errmsg);
@@ -45,9 +45,9 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 ShaderProgram::~ShaderProgram()
 {
-	if (this->program_id != NULL)
+	if (this->m_program_id != NULL)
 	{
-		glDeleteProgram(this->program_id);
+		glDeleteProgram(this->m_program_id);
 	}
 }
 
@@ -97,13 +97,13 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
 
 GLuint ShaderProgram::RegisterUniform(std::string name)
 {
-	if (this->program_id == NULL)
+	if (this->m_program_id == NULL)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
 	else
 	{
-		GLuint uniform_id = glGetUniformLocation(this->program_id, name.c_str());
+		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;
 	}
@@ -111,24 +111,36 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 
 void ShaderProgram::Select()
 {
-	if (this->program_id == NULL)
+	if (this->m_program_id == NULL)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
 	else
 	{
-		glUseProgram(this->program_id);
+		glUseProgram(this->m_program_id);
 	}
 }
 
 GLuint ShaderProgram::GetUniform(std::string name)
 {
-	if (this->program_id == NULL)
+	if (this->m_program_id == NULL)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
 	else
 	{
 		return this->m_uniforms.at(name);
+	}
+}
+
+GLuint ShaderProgram::GetProgramID()
+{
+	if (this->m_program_id == NULL)
+	{
+		throw std::runtime_error("ShaderProgram has not been initialised");
+	}
+	else
+	{
+		return this->m_program_id;
 	}
 }

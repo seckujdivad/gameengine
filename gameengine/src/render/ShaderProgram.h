@@ -15,15 +15,16 @@ private:
 	GLuint LoadShader(std::string path, GLenum type);
 
 	std::map<std::string, GLuint> m_uniforms;
+	GLuint m_program_id; //OpenGL identifier of the program the shaders have been linked into
 
 public:
-	GLuint program_id; //OpenGL identifier of the program the shaders have been linked into
-	
 	ShaderProgram();
 	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders);
 	~ShaderProgram();
 
 	void Select();
+
+	GLuint GetProgramID();
 
 	GLuint RegisterUniform(std::string name);
 	GLuint GetUniform(std::string name);
