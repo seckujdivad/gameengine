@@ -4,9 +4,6 @@
 Camera::Camera() : Entity()
 {
 	this->m_fov = (GLfloat)45;
-
-	this->perspective_matrix = glm::mat4(1.0f);
-	this->view_matrix = glm::mat4(1.0f);
 }
 
 Camera::~Camera()
@@ -46,11 +43,12 @@ GLfloat Camera::GetFarClip()
 
 void Camera::GenViewMat()
 {
-	this->view_matrix = glm::mat4(1.0f);
-	this->view_matrix = glm::translate(this->view_matrix, glm::vec3(0 - this->GetPosition(0), 0 - this->GetPosition(1), 0 - this->GetPosition(2)));
-	this->view_matrix = glm::rotate(this->view_matrix, glm::radians(0 - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-	this->view_matrix = glm::rotate(this->view_matrix, glm::radians(0 - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-	this->view_matrix = glm::rotate(this->view_matrix, glm::radians(0 - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	this->view_translate_vector = glm::vec4(0 - this->GetPosition(0), 0 - this->GetPosition(1), 0 - this->GetPosition(2), 0.0f);
+
+	this->view_rotate_matrix = glm::mat4(1.0f);
+	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Camera::GenPerspMat(float window_width, float window_height)
@@ -60,12 +58,14 @@ void Camera::GenPerspMat(float window_width, float window_height)
 
 void Camera::RegisterUniforms(ShaderProgram* shader_program)
 {
-	shader_program->RegisterUniform("view");
-	shader_program->RegisterUniform("projection");
+	shader_program->RegisterUniform("cam_translate");
+	shader_program->RegisterUniform("cam_rotate");
+	shader_program->RegisterUniform("cam_persp");
 }
 
 void Camera::SetUniforms(ShaderProgram* shader_program)
 {
-	glUniformMatrix4fv(shader_program->GetUniform("view"), 1, GL_FALSE, glm::value_ptr(this->view_matrix));
-	glUniformMatrix4fv(shader_program->GetUniform("projection"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));
+	glUniform4fv(shader_program->GetUniform("cam_translate"), 1, glm::value_ptr(this->view_translate_vector));
+	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->view_rotate_matrix));
+	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));
 }

@@ -3,7 +3,7 @@
 
 Model::Model() : Entity()
 {
-	this->position_matrix = glm::mat4(1.0f);
+
 }
 
 Model::Model(Model& copy_from) : Entity(copy_from)
@@ -511,12 +511,13 @@ int Model::MergeEdges()
 
 void Model::GenPosMat()
 {
-	this->position_matrix = glm::mat4(1.0f);
-	this->position_matrix = glm::scale(this->position_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
-	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-	this->position_matrix = glm::rotate(this->position_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
-	this->position_matrix = glm::translate(this->position_matrix, glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2)));
+	this->position_rotate_matrix = glm::mat4(1.0f);
+	this->position_rotate_matrix = glm::scale(this->position_rotate_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
+	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	this->position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
 }
 
 void Model::GenVertexBuffer(GLuint triangle_mode)
@@ -563,6 +564,9 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), fan_data.data(), GL_STATIC_DRAW);
 			this->vertex_buffers.push_back(vertex_buffer);
 			this->vertex_buffers_count.push_back(trifans.at(i).size());
+
+			glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+			glEnableVertexAttribArray(i);
 		}
 	}
 	else if (triangle_mode == GL_TRIANGLES)
@@ -596,19 +600,20 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
 		this->vertex_buffers.push_back(vertex_buffer);
 		this->vertex_buffers_count.push_back(triangles.size());
-	}
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-	glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+		glEnableVertexAttribArray(0);
+	}
 }
 
 void Model::RegisterUniforms()
 {
-	this->shader_program.RegisterUniform("model");
+	this->shader_program.RegisterUniform("mdl_rotate");
+	this->shader_program.RegisterUniform("mdl_translate");
 }
 
 void Model::SetUniforms()
 {
-	this->shader_program.GetUniform("model");
-	glUniformMatrix4fv(this->shader_program.GetUniform("model"), 1, GL_FALSE, glm::value_ptr(this->position_matrix));
+	glUniformMatrix4fv(this->shader_program.GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->position_rotate_matrix));
+	glUniform4fv(this->shader_program.GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector));
 }

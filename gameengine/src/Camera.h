@@ -22,7 +22,8 @@ private:
 	GLfloat m_clip_far = 100.0f;
 
 public:
-	glm::mat4 view_matrix;
+	glm::mat4 view_rotate_matrix;
+	glm::vec4 view_translate_vector;
 	glm::mat4 perspective_matrix;
 
 	Camera();
