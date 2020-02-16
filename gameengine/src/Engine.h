@@ -10,6 +10,7 @@
 #include <map>
 #include <tuple>
 
+#include "GLComponents.h"
 #include "Scene.h"
 #include "Model.h"
 #include "Camera.h"

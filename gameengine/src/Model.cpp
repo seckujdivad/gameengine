@@ -43,6 +43,8 @@ Model::Model(Model& copy_from) : Entity(copy_from)
 			faces_subvector->push_back(faces.at(i).at(j));
 		}
 		this->m_faces.push_back(faces_subvector);
+
+		this->m_face_normals.push_back(new glm::vec3(*copy_from.GetFaceNormal(i)));
 	}
 }
 
@@ -61,6 +63,7 @@ Model::~Model()
 	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
 		delete this->m_faces.at(i);
+		delete this->m_face_normals.at(i);
 	}
 }
 
@@ -258,7 +261,7 @@ std::vector<std::tuple<int, int>> Model::GetEdgesCopy()
 	return output;
 }
 
-int Model::AddFace(std::vector<int> edge_indexes, std::vector<GLfloat> normal)
+int Model::AddFace(std::vector<int> edge_indexes, glm::vec3 normal)
 {
 	//copy edge indices
 	std::vector<int>* edges_copy = new std::vector<int>;
@@ -272,12 +275,7 @@ int Model::AddFace(std::vector<int> edge_indexes, std::vector<GLfloat> normal)
 	this->m_faces.push_back(edges_copy);
 
 	//copy normal
-	std::vector<GLfloat>* normal_copy = new std::vector<GLfloat>;
-	for (size_t i = 0; i < normal.size(); i++)
-	{
-		normal_copy->push_back(normal.at(i));
-	}
-	this->m_face_normals.push_back(normal_copy);
+	this->m_face_normals.push_back(new glm::vec3(normal));
 
 	//return face index
 	return this->m_faces.size() - 1;
@@ -356,7 +354,7 @@ std::vector<std::vector<int>> Model::GetFacesCopy()
 	return output;
 }
 
-std::vector<GLfloat>* Model::GetFaceNormal(int index)
+glm::vec3* Model::GetFaceNormal(int index)
 {
 	return this->m_face_normals.at(index);
 }

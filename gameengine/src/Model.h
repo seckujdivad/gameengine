@@ -22,7 +22,7 @@ private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
 	std::vector<std::tuple<int, int>*> m_edges;
 	std::vector<std::vector<int>*> m_faces;
-	std::vector<std::vector<GLfloat>*> m_face_normals;
+	std::vector<glm::vec3*> m_face_normals;
 
 public:
 	Model();
@@ -64,13 +64,13 @@ public:
 	std::vector<std::tuple<int, int>> GetEdgesCopy();
 
 	//faces and face normals
-	int AddFace(std::vector<int> edge_indexes, std::vector<GLfloat> normal); //edges must form a loop end-to-end in the given order
+	int AddFace(std::vector<int> edge_indexes, glm::vec3 normal); //edges must form a loop end-to-end in the given order
 	bool RemoveFace(int index);
 	bool RemoveFace(size_t index);
 	int FindFace(std::vector<int> edge_indexes);
 	std::vector<int>* GetFace(int index);
 	std::vector<std::vector<int>> GetFacesCopy();
-	std::vector<GLfloat>* GetFaceNormal(int index);
+	glm::vec3* GetFaceNormal(int index);
 
 	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();

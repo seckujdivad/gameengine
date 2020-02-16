@@ -229,7 +229,7 @@ Model* ModelFromPly(std::string path)
 						}
 						edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(edge_indexes.size() + 1)), std::stoi(sliced_string.at(1))));
 
-						result->AddFace(edge_indexes, {});
+						result->AddFace(edge_indexes, glm::vec3(1.0f, 1.0f, 1.0f));
 					}
 
 					//move to next subpattern
