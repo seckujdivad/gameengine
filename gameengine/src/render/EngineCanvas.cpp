@@ -2,6 +2,8 @@
 //#include <GL/glew.h>
 #include "EngineCanvas.h"
 
+//#define GE_USESAMPLE
+
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : wxGLCanvas(parent, id, args)
 {
 	this->m_glcontext = new wxGLContext(this);
@@ -19,7 +21,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	/*
+#ifdef GE_USESAMPLE
 	int success;
 	char infoLog[512];
 	int msglen;
@@ -117,8 +119,9 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+#endif
 
-	///////////////*/
+	///////////////
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Render();
@@ -137,7 +140,8 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 
 void EngineCanvas::Render()
 {
-	/*glClearColor(0, 1, 0, 0);
+#ifdef GE_USESAMPLE
+	glClearColor(0, 1, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
 
@@ -146,14 +150,16 @@ void EngineCanvas::Render()
 
 	glUseProgram(this->m_shader_program);
 	glBindVertexArray(this->m_VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);*/
-
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+#else
 	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
+
 	
 	if (this->m_scene != nullptr)
 	{
 		this->m_scene->Render(this);
 	}
+#endif
 
 	glFlush();
 	this->SwapBuffers();

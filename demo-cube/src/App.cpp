@@ -5,6 +5,7 @@ wxIMPLEMENT_APP(App);
 
 bool App::OnInit()
 {
+	wxMessageBox("");
 	this->m_frame_main = new Main();
 	this->m_frame_main->Show();
 

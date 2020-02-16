@@ -594,6 +594,8 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 			}
 		}
 
+		GLfloat* tris = triangles.data();
+
 		GLuint vertex_buffer;
 		glGenBuffers(1, &vertex_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -615,5 +617,5 @@ void Model::RegisterUniforms()
 void Model::SetUniforms()
 {
 	glUniformMatrix4fv(this->shader_program.GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->position_rotate_matrix));
-	glUniform4fv(this->shader_program.GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector));
+	glUniform4fv(this->shader_program.GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector)); //
 }

@@ -10,6 +10,10 @@ uniform mat4 cam_persp;
 
 void main()
 {
-	gl_Position = cam_persp * (cam_rotate * ((mdl_rotate * vec4(aPos.xyz, 1.0f)) + mdl_translate + cam_translate));
+	gl_Position = vec4(aPos.xyz, 1.0f);
+	gl_Position = mdl_rotate * gl_Position;
+	gl_Position = gl_Position + mdl_translate + cam_translate;
+	gl_Position = cam_rotate * gl_Position;
+	gl_Position = cam_persp * gl_Position;
 	vpos = aPos;
 }

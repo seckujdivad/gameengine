@@ -8,6 +8,12 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders)
 {
+	this->m_program_id = glCreateProgram();
+	if (this->m_program_id == 0)
+	{
+		throw std::runtime_error("Couldn't create program object");
+	}
+
 	std::vector<GLuint> shader_ids;
 	for (size_t i = 0; i < shaders.size(); i++)
 	{
@@ -15,7 +21,6 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	}
 
 	//link shaders
-	this->m_program_id = glCreateProgram();
 	for (size_t i = 0; i < shader_ids.size(); i++)
 	{
 		glAttachShader(this->m_program_id, shader_ids.at(i));
@@ -32,7 +37,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	//check for errors
 	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
 	glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
-	if (!link_was_successful) //get error message from GPU
+	if (link_was_successful != GL_TRUE) //get error message from GPU
 	{
 		char err_info[512];
 		int err_len;
@@ -81,7 +86,7 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
 	//check for errors
 	GLint compile_was_successful; //should be glboolean in my opinion but that's what the function takes
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compile_was_successful);
-	if (!compile_was_successful) //get error message from GPU
+	if (compile_was_successful != GL_TRUE) //get error message from GPU
 	{
 		char err_info[512];
 		int err_len;

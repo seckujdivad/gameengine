@@ -1,6 +1,8 @@
 #include <wx/wxprec.h>
 #include "Main.h"
 
+//#define GE_USESAMPLE
+
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
 {
@@ -18,6 +20,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 		0
 	};
 
+	glEnable(GL_DEBUG_OUTPUT);
+
 	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, gl_args);
 
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
@@ -30,9 +34,11 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	this->m_sizer->AddGrowableCol(0);
 
 	//load scene
+#ifndef GE_USESAMPLE
 	this->m_scene = InitialiseScene("resources", "simplescene.json");
 	this->m_glcanvas->SetScene(this->m_scene);
 	this->m_scene->PushUniforms();
+#endif
 
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
@@ -41,7 +47,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 
 Main::~Main()
 {
+#ifndef GE_USESAMPLE
 	delete this->m_scene;
+#endif
 }
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)

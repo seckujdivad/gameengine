@@ -15,7 +15,7 @@ private:
 	GLuint LoadShader(std::string path, GLenum type);
 
 	std::map<std::string, GLuint> m_uniforms;
-	GLuint m_program_id; //OpenGL identifier of the program the shaders have been linked into
+	GLuint m_program_id = NULL; //OpenGL identifier of the program the shaders have been linked into
 
 public:
 	ShaderProgram();
