@@ -131,6 +131,7 @@ void Scene::Render(EngineCanvas* canvas)
 		
 		for (size_t j = 0; j < this->models.at(i)->vertex_buffers_count.size(); j++)
 		{
+			glBindBuffer(GL_ARRAY_BUFFER, this->models.at(i)->vertex_buffers.at(j));
 			glDrawArrays(this->models.at(i)->triangle_mode, 0, this->models.at(i)->vertex_buffers_count.at(j));
 		}
 	}
