@@ -258,8 +258,9 @@ std::vector<std::tuple<int, int>> Model::GetEdgesCopy()
 	return output;
 }
 
-int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
+int Model::AddFace(std::vector<int> edge_indexes, std::vector<GLfloat> normal)
 {
+	//copy edge indices
 	std::vector<int>* edges_copy = new std::vector<int>;
 
 	for (size_t i = 0; i < edge_indexes.size(); i++)
@@ -270,6 +271,15 @@ int Model::AddFace(std::vector<int> edge_indexes, std::string fragment_shader)
 
 	this->m_faces.push_back(edges_copy);
 
+	//copy normal
+	std::vector<GLfloat>* normal_copy = new std::vector<GLfloat>;
+	for (size_t i = 0; i < normal.size(); i++)
+	{
+		normal_copy->push_back(normal.at(i));
+	}
+	this->m_face_normals.push_back(normal_copy);
+
+	//return face index
 	return this->m_faces.size() - 1;
 }
 
@@ -283,6 +293,7 @@ bool Model::RemoveFace(size_t index)
 	if ((index >= 0) && (index < this->m_faces.size()))
 	{
 		this->m_faces.erase(this->m_faces.begin() + index);
+		this->m_face_normals.erase(this->m_face_normals.begin() + index);
 		return true;
 	}
 	else
@@ -343,6 +354,11 @@ std::vector<std::vector<int>> Model::GetFacesCopy()
 		output.push_back(face);
 	}
 	return output;
+}
+
+std::vector<GLfloat>* Model::GetFaceNormal(int index)
+{
+	return this->m_face_normals.at(index);
 }
 
 std::vector<std::vector<GLfloat>> Model::GetTriFans()
@@ -523,7 +539,7 @@ void Model::GenPosMat()
 void Model::GenVertexBuffer(GLuint triangle_mode)
 {
 	//delete left over arrays and buffers
-	if (this->vao == NULL)
+	if (this->vao != NULL)
 	{
 		glDeleteVertexArrays(1, &this->vao);
 	}
@@ -547,7 +563,7 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 
 		std::vector<GLfloat> fan_data;
 
-		for (size_t i = 0; i < trifans.size(); i++)
+		for (size_t i = 0; i < 1; i++)//trifans.size(); i++)
 		{
 			fan_data.clear();
 			for (size_t j = 0; j < trifans.at(i).size(); j++)
@@ -561,13 +577,14 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 			GLuint vertex_buffer;
 			glGenBuffers(1, &vertex_buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * trifans.at(i).size(), fan_data.data(), GL_STATIC_DRAW);
-			this->vertex_buffers.push_back(vertex_buffer);
-			this->vertex_buffers_count.push_back(trifans.at(i).size());
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * fan_data.size(), fan_data.data(), GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
 
-			glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-			glEnableVertexAttribArray(i);
+			this->vertex_buffers.push_back(vertex_buffer);
+			this->vertex_buffers_count.push_back(trifans.at(i).size() / 3);
 		}
+		
 	}
 	else if (triangle_mode == GL_TRIANGLES)
 	{
@@ -595,13 +612,14 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 		}
 
 		GLfloat* tris = triangles.data();
+		int size = triangles.size();
 
 		GLuint vertex_buffer;
 		glGenBuffers(1, &vertex_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
 		this->vertex_buffers.push_back(vertex_buffer);
-		this->vertex_buffers_count.push_back(triangles.size());
+		this->vertex_buffers_count.push_back(triangles.size() / 3);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
 		glEnableVertexAttribArray(0);

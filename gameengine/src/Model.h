@@ -22,6 +22,7 @@ private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
 	std::vector<std::tuple<int, int>*> m_edges;
 	std::vector<std::vector<int>*> m_faces;
+	std::vector<std::vector<GLfloat>*> m_face_normals;
 
 public:
 	Model();
@@ -38,6 +39,7 @@ public:
 	std::vector<GLuint> vertex_buffers;
 	std::vector<GLint> vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
 
+	//vertices
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
 	int AddVertex(std::vector<GLfloat> vertex);
 	bool RemoveVertex(int index);
@@ -47,6 +49,7 @@ public:
 	std::vector<GLfloat>* GetVertex(int index);
 	std::vector<std::vector<GLfloat>> GetVerticesCopy();
 
+	//edges
 	int AddEdge(std::vector<int> vertex_indexes);
 	int AddEdge(int index0, int index1);
 	int AddEdge(std::tuple<int, int> vertex_indexes);
@@ -60,12 +63,14 @@ public:
 	std::vector<int> GetEdgeVec(int index);
 	std::vector<std::tuple<int, int>> GetEdgesCopy();
 
-	int AddFace(std::vector<int> edge_indexes, std::string fragment_shader); //edges must form a loop end-to-end in the given order
+	//faces and face normals
+	int AddFace(std::vector<int> edge_indexes, std::vector<GLfloat> normal); //edges must form a loop end-to-end in the given order
 	bool RemoveFace(int index);
 	bool RemoveFace(size_t index);
 	int FindFace(std::vector<int> edge_indexes);
 	std::vector<int>* GetFace(int index);
 	std::vector<std::vector<int>> GetFacesCopy();
+	std::vector<GLfloat>* GetFaceNormal(int index);
 
 	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
