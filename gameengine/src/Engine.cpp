@@ -249,7 +249,7 @@ Model* ModelFromPly(std::string path)
 							face_normal = face_normal + face_normals.at(i);
 						}
 
-						result->AddFace(edge_indexes, face_normal);
+						result->AddFace(edge_indexes, glm::normalize(face_normal));
 					}
 
 					//move to next subpattern
