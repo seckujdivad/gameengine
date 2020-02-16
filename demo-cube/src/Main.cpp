@@ -61,13 +61,17 @@ Main::~Main()
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
+#ifndef GE_USESAMPLE
 	this->m_glcanvas->Render();
 	evt.Skip();
+#endif
 }
 
 void Main::spn_zrot_OnChange(wxCommandEvent& evt)
 {
+#ifndef GE_USESAMPLE
 	this->m_scene->models.at(0)->SetRotation(2, this->m_spn_zrot->GetValue());
 	this->m_glcanvas->Render();
 	evt.Skip();
+#endif
 }
