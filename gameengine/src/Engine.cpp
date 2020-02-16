@@ -128,6 +128,10 @@ Model* ModelFromPly(std::string path)
 	int pattern_subindex = 0; //number of elements of the current pattern that have been read (post header)
 	std::vector<int> edge_indexes;
 
+	std::vector<glm::vec3> vertex_normals;
+	std::vector<glm::vec3> face_normals;
+	glm::vec3 face_normal;
+
 	std::vector<std::string> sliced_string;
 
 	std::map<std::string, PlyValueList> values;
@@ -215,21 +219,37 @@ Model* ModelFromPly(std::string path)
 
 					if (header_layout.at(pattern_index)->name == "vertex")
 					{
-						result->AddVertex((GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("x")))),
+						result->AddVertex(
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("x")))),
 							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("y")))),
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("z")))));
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("z"))))
+						);
+						vertex_normals.push_back(glm::vec3(
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("nx")))),
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("ny")))),
+							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("nz"))))
+						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
 					{
 						edge_indexes.clear();
+						face_normals.clear();
 
 						for (int i = 1; i < std::stoi(sliced_string.at(0)); i++)
 						{
 							edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(i)), std::stoi(sliced_string.at(i + 1))));
+							face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
 						}
 						edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(edge_indexes.size() + 1)), std::stoi(sliced_string.at(1))));
+						face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(0))));
 
-						result->AddFace(edge_indexes, glm::vec3(1.0f, 1.0f, 1.0f));
+						face_normal = glm::vec3(0.0f, 0.0f, 0.0f);
+						for (size_t i = 0; i < face_normals.size(); i++)
+						{
+							face_normal = face_normal + face_normals.at(i);
+						}
+
+						result->AddFace(edge_indexes, face_normal);
 					}
 
 					//move to next subpattern
