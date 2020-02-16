@@ -75,7 +75,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			if (it.value()["merge geometry"].get<bool>())
 			{
 				model->MergeVertices(it.value()["merge distance"].get<GLfloat>());
-				model->MergeEdges();
 			}
 		}
 
@@ -126,7 +125,7 @@ Model* ModelFromPly(std::string path)
 	int line_index = 0; //line index in the ply file
 	int pattern_index = 0; //current pattern index (post header)
 	int pattern_subindex = 0; //number of elements of the current pattern that have been read (post header)
-	std::vector<int> edge_indexes;
+	std::vector<int> vertex_indices;
 
 	std::vector<glm::vec3> vertex_normals;
 	std::vector<glm::vec3> face_normals;
@@ -232,16 +231,14 @@ Model* ModelFromPly(std::string path)
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
 					{
-						edge_indexes.clear();
+						vertex_indices.clear();
 						face_normals.clear();
 
-						for (int i = 1; i < std::stoi(sliced_string.at(0)); i++)
+						for (int i = 1; i < std::stoi(sliced_string.at(0)) + 1; i++)
 						{
-							edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(i)), std::stoi(sliced_string.at(i + 1))));
+							vertex_indices.push_back(std::stoi(sliced_string.at(i)));
 							face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
 						}
-						edge_indexes.push_back(result->AddEdge(std::stoi(sliced_string.at(edge_indexes.size() + 1)), std::stoi(sliced_string.at(1))));
-						face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(0))));
 
 						face_normal = glm::vec3(0.0f, 0.0f, 0.0f);
 						for (size_t i = 0; i < face_normals.size(); i++)
@@ -249,7 +246,7 @@ Model* ModelFromPly(std::string path)
 							face_normal = face_normal + face_normals.at(i);
 						}
 
-						result->AddFace(edge_indexes, glm::normalize(face_normal));
+						result->AddFace(vertex_indices, glm::normalize(face_normal));
 					}
 
 					//move to next subpattern
