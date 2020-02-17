@@ -17,8 +17,16 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glLoadIdentity();
 	glewInit();
 
+	glEnable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
+
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	GL_VERSION;
+	GLEW_VERSION;
+	GLEW_VERSION_MINOR;
+	GLEW_VERSION_MAJOR;
+
 	glDebugMessageCallback(MessageCallback, 0);
 
 #ifdef GE_USESAMPLE
@@ -152,8 +160,8 @@ void EngineCanvas::Render()
 	glBindVertexArray(this->m_VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 #else
-	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
 
+	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
 	
 	if (this->m_scene != nullptr)
 	{

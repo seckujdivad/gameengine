@@ -108,6 +108,7 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	}
 	else
 	{
+		this->Select();
 		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;

@@ -37,6 +37,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="resources\models\pyramid.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="resources\models\suzanne.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">

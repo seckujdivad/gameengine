@@ -260,6 +260,8 @@ std::vector<GLfloat> Model::GetTriangles()
 
 			vertex_indices.push_back(face_vertex_indices->at(0));
 
+			//std::reverse(vertex_indices.begin(), vertex_indices.end());
+
 			for (size_t j = 0; j < vertex_indices.size(); j++)
 			{
 				vertex = this->GetVertex(vertex_indices.at(j));

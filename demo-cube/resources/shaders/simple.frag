@@ -6,5 +6,6 @@ void main()
 {
 	//gl_FragColor = vec4(1.0f, 0.5f, 0.5f, 1.0f);
 	//gl_FragColor = vec4(vpos.xyz, 1.0f);
-	gl_FragColor = vec4(vpos.x, vpos.x, vpos.x, 1.0f);
+	float divisor = 2.0f;
+	gl_FragColor = vec4(normalize(vpos), 1.0f);
 }
