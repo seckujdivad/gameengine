@@ -20,6 +20,9 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
