@@ -9,7 +9,7 @@ ShaderProgram::ShaderProgram()
 ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders)
 {
 	this->m_program_id = glCreateProgram();
-	if (this->m_program_id == 0)
+	if (this->m_program_id == NULL)
 	{
 		throw std::runtime_error("Couldn't create program object");
 	}
@@ -36,6 +36,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 	//check for errors
 	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
+	glValidateProgram(this->m_program_id);
 	glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
 	if (link_was_successful != GL_TRUE) //get error message from GPU
 	{
@@ -52,7 +53,7 @@ ShaderProgram::~ShaderProgram()
 {
 	if (this->m_program_id != NULL)
 	{
-		glDeleteProgram(this->m_program_id);
+		//glDeleteProgram(this->m_program_id);
 	}
 }
 
@@ -108,7 +109,6 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	}
 	else
 	{
-		this->Select();
 		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;
