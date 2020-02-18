@@ -4,6 +4,7 @@
 Scene::Scene(Camera* active_camera)
 {
 	this->m_active_camera = active_camera;
+	this->m_identifier = "";
 }
 
 Scene::~Scene()
@@ -149,4 +150,14 @@ void Scene::PushUniforms()
 			this->cameras.at(j)->RegisterUniforms(&this->models.at(i)->shader_program);
 		}
 	}
+}
+
+void Scene::SetIdentifier(std::string identifier)
+{
+	this->m_identifier = identifier;
+}
+
+std::string Scene::GetIdentifier()
+{
+	return this->m_identifier;
 }

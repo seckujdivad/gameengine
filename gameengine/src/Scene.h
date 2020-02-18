@@ -16,6 +16,8 @@ class Scene
 {
 private:
 	Camera* m_active_camera;
+	
+	std::string m_identifier;
 
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
@@ -23,6 +25,9 @@ private:
 public:
 	Scene(Camera* active_camera);
 	~Scene();
+
+	void SetIdentifier(std::string identifier);
+	std::string GetIdentifier();
 
 	std::vector<Model*> models;
 	std::vector<Camera*> cameras;
