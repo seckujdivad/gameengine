@@ -7,7 +7,7 @@
   "models": {
     "cube": {
       "type": "ply",
-      "geometry": "models/cube.ply",
+      "geometry": "models/suzanne.ply",
       "merge geometry": false,
       "merge distance":  0.01
     }

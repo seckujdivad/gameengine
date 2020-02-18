@@ -22,10 +22,6 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	GL_VERSION;
-	GLEW_VERSION;
-	GLEW_VERSION_MINOR;
-	GLEW_VERSION_MAJOR;
 
 	glDebugMessageCallback(MessageCallback, 0);
 

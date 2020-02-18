@@ -112,7 +112,7 @@ void Scene::ClearAllCameras(bool destroy)
 
 void Scene::Render(EngineCanvas* canvas)
 {
-	glClearColor(0, 0, 1, 0);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	this->m_active_camera->GenPerspMat((float)canvas->GetSize().x, (float)canvas->GetSize().y);
