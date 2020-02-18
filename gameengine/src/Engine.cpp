@@ -54,6 +54,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	// make scene object
 	Scene* scene = new Scene(main_camera);
+
+	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
 	
 	// add cameras to scene
 	for (size_t i = 0; i < cameras.size(); i++)
@@ -106,6 +108,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	{
 		delete it->second;
 	}
+
 	return scene;
 }
 
