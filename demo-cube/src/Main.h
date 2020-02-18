@@ -19,6 +19,9 @@ private:
 	wxButton* m_btn_render;
 	wxListBox* m_lb_models;
 
+	std::string m_scene_path = "resources";
+	std::string m_scene_filename = "simplescene.json";
+
 	//model attributes
 	std::vector<wxSlider*> m_mdl_sliders;
 	std::map<int, std::string> m_mdl_slider_lookup;

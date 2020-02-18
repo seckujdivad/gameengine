@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Main.h"
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize(800, 600))
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize(800, 600))
 {
 	this->SetBackgroundColour(wxColor(238, 238, 238));
 	this->SetMinSize(wxSize(500, 400));
@@ -83,9 +83,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render test", wxPoint(30, 30), wxSize
 	this->m_model_selection_index = -1;
 
 	//load scene
-	this->m_scene = InitialiseScene("resources", "simplescene.json");
+	std::string scene_path = "resources";
+	this->m_scene = InitialiseScene(this->m_scene_path, this->m_scene_filename);
 	this->m_glcanvas->SetScene(this->m_scene);
 	this->m_scene->PushUniforms();
+
+	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
 	//load model names
 	for (size_t i = 0; i < this->m_scene->models.size(); i++)
