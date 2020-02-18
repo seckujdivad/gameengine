@@ -3,6 +3,9 @@
 #include <wx/wxprec.h>
 #include <wx/wx.h>
 #include <wx/gbsizer.h>
+#include <wx/listbox.h>
+
+#include <map>
 
 #include "GLComponents.h"
 #include "render/EngineCanvas.h"
@@ -14,16 +17,18 @@ private:
 	wxGridBagSizer* m_sizer;
 	EngineCanvas* m_glcanvas;
 	wxButton* m_btn_render;
-	wxSlider* m_sld_xrot;
-	wxSlider* m_sld_yrot;
-	wxSlider* m_sld_zrot;
+	wxListBox* m_lb_models;
+
+	//model attributes
+	std::vector<wxSlider*> m_mdl_sliders;
+	std::map<int, std::string> m_mdl_slider_lookup;
+	int m_model_selection_index;
 
 	Scene* m_scene;
 
 	void btn_render_OnClick(wxCommandEvent& evt);
-	void sld_xrot_OnChange(wxCommandEvent& evt);
-	void sld_yrot_OnChange(wxCommandEvent& evt);
-	void sld_zrot_OnChange(wxCommandEvent& evt);
+	void sld_OnChange(wxCommandEvent& evt);
+	void lb_models_OnSelection(wxCommandEvent& evt);
 
 public:
 	Main();
