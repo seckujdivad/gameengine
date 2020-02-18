@@ -18,7 +18,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : w
 	glewInit();
 
 	glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
