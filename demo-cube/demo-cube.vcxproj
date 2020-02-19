@@ -148,6 +148,7 @@
     <None Include="resources\models\cube.stl" />
     <None Include="resources\models\pyramid.ply" />
     <None Include="resources\models\suzanne.ply" />
+    <None Include="resources\models\teapot.ply" />
     <None Include="resources\shaders\simple.frag" />
     <None Include="resources\shaders\simple.vert" />
     <None Include="resources\simplescene.json" />

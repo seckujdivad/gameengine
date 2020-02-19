@@ -19,6 +19,18 @@
     <Filter Include="Source Files\render">
       <UniqueIdentifier>{0e575d5d-5b34-450d-91f9-3bea84e4fda0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\loaders">
+      <UniqueIdentifier>{e95f2e59-850b-4184-bca2-e5413f3c5326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\loaders\models">
+      <UniqueIdentifier>{81a55c19-12c6-4b1e-ae67-c981c046d42f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\loaders">
+      <UniqueIdentifier>{deed8cfa-ad12-4f65-89ed-2dfb638a155d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\loaders\models">
+      <UniqueIdentifier>{4f70b7ee-b72d-4f2b-bc4f-4a07a6aaa0e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -48,6 +60,9 @@
     <ClInclude Include="src\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\models\PlyLoader.h">
+      <Filter>Header Files\loaders\models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -73,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="src\GLComponents.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\models\PlyLoader.cpp">
+      <Filter>Source Files\loaders\models</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
