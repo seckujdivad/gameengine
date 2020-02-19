@@ -237,7 +237,6 @@ std::vector<GLfloat> Model::GetTriangles()
 {
 	std::vector<GLfloat> triangles;
 	std::vector<GLfloat>* vertex;
-	std::vector<int> vertex_indices;
 	std::vector<int>* face_vertex_indices;
 
 	std::vector<std::vector<int>> face_tri_verts;
@@ -247,37 +246,6 @@ std::vector<GLfloat> Model::GetTriangles()
 		face_vertex_indices = this->m_faces.at(i);
 		if (face_vertex_indices->size() > 2) //lines aren't faces and shouldn't be rendered
 		{
-			/*
-			vertex_indices.clear();
-			
-			vertex_indices.push_back(face_vertex_indices->at(0));
-
-			for (size_t j = 1; j < face_vertex_indices->size(); j++)
-			{
-				if ((j % 2) == 0) //add twice
-				{
-					vertex_indices.push_back(face_vertex_indices->at(j));
-					vertex_indices.push_back(face_vertex_indices->at(j));
-				}
-				else //mod == 1, add once
-				{
-					vertex_indices.push_back(face_vertex_indices->at(j));
-				}
-			}
-
-			vertex_indices.push_back(face_vertex_indices->at(0));
-
-			//std::reverse(vertex_indices.begin(), vertex_indices.end());
-
-			for (size_t j = 0; j < vertex_indices.size(); j++)
-			{
-				vertex = this->GetVertex(vertex_indices.at(j));
-				for (size_t k = 0; k < 3; k++)
-				{
-					triangles.push_back(vertex->at(k));
-				}
-			}*/
-
 			face_tri_verts.clear();
 
 			//get tris
