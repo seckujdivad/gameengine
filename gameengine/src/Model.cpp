@@ -240,6 +240,11 @@ std::vector<GLfloat> Model::GetTriangles()
 	std::vector<int>* face_vertex_indices;
 
 	std::vector<std::vector<int>> face_tri_verts;
+	std::vector<glm::vec3> tri_vecs;
+
+	glm::vec3 ccw_normal;
+	glm::vec3 face_normal;
+	float normal_angle_diff;
 
 	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
@@ -254,11 +259,30 @@ std::vector<GLfloat> Model::GetTriangles()
 				face_tri_verts.push_back({ face_vertex_indices->at(0), face_vertex_indices->at(j), face_vertex_indices->at(j + 1) });
 			}
 
-			//process tri normals
+			//get face normal
+			face_normal = *this->m_face_normals.at(i);
 
 			//unpack tri data
 			for (size_t j = 0; j < face_tri_verts.size(); j++)
 			{
+				//get as vectors
+				tri_vecs.clear();
+				for (size_t k = 0; k < face_tri_verts.at(j).size(); k++)
+				{
+					vertex = this->GetVertex(face_tri_verts.at(j).at(k));
+					tri_vecs.push_back(glm::vec3(vertex->at(0), vertex->at(1), vertex->at(2)));
+				}
+
+				//calculate ccw normal
+				ccw_normal = glm::cross(tri_vecs.at(1) - tri_vecs.at(0), tri_vecs.at(2) - tri_vecs.at(0)); //follows right hand rule
+				normal_angle_diff = std::abs(std::fmod(std::cos(glm::dot(ccw_normal, face_normal) / (glm::length(ccw_normal) * glm::length(face_normal))) + glm::pi<float>(), glm::pi<float>() * 2.0f) - glm::pi<float>());
+
+				if (normal_angle_diff > (glm::pi<float>() / 2))
+				{
+					std::reverse(face_tri_verts.begin(), face_tri_verts.end());
+				}
+
+				//prep for array
 				for (size_t k = 0; k < face_tri_verts.at(j).size(); k++)
 				{
 					vertex = this->GetVertex(face_tri_verts.at(j).at(k));

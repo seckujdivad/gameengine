@@ -12,6 +12,7 @@
 #include <array>
 #include <tuple>
 #include <string>
+#include <cmath>
 
 #include "Entity.h"
 #include "render/ShaderProgram.h"
