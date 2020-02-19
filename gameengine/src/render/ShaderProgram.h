@@ -20,6 +20,7 @@ private:
 public:
 	ShaderProgram();
 	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders);
+	ShaderProgram(const ShaderProgram& ) = delete; //This is a deliberate overload to throw an error. Copying of this object is not supported
 	~ShaderProgram();
 
 	void Select();

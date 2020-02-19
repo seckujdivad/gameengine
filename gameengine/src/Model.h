@@ -28,7 +28,7 @@ public:
 	Model(Model& copy_from);
 	~Model();
 
-	ShaderProgram shader_program;
+	ShaderProgram* shader_program;
 
 	glm::mat4 position_rotate_matrix;
 	glm::vec4 position_translate_vector;

@@ -53,7 +53,7 @@ ShaderProgram::~ShaderProgram()
 {
 	if (this->m_program_id != NULL)
 	{
-		//glDeleteProgram(this->m_program_id);
+		glDeleteProgram(this->m_program_id);
 	}
 }
 

@@ -3,7 +3,7 @@
 
 Model::Model() : Entity()
 {
-
+	this->shader_program = new ShaderProgram(); //make black shader program so that proper errors are thrown
 }
 
 Model::Model(Model& copy_from) : Entity(copy_from)
@@ -36,6 +36,8 @@ Model::Model(Model& copy_from) : Entity(copy_from)
 
 		this->m_face_normals.push_back(new glm::vec3(*copy_from.GetFaceNormal(i)));
 	}
+
+	this->shader_program = new ShaderProgram();
 }
 
 Model::~Model()
@@ -50,6 +52,8 @@ Model::~Model()
 		delete this->m_faces.at(i);
 		delete this->m_face_normals.at(i);
 	}
+
+	delete this->shader_program;
 }
 
 int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
@@ -450,12 +454,12 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 
 void Model::RegisterUniforms()
 {
-	this->shader_program.RegisterUniform("mdl_rotate");
-	this->shader_program.RegisterUniform("mdl_translate");
+	this->shader_program->RegisterUniform("mdl_rotate");
+	this->shader_program->RegisterUniform("mdl_translate");
 }
 
 void Model::SetUniforms()
 {
-	glUniformMatrix4fv(this->shader_program.GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->position_rotate_matrix));
-	glUniform4fv(this->shader_program.GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector)); //
+	glUniformMatrix4fv(this->shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->position_rotate_matrix));
+	glUniform4fv(this->shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector)); //
 }

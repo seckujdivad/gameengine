@@ -95,7 +95,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetIdentifier(it.value()["name"].get<std::string>());
 
 		//load shader
-		model->shader_program = ShaderProgram({
+		delete model->shader_program;
+		model->shader_program = new ShaderProgram({
 			{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
 			{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
 			});
