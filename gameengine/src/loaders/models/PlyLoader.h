@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
 
 #include "../../Model.h"
 
@@ -20,6 +21,7 @@ struct PlyElement
 	int num_elements;
 	std::vector<PlyType> types;
 	std::vector<std::string> field_names;
+	std::map<std::string, int> field_name_map;
 };
 
 struct PlyValueList
@@ -34,6 +36,3 @@ bool IsPlyInt(std::string type_name);
 
 std::vector<std::string> SplitOnChar(std::string string, char splitter, bool add_empty = false);
 std::vector<std::string> SplitOnChar(std::string string, std::string splitter, bool add_empty = false);
-
-template<typename T>
-int FindInVector(std::vector<T> to_search, T search_item);

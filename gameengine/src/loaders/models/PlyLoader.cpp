@@ -52,6 +52,16 @@ Model* ModelFromPly(std::string path)
 				{
 					if (line == "end_header")
 					{
+						
+						for (size_t i = 0; i < header_layout.size(); i++)
+						{
+							current_element = header_layout.at(i);
+							for (size_t j = 0; j < current_element->field_names.size(); j++)
+							{
+								current_element->field_name_map.insert(std::pair<std::string, int>(current_element->field_names.at(j), j));
+							}
+						}
+
 						in_header = false;
 					}
 					else if (line.substr(0, 8) == "element ")
@@ -111,14 +121,14 @@ Model* ModelFromPly(std::string path)
 					if (header_layout.at(pattern_index)->name == "vertex")
 					{
 						result->AddVertex(
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("x")))),
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("y")))),
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("z"))))
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
 						);
 						vertex_normals.push_back(glm::vec3(
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("nx")))),
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("ny")))),
-							(GLfloat)std::stof(sliced_string.at(FindInVector(header_layout.at(pattern_index)->field_names, std::string("nz"))))
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx")))
 						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
@@ -238,17 +248,4 @@ std::vector<std::string> SplitOnChar(std::string string, std::string splitter, b
 	{
 		throw std::runtime_error("Splitter must have length 1");
 	}
-}
-
-template<typename T>
-int FindInVector(std::vector<T> to_search, T search_item)
-{
-	for (size_t i = 0; i < to_search.size(); i++)
-	{
-		if (to_search.at(i) == search_item)
-		{
-			return i;
-		}
-	}
-	return -1;
 }
