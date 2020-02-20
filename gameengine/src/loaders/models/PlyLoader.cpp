@@ -209,40 +209,42 @@ bool IsPlyInt(std::string type_name)
 	}
 }
 
-std::vector<std::string> SplitOnChar(std::string string, char splitter, bool add_empty)
+std::vector<std::string> SplitOnChar(std::string string, char splitter)
 {
 	std::vector<std::string> result;
 	std::string current_slice = "";
+	int prev_slice = 0;
 
 	for (size_t i = 0; i < string.size(); i++)
 	{
 		if (string.at(i) == splitter)
 		{
-			if ((current_slice != "") || (add_empty))
+			current_slice = string.substr(prev_slice, i - prev_slice);
+			if (current_slice != "")
 			{
 				result.push_back(current_slice);
-				current_slice = "";
 			}
-		}
-		else
-		{
-			current_slice = current_slice + string.at(i);
+			prev_slice = i + 1;
 		}
 	}
 
-	if (current_slice != "")
+	if (prev_slice != string.size())
 	{
-		result.push_back(current_slice);
+		current_slice = string.substr(prev_slice, string.size() - prev_slice);
+		if (current_slice != "")
+		{
+			result.push_back(current_slice);
+		}
 	}
 
 	return result;
 }
 
-std::vector<std::string> SplitOnChar(std::string string, std::string splitter, bool add_empty)
+std::vector<std::string> SplitOnChar(std::string string, std::string splitter)
 {
 	if (splitter.size() == 1)
 	{
-		return SplitOnChar(string, splitter.at(0), add_empty);
+		return SplitOnChar(string, splitter.at(0));
 	}
 	else
 	{

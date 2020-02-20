@@ -34,5 +34,5 @@ struct PlyValueList
 Model* ModelFromPly(std::string path);
 bool IsPlyInt(std::string type_name);
 
-std::vector<std::string> SplitOnChar(std::string string, char splitter, bool add_empty = false);
-std::vector<std::string> SplitOnChar(std::string string, std::string splitter, bool add_empty = false);
+std::vector<std::string> SplitOnChar(std::string string, char splitter);
+std::vector<std::string> SplitOnChar(std::string string, std::string splitter);
