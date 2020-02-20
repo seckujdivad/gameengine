@@ -127,8 +127,8 @@ Model* ModelFromPly(std::string path)
 						);
 						vertex_normals.push_back(glm::vec3(
 							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx")))
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
 						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
