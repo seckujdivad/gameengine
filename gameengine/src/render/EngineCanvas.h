@@ -35,7 +35,7 @@ private:
 	GLuint m_mdlmat_id;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, const int* args);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
 	~EngineCanvas();
 
 	void SetScene(Scene* scene);

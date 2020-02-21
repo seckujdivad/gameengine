@@ -12,14 +12,10 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	int gl_args[] = {
-		WX_GL_CORE_PROFILE,
-		WX_GL_MAJOR_VERSION, 4,
-		WX_GL_MINOR_VERSION, 0,
-		0
-	};
+	wxGLAttributes args;
+	args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
-	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, gl_args);
+	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, args);
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
 
 	//create rest of ui

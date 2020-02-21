@@ -1,16 +1,16 @@
 #include <wx/wxprec.h>
 #include "EngineCanvas.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, const int* args) : wxGLCanvas(parent, id, args)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args) : wxGLCanvas(parent, args, id)
 {
 	this->m_glcontext = new wxGLContext(this);
 	this->SetCurrent(*this->m_glcontext);
 
 	std::remove(ENGINECANVAS_LOG_PATH);
-
+	
 	glewExperimental = GL_TRUE;
-	glLoadIdentity();
 	glewInit();
+	glLoadIdentity();
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
