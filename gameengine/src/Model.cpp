@@ -367,10 +367,12 @@ int Model::MergeVertices(GLfloat threshold)
 void Model::GenPosMat()
 {
 	this->position_rotate_matrix = glm::mat4(1.0f);
-	this->position_rotate_matrix = glm::scale(this->position_rotate_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
 	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
 	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
 	this->position_rotate_matrix = glm::rotate(this->position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	this->position_scale_matrix = glm::mat4(1.0f);
+	this->position_scale_matrix = glm::scale(this->position_rotate_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
 
 	this->position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
 }
@@ -448,10 +450,12 @@ void Model::RegisterUniforms()
 {
 	this->shader_program->RegisterUniform("mdl_rotate");
 	this->shader_program->RegisterUniform("mdl_translate");
+	this->shader_program->RegisterUniform("mdl_scale");
 }
 
 void Model::SetUniforms()
 {
 	glUniformMatrix4fv(this->shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->position_rotate_matrix));
-	glUniform4fv(this->shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector)); //
+	glUniformMatrix4fv(this->shader_program->GetUniform("mdl_scale"), 1, GL_FALSE, glm::value_ptr(this->position_scale_matrix));
+	glUniform4fv(this->shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->position_translate_vector));
 }

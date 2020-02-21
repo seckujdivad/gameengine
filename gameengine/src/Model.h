@@ -32,6 +32,7 @@ public:
 	ShaderProgram* shader_program;
 
 	glm::mat4 position_rotate_matrix;
+	glm::mat4 position_scale_matrix;
 	glm::vec4 position_translate_vector;
 
 	GLuint triangle_mode;
