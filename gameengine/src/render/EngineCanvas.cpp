@@ -31,7 +31,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 
 EngineCanvas::~EngineCanvas()
 {
-	delete this->m_glcontext;
+	wxDELETE(this->m_glcontext);
 }
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
