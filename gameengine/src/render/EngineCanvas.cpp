@@ -3,7 +3,9 @@
 
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args) : wxGLCanvas(parent, args, id)
 {
-	this->m_glcontext = new wxGLContext(this);
+	wxGLContextAttrs ctx_attrs;
+	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(0).EndList();
+	this->m_glcontext = new wxGLContext(this, NULL, &ctx_attrs);
 	this->SetCurrent(*this->m_glcontext);
 
 	std::remove(ENGINECANVAS_LOG_PATH);
