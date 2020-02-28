@@ -8,6 +8,4 @@ void UVFromSvg(Model* model, std::string path)
 	{
 		throw std::runtime_error("Couldn't open file '" + path + '"');
 	}
-
-	if 
 }

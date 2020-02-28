@@ -152,6 +152,7 @@
     <None Include="resources\shaders\simple.frag" />
     <None Include="resources\shaders\simple.vert" />
     <None Include="resources\simplescene.json" />
+    <None Include="resources\uv\cube.svg" />
     <None Include="resources\uv\suzanne.svg" />
   </ItemGroup>
   <ItemGroup>

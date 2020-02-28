@@ -52,6 +52,9 @@
     <None Include="resources\uv\suzanne.svg">
       <Filter>Resource Files\uv</Filter>
     </None>
+    <None Include="resources\uv\cube.svg">
+      <Filter>Resource Files\uv</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">
