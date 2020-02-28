@@ -9,19 +9,15 @@
       "type": "ply",
       "geometry": "models/cube.ply",
       "merge geometry": true,
-      "merge distance": 0.01
-    },
-    "pyramid": {
-      "type": "ply",
-      "geometry": "models/pyramid.ply",
-      "merge geometry": true,
-      "merge distance": 0.01
+      "merge distance": 0.01,
+      "uv": "uv/cube.svg"
     },
     "suzanne": {
       "type": "ply",
       "geometry": "models/suzanne.ply",
       "merge geometry": true,
-      "merge distance": 0.01
+      "merge distance": 0.01,
+      "uv": "uv/suzanne.svg"
     }
   },
   "layout": [

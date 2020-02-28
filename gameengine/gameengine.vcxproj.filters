@@ -31,6 +31,12 @@
     <Filter Include="Source Files\loaders\models">
       <UniqueIdentifier>{4f70b7ee-b72d-4f2b-bc4f-4a07a6aaa0e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\loaders\uvs">
+      <UniqueIdentifier>{c787ef1e-941a-406b-9359-a0942020845e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\loaders\uvs">
+      <UniqueIdentifier>{1f6fc895-d757-4487-bc02-969de4ddaad3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -63,6 +69,9 @@
     <ClInclude Include="src\loaders\models\PlyLoader.h">
       <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\uvs\SvgLoader.h">
+      <Filter>Header Files\loaders\uvs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -91,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="src\loaders\models\PlyLoader.cpp">
       <Filter>Source Files\loaders\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\uvs\SvgLoader.cpp">
+      <Filter>Source Files\loaders\uvs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
