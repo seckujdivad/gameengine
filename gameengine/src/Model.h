@@ -23,6 +23,7 @@ private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
 	std::vector<std::vector<int>*> m_faces;
 	std::vector<glm::vec3*> m_face_normals;
+	std::vector<std::vector<glm::vec2>*> m_face_uv;
 
 public:
 	Model();
@@ -50,7 +51,7 @@ public:
 	std::vector<GLfloat>* GetVertex(int index);
 	std::vector<std::vector<GLfloat>> GetVerticesCopy();
 
-	//faces and face normals
+	//faces, face normals and face uvs
 	int AddFace(std::vector<int> vertex_indices, glm::vec3 normal);
 	bool RemoveFace(int index);
 	bool RemoveFace(size_t index);
