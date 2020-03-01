@@ -145,15 +145,10 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="resources\models\cube.ply" />
-    <None Include="resources\models\cube.stl" />
-    <None Include="resources\models\pyramid.ply" />
     <None Include="resources\models\suzanne.ply" />
-    <None Include="resources\models\teapot.ply" />
     <None Include="resources\shaders\simple.frag" />
     <None Include="resources\shaders\simple.vert" />
     <None Include="resources\simplescene.json" />
-    <None Include="resources\uv\cube.svg" />
-    <None Include="resources\uv\suzanne.svg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -168,9 +163,6 @@
       <Project>{4f4b007f-ee21-46cf-b8de-2447b8b8015a}</Project>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="resources\uv\suzanne.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

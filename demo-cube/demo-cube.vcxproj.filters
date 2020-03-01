@@ -19,18 +19,12 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{944919d2-d6c5-4179-a1b5-4e92840310d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\uv">
-      <UniqueIdentifier>{052dcda9-e0ba-4936-a5c1-eb4a6c927555}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\simplescene.json">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\models\cube.ply">
-      <Filter>Resource Files\models</Filter>
-    </None>
-    <None Include="resources\models\cube.stl">
       <Filter>Resource Files\models</Filter>
     </None>
     <None Include="resources\shaders\simple.frag">
@@ -40,20 +34,8 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="resources\models\pyramid.ply">
-      <Filter>Resource Files\models</Filter>
-    </None>
     <None Include="resources\models\suzanne.ply">
       <Filter>Resource Files\models</Filter>
-    </None>
-    <None Include="resources\models\teapot.ply">
-      <Filter>Resource Files\models</Filter>
-    </None>
-    <None Include="resources\uv\suzanne.svg">
-      <Filter>Resource Files\uv</Filter>
-    </None>
-    <None Include="resources\uv\cube.svg">
-      <Filter>Resource Files\uv</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -71,10 +53,5 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="resources\uv\suzanne.png">
-      <Filter>Resource Files\uv</Filter>
-    </Image>
   </ItemGroup>
 </Project>
