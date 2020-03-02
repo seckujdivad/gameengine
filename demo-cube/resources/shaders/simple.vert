@@ -2,9 +2,10 @@
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inUV;
-out vec3 outPos;
-out vec3 outNormal;
-out vec2 outUV;
+
+out vec3 globalPos;
+out vec3 globalNormal;
+out vec2 globalUV;
 
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
@@ -23,7 +24,7 @@ void main()
 	gl_Position = cam_rotate * gl_Position;
 	gl_Position = cam_persp * gl_Position;
 
-	outPos = inPos;
-	outNormal = inNormal;
-	outUV = inUV;
+	globalPos = inPos;
+	globalNormal = inNormal;
+	globalUV = inUV;
 }

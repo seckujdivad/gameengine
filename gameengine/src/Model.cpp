@@ -274,6 +274,8 @@ std::vector<GLfloat> Model::GetTriangles()
 	glm::vec3 face_normal;
 	float normal_angle_diff;
 
+	std::vector<glm::vec2>* face_uv;
+
 	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
 		face_vertex_indices = this->m_faces.at(i);
@@ -289,6 +291,8 @@ std::vector<GLfloat> Model::GetTriangles()
 
 			//get face normal
 			face_normal = *this->m_face_normals.at(i);
+
+			face_uv = this->GetFaceUV(i);
 
 			//unpack tri data
 			for (size_t j = 0; j < face_tri_verts.size(); j++)
@@ -318,6 +322,13 @@ std::vector<GLfloat> Model::GetTriangles()
 					{
 						triangles.push_back(vertex->at(l));
 					}
+
+					triangles.push_back(face_normal.x);
+					triangles.push_back(face_normal.y);
+					triangles.push_back(face_normal.z);
+
+					triangles.push_back(face_uv->at(j).x);
+					triangles.push_back(face_uv->at(j).y);
 				}
 			}
 		}
@@ -426,36 +437,7 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 	//get verts in correct format
 	this->triangle_mode = triangle_mode;
 
-	if (triangle_mode == GL_TRIANGLE_FAN)
-	{
-		std::vector<std::vector<GLfloat>> trifans = this->GetTriFans();
-
-		std::vector<GLfloat> fan_data;
-
-		for (size_t i = 0; i < 1; i++)//trifans.size(); i++)
-		{
-			fan_data.clear();
-			for (size_t j = 0; j < trifans.at(i).size(); j++)
-			{
-				for (size_t k = 0; k < this->m_vertices.at(trifans.at(i).at(j))->size(); k++)
-				{
-					fan_data.push_back(this->m_vertices.at(trifans.at(i).at(j))->at(k));
-				}
-			}
-
-			GLuint vertex_buffer;
-			glGenBuffers(1, &vertex_buffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * fan_data.size(), fan_data.data(), GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-			glEnableVertexAttribArray(0);
-
-			this->vertex_buffers.push_back(vertex_buffer);
-			this->vertex_buffers_count.push_back(trifans.at(i).size() / 3);
-		}
-		
-	}
-	else if (triangle_mode == GL_TRIANGLES)
+	if (triangle_mode == GL_TRIANGLES) //the only supported mode
 	{
 		std::vector<GLfloat> triangles = this->GetTriangles();
 
@@ -469,8 +451,13 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 		this->vertex_buffers.push_back(vertex_buffer);
 		this->vertex_buffers_count.push_back(triangles.size() / 3);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
 		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
 	}
 }
 
