@@ -3,7 +3,7 @@
 
 Model::Model() : Entity()
 {
-	this->shader_program = new ShaderProgram(); //make black shader program so that proper errors are thrown
+	this->shader_program = new ShaderProgram(); //make blank shader program so that proper errors are thrown
 }
 
 Model::Model(Model& copy_from) : Entity(copy_from)
@@ -24,8 +24,11 @@ Model::Model(Model& copy_from) : Entity(copy_from)
 
 	std::vector<std::vector<int>> faces = copy_from.GetFacesCopy();
 	std::vector<int>* faces_subvector;
+	std::vector<glm::vec2>* face_uv_source;
+	std::vector<glm::vec2>* face_uv;
 	for (size_t i = 0; i < faces.size(); i++)
 	{
+		//vertices
 		faces_subvector = new std::vector<int>;
 		faces_subvector->reserve(faces.at(i).size());
 		for (size_t j = 0; j < faces.at(i).size(); j++)
@@ -34,7 +37,17 @@ Model::Model(Model& copy_from) : Entity(copy_from)
 		}
 		this->m_faces.push_back(faces_subvector);
 
+		//normal
 		this->m_face_normals.push_back(new glm::vec3(*copy_from.GetFaceNormal(i)));
+
+		//uv
+		face_uv = new std::vector<glm::vec2>;
+		face_uv_source = copy_from.GetFaceUV(i);
+		for (size_t j = 0; j < face_uv_source->size(); j++)
+		{
+			face_uv->push_back(face_uv_source->at(j));
+		}
+		this->m_face_uvs.push_back(face_uv);
 	}
 
 	this->shader_program = new ShaderProgram();
@@ -51,6 +64,7 @@ Model::~Model()
 	{
 		delete this->m_faces.at(i);
 		delete this->m_face_normals.at(i);
+		delete this->m_face_uvs.at(i);
 	}
 
 	delete this->shader_program;
@@ -136,7 +150,7 @@ std::vector<std::vector<GLfloat>> Model::GetVerticesCopy()
 	return output;
 }
 
-int Model::AddFace(std::vector<int> vertex_indices, glm::vec3 normal)
+int Model::AddFace(std::vector<int> vertex_indices, glm::vec3 normal, std::vector<glm::vec2> uv)
 {
 	//copy edge indices
 	std::vector<int>* vertexes_copy = new std::vector<int>;
@@ -150,6 +164,14 @@ int Model::AddFace(std::vector<int> vertex_indices, glm::vec3 normal)
 
 	//copy normal
 	this->m_face_normals.push_back(new glm::vec3(normal));
+
+	//copy uv
+	std::vector<glm::vec2>* uv_copy = new std::vector<glm::vec2>;
+	for (size_t i = 0; i < uv.size(); i++)
+	{
+		uv_copy->push_back(uv.at(i));
+	}
+	this->m_face_uvs.push_back(uv_copy);
 
 	//return face index
 	return this->m_faces.size() - 1;
@@ -166,6 +188,7 @@ bool Model::RemoveFace(size_t index)
 	{
 		this->m_faces.erase(this->m_faces.begin() + index);
 		this->m_face_normals.erase(this->m_face_normals.begin() + index);
+		this->m_face_uvs.erase(this->m_face_uvs.begin() + index);
 		return true;
 	}
 	else
@@ -201,6 +224,11 @@ std::vector<std::vector<int>> Model::GetFacesCopy()
 glm::vec3* Model::GetFaceNormal(int index)
 {
 	return this->m_face_normals.at(index);
+}
+
+std::vector<glm::vec2>* Model::GetFaceUV(int index)
+{
+	return this->m_face_uvs.at(index);
 }
 
 std::vector<std::vector<GLfloat>> Model::GetTriFans()

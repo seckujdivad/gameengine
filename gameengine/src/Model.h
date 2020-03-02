@@ -23,7 +23,7 @@ private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
 	std::vector<std::vector<int>*> m_faces;
 	std::vector<glm::vec3*> m_face_normals;
-	std::vector<std::vector<glm::vec2>*> m_face_uv;
+	std::vector<std::vector<glm::vec2>*> m_face_uvs;
 
 public:
 	Model();
@@ -52,12 +52,13 @@ public:
 	std::vector<std::vector<GLfloat>> GetVerticesCopy();
 
 	//faces, face normals and face uvs
-	int AddFace(std::vector<int> vertex_indices, glm::vec3 normal);
+	int AddFace(std::vector<int> vertex_indices, glm::vec3 normal, std::vector<glm::vec2> uv);
 	bool RemoveFace(int index);
 	bool RemoveFace(size_t index);
 	std::vector<int>* GetFace(int index);
 	std::vector<std::vector<int>> GetFacesCopy();
 	glm::vec3* GetFaceNormal(int index);
+	std::vector<glm::vec2>* GetFaceUV(int index);
 
 	std::vector<std::vector<GLfloat>> GetTriFans();
 	std::vector<std::vector<GLfloat>*> GetTriStrips();
