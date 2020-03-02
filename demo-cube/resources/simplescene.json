@@ -28,7 +28,9 @@
       "shader": {
         "vertex": "simple",
         "fragment": "simple",
-        "colour texture": "textures/wood.jpg"
+        "textures": {
+          "colour": "textures/wood.bmp"
+        }
       }
     },
     {
@@ -40,7 +42,9 @@
       "shader": {
         "vertex": "simple",
         "fragment": "simple",
-        "colour texture": "textures/wood.jpg"
+        "textures": {
+          "colour": "textures/wood.bmp"
+        }
       }
     }
   ],

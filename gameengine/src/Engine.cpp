@@ -73,11 +73,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			std::string full_path = path + "/";
 			full_path = full_path + it.value()["geometry"].get<std::string>();
 			model = ModelFromPly(full_path);
+		}
 
-			if (it.value()["merge geometry"].get<bool>())
-			{
-				model->MergeVertices(it.value()["merge distance"].get<GLfloat>());
-			}
+		if (it.value()["merge geometry"].get<bool>())
+		{
+			model->MergeVertices(it.value()["merge distance"].get<GLfloat>());
 		}
 
 		model_lib[it.key()] = model;
@@ -93,6 +93,10 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetScale(it.value()["scale"][0].get<GLfloat>(), it.value()["scale"][1].get<GLfloat>(), it.value()["scale"][2].get<GLfloat>());
 
 		model->SetIdentifier(it.value()["name"].get<std::string>());
+
+		//load texture
+		wxBitmap image;
+		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
 
 		//load shader
 		delete model->shader_program;

@@ -165,7 +165,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\wood.jpg" />
+    <Image Include="resources\textures\wood.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
