@@ -27,7 +27,8 @@
       "scale": [ 1, 1, 1 ],
       "shader": {
         "vertex": "simple",
-        "fragment": "simple"
+        "fragment": "simple",
+        "colour texture": "textures/wood.jpg"
       }
     },
     {
@@ -38,7 +39,8 @@
       "scale": [ 1, 1, 1 ],
       "shader": {
         "vertex": "simple",
-        "fragment": "simple"
+        "fragment": "simple",
+        "colour texture": "textures/wood.jpg"
       }
     }
   ],
