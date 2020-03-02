@@ -21,6 +21,8 @@ Model* ModelFromPly(std::string path)
 
 	std::vector<glm::vec3> vertex_normals;
 	std::vector<glm::vec3> face_normals;
+	std::vector<glm::vec2> vertex_uvs;
+	std::vector<glm::vec2> face_uvs;
 	glm::vec3 face_normal;
 
 	std::vector<std::string> sliced_string;
@@ -130,6 +132,10 @@ Model* ModelFromPly(std::string path)
 							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
 							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
 						));
+						vertex_uvs.push_back(glm::vec2(
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
+							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t")))
+						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
 					{
@@ -140,6 +146,7 @@ Model* ModelFromPly(std::string path)
 						{
 							vertex_indices.push_back(std::stoi(sliced_string.at(i)));
 							face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
+							face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
 						}
 
 						face_normal = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -148,7 +155,7 @@ Model* ModelFromPly(std::string path)
 							face_normal = face_normal + face_normals.at(i);
 						}
 
-						result->AddFace(vertex_indices, glm::normalize(face_normal));
+						result->AddFace(vertex_indices, glm::normalize(face_normal), face_uvs);
 					}
 
 					//move to next subpattern
