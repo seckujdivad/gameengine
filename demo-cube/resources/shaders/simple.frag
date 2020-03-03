@@ -4,10 +4,12 @@ in vec3 globalPos;
 in vec3 globalNormal;
 in vec2 globalUV;
 
+uniform sampler2D colourTexture;
+
 void main()
 {
-	//gl_FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-	//gl_FragColor = vec4(vpos.xyz, 1.0f);
-	frag_out = vec4(normalize(globalPos), 1.0f);
+	//frag_out = vec4(normalize(globalPos), 1.0f);
 	//frag_out = vec4(vec3(gl_FragCoord.z).xyz, 1.0f);
+	frag_out = texture(colourTexture, globalUV);
+	//frag_out = vec4(globalUV.st, 0.0f, 1.0f);
 }

@@ -273,6 +273,8 @@ std::vector<GLfloat> Model::GetTriangles()
 	std::vector<std::vector<int>> face_tri_verts;
 	std::vector<glm::vec3> tri_vecs;
 
+	std::vector<std::vector<glm::vec2>> face_tri_uvs;
+
 	glm::vec3 ccw_normal;
 	glm::vec3 face_normal;
 	float normal_angle_diff;
@@ -285,17 +287,19 @@ std::vector<GLfloat> Model::GetTriangles()
 		if (face_vertex_indices->size() > 2) //lines aren't faces and shouldn't be rendered
 		{
 			face_tri_verts.clear();
+			face_tri_uvs.clear();
+
+			face_uv = this->GetFaceUV(i);
 
 			//get tris
 			for (size_t j = 1; j < face_vertex_indices->size() - 1; j++)
 			{
 				face_tri_verts.push_back({ face_vertex_indices->at(0), face_vertex_indices->at(j), face_vertex_indices->at(j + 1) });
+				face_tri_uvs.push_back({ face_uv->at(0), face_uv->at(j), face_uv->at(j + 1) });
 			}
 
 			//get face normal
 			face_normal = *this->m_face_normals.at(i);
-
-			face_uv = this->GetFaceUV(i);
 
 			//unpack tri data
 			for (size_t j = 0; j < face_tri_verts.size(); j++)
@@ -330,8 +334,8 @@ std::vector<GLfloat> Model::GetTriangles()
 					triangles.push_back(face_normal.y);
 					triangles.push_back(face_normal.z);
 
-					triangles.push_back(face_uv->at(j).x);
-					triangles.push_back(face_uv->at(j).y);
+					triangles.push_back(face_tri_uvs.at(j).at(k).x);
+					triangles.push_back(face_tri_uvs.at(j).at(k).y);
 				}
 			}
 		}

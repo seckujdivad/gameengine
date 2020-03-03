@@ -95,14 +95,21 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetIdentifier(it.value()["name"].get<std::string>());
 
 		//load texture
-		wxBitmap image;
+		wxImage image;
 		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
 
+		unsigned char* data = image.GetData();
+
 		//load shader
-		model->SetShaderProgram(new ShaderProgram({
+		ShaderProgram* shader_program = new ShaderProgram({
 			{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
 			{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
-			}));
+			});
+		
+		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
+
+		model->SetShaderProgram(shader_program);
+
 
 		scene->AddModel(model);
 	}

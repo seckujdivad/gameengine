@@ -141,6 +141,7 @@ Model* ModelFromPly(std::string path)
 					{
 						vertex_indices.clear();
 						face_normals.clear();
+						face_uvs.clear();
 
 						for (int i = 1; i < std::stoi(sliced_string.at(0)) + 1; i++)
 						{
@@ -148,6 +149,8 @@ Model* ModelFromPly(std::string path)
 							face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
 							face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
 						}
+
+						//vertex_uvs.clear();
 
 						face_normal = glm::vec3(0.0f, 0.0f, 0.0f);
 						for (size_t i = 0; i < face_normals.size(); i++)

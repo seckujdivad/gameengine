@@ -109,6 +109,7 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	}
 	else
 	{
+		glUseProgram(this->m_program_id);
 		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;
@@ -124,6 +125,15 @@ void ShaderProgram::Select()
 	else
 	{
 		glUseProgram(this->m_program_id);
+
+		for (int i = 0; i < 16; i++)
+		{
+			if (this->m_textures[i] != -1)
+			{
+				glActiveTexture(GL_TEXTURE0);// + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
+				glBindTexture(GL_TEXTURE_2D, this->m_textures[i]);
+			}
+		}
 	}
 }
 
@@ -149,4 +159,47 @@ GLuint ShaderProgram::GetProgramID()
 	{
 		return this->m_program_id;
 	}
+}
+
+void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width, int height, int index)
+{
+	if (index == -1)
+	{
+		for (int i = 0; (i < 16) && (index == -1); i++)
+		{
+			if (this->m_textures[i] == -1)
+			{
+				index = i;
+			}
+		}
+
+		if (index == -1)
+		{
+			throw std::runtime_error("Can't allocate a texture, all slots used");
+		}
+	}
+	else if ((index < 0 or index > 15))
+	{
+		throw std::runtime_error("Invalid texture index " + std::to_string(index));
+	}
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //shrinking filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //enlarging filter
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	GLuint uniform_id = this->RegisterUniform(name);
+	glUniform1i(uniform_id, index);
+
+	this->m_textures[index] = texture;
 }
