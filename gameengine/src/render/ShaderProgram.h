@@ -12,7 +12,7 @@
 class ShaderProgram
 {
 private:
-	GLuint LoadShader(std::string path, GLenum type);
+	GLuint LoadShader(std::string path, GLenum type, std::vector<std::tuple<std::string, std::string>> preprocessor_defines);
 
 	std::map<std::string, GLuint> m_uniforms;
 	GLuint m_program_id = NULL; //OpenGL identifier of the program the shaders have been linked into
@@ -26,7 +26,7 @@ private:
 
 public:
 	ShaderProgram();
-	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders);
+	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines);
 	ShaderProgram(const ShaderProgram& ) = delete; //This is a deliberate overload to throw an error. Copying of this object is not supported
 	~ShaderProgram();
 

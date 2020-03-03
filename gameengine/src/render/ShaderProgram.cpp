@@ -6,7 +6,7 @@ ShaderProgram::ShaderProgram()
 	this->m_program_id = NULL;
 }
 
-ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders)
+ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines)
 {
 	this->m_program_id = glCreateProgram();
 	if (this->m_program_id == NULL)
@@ -17,7 +17,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	std::vector<GLuint> shader_ids;
 	for (size_t i = 0; i < shaders.size(); i++)
 	{
-		shader_ids.push_back(this->LoadShader(std::get<0>(shaders.at(i)), std::get<1>(shaders.at(i))));
+		shader_ids.push_back(this->LoadShader(std::get<0>(shaders.at(i)), std::get<1>(shaders.at(i)), preprocessor_defines));
 	}
 
 	//link shaders
@@ -57,7 +57,7 @@ ShaderProgram::~ShaderProgram()
 	}
 }
 
-GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
+GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std::tuple<std::string, std::string>> preprocessor_defines)
 {
 	std::string shader_file_contents;
 	std::ifstream shader_file;
@@ -77,6 +77,13 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type)
 	{
 		throw std::runtime_error("Couldn't open shader file at \"" + path + "\"");
 	}
+
+	//add preprocessor defines
+	for (size_t i = 0; i < preprocessor_defines.size(); i++)
+	{
+		shader_file_contents = "#define " + std::get<0>(preprocessor_defines.at(i)) + " " + std::get<1>(preprocessor_defines.at(i)) + ";" + shader_file_contents;
+	}
+
 	const char* shader_src = shader_file_contents.c_str();
 
 	//load shader into GPU and compile

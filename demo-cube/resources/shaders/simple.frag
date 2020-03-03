@@ -10,10 +10,6 @@ uniform vec3 light_ambient;
 
 void main()
 {
-	//frag_out = vec4(normalize(globalPos), 1.0f);
-	//frag_out = vec4(vec3(gl_FragCoord.z).xyz, 1.0f);
-	//frag_out = vec4(globalUV.st, 0.0f, 1.0f);
-
 	//get base colour
 	frag_out = texture(colourTexture, globalUV);
 	
