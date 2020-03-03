@@ -5,6 +5,7 @@ layout (location = 2) in vec2 inUV;
 
 out vec3 globalPos;
 out vec3 globalNormal;
+out vec3 globalTransformedNormal;
 out vec2 globalUV;
 
 uniform vec4 mdl_translate;
@@ -23,6 +24,8 @@ void main()
 	gl_Position = gl_Position + mdl_translate + cam_translate;
 	gl_Position = cam_rotate * gl_Position;
 	gl_Position = cam_persp * gl_Position;
+
+	globalTransformedNormal = (cam_persp * cam_rotate * mdl_rotate * vec4(inPos.xyz, 0.0f)).xyz;
 
 	globalPos = inPos;
 	globalNormal = inNormal;

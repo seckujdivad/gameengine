@@ -126,6 +126,7 @@ void Scene::Render(EngineCanvas* canvas)
 		this->models.at(i)->GetShaderProgram()->Select();
 		this->models.at(i)->BindVAO();
 
+		glUniform3fv(this->models.at(i)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 		this->m_active_camera->SetUniforms(this->models.at(i)->GetShaderProgram());
 		this->models.at(i)->SetUniforms();
 
@@ -138,6 +139,8 @@ void Scene::PushUniforms()
 	for (size_t i = 0; i < this->models.size(); i++)
 	{
 		this->models.at(i)->RegisterUniforms();
+
+		this->models.at(i)->GetShaderProgram()->RegisterUniform("light_ambient");
 
 		for (size_t j = 0; j < this->cameras.size(); j++)
 		{
@@ -154,4 +157,9 @@ void Scene::SetIdentifier(std::string identifier)
 std::string Scene::GetIdentifier()
 {
 	return this->m_identifier;
+}
+
+void Scene::SetAmbientLight(glm::vec3 light_intensity)
+{
+	this->m_light_ambient = light_intensity;
 }

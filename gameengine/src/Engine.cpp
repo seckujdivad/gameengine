@@ -56,6 +56,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	Scene* scene = new Scene(main_camera);
 
 	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
+	scene->SetAmbientLight(glm::vec3(config["lighting"]["ambient"][0].get<float>(), config["lighting"]["ambient"][1].get<float>(), config["lighting"]["ambient"][2].get<float>()));
 	
 	// add cameras to scene
 	for (size_t i = 0; i < cameras.size(); i++)

@@ -19,6 +19,8 @@ private:
 	
 	std::string m_identifier;
 
+	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
 	
@@ -48,4 +50,6 @@ public:
 	void Render(EngineCanvas* canvas);
 
 	void PushUniforms();
+
+	void SetAmbientLight(glm::vec3 light_intensity);
 };

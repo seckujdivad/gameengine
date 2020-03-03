@@ -58,10 +58,20 @@
   "shaders": {
     "fragment": {
       "simple": "shaders/simple.frag",
-      "background":  "shaders/background.frag"
+      "background": "shaders/background.frag"
     },
     "vertex": {
       "simple": "shaders/simple.vert"
     }
+  },
+  "lighting": {
+    "ambient": [ 0.8, 0.8, 0.8 ],
+    "point lights": [
+      {
+        "name": "simple light",
+        "diffuse": [ 0.1, 0.1, 0.1 ],
+        "specular": [ 0.1, 0.1, 0.1 ]
+      }
+    ]
   }
 }
