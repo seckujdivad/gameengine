@@ -109,8 +109,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
 
 		model->SetShaderProgram(shader_program);
-
-
 		scene->AddModel(model);
 	}
 
