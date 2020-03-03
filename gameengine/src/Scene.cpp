@@ -123,18 +123,13 @@ void Scene::Render(EngineCanvas* canvas)
 	{
 		this->models.at(i)->GenPosMat();
 
-		this->models.at(i)->shader_program->Select();
+		this->models.at(i)->GetShaderProgram()->Select();
+		this->models.at(i)->BindVAO();
 
-		this->m_active_camera->SetUniforms(this->models.at(i)->shader_program);
+		this->m_active_camera->SetUniforms(this->models.at(i)->GetShaderProgram());
 		this->models.at(i)->SetUniforms();
 
-		glBindVertexArray(this->models.at(i)->vao);
-		
-		for (size_t j = 0; j < this->models.at(i)->vertex_buffers_count.size(); j++)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, this->models.at(i)->vertex_buffers.at(j));
-			glDrawArrays(this->models.at(i)->triangle_mode, 0, this->models.at(i)->vertex_buffers_count.at(j));
-		}
+		this->models.at(i)->DrawVBOs();
 	}
 }
 
@@ -146,7 +141,7 @@ void Scene::PushUniforms()
 
 		for (size_t j = 0; j < this->cameras.size(); j++)
 		{
-			this->cameras.at(j)->RegisterUniforms(this->models.at(i)->shader_program);
+			this->cameras.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 		}
 	}
 }

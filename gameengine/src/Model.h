@@ -25,21 +25,21 @@ private:
 	std::vector<glm::vec3*> m_face_normals;
 	std::vector<std::vector<glm::vec2>*> m_face_uvs;
 
+	ShaderProgram* m_shader_program = nullptr;
+
+	glm::mat4 m_position_rotate_matrix;
+	glm::mat4 m_position_scale_matrix;
+	glm::vec4 m_position_translate_vector;
+
+	GLuint m_triangle_mode;
+	GLuint m_vao = NULL;
+	std::vector<GLuint> m_vertex_buffers;
+	std::vector<GLint> m_vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
+
 public:
 	Model();
 	Model(Model& copy_from);
 	~Model();
-
-	ShaderProgram* shader_program;
-
-	glm::mat4 position_rotate_matrix;
-	glm::mat4 position_scale_matrix;
-	glm::vec4 position_translate_vector;
-
-	GLuint triangle_mode;
-	GLuint vao = NULL;
-	std::vector<GLuint> vertex_buffers;
-	std::vector<GLint> vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
 
 	//vertices
 	int AddVertex(GLfloat x, GLfloat y, GLfloat z);
@@ -72,4 +72,9 @@ public:
 
 	void RegisterUniforms();
 	void SetUniforms();
+
+	void SetShaderProgram(ShaderProgram* shader_program);
+	ShaderProgram* GetShaderProgram();
+	void BindVAO();
+	void DrawVBOs();
 };

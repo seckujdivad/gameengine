@@ -99,11 +99,10 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
 
 		//load shader
-		delete model->shader_program;
-		model->shader_program = new ShaderProgram({
+		model->SetShaderProgram(new ShaderProgram({
 			{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
 			{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
-			});
+			}));
 
 		scene->AddModel(model);
 	}
