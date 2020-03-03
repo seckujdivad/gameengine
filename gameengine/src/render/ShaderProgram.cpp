@@ -130,7 +130,7 @@ void ShaderProgram::Select()
 		{
 			if (this->m_textures[i] != -1)
 			{
-				glActiveTexture(GL_TEXTURE0);// + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
+				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
 				glBindTexture(GL_TEXTURE_2D, this->m_textures[i]);
 			}
 		}
