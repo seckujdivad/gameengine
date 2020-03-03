@@ -29,7 +29,7 @@
         "vertex": "simple",
         "fragment": "simple",
         "textures": {
-          "colour": "textures/wood.bmp"
+          "colour": "textures/TwoTone.png"
         }
       }
     },

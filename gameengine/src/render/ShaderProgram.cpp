@@ -196,7 +196,7 @@ void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //enlarging filter
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	GLuint uniform_id = this->RegisterUniform(name);
 	glUniform1i(uniform_id, index);

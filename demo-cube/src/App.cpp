@@ -7,6 +7,8 @@ bool App::OnInit()
 {
 	wxMessageBox("Inject debuggers (RenderDoc etc) if you are using them into this process before clicking OK", "Inject debuggers");
 
+	wxInitAllImageHandlers();
+
 	this->m_frame_main = new Main();
 	this->m_frame_main->Show();
 
