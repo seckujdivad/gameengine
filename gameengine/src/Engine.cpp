@@ -103,9 +103,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		//load shader
 		ShaderProgram* shader_program = new ShaderProgram({
-			{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
-			{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
-			}, {});
+				{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
+				{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
+			},
+			{
+				{"POINT_LIGHT_NUM", "1"}
+			});
 		
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
 

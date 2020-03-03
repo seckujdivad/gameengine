@@ -62,6 +62,7 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	std::string shader_file_contents;
 	std::ifstream shader_file;
 	std::string line;
+	std::string line0;
 
 	//load shader from file
 	shader_file_contents = "";
@@ -70,7 +71,14 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	{
 		while (std::getline(shader_file, line))
 		{
-			shader_file_contents = shader_file_contents + line + "\n";
+			if (line0 == "")
+			{
+				line0 = line;
+			}
+			else
+			{
+				shader_file_contents = shader_file_contents + line + "\n";
+			}
 		}
 	}
 	else
@@ -81,8 +89,10 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	//add preprocessor defines
 	for (size_t i = 0; i < preprocessor_defines.size(); i++)
 	{
-		shader_file_contents = "#define " + std::get<0>(preprocessor_defines.at(i)) + " " + std::get<1>(preprocessor_defines.at(i)) + ";" + shader_file_contents;
+		shader_file_contents = "#define " + std::get<0>(preprocessor_defines.at(i)) + " " + std::get<1>(preprocessor_defines.at(i)) + "\n" + shader_file_contents;
 	}
+
+	shader_file_contents = line0 + "\n" + shader_file_contents;
 
 	const char* shader_src = shader_file_contents.c_str();
 
