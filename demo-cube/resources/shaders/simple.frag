@@ -26,6 +26,10 @@ uniform vec4 cam_translate;
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 
+uniform vec3 mat_diffuse;
+uniform vec3 mat_specular;
+uniform float mat_specular_highlight;
+
 //textures
 uniform sampler2D colourTexture;
 
@@ -35,8 +39,7 @@ uniform vec3 light_ambient;
 struct PointLight
 {
 	vec3 position;
-	vec3 diffuse;
-	vec3 specular;
+	vec3 intensity;
 };
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
@@ -65,12 +68,12 @@ void main()
 	{
 		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz);
 		diffuse_intensity = max(dot(normal, fragtolight), 0.0f);
-		frag_intensity = frag_intensity + (diffuse_intensity * light_points[i].diffuse);
+		frag_intensity = frag_intensity + (diffuse_intensity * mat_diffuse * light_points[i].intensity);
 
 		fragtocam = normalize(vec3(cam_translate) - globalSceneSpacePos.xyz);
 		perfect_reflection = reflect(0 - fragtolight, normal);
-		specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), 32);
-		frag_intensity = frag_intensity + (specular_intensity * light_points[i].specular);
+		specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), mat_specular_highlight);
+		frag_intensity = frag_intensity + (specular_intensity * mat_specular * light_points[i].intensity);
 	}
 
 	//apply lighting to fragment

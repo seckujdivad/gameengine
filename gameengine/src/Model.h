@@ -16,6 +16,7 @@
 
 #include "Entity.h"
 #include "render/ShaderProgram.h"
+#include "Material.h"
 
 class Model : public Entity
 {
@@ -35,6 +36,8 @@ private:
 	GLuint m_vao = NULL;
 	std::vector<GLuint> m_vertex_buffers;
 	std::vector<GLint> m_vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
+
+	Material m_material;
 
 public:
 	Model();
@@ -77,4 +80,6 @@ public:
 	ShaderProgram* GetShaderProgram();
 	void BindVAO();
 	void DrawVBOs();
+
+	void SetMaterial(Material material);
 };

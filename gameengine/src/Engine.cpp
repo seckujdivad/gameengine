@@ -71,12 +71,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	{
 		PointLight* pointlight = new PointLight(num_point_lights);
 		pointlight->SetIdentifier(it.value()["name"].get<std::string>());
-		pointlight->SetDiffuse(glm::vec3(it.value()["diffuse"][0].get<float>(),
-			it.value()["diffuse"][1].get<float>(),
-			it.value()["diffuse"][2].get<float>()));
-		pointlight->SetSpecular(glm::vec3(it.value()["specular"][0].get<float>(),
-			it.value()["specular"][1].get<float>(),
-			it.value()["specular"][2].get<float>()));
+		pointlight->SetIntensity(glm::vec3(it.value()["intensity"][0].get<float>(),
+			it.value()["intensity"][1].get<float>(),
+			it.value()["intensity"][2].get<float>()));
 		pointlight->SetPosition(0, it.value()["position"][0].get<float>());
 		pointlight->SetPosition(1, it.value()["position"][1].get<float>());
 		pointlight->SetPosition(2, it.value()["position"][2].get<float>());
@@ -131,6 +128,17 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			{
 				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)}
 			});
+		
+		Material mat;
+		mat.SetDiffuse(glm::vec3(it.value()["shader"]["phong"]["diffuse"][0].get<float>(),
+			it.value()["shader"]["phong"]["diffuse"][1].get<float>(),
+			it.value()["shader"]["phong"]["diffuse"][2].get<float>()));
+		mat.SetSpecular(glm::vec3(it.value()["shader"]["phong"]["specular"][0].get<float>(),
+			it.value()["shader"]["phong"]["specular"][1].get<float>(),
+			it.value()["shader"]["phong"]["specular"][2].get<float>()));
+		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
+
+		model->SetMaterial(mat);
 		
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
 

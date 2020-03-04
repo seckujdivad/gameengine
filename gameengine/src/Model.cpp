@@ -473,6 +473,8 @@ void Model::RegisterUniforms()
 	this->m_shader_program->RegisterUniform("mdl_rotate");
 	this->m_shader_program->RegisterUniform("mdl_translate");
 	this->m_shader_program->RegisterUniform("mdl_scale");
+
+	this->m_material.RegisterUniforms(this->m_shader_program);
 }
 
 void Model::SetUniforms()
@@ -480,6 +482,8 @@ void Model::SetUniforms()
 	glUniformMatrix4fv(this->m_shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_position_rotate_matrix));
 	glUniformMatrix4fv(this->m_shader_program->GetUniform("mdl_scale"), 1, GL_FALSE, glm::value_ptr(this->m_position_scale_matrix));
 	glUniform4fv(this->m_shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->m_position_translate_vector));
+
+	this->m_material.SetUniforms(this->m_shader_program);
 }
 
 void Model::SetShaderProgram(ShaderProgram* shader_program)
@@ -509,4 +513,9 @@ void Model::DrawVBOs()
 		glBindBuffer(GL_ARRAY_BUFFER, this->m_vertex_buffers.at(j));
 		glDrawArrays(this->m_triangle_mode, 0, this->m_vertex_buffers_count.at(j));
 	}
+}
+
+void Model::SetMaterial(Material material)
+{
+	this->m_material = material;
 }

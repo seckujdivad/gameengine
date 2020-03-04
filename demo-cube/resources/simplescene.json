@@ -30,6 +30,11 @@
         "fragment": "simple",
         "textures": {
           "colour": "textures/white.png"
+        },
+        "phong": {
+          "diffuse": [ 0.4, 0.4, 0.4 ],
+          "specular": [ 0.4, 0.4, 0.4 ],
+          "specular highlight": 32
         }
       }
     },
@@ -44,6 +49,11 @@
         "fragment": "simple",
         "textures": {
           "colour": "textures/unnamed.jpg"
+        },
+        "phong": {
+          "diffuse": [ 0.4, 0.4, 0.4 ],
+          "specular": [ 0.4, 0.4, 0.4 ],
+          "specular highlight": 32
         }
       }
     }
@@ -70,8 +80,7 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "diffuse": [ 0.4, 0.4, 0.4 ],
-        "specular": [ 0.4, 0.4, 0.4 ]
+        "intensity": [ 1.0, 1.0, 1.0 ]
       }
     ]
   }
