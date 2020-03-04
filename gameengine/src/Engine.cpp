@@ -56,7 +56,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	Scene* scene = new Scene(main_camera);
 
 	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
-	scene->SetAmbientLight(glm::vec3(config["lighting"]["ambient"][0].get<float>(), config["lighting"]["ambient"][1].get<float>(), config["lighting"]["ambient"][2].get<float>()));
 	
 	// add cameras to scene
 	for (size_t i = 0; i < cameras.size(); i++)
@@ -64,6 +63,14 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		scene->AddCamera(cameras.at(i));
 	}
 
+	//load lighting
+	scene->SetAmbientLight(glm::vec3(config["lighting"]["ambient"][0].get<float>(), config["lighting"]["ambient"][1].get<float>(), config["lighting"]["ambient"][2].get<float>()));
+
+	for (auto it = config["lighting"]["point lights"].begin(); it != config["lighting"]["point lights"].end(); it++)
+	{
+		PointLight* 
+	}
+	
 	// create model object library
 	std::map<std::string, Model*> model_lib;
 	Model* model = nullptr;
