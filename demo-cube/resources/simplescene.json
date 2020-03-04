@@ -70,8 +70,8 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "diffuse": [ 0.8, 0.8, 0.8 ],
-        "specular": [ 0.1, 0.1, 0.1 ]
+        "diffuse": [ 0.4, 0.4, 0.4 ],
+        "specular": [ 0.4, 0.4, 0.4 ]
       }
     ]
   }
