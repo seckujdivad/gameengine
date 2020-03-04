@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "Camera.h"
 #include "render/EngineCanvas.h"
+#include "PointLight.h"
 
 class EngineCanvas;
 
@@ -23,6 +24,7 @@ private:
 
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
+	int GetPointLightIndex(PointLight* pointlight);
 	
 public:
 	Scene(Camera* active_camera);
@@ -33,6 +35,7 @@ public:
 
 	std::vector<Model*> models;
 	std::vector<Camera*> cameras;
+	std::vector<PointLight*> pointlights;
 
 	void AddModel(Model* model);
 	void RemoveModel(Model* model);
@@ -40,6 +43,8 @@ public:
 	void RemoveCamera(Camera* camera);
 	void SetActiveCamera(Camera* camera);
 	Camera* GetActiveCamera();
+	void AddPointLight(PointLight* pointlight);
+	void RemovePointLight(PointLight* pointlight);
 
 	size_t NumModels();
 	size_t NumCameras();

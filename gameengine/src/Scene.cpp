@@ -18,6 +18,11 @@ Scene::~Scene()
 	{
 		delete this->cameras.at(i);
 	}
+
+	for (size_t i = 0; i < this->pointlights.size(); i++)
+	{
+		delete this->pointlights.at(i);
+	}
 }
 
 int Scene::GetModelIndex(Model* model)
@@ -37,6 +42,18 @@ int Scene::GetCameraIndex(Camera* camera)
 	for (size_t i = 0; i < this->cameras.size(); i++)
 	{
 		if (camera == this->cameras.at(i))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+int Scene::GetPointLightIndex(PointLight* pointlight)
+{
+	for (size_t i = 0; i < this->pointlights.size(); i++)
+	{
+		if (pointlight == this->pointlights.at(i))
 		{
 			return i;
 		}
@@ -94,6 +111,24 @@ void Scene::SetActiveCamera(Camera* camera)
 Camera* Scene::GetActiveCamera()
 {
 	return this->m_active_camera;
+}
+
+void Scene::AddPointLight(PointLight* pointlight)
+{
+	this->pointlights.push_back(pointlight);
+}
+
+void Scene::RemovePointLight(PointLight* pointlight)
+{
+	int pointlight_index = this->GetPointLightIndex(pointlight);
+	if (pointlight_index == -1)
+	{
+		throw std::runtime_error("PointLight doesn't exist in this scene");
+	}
+	else
+	{
+		this->pointlights.erase(this->pointlights.begin() + pointlight_index);
+	}
 }
 
 size_t Scene::NumModels()
