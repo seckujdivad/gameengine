@@ -418,7 +418,7 @@ void Model::GenPosMat()
 	this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	this->m_position_scale_matrix = glm::mat4(1.0f);
-	this->m_position_scale_matrix = glm::scale(this->m_position_rotate_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
+	this->m_position_scale_matrix = glm::scale(this->m_position_scale_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
 
 	this->m_position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
 }
