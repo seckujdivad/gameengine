@@ -53,7 +53,15 @@ void Scene::AddModel(Model* model)
 
 void Scene::RemoveModel(Model* model)
 {
-	this->models.erase(this->models.begin() + this->GetModelIndex(model));
+	int model_index = this->GetModelIndex(model);
+	if (model_index == -1)
+	{
+		throw std::runtime_error("Model doesn't exist in this scene");
+	}
+	else
+	{
+		this->models.erase(this->models.begin() + model_index);
+	}
 }
 
 void Scene::AddCamera(Camera* camera)
@@ -63,6 +71,19 @@ void Scene::AddCamera(Camera* camera)
 
 void Scene::RemoveCamera(Camera* camera)
 {
+	int camera_index = this->GetCameraIndex(camera);
+	if (camera_index == -1)
+	{
+		throw std::runtime_error("Camera doesn't exist in this scene");
+	}
+	else if (camera == this->m_active_camera)
+	{
+		throw std::runtime_error("Can't remove the active camera");
+	}
+	else
+	{
+		this->cameras.erase(this->cameras.begin() + camera_index);
+	}
 }
 
 void Scene::SetActiveCamera(Camera* camera)
