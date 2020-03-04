@@ -18,6 +18,14 @@ in vec4 globalMdlSpaceNormal;
 in vec4 globalSceneSpaceNormal;
 in vec4 globalCamSpaceNormal;
 
+uniform vec4 mdl_translate;
+uniform mat4 mdl_rotate;
+uniform mat4 mdl_scale;
+
+uniform vec4 cam_translate;
+uniform mat4 cam_rotate;
+uniform mat4 cam_persp;
+
 //textures
 uniform sampler2D colourTexture;
 
@@ -45,19 +53,24 @@ void main()
 
 	// diffuse
 	vec3 normal = normalize(globalSceneSpaceNormal.xyz);
-	vec3 lightpos;
 
 	float diffuse_intensity;
-	float dotproduct;
+	vec3 fragtolight;
+
+	float specular_intensity;
+	vec3 fragtocam;
+	vec3 perfect_reflection;
 
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
-		lightpos = light_points[i].position;
-
-		dotproduct = dot(normal, normalize(lightpos - globalSceneSpacePos.xyz));
-		diffuse_intensity = max(dotproduct, 0.0f);
-
+		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz);
+		diffuse_intensity = max(dot(normal, fragtolight), 0.0f);
 		frag_intensity = frag_intensity + (diffuse_intensity * light_points[i].diffuse);
+
+		fragtocam = normalize(vec3(cam_translate) - globalSceneSpacePos.xyz);
+		perfect_reflection = reflect(0 - fragtolight, normal);
+		specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), 32);
+		frag_intensity = frag_intensity + (specular_intensity * light_points[i].specular);
 	}
 
 	//apply lighting to fragment
