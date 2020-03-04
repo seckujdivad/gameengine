@@ -66,9 +66,21 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	//load lighting
 	scene->SetAmbientLight(glm::vec3(config["lighting"]["ambient"][0].get<float>(), config["lighting"]["ambient"][1].get<float>(), config["lighting"]["ambient"][2].get<float>()));
 
+	int num_point_lights = 0;
 	for (auto it = config["lighting"]["point lights"].begin(); it != config["lighting"]["point lights"].end(); it++)
 	{
-		PointLight* 
+		PointLight* pointlight = new PointLight(num_point_lights);
+		pointlight->SetIdentifier(it.value()["name"].get<std::string>());
+		pointlight->SetDiffuse(glm::vec3(it.value()["diffuse"][0].get<float>(),
+			it.value()["diffuse"][1].get<float>(),
+			it.value()["diffuse"][2].get<float>()));
+		pointlight->SetSpecular(glm::vec3(it.value()["specular"][0].get<float>(),
+			it.value()["specular"][1].get<float>(),
+			it.value()["specular"][2].get<float>()));
+
+		scene->AddPointLight(pointlight);
+
+		num_point_lights++;
 	}
 	
 	// create model object library
@@ -114,7 +126,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 				{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
 			},
 			{
-				{"POINT_LIGHT_NUM", "1"}
+				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)}
 			});
 		
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
