@@ -186,6 +186,11 @@ void Scene::Render(EngineCanvas* canvas)
 		this->m_active_camera->SetUniforms(this->models.at(i)->GetShaderProgram());
 		this->models.at(i)->SetUniforms();
 
+		for (size_t j = 0; j < this->pointlights.size(); j++)
+		{
+			this->pointlights.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
+		}
+
 		this->models.at(i)->DrawVBOs();
 	}
 }
@@ -201,6 +206,11 @@ void Scene::PushUniforms()
 		for (size_t j = 0; j < this->cameras.size(); j++)
 		{
 			this->cameras.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
+		}
+
+		for (size_t j = 0; j < this->pointlights.size(); j++)
+		{
+			this->pointlights.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 		}
 	}
 }
