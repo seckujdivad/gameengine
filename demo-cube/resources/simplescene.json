@@ -75,12 +75,12 @@
     }
   },
   "lighting": {
-    "ambient": [ 0.1, 0.1, 0.1 ],
+    "ambient": [ 0.3, 0.3, 0.3 ],
     "point lights": [
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "intensity": [ 1.0, 1.0, 1.0 ]
+        "intensity": [ 2.0, 2.0, 0.0 ]
       }
     ]
   }
