@@ -163,6 +163,7 @@
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\PointLight.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
+    <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\PointLight.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
