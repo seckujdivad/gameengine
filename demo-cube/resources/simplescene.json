@@ -29,7 +29,7 @@
         "vertex": "simple",
         "fragment": "simple",
         "textures": {
-          "colour": "textures/sky.jpg"
+          "colour": "textures/white.png"
         }
       }
     },
@@ -65,11 +65,12 @@
     }
   },
   "lighting": {
-    "ambient": [ 0.8, 0.8, 0.8 ],
+    "ambient": [ 0.1, 0.1, 0.1 ],
     "point lights": [
       {
         "name": "simple light",
-        "diffuse": [ 0.1, 0.1, 0.1 ],
+        "position": [ 5, -5, 0 ],
+        "diffuse": [ 0.8, 0.8, 0.8 ],
         "specular": [ 0.1, 0.1, 0.1 ]
       }
     ]
