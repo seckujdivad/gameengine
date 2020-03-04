@@ -77,6 +77,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		pointlight->SetSpecular(glm::vec3(it.value()["specular"][0].get<float>(),
 			it.value()["specular"][1].get<float>(),
 			it.value()["specular"][2].get<float>()));
+		pointlight->SetPosition(0, it.value()["position"][0].get<float>());
+		pointlight->SetPosition(1, it.value()["position"][1].get<float>());
+		pointlight->SetPosition(2, it.value()["position"][2].get<float>());
 
 		scene->AddPointLight(pointlight);
 
