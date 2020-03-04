@@ -3,10 +3,15 @@ layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inUV;
 
-out vec3 globalPos;
-out vec3 globalNormal;
-out vec3 globalTransformedNormal;
+out vec4 globalMdlSpacePos;
+out vec4 globalSceneSpacePos;
+out vec4 globalCamSpacePos;
+
 out vec2 globalUV;
+
+out vec4 globalMdlSpaceNormal;
+out vec4 globalSceneSpaceNormal;
+out vec4 globalCamSpaceNormal;
 
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
@@ -18,16 +23,25 @@ uniform mat4 cam_persp;
 
 void main()
 {
-	gl_Position = vec4(inPos.xyz, 1.0f);
-	gl_Position = mdl_scale * gl_Position;
-	gl_Position = mdl_rotate * gl_Position;
-	gl_Position = gl_Position + mdl_translate + cam_translate;
-	gl_Position = cam_rotate * gl_Position;
-	gl_Position = cam_persp * gl_Position;
+	//vertex transformations
+	globalMdlSpacePos = vec4(inPos.xyz, 1.0f);
 
-	globalTransformedNormal = (cam_persp * cam_rotate * mdl_rotate * vec4(inPos.xyz, 0.0f)).xyz;
+	// model
+	globalSceneSpacePos = mdl_scale * globalMdlSpacePos;
+	globalSceneSpacePos = mdl_rotate * globalSceneSpacePos;
+	globalSceneSpacePos = globalSceneSpacePos + mdl_translate;
 
-	globalPos = inPos;
-	globalNormal = inNormal;
+	// camera
+	globalCamSpacePos = globalSceneSpacePos + cam_translate;
+	globalCamSpacePos = cam_rotate * globalCamSpacePos;
+
+	// perspective
+	gl_Position = cam_persp * globalCamSpacePos;
+
+	//outputs
+	globalMdlSpaceNormal = vec4(inNormal.xyz, 1.0f);
+	globalSceneSpaceNormal = mdl_rotate * globalMdlSpaceNormal;
+	globalCamSpaceNormal = cam_rotate * globalSceneSpaceNormal;
+	
 	globalUV = inUV;
 }
