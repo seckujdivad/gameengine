@@ -57,23 +57,26 @@ void main()
 	// diffuse
 	vec3 normal = normalize(globalSceneSpaceNormal.xyz);
 
+	//vars for loop
 	float diffuse_intensity;
-	vec3 fragtolight;
-
 	float specular_intensity;
+	vec3 fragtolight;
 	vec3 fragtocam;
 	vec3 perfect_reflection;
 
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
-		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz);
-		diffuse_intensity = max(dot(normal, fragtolight), 0.0f);
-		frag_intensity = frag_intensity + (diffuse_intensity * mat_diffuse * light_points[i].intensity);
+		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz); //get direction from the fragment to the light source
+		fragtocam = normalize(vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
 
-		fragtocam = normalize(vec3(cam_translate) - globalSceneSpacePos.xyz);
-		perfect_reflection = reflect(0 - fragtolight, normal);
-		specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), mat_specular_highlight);
-		frag_intensity = frag_intensity + (specular_intensity * mat_specular * light_points[i].intensity);
+		//diffuse
+		diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
+		frag_intensity = frag_intensity + (diffuse_intensity * mat_diffuse * light_points[i].intensity); //apply diffuse intensity and material diffuse colour to fragment intensity
+		
+		//specular
+		perfect_reflection = reflect(0 - fragtolight, normal); //calculate the direction that light bounces off the surface at
+		specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), mat_specular_highlight); //use angle between the ideal bounce direction and the bounce direction to reach the camera to get the intensity
+		frag_intensity = frag_intensity + (specular_intensity * mat_specular * light_points[i].intensity); //apply specular intensity and material specular colour to fragment intensity
 	}
 
 	//apply lighting to fragment
