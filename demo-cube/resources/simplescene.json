@@ -22,9 +22,9 @@
     {
       "model": "cube",
       "name": "simple cube",
-      "position": [ 5, 0, 0 ],
+      "position": [ 15, -3, 0 ],
       "rotation": [ 0, 0, 0 ],
-      "scale": [ 1, 1, 1 ],
+      "scale": [ 5, 5, 5 ],
       "shader": {
         "vertex": "simple",
         "fragment": "simple",
@@ -80,7 +80,9 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "intensity": [ 2.0, 2.0, 0.0 ]
+        "intensity": [ 2.0, 2.0, 0.0 ],
+        "shadows": true,
+        "shadow texture": [ 1024, 1024 ]
       }
     ]
   }
