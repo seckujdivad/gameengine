@@ -178,6 +178,7 @@ void Scene::Render(EngineCanvas* canvas)
 	}
 	
 	//calculate shadows
+	glCullFace(GL_FRONT);
 	for (size_t i = 0; i < this->pointlights.size(); i++)
 	{
 		if (this->pointlights.at(i)->ShadowsEnabled())
@@ -197,6 +198,7 @@ void Scene::Render(EngineCanvas* canvas)
 		}
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glCullFace(GL_BACK);
 
 	glViewport(0, 0, (GLint)canvas->GetSize().x, (GLint)canvas->GetSize().y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

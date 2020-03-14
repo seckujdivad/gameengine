@@ -57,7 +57,7 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 	
 	if (depth_sample == 1.0f)
 	{
-		return 1.0f;
+		return 0.0f;
 	}
 	else if (frag_depth - light_points[lightindex].shadow_bias > corrected_depth_sample)
 	{

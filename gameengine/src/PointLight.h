@@ -24,8 +24,8 @@ private:
 	std::vector<glm::mat4> m_transforms;
 
 	float m_shadow_clip_near = 0.1f;
-	float m_shadow_clip_far = 25.0f;
-	float m_shadow_bias = 0.1f;
+	float m_shadow_clip_far = 100.0f;
+	float m_shadow_bias = 0.0f;
 
 public:
 	PointLight(int light_index);
