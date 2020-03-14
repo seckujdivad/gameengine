@@ -78,6 +78,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		pointlight->SetPosition(1, it.value()["position"][1].get<float>());
 		pointlight->SetPosition(2, it.value()["position"][2].get<float>());
 
+		if (it.value()["shadows"].get<bool>())
+		{
+			pointlight->EnableShadows(it.value()["shadow texture"][0].get<unsigned int>(), it.value()["shadow texture"][1].get<unsigned int>());
+		}
+
 		scene->AddPointLight(pointlight);
 
 		num_point_lights++;
@@ -104,6 +109,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	}
 
 	// clone model objects into scene
+	ShaderProgram* shader_program;
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
 	{
 		model = new Model(*model_lib.at(it.value()["model"].get<std::string>()));
@@ -121,10 +127,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		unsigned char* data = image.GetData();
 
 		//load shader
-		ShaderProgram* shader_program = new ShaderProgram({
-				{path + '/' + config["shaders"]["vertex"][it.value()["shader"]["vertex"].get<std::string>()].get<std::string>(), GL_VERTEX_SHADER},
-				{path + '/' + config["shaders"]["fragment"][it.value()["shader"]["fragment"].get<std::string>()].get<std::string>(), GL_FRAGMENT_SHADER}
-			},
+		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["render"]),
 			{
 				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)}
 			});
@@ -143,6 +146,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
 
 		model->SetShaderProgram(shader_program);
+
+		//load shadow shader
+		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["shadow"]), {});
+		model->SetShadowShaderProgram(shader_program);
+
+		//store model
 		scene->AddModel(model);
 	}
 
@@ -153,4 +162,34 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	}
 
 	return scene;
+}
+
+std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, nlohmann::json config, nlohmann::basic_json<> shader_config)
+{
+	std::vector<std::tuple<std::string, GLenum>> output = {};
+
+	int shader_type;
+	int j = shader_config.size();
+	for (auto it = shader_config.begin(); it != shader_config.end(); it++)
+	{
+		if (it.key() == "vertex")
+		{
+			shader_type = GL_VERTEX_SHADER;
+		}
+		else if (it.key() == "fragment")
+		{
+			shader_type = GL_FRAGMENT_SHADER;
+		}
+		else if (it.key() == "geometry")
+		{
+			shader_type = GL_GEOMETRY_SHADER;
+		}
+		else
+		{
+			throw std::runtime_error("Can't find shader type " + it.value().get<std::string>());
+		}
+		output.push_back({base_path + "/" + config["shaders"][it.key()][shader_config[it.key()].get<std::string>()].get<std::string>(), shader_type});
+	}
+
+	return output;
 }

@@ -42,8 +42,6 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 
 void EngineCanvas::Render()
 {
-	glViewport(0, 0, (GLint)this->GetSize().x, (GLint)this->GetSize().y);
-	
 	if (this->m_scene != nullptr)
 	{
 		this->m_scene->Render(this);

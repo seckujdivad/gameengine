@@ -18,3 +18,5 @@
 using nlohmann::json;
 
 Scene* InitialiseScene(std::string path, std::string filename);
+
+std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, nlohmann::json config, nlohmann::basic_json<> shader_config);

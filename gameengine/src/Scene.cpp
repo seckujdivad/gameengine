@@ -170,15 +170,43 @@ void Scene::ClearAllCameras(bool destroy)
 void Scene::Render(EngineCanvas* canvas)
 {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//generate values
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->GenPosMat();
+	}
+	
+	//calculate shadows
+	for (size_t i = 0; i < this->pointlights.size(); i++)
+	{
+		if (this->pointlights.at(i)->ShadowsEnabled())
+		{
+			this->pointlights.at(i)->InitialiseViewport();
+			this->pointlights.at(i)->SelectFBO();
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			for (size_t j = 0; j < this->models.size(); j++)
+			{
+				this->models.at(j)->GetShadowShaderProgram()->Select();
+				this->models.at(j)->BindVAO();
+				this->models.at(j)->SetShadowUniforms();
+				this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
+				this->models.at(i)->DrawVBOs();
+			}
+		}
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, (GLint)canvas->GetSize().x, (GLint)canvas->GetSize().y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	this->m_active_camera->GenPerspMat((float)canvas->GetSize().x, (float)canvas->GetSize().y);
 	this->m_active_camera->GenViewMat();
-	
+
+	//draw scene
 	for (size_t i = 0; i < this->models.size(); i++)
 	{
-		this->models.at(i)->GenPosMat();
-
 		this->models.at(i)->GetShaderProgram()->Select();
 		this->models.at(i)->BindVAO();
 
@@ -200,6 +228,7 @@ void Scene::PushUniforms()
 	for (size_t i = 0; i < this->models.size(); i++)
 	{
 		this->models.at(i)->RegisterUniforms();
+		this->models.at(i)->RegisterShadowUniforms();
 
 		this->models.at(i)->GetShaderProgram()->RegisterUniform("light_ambient");
 
@@ -211,6 +240,7 @@ void Scene::PushUniforms()
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
 			this->pointlights.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
+			this->pointlights.at(j)->RegisterShadowUniforms(this->models.at(i)->GetShadowShaderProgram());
 		}
 	}
 }

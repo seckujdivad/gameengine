@@ -26,7 +26,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 		glAttachShader(this->m_program_id, shader_ids.at(i));
 	}
 	glLinkProgram(this->m_program_id);
-	glUseProgram(this->m_program_id);
+	//glUseProgram(this->m_program_id);
 
 	//clean up shaders as they have already been linked
 	for (size_t i = 0; i < shader_ids.size(); i++)
@@ -148,7 +148,7 @@ void ShaderProgram::Select()
 			if (this->m_textures[i] != -1)
 			{
 				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
-				glBindTexture(GL_TEXTURE_2D, this->m_textures[i]);
+				glBindTexture(this->m_texture_types[i], this->m_textures[i]);
 			}
 		}
 	}
@@ -180,6 +180,30 @@ GLuint ShaderProgram::GetProgramID()
 
 void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width, int height, int index)
 {
+	this->Select();
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //shrinking filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //enlarging filter
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	this->RegisterTexture(name, texture, GL_TEXTURE_2D, index);
+}
+
+void ShaderProgram::RegisterTexture(std::string name, GLuint texture, GLuint type, int index)
+{
+	this->Select();
+
 	if (index == -1)
 	{
 		for (int i = 0; (i < 16) && (index == -1); i++)
@@ -200,23 +224,9 @@ void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width
 		throw std::runtime_error("Invalid texture index " + std::to_string(index));
 	}
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	//wrapping
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	//filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //shrinking filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //enlarging filter
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
 	GLuint uniform_id = this->RegisterUniform(name);
 	glUniform1i(uniform_id, index);
 
 	this->m_textures[index] = texture;
+	this->m_texture_types[index] = type;
 }

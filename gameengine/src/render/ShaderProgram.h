@@ -23,6 +23,12 @@ private:
 		-1, -1, -1, -1,
 		-1, -1, -1, -1,
 	};
+	int m_texture_types[16] = {
+		-1, -1, -1, -1,
+		-1, -1, -1, -1,
+		-1, -1, -1, -1,
+		-1, -1, -1, -1,
+	};
 
 public:
 	ShaderProgram();
@@ -38,4 +44,5 @@ public:
 	GLuint GetUniform(std::string name);
 
 	void LoadTexture(std::string name, unsigned char* data, int width, int height, int index = -1);
+	void RegisterTexture(std::string name, GLuint texture, GLuint type, int index = -1);
 };

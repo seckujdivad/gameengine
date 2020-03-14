@@ -22,12 +22,19 @@
     {
       "model": "cube",
       "name": "simple cube",
-      "position": [ 15, -3, 0 ],
+      "position": [ 8, -5, -5 ],
       "rotation": [ 0, 0, 0 ],
-      "scale": [ 5, 5, 5 ],
+      "scale": [ 1, 1, 1 ],
       "shader": {
-        "vertex": "simple",
-        "fragment": "simple",
+        "render": {
+          "vertex": "simple",
+          "fragment": "simple"
+        },
+        "shadow": {
+          "vertex": "simple shadow",
+          "fragment": "simple shadow",
+          "geometry": "simple shadow"
+        },
         "textures": {
           "colour": "textures/white.png"
         },
@@ -45,8 +52,15 @@
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
       "shader": {
-        "vertex": "simple",
-        "fragment": "simple",
+        "render": {
+          "vertex": "simple",
+          "fragment": "simple"
+        },
+        "shadow": {
+          "vertex": "simple shadow",
+          "fragment": "simple shadow",
+          "geometry": "simple shadow"
+        },
         "textures": {
           "colour": "textures/unnamed.jpg"
         },
@@ -64,8 +78,15 @@
       "rotation": [ 0, 0, 0 ],
       "scale": [ 25, 25, 1 ],
       "shader": {
-        "vertex": "simple",
-        "fragment": "simple",
+        "render": {
+          "vertex": "simple",
+          "fragment": "simple"
+        },
+        "shadow": {
+          "vertex": "simple shadow",
+          "fragment": "simple shadow",
+          "geometry": "simple shadow"
+        },
         "textures": {
           "colour": "textures/white.png"
         },
@@ -87,10 +108,14 @@
   "shaders": {
     "fragment": {
       "simple": "shaders/simple.frag",
-      "background": "shaders/background.frag"
+      "simple shadow": "shaders/simple_shadow.frag"
     },
     "vertex": {
-      "simple": "shaders/simple.vert"
+      "simple": "shaders/simple.vert",
+      "simple shadow": "shaders/simple_shadow.vert"
+    },
+    "geometry": {
+      "simple shadow": "shaders/simple_shadow.geom"
     }
   },
   "lighting": {

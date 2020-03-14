@@ -71,6 +71,10 @@ Model::~Model()
 	{
 		delete this->m_shader_program;
 	}
+	if (this->m_shadow_shader_program != nullptr)
+	{
+		delete this->m_shadow_shader_program;
+	}
 }
 
 int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
@@ -518,4 +522,33 @@ void Model::DrawVBOs()
 void Model::SetMaterial(Material material)
 {
 	this->m_material = material;
+}
+
+void Model::SetShadowShaderProgram(ShaderProgram* shader_program)
+{
+	if (this->m_shadow_shader_program != nullptr)
+	{
+		delete this->m_shadow_shader_program;
+	}
+
+	this->m_shadow_shader_program = shader_program;
+}
+
+ShaderProgram* Model::GetShadowShaderProgram()
+{
+	return this->m_shadow_shader_program;
+}
+
+void Model::RegisterShadowUniforms()
+{
+	this->m_shadow_shader_program->RegisterUniform("mdl_rotate");
+	this->m_shadow_shader_program->RegisterUniform("mdl_translate");
+	this->m_shadow_shader_program->RegisterUniform("mdl_scale");
+}
+
+void Model::SetShadowUniforms()
+{
+	glUniformMatrix4fv(this->m_shadow_shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_position_rotate_matrix));
+	glUniformMatrix4fv(this->m_shadow_shader_program->GetUniform("mdl_scale"), 1, GL_FALSE, glm::value_ptr(this->m_position_scale_matrix));
+	glUniform4fv(this->m_shadow_shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->m_position_translate_vector));
 }

@@ -27,6 +27,7 @@ private:
 	std::vector<std::vector<glm::vec2>*> m_face_uvs;
 
 	ShaderProgram* m_shader_program = nullptr;
+	ShaderProgram* m_shadow_shader_program = nullptr;
 
 	glm::mat4 m_position_rotate_matrix;
 	glm::mat4 m_position_scale_matrix;
@@ -76,8 +77,13 @@ public:
 	void RegisterUniforms();
 	void SetUniforms();
 
+	void RegisterShadowUniforms();
+	void SetShadowUniforms();
+
 	void SetShaderProgram(ShaderProgram* shader_program);
 	ShaderProgram* GetShaderProgram();
+	void SetShadowShaderProgram(ShaderProgram* shader_program);
+	ShaderProgram* GetShadowShaderProgram();
 	void BindVAO();
 	void DrawVBOs();
 
