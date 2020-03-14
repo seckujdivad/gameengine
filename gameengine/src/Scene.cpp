@@ -192,7 +192,7 @@ void Scene::Render(EngineCanvas* canvas)
 				this->models.at(j)->BindVAO();
 				this->models.at(j)->SetShadowUniforms();
 				this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
-				this->models.at(i)->DrawVBOs();
+				this->models.at(j)->DrawVBOs();
 			}
 		}
 	}
