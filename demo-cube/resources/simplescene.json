@@ -124,7 +124,7 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "intensity": [ 2.0, 2.0, 0.0 ],
+        "intensity": [ 2.0, 2.0, 2.0 ],
         "shadows": true,
         "shadow texture": [ 2048, 2048 ],
         "shadow clips": [ 0.1, 100 ]
