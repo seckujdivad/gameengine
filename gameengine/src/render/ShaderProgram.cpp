@@ -195,7 +195,7 @@ void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //enlarging filter
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	//glGenerateMipmap(GL_TEXTURE_2D);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	this->RegisterTexture(name, texture, GL_TEXTURE_2D, index);
 }
