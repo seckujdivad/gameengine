@@ -126,7 +126,8 @@
         "position": [ 5, -5, 0 ],
         "intensity": [ 2.0, 2.0, 0.0 ],
         "shadows": true,
-        "shadow texture": [ 1024, 1024 ]
+        "shadow texture": [ 1024, 1024 ],
+        "shadow clips": [ 0.1, 100 ]
       }
     ]
   }

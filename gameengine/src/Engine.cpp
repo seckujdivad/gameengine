@@ -80,7 +80,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		if (it.value()["shadows"].get<bool>())
 		{
-			pointlight->EnableShadows(it.value()["shadow texture"][0].get<unsigned int>(), it.value()["shadow texture"][1].get<unsigned int>());
+			pointlight->EnableShadows(it.value()["shadow texture"][0].get<unsigned int>(), it.value()["shadow texture"][1].get<unsigned int>(),
+				it.value()["shadow clips"][0].get<float>(), it.value()["shadow clips"][1].get<float>());
 		}
 
 		scene->AddPointLight(pointlight);

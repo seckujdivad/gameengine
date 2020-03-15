@@ -18,7 +18,7 @@ void PointLight::SetIntensity(glm::vec3 intensity)
 	this->m_intensity = intensity;
 }
 
-void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int shadow_texture_height)
+void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int shadow_texture_height, float near_plane, float far_plane)
 {
 	if (this->m_shadows_enabled)
 	{
@@ -28,6 +28,8 @@ void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int s
 	this->m_shadowtex_width = shadow_texture_width;
 	this->m_shadowtex_height = shadow_texture_height;
 	this->m_shadows_enabled = true;
+	this->m_shadow_clip_near = near_plane;
+	this->m_shadow_clip_far = far_plane;
 
 	//make cubemap
 	glGenTextures(1, &this->m_depth_cubemap);
