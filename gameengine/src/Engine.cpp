@@ -139,12 +139,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetMaterial(mat);
 
 		// load texture
-		wxImage image;
-		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
-
-		unsigned char* data = image.GetData();
 		
-		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
+		auto a = it.value()["shader"]["textures"]["colour"];
+
+		wxImage image = CreateTexture(path, it.value()["shader"]["textures"]["colour"]);
+		shader_program->LoadTexture("colourTexture", image.GetData(), image.GetWidth(), image.GetHeight(), 0);
 
 		// store shader program
 		model->SetShaderProgram(shader_program);
@@ -194,4 +193,33 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 	}
 
 	return output;
+}
+
+wxImage CreateTexture(std::string base_path, json image_specifier)
+{
+	wxImage image;
+
+	if (image_specifier.is_string()) //image is given as a file path
+	{
+		image.LoadFile(base_path + '/' + image_specifier.get<std::string>(), wxBITMAP_TYPE_ANY);
+	}
+	else if (image_specifier.is_array() && (image_specifier.size() == 3))
+	{
+		float r = image_specifier[0].get<float>();
+		float g = image_specifier[1].get<float>();
+		float b = image_specifier[2].get<float>();
+
+		unsigned char* data = (unsigned char*)malloc(3 * sizeof(unsigned char));
+		data[0] = (unsigned char)(r * ((2 << 7) - 1));
+		data[1] = (unsigned char)(g * ((2 << 7) - 1));
+		data[2] = (unsigned char)(b * ((2 << 7) - 1));
+		
+		image.SetData(data, 1, 1);
+	}
+	else
+	{
+		throw std::runtime_error("Can't load image: specifier is invalid");
+	}
+	
+	return image;
 }
