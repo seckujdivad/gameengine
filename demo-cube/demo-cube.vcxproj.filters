@@ -67,7 +67,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\wood.bmp">
+    <Image Include="resources\textures\sky.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="resources\textures\TwoTone.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="resources\textures\unnamed.jpg">
       <Filter>Resource Files\textures</Filter>
     </Image>
   </ItemGroup>

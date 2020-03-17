@@ -36,7 +36,7 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": "textures/white.png"
+          "colour": [ 1, 1, 1 ]
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
