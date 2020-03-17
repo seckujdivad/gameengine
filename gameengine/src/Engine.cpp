@@ -121,12 +121,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		model->SetIdentifier(it.value()["name"].get<std::string>());
 
-		//load texture
-		wxImage image;
-		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
-
-		unsigned char* data = image.GetData();
-
 		//load shader
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["render"]),
 			{
@@ -143,9 +137,16 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
 
 		model->SetMaterial(mat);
+
+		// load texture
+		wxImage image;
+		image.LoadFile(path + '/' + it.value()["shader"]["textures"]["colour"].get<std::string>(), wxBITMAP_TYPE_ANY);
+
+		unsigned char* data = image.GetData();
 		
 		shader_program->LoadTexture("colourTexture", data, image.GetWidth(), image.GetHeight(), 0);
 
+		// store shader program
 		model->SetShaderProgram(shader_program);
 
 		//load shadow shader
