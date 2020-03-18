@@ -195,9 +195,14 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 	return output;
 }
 
-wxImage CreateTexture(std::string base_path, json image_specifier)
+wxImage CreateTexture(std::string base_path, json image_specifier, float default_r, float default_g, float default_b)
 {
 	wxImage image;
+	
+	float r;
+	float g;
+	float b;
+	bool generate_texture = false;
 
 	if (image_specifier.is_string()) //image is given as a file path
 	{
@@ -205,20 +210,29 @@ wxImage CreateTexture(std::string base_path, json image_specifier)
 	}
 	else if (image_specifier.is_array() && (image_specifier.size() == 3))
 	{
-		float r = image_specifier[0].get<float>();
-		float g = image_specifier[1].get<float>();
-		float b = image_specifier[2].get<float>();
+		r = image_specifier[0].get<float>();
+		g = image_specifier[1].get<float>();
+		b = image_specifier[2].get<float>();
 
+		generate_texture = true;
+	}
+	else
+	{
+		r = default_r;
+		g = default_g;
+		b = default_b;
+
+		generate_texture = true;
+	}
+
+	if (generate_texture)
+	{
 		unsigned char* data = (unsigned char*)malloc(3 * sizeof(unsigned char));
 		data[0] = (unsigned char)(r * ((2 << 7) - 1));
 		data[1] = (unsigned char)(g * ((2 << 7) - 1));
 		data[2] = (unsigned char)(b * ((2 << 7) - 1));
-		
+
 		image.SetData(data, 1, 1);
-	}
-	else
-	{
-		throw std::runtime_error("Can't load image: specifier is invalid");
 	}
 	
 	return image;
