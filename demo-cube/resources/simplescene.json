@@ -36,7 +36,8 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": [ 1, 1, 1 ]
+          "colour": [ 1, 1, 1 ],
+          "normal": "textures/cube_normals.png"
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],

@@ -32,6 +32,7 @@ uniform float mat_specular_highlight;
 
 //textures
 uniform sampler2D colourTexture;
+uniform sampler2D normalTexture;
 
 //lighting
 uniform vec3 light_ambient;
@@ -73,6 +74,8 @@ void main()
 {
 	//get base colour
 	frag_out = texture(colourTexture, globalUV);
+
+	//apply normal map
 	
 	//calculate light intensity
 	// ambient

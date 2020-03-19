@@ -76,5 +76,8 @@
     <Image Include="resources\textures\unnamed.jpg">
       <Filter>Resource Files\textures</Filter>
     </Image>
+    <Image Include="resources\textures\cube_normals.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
