@@ -53,6 +53,11 @@ uniform PointLight light_points[POINT_LIGHT_NUM];
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
+	if (!light_points[lightindex].shadows_enabled)
+	{
+		return 1.0f;
+	}
+
 	vec3 lighttofrag = fragpos - light_points[lightindex].position;
 	float depth_sample = texture(light_points[lightindex].shadow_cubemap, lighttofrag).r;
 	float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
