@@ -18,6 +18,8 @@ in vec4 globalMdlSpaceNormal;
 in vec4 globalSceneSpaceNormal;
 in vec4 globalCamSpaceNormal;
 
+in mat3 globalNormalTBN;
+
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
 uniform mat4 mdl_scale;
@@ -83,7 +85,10 @@ void main()
 	frag_intensity = frag_intensity + light_ambient;
 
 	// diffuse
-	vec3 normal = normalize(globalSceneSpaceNormal.xyz);
+	vec3 sample_normal = texture(normalTexture, globalUV).rgb;
+	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
+
+	vec3 normal = globalNormalTBN * sample_normal;
 
 	//vars for loop
 	float diffuse_intensity;

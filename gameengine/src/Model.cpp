@@ -285,6 +285,13 @@ std::vector<GLfloat> Model::GetTriangles()
 
 	std::vector<glm::vec2>* face_uv;
 
+	glm::vec3 tangent;
+	glm::vec3 bitangent;
+	glm::vec3 edge1;
+	glm::vec3 edge2;
+	glm::vec2 edgeuv1;
+	glm::vec2 edgeuv2;
+
 	for (size_t i = 0; i < this->m_faces.size(); i++)
 	{
 		face_vertex_indices = this->m_faces.at(i);
@@ -316,6 +323,20 @@ std::vector<GLfloat> Model::GetTriangles()
 					tri_vecs.push_back(glm::vec3(vertex->at(0), vertex->at(1), vertex->at(2)));
 				}
 
+				//calculate tangent and bitangent
+				edge1 = tri_vecs.at(1) - tri_vecs.at(0);
+				edge2 = tri_vecs.at(2) - tri_vecs.at(0);
+				edgeuv1 = face_tri_uvs.at(j).at(1) - face_tri_uvs.at(j).at(0);
+				edgeuv2 = face_tri_uvs.at(j).at(2) - face_tri_uvs.at(j).at(0);
+
+				tangent.x = (edgeuv2.y * edge1.x) - (edgeuv1.y * edge2.x);
+				tangent.y = (edgeuv2.y * edge1.y) - (edgeuv1.y * edge2.y);
+				tangent.z = (edgeuv2.y * edge1.z) - (edgeuv1.y * edge2.z);
+
+				bitangent.x = (edgeuv1.x * edge2.x) - (edgeuv2.x * edge1.x);
+				bitangent.y = (edgeuv1.x * edge2.y) - (edgeuv2.x * edge1.y);
+				bitangent.z = (edgeuv1.x * edge2.z) - (edgeuv2.x * edge1.z);
+
 				//calculate ccw normal
 				ccw_normal = glm::cross(tri_vecs.at(1) - tri_vecs.at(0), tri_vecs.at(2) - tri_vecs.at(0)); //follows right hand rule
 				normal_angle_diff = std::abs(std::fmod(std::acos(glm::dot(ccw_normal, face_normal) / (glm::length(ccw_normal) * glm::length(face_normal))) + glm::pi<float>(), glm::pi<float>() * 2.0f) - glm::pi<float>());
@@ -340,6 +361,14 @@ std::vector<GLfloat> Model::GetTriangles()
 
 					triangles.push_back(face_tri_uvs.at(j).at(k).x);
 					triangles.push_back(face_tri_uvs.at(j).at(k).y);
+
+					triangles.push_back(tangent.x);
+					triangles.push_back(tangent.y);
+					triangles.push_back(tangent.z);
+
+					triangles.push_back(bitangent.x);
+					triangles.push_back(bitangent.y);
+					triangles.push_back(bitangent.z);
 				}
 			}
 		}
@@ -460,15 +489,19 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
 		this->m_vertex_buffers.push_back(vertex_buffer);
-		this->m_vertex_buffers_count.push_back(triangles.size() / 3);
+		this->m_vertex_buffers_count.push_back(triangles.size() / 14);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), 0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
 
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(3);
+		glEnableVertexAttribArray(4);
 	}
 }
 

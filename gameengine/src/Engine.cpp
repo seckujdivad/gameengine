@@ -142,10 +142,10 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		
 		auto a = it.value()["shader"]["textures"]["colour"];
 
-		wxImage texture_image = CreateTexture(path, it.value()["shader"]["textures"]["colour"]);
+		wxImage texture_image = CreateTexture(path, it.value()["shader"]["textures"]["colour"], 1.0f, 1.0f, 1.0f);
 		shader_program->LoadTexture("colourTexture", texture_image.GetData(), texture_image.GetWidth(), texture_image.GetHeight());
 
-		wxImage normal_image = CreateTexture(path, it.value()["shader"]["textures"]["normal"], 127.0f / 255.0f, 127.0f / 255.0f, 1.0f);
+		wxImage normal_image = CreateTexture(path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
 		shader_program->LoadTexture("normalTexture", normal_image.GetData(), normal_image.GetWidth(), normal_image.GetHeight());
 
 		// store shader program
