@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wx/wxprec.h>
-#include "GLComponents.h"
+#include "../GLComponents.h"
 
 #include <array>
 #include <string>

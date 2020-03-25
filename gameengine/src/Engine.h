@@ -9,9 +9,9 @@
 #include <map>
 
 #include "GLComponents.h"
-#include "Scene.h"
-#include "Model.h"
-#include "Camera.h"
+#include "scene/Scene.h"
+#include "scene/model/Model.h"
+#include "scene/Camera.h"
 #include "render/ShaderProgram.h"
 #include "loaders/models/PlyLoader.h"
 

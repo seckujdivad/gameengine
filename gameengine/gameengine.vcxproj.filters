@@ -31,6 +31,24 @@
     <Filter Include="Source Files\loaders\models">
       <UniqueIdentifier>{4f70b7ee-b72d-4f2b-bc4f-4a07a6aaa0e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{1880463a-6bf3-4c4c-a90a-206e567f02ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene\light">
+      <UniqueIdentifier>{7b2e8355-9369-421e-a405-a926096e59a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene\model">
+      <UniqueIdentifier>{d67341c9-df2a-4184-be90-1a8851aa82b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{62d10881-699b-49df-a336-f7a961fcb537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\light">
+      <UniqueIdentifier>{807d40ea-ae77-4f1f-be01-fc8c71d87745}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\model">
+      <UniqueIdentifier>{35bc5c87-f89a-498c-b2f9-969056d5e127}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -39,16 +57,7 @@
     <ClInclude Include="src\render\EngineCanvas.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\render\ShaderProgram.h">
@@ -57,40 +66,37 @@
     <ClInclude Include="src\GLComponents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\loaders\models\PlyLoader.h">
       <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
-    <ClInclude Include="src\PointLight.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\scene\model\Material.h">
+      <Filter>Header Files\scene\model</Filter>
     </ClInclude>
-    <ClInclude Include="src\Material.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\scene\model\Model.h">
+      <Filter>Header Files\scene\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\light\PointLight.h">
+      <Filter>Header Files\scene\light</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Camera.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Entity.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Scene.h">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\render\ShaderProgram.cpp">
       <Filter>Source Files\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Entity.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\GLComponents.cpp">
       <Filter>Source Files</Filter>
@@ -98,11 +104,23 @@
     <ClCompile Include="src\loaders\models\PlyLoader.cpp">
       <Filter>Source Files\loaders\models</Filter>
     </ClCompile>
-    <ClCompile Include="src\PointLight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\scene\light\PointLight.cpp">
+      <Filter>Source Files\scene\light</Filter>
     </ClCompile>
-    <ClCompile Include="src\Material.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\scene\model\Material.cpp">
+      <Filter>Source Files\scene\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\Model.cpp">
+      <Filter>Source Files\scene\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Camera.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Entity.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Scene.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

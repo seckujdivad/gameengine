@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wx/wxprec.h>
-#include "GLComponents.h"
+#include "../../GLComponents.h"
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -14,8 +14,8 @@
 #include <string>
 #include <cmath>
 
-#include "Entity.h"
-#include "render/ShaderProgram.h"
+#include "../Entity.h"
+#include "../../render/ShaderProgram.h"
 #include "Material.h"
 
 class Model : public Entity

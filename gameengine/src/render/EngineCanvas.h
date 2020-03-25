@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "../Scene.h"
+#include "../scene/Scene.h"
 
 #ifndef ENGINECANVAS_LOG_PATH
 #define ENGINECANVAS_LOG_PATH "gameengine_GL.log"

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <map>
 
-#include "../../Model.h"
+#include "../../scene/model/Model.h"
 
 struct PlyType
 {

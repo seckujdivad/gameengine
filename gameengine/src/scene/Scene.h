@@ -1,15 +1,15 @@
 #pragma once
 
 #include <wx/wxprec.h>
-#include "GLComponents.h"
+#include "../GLComponents.h"
 
 #include <vector>
 
-#include "render/ShaderProgram.h"
-#include "Model.h"
+#include "../render/ShaderProgram.h"
+#include "model/Model.h"
 #include "Camera.h"
-#include "render/EngineCanvas.h"
-#include "PointLight.h"
+#include "../render/EngineCanvas.h"
+#include "light/PointLight.h"
 
 class EngineCanvas;
 
