@@ -1,37 +1,30 @@
 #include <wx/wxprec.h>
 #include "Entity.h"
 
-Entity::Entity()
+Entity::Entity() : Nameable()
 {
 	this->m_position = { 0.0f, 0.0f, 0.0f };
 	this->m_rotation = { 0.0f, 0.0f, 0.0f };
 	this->m_scale = { 0.0f, 0.0f, 0.0f };
-
-	this->m_identifier = "";
 }
 
-Entity::Entity(Entity& copyfrom)
+Entity::Entity(Entity& copyfrom) : Nameable(copyfrom)
 {
 	this->m_position = copyfrom.GetPosition();
 	this->m_rotation = copyfrom.GetRotation();
 	this->m_scale = copyfrom.GetScale();
+}
 
-	this->m_identifier = copyfrom.GetIdentifier();
+Entity& Entity::operator=(Entity& copyfrom)
+{
+	Nameable::operator=(copyfrom);
+
+	return *this;
 }
 
 Entity::~Entity()
 {
 
-}
-
-void Entity::SetIdentifier(std::string identifier)
-{
-	this->m_identifier = identifier;
-}
-
-std::string Entity::GetIdentifier()
-{
-	return this->m_identifier;
 }
 
 void Entity::SetPosition(GLfloat x, GLfloat y, GLfloat z)

@@ -3,26 +3,27 @@
 #include <wx/wxprec.h>
 #include "../GLComponents.h"
 
+#include "Positionable.h"
+#include "Rotatable.h"
+#include "Scalable.h"
+#include "Nameable.h"
+
 #include <array>
 #include <string>
 
 
-class Entity
+class Entity : public Nameable
 {
 private:
 	std::array<GLfloat, 3> m_position;
 	std::array<GLfloat, 3> m_rotation;
 	std::array<GLfloat, 3> m_scale;
 
-	std::string m_identifier;
-
 public:
 	Entity();
 	Entity(Entity& copyfrom);
+	Entity& operator=(Entity& copyfrom);
 	~Entity();
-
-	void SetIdentifier(std::string identifier);
-	std::string GetIdentifier();
 
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
 	void SetPosition(std::array<GLfloat, 3> point);
