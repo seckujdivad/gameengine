@@ -134,7 +134,7 @@ Model* ModelFromPly(std::string path)
 						));
 						vertex_uvs.push_back(glm::vec2(
 							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t")))
+							0.0f - (GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
 						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
