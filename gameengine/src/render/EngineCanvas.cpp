@@ -56,7 +56,7 @@ void EngineCanvas::SetScene(Scene* scene)
 	this->m_scene = scene;
 }
 
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam)
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
 	std::ofstream output_file;
 	output_file.open(ENGINECANVAS_LOG_PATH);
