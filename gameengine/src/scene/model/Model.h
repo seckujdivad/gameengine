@@ -14,11 +14,14 @@
 #include <string>
 #include <cmath>
 
-#include "../Entity.h"
+#include "../Positionable.h"
+#include "../Rotatable.h"
+#include "../Scalable.h"
+#include "../Nameable.h"
 #include "../../render/ShaderProgram.h"
 #include "Material.h"
 
-class Model : public Entity
+class Model : public Positionable, public Rotatable, public Scalable, public Nameable
 {
 private:
 	std::vector<std::vector<GLfloat>*> m_vertices;

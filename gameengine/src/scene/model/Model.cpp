@@ -1,12 +1,12 @@
 #include <wx/wxprec.h>
 #include "Model.h"
 
-Model::Model() : Entity()
+Model::Model() : Positionable(), Rotatable(), Nameable(), Scalable()
 {
 	this->m_shader_program = new ShaderProgram(); //make blank shader program so that proper errors are thrown
 }
 
-Model::Model(Model& copy_from) : Entity(copy_from)
+Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), Nameable(copy_from), Scalable(copy_from)
 {
 	//copy geometry
 	std::vector<std::vector<GLfloat>> vertices = copy_from.GetVerticesCopy();
