@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Camera.h"
 
-Camera::Camera() : Entity()
+Camera::Camera() : Positionable(), Rotatable(), Nameable()
 {
 	this->m_fov = (GLfloat)45;
 }
