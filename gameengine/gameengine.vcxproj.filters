@@ -81,9 +81,6 @@
     <ClInclude Include="src\scene\Camera.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\Entity.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\Scene.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
@@ -126,9 +123,6 @@
       <Filter>Source Files\scene\model</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Camera.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\Entity.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Scene.cpp">
