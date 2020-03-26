@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "Model.h"
+#include "scene/model/Model.h"
 
 TEST(ModelTests, Vertex_SetGet_Vector)
 {

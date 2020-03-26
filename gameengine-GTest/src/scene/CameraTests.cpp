@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Camera.h"
+#include "scene/Camera.h"
 
 TEST(CameraTests, FOV_SetGet)
 {

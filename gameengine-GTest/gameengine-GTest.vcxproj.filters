@@ -2,14 +2,23 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="src\CameraTests.cpp">
-      <Filter>tests</Filter>
+    <ClCompile Include="src\scene\NameableTests.cpp">
+      <Filter>tests\scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\ModelTests.cpp">
-      <Filter>tests</Filter>
+    <ClCompile Include="src\scene\Positionable.cpp">
+      <Filter>tests\scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\EntityTests.cpp">
-      <Filter>tests</Filter>
+    <ClCompile Include="src\scene\RotatableTests.cpp">
+      <Filter>tests\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\CameraTests.cpp">
+      <Filter>tests\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\ModelTests.cpp">
+      <Filter>tests\scene\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\ScalableTests.cpp">
+      <Filter>tests\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -19,8 +28,23 @@
     <Filter Include="tests">
       <UniqueIdentifier>{fdd1d3d7-cf49-49b6-ac9e-1d3310197f90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tests\scene">
+      <UniqueIdentifier>{b39b07c2-bd38-4627-acb6-db1e2b3be910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\scene\light">
+      <UniqueIdentifier>{c659929c-6959-4906-ac1b-8463a593108a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\scene\model">
+      <UniqueIdentifier>{23fe6ae6-8aaf-4490-949a-a5c74532fd72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\loaders">
+      <UniqueIdentifier>{5cef42b2-f867-48f8-88b6-0d6ff679fa0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\loaders\models">
+      <UniqueIdentifier>{b5a80a33-8432-4e53-8bad-7810b1ad7b1f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tests\render">
-      <UniqueIdentifier>{d7f1e82a-91fa-4ffe-b52b-8bc50cb0f5bc}</UniqueIdentifier>
+      <UniqueIdentifier>{12067eaf-f31a-43b6-b93c-c8e0784a1e80}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
