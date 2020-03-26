@@ -5,7 +5,9 @@ wxIMPLEMENT_APP(App);
 
 bool App::OnInit()
 {
+#ifdef _DEBUG
 	wxMessageBox("Inject debuggers (RenderDoc etc) if you are using them into this process before clicking OK", "Inject debuggers");
+#endif
 
 	wxInitAllImageHandlers();
 
