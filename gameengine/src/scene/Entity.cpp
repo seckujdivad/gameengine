@@ -1,16 +1,14 @@
 #include <wx/wxprec.h>
 #include "Entity.h"
 
-Entity::Entity() : Nameable()
+Entity::Entity() : Nameable(), Positionable()
 {
-	this->m_position = { 0.0f, 0.0f, 0.0f };
 	this->m_rotation = { 0.0f, 0.0f, 0.0f };
 	this->m_scale = { 0.0f, 0.0f, 0.0f };
 }
 
-Entity::Entity(Entity& copyfrom) : Nameable(copyfrom)
+Entity::Entity(Entity& copyfrom) : Nameable(copyfrom), Positionable(copyfrom)
 {
-	this->m_position = copyfrom.GetPosition();
 	this->m_rotation = copyfrom.GetRotation();
 	this->m_scale = copyfrom.GetScale();
 }
@@ -18,6 +16,7 @@ Entity::Entity(Entity& copyfrom) : Nameable(copyfrom)
 Entity& Entity::operator=(Entity& copyfrom)
 {
 	Nameable::operator=(copyfrom);
+	Positionable::operator=(copyfrom);
 
 	return *this;
 }
@@ -25,31 +24,6 @@ Entity& Entity::operator=(Entity& copyfrom)
 Entity::~Entity()
 {
 
-}
-
-void Entity::SetPosition(GLfloat x, GLfloat y, GLfloat z)
-{
-	this->m_position = { x, y, z };
-}
-
-void Entity::SetPosition(std::array<GLfloat, 3> point)
-{
-	this->m_position = point;
-}
-
-void Entity::SetPosition(int index, GLfloat value)
-{
-	this->m_position.at(index) = value;
-}
-
-std::array<GLfloat, 3> Entity::GetPosition()
-{
-	return this->m_position;
-}
-
-GLfloat Entity::GetPosition(int index)
-{
-	return this->m_position.at(index);
 }
 
 void Entity::SetRotation(GLfloat x, GLfloat y, GLfloat z)

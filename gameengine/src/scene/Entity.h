@@ -12,10 +12,10 @@
 #include <string>
 
 
-class Entity : public Nameable
+class Entity : public Nameable, public Positionable
 {
 private:
-	std::array<GLfloat, 3> m_position;
+	
 	std::array<GLfloat, 3> m_rotation;
 	std::array<GLfloat, 3> m_scale;
 
@@ -24,12 +24,6 @@ public:
 	Entity(Entity& copyfrom);
 	Entity& operator=(Entity& copyfrom);
 	~Entity();
-
-	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
-	void SetPosition(std::array<GLfloat, 3> point);
-	void SetPosition(int index, GLfloat value);
-	std::array<GLfloat, 3> GetPosition();
-	GLfloat GetPosition(int index);
 
 	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
 	void SetRotation(std::array<GLfloat, 3> rotation);
