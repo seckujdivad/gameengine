@@ -6,10 +6,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "../Entity.h"
+#include "../Positionable.h"
+#include "../Nameable.h"
 #include "../../render/ShaderProgram.h"
 
-class PointLight : public Entity
+class PointLight : public Positionable, public Nameable
 {
 private:
 	glm::vec3 m_intensity;

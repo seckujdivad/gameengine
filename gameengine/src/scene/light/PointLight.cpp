@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "PointLight.h"
 
-PointLight::PointLight(int light_index)
+PointLight::PointLight(int light_index) : Positionable(), Nameable()
 {
 	this->m_light_index = light_index;
 
