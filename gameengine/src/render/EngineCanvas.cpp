@@ -63,13 +63,13 @@ void EngineCanvas::MouseMove(wxMouseEvent& evt)
 				float fov_fraction_x = (float)delta_coords[0] / (float)this->GetSize().x;
 				float fov_fraction_y = (float)delta_coords[1] / (float)this->GetSize().x;
 
-				float fov = this->m_scene->GetActiveCamera()->GetFOV();
+				float fov = this->m_look_camera->GetFOV();
 
 				float rotation_z = fov_fraction_x * fov;
 				float rotation_x = fov_fraction_y * fov;
 
-				this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) - rotation_x);
-				this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) - rotation_z);
+				this->m_look_camera->SetRotation(0, this->m_look_camera->GetRotation(0) - rotation_x);
+				this->m_look_camera->SetRotation(2, this->m_look_camera->GetRotation(2) - rotation_z);
 
 				this->Render();
 			}
@@ -92,10 +92,19 @@ void EngineCanvas::Render()
 	this->SwapBuffers();
 }
 
-void EngineCanvas::SetMouselook(bool enable)
+void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 {
 	if (enable)
 	{
+		if ((camera == nullptr) && (this->m_look_camera == nullptr))
+		{
+			throw std::runtime_error("No camera specified and no camera stored");
+		}
+		else if (camera != nullptr)
+		{
+			this->m_look_camera = camera;
+		}
+
 		this->SetCursor(this->m_blank_cursor);
 	}
 	else

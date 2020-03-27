@@ -17,6 +17,8 @@
 
 class Scene;
 
+class Camera;
+
 class EngineCanvas : public wxGLCanvas
 {
 private:
@@ -35,6 +37,7 @@ private:
 	GLuint m_mdlmat_id;
 
 	bool m_mouselook = false;
+	Camera* m_look_camera = nullptr;
 	wxCursor m_blank_cursor;
 
 	void Paint(wxPaintEvent& evt);
@@ -47,7 +50,7 @@ public:
 	void SetScene(Scene* scene);
 	void Render();
 
-	void SetMouselook(bool enable);
+	void SetMouselook(bool enable, Camera* camera = nullptr);
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

@@ -16,7 +16,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
 	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, args);
-	this->m_glcanvas->SetMouselook(true);
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
 
 	//create rest of ui
@@ -84,6 +83,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_scene = InitialiseScene(this->m_scene_path, this->m_scene_filename);
 	this->m_glcanvas->SetScene(this->m_scene);
 	this->m_scene->PushUniforms();
+
+	this->m_glcanvas->SetMouselook(true, this->m_scene->GetActiveCamera());
 
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
