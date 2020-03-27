@@ -187,6 +187,9 @@
     <Image Include="resources\textures\TwoTone.png" />
     <Image Include="resources\textures\unnamed.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
