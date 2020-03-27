@@ -16,6 +16,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
 	this->m_glcanvas = new EngineCanvas(this, wxID_ANY, args);
+	this->m_glcanvas->SetMouselook(true);
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
 
 	//create rest of ui

@@ -34,6 +34,12 @@ private:
 	GLuint m_viewmat_id;
 	GLuint m_mdlmat_id;
 
+	bool m_mouselook = false;
+	wxCursor m_blank_cursor;
+
+	void Paint(wxPaintEvent& evt);
+	void MouseMove(wxMouseEvent& evt);
+
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
 	~EngineCanvas();
@@ -41,7 +47,7 @@ public:
 	void SetScene(Scene* scene);
 	void Render();
 
-	void Paint(wxPaintEvent& evt);
+	void SetMouselook(bool enable);
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

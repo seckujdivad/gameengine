@@ -25,7 +25,10 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 
 	glDebugMessageCallback(MessageCallback, 0);
 
+	this->m_blank_cursor = wxCursor(wxCURSOR_BLANK);
+
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
+	this->Bind(wxEVT_MOTION, &EngineCanvas::MouseMove, this);
 	this->Render();
 }
 
@@ -40,6 +43,43 @@ void EngineCanvas::Paint(wxPaintEvent& evt)
 	evt.Skip();
 }
 
+void EngineCanvas::MouseMove(wxMouseEvent& evt)
+{
+	if ((evt.Leaving()) || !(this->m_mouselook))
+	{
+		
+	}
+	else
+	{
+		int centre_coords[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
+		this->WarpPointer(centre_coords[0], centre_coords[1]); //more responsive if we move it before rendering
+
+		if (!(evt.Entering()))
+		{
+			int delta_coords[2] = { evt.GetPosition().x - centre_coords[0], evt.GetPosition().y - centre_coords[1] };
+
+			if ((delta_coords[0] != 0) || (delta_coords[1] != 0))
+			{
+				float fov_fraction_x = (float)delta_coords[0] / (float)this->GetSize().x;
+				float fov_fraction_y = (float)delta_coords[1] / (float)this->GetSize().x;
+
+				float fov = this->m_scene->GetActiveCamera()->GetFOV();
+
+				float rotation_z = fov_fraction_x * fov;
+				float rotation_x = fov_fraction_y * fov;
+
+				this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) - rotation_x);
+				this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) - rotation_z);
+
+				this->Render();
+			}
+		}
+
+	}
+	
+	evt.Skip();
+}
+
 void EngineCanvas::Render()
 {
 	if (this->m_scene != nullptr)
@@ -50,6 +90,20 @@ void EngineCanvas::Render()
 
 	glFlush();
 	this->SwapBuffers();
+}
+
+void EngineCanvas::SetMouselook(bool enable)
+{
+	if (enable)
+	{
+		this->SetCursor(this->m_blank_cursor);
+	}
+	else
+	{
+		this->SetCursor(wxNullCursor);
+	}
+
+	this->m_mouselook = enable;
 }
 
 void EngineCanvas::SetScene(Scene* scene)
