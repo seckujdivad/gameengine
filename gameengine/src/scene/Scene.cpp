@@ -167,8 +167,12 @@ void Scene::ClearAllCameras(bool destroy)
 	this->cameras.clear();
 }
 
-void Scene::Render(EngineCanvas* canvas)
+void Scene::Render(GLuint framebuffer)
 {
+	//get viewport dimensions so it can be reset
+	GLint viewport_dimensions[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
+
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//generate values
@@ -177,7 +181,7 @@ void Scene::Render(EngineCanvas* canvas)
 		this->models.at(i)->GenPosMat();
 	}
 	
-	//calculate shadows
+	//draw shadows
 	glCullFace(GL_FRONT);
 	for (size_t i = 0; i < this->pointlights.size(); i++)
 	{
@@ -197,13 +201,14 @@ void Scene::Render(EngineCanvas* canvas)
 			}
 		}
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glCullFace(GL_BACK);
 
-	glViewport(0, 0, (GLint)canvas->GetSize().x, (GLint)canvas->GetSize().y);
+	//prepare for camera draw
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glCullFace(GL_BACK);
+	glViewport(viewport_dimensions[0], viewport_dimensions[1], viewport_dimensions[2], viewport_dimensions[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	this->m_active_camera->GenPerspMat((float)canvas->GetSize().x, (float)canvas->GetSize().y);
+	this->m_active_camera->GenPerspMat((float)(viewport_dimensions[2] - viewport_dimensions[0]), (float)(viewport_dimensions[3] - viewport_dimensions[1]));
 	this->m_active_camera->GenViewMat();
 
 	//draw scene

@@ -44,7 +44,8 @@ void EngineCanvas::Render()
 {
 	if (this->m_scene != nullptr)
 	{
-		this->m_scene->Render(this);
+		glViewport(0, 0, this->GetSize().x, this->GetSize().y);
+		this->m_scene->Render();
 	}
 
 	glFlush();

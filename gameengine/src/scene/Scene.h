@@ -11,8 +11,6 @@
 #include "../render/EngineCanvas.h"
 #include "light/PointLight.h"
 
-class EngineCanvas;
-
 class Scene
 {
 private:
@@ -52,7 +50,7 @@ public:
 	void ClearAllModels(bool destroy = false);
 	void ClearAllCameras(bool destroy = false);
 
-	void Render(EngineCanvas* canvas);
+	void Render(GLuint framebuffer = 0); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
 
 	void PushUniforms();
 
