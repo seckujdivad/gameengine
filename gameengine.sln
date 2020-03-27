@@ -14,6 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packaged-releases", "packaged-releases", "{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A}"
+	ProjectSection(SolutionItems) = preProject
+		packaged-releases\package-releases.py = packaged-releases\package-releases.py
+		packaged-releases\packages.json = packaged-releases\packages.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -49,6 +55,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63979F0E-A6D0-403D-AFA4-4FD1400E4095}
