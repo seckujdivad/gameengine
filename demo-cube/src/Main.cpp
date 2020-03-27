@@ -228,38 +228,65 @@ void Main::Mainloop(wxTimerEvent& evt) //this method is called repeatedly by the
 
 	bool redraw_required = false;
 
+	float translate_increment = 0.5;
+	float rotate_increment = 5;
+
 	//poll keys
+	// translation
 	if (wxGetKeyState(wxKeyCode('W')))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) + 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) + translate_increment);
 		redraw_required = true;
 	}
 	if (wxGetKeyState(wxKeyCode('S')))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) - 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) - translate_increment);
 		redraw_required = true;
 	}
 	if (wxGetKeyState(wxKeyCode('D')))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) - 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) - translate_increment);
 		redraw_required = true;
 	}
 	if (wxGetKeyState(wxKeyCode('A')))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) + 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) + translate_increment);
 		redraw_required = true;
 	}
 	if (wxGetKeyState(WXK_CONTROL))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) + 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) - translate_increment);
 		redraw_required = true;
 	}
 	if (wxGetKeyState(WXK_SHIFT))
 	{
-		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) - 0.5);
+		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) + translate_increment);
 		redraw_required = true;
 	}
 
+	// rotation
+	if (wxGetKeyState(WXK_UP))
+	{
+		this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) + rotate_increment);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(WXK_DOWN))
+	{
+		this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) - rotate_increment);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(WXK_RIGHT))
+	{
+		this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) - rotate_increment);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(WXK_LEFT))
+	{
+		this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) + rotate_increment);
+		redraw_required = true;
+	}
+
+	//redraw if required
 	if (redraw_required)
 	{
 		this->m_glcanvas->Render();
