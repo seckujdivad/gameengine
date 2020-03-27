@@ -10,7 +10,7 @@ import fnmatch
 print("Packaging...")
 
 #get package config
-with open("packages.json", "r") as file:
+with open(os.path.join(sys.path[0], "packages.json"), "r") as file:
     packages_config = json.load(file)
 
 #get solution directory
