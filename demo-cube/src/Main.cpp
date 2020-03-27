@@ -92,6 +92,11 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 		this->m_lb_models->Append(this->m_scene->models.at(i)->GetIdentifier());
 	}
 
+	//start mainloop
+	this->Bind(wxEVT_TIMER, &Main::Mainloop, this);
+	this->m_timer_mainloop = new wxTimer(this);
+	this->m_timer_mainloop->Start(30);
+
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
@@ -104,7 +109,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 Main::~Main()
 {
+	this->m_timer_mainloop->Stop();
 	delete this->m_scene;
+	delete this->m_timer_mainloop;
 }
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
@@ -213,4 +220,18 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 			}
 		}
 	}
+}
+
+void Main::Mainloop(wxTimerEvent& evt) //this method is called repeatedly by the window manager
+{
+	this->m_timer_mainloop->Stop();
+
+	if (wxGetKeyState(wxKeyCode('W')))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) + 0.5);
+		this->m_glcanvas->Render();
+	}
+
+	this->m_timer_mainloop->Start();
+	evt.Skip();
 }
