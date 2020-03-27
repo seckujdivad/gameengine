@@ -9,12 +9,11 @@
 #include <array>
 #include <string>
 
-#include "Positionable.h"
-#include "Rotatable.h"
+#include "LocallyMovable.h"
 #include "Nameable.h"
 #include "../render/ShaderProgram.h"
 
-class Camera : public Positionable, public Rotatable, public Nameable
+class Camera : public LocallyMovable, public Nameable
 {
 private:
 	std::string m_identifier;

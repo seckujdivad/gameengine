@@ -165,6 +165,7 @@
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\scene\Camera.h" />
     <ClInclude Include="src\scene\light\PointLight.h" />
+    <ClInclude Include="src\scene\LocallyMovable.h" />
     <ClInclude Include="src\scene\model\Material.h" />
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\Nameable.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="src\render\ShaderProgram.cpp" />
     <ClCompile Include="src\scene\Camera.cpp" />
     <ClCompile Include="src\scene\light\PointLight.cpp" />
+    <ClCompile Include="src\scene\LocallyMovable.cpp" />
     <ClCompile Include="src\scene\model\Material.cpp" />
     <ClCompile Include="src\scene\model\Model.cpp" />
     <ClCompile Include="src\scene\Nameable.cpp" />
