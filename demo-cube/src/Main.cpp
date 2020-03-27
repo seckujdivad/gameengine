@@ -226,9 +226,42 @@ void Main::Mainloop(wxTimerEvent& evt) //this method is called repeatedly by the
 {
 	this->m_timer_mainloop->Stop();
 
+	bool redraw_required = false;
+
+	//poll keys
 	if (wxGetKeyState(wxKeyCode('W')))
 	{
 		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) + 0.5);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(wxKeyCode('S')))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(0, this->m_scene->GetActiveCamera()->GetPosition(0) - 0.5);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(wxKeyCode('D')))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) - 0.5);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(wxKeyCode('A')))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(1, this->m_scene->GetActiveCamera()->GetPosition(1) + 0.5);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(WXK_CONTROL))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) + 0.5);
+		redraw_required = true;
+	}
+	if (wxGetKeyState(WXK_SHIFT))
+	{
+		this->m_scene->GetActiveCamera()->SetPosition(2, this->m_scene->GetActiveCamera()->GetPosition(2) - 0.5);
+		redraw_required = true;
+	}
+
+	if (redraw_required)
+	{
 		this->m_glcanvas->Render();
 	}
 
