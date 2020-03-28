@@ -103,7 +103,7 @@
     "main": {
       "position": [ 0, 0, 0 ],
       "rotation": [ 90, 0, -90 ],
-      "fov": 90
+      "fov": 60
     }
   },
   "shaders": {
