@@ -80,7 +80,7 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
 
 	//poll keyboard movement keys
-	if (this->m_keyboard_move)
+	if (this->m_keyboard_move_active)
 	{
 		if (wxGetKeyState(wxKeyCode('W')))
 		{
@@ -148,6 +148,7 @@ void EngineCanvas::KeyDown(wxKeyEvent& evt)
 	if ((evt.GetKeyCode() == WXK_ESCAPE) && this->m_mouselook_active)
 	{
 		this->SetMouselookActive(false);
+		this->SetKeyboardMoveActive(false);
 	}
 
 	evt.Skip();
@@ -158,6 +159,7 @@ void EngineCanvas::Clicked(wxMouseEvent& evt)
 	if (!this->m_mouselook_active)
 	{
 		this->SetMouselookActive(true);
+		this->SetKeyboardMoveActive(true);
 	}
 
 	evt.Skip();
@@ -211,6 +213,13 @@ void EngineCanvas::SetKeyboardMove(bool enable, Camera* camera)
 	}
 
 	this->m_keyboard_move = enable;
+	this->SetKeyboardMoveActive(enable);
+}
+
+
+void EngineCanvas::SetKeyboardMoveActive(bool enable)
+{
+	this->m_keyboard_move_active = enable;
 }
 
 void EngineCanvas::SetRenderLoop(bool enable)

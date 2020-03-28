@@ -34,12 +34,16 @@ private:
 	wxCursor m_blank_cursor;
 	float m_mouselook_multiplier = 3.0f;
 
+	void SetMouselookActive(bool enable);
+
 	//keyboard move
 	bool m_keyboard_move = false;
+	bool m_keyboard_move_active = false;
 	Camera* m_move_camera = nullptr;
 	wxTimer* m_timer_mainloop;
 	float m_keyboard_move_increment = 0.1f;
 
+	void SetKeyboardMoveActive(bool enable);
 	void CameraControlMainloop(wxTimerEvent& evt);
 
 	//render loop
@@ -49,7 +53,7 @@ private:
 	//key press handling
 	void KeyDown(wxKeyEvent& evt);
 	void Clicked(wxMouseEvent& evt);
-	void SetMouselookActive(bool enable);
+	
 
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
