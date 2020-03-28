@@ -43,6 +43,6 @@ public:
 	GLuint RegisterUniform(std::string name);
 	GLuint GetUniform(std::string name);
 
-	void LoadTexture(std::string name, unsigned char* data, int width, int height, int index = -1);
+	void LoadTexture(std::string name, unsigned char* data, int width, int height, int index = -1, GLuint min_filter = GL_NEAREST, GLuint mag_filter = GL_NEAREST);
 	void RegisterTexture(std::string name, GLuint texture, GLuint type, int index = -1);
 };

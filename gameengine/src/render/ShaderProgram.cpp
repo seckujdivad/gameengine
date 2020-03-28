@@ -178,7 +178,7 @@ GLuint ShaderProgram::GetProgramID()
 	}
 }
 
-void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width, int height, int index)
+void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width, int height, int index, GLuint min_filter, GLuint mag_filter)
 {
 	this->Select();
 
@@ -191,8 +191,8 @@ void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	//filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //shrinking filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //enlarging filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter); //shrinking filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter); //enlarging filter
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
