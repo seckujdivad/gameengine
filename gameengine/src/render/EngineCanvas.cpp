@@ -134,8 +134,11 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 
 void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 {
-	this->Render();
-	evt.Skip();
+	if (this->m_loop_render)
+	{
+		this->Render();
+		evt.RequestMore();
+	}
 }
 
 void EngineCanvas::SetMouselook(bool enable, Camera* camera)
@@ -183,10 +186,7 @@ void EngineCanvas::SetKeyboardMove(bool enable, Camera* camera)
 
 void EngineCanvas::SetRenderLoop(bool enable)
 {
-	if (enable)
-	{
-
-	}
+	this->m_loop_render = enable;
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

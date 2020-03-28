@@ -40,6 +40,9 @@ private:
 	float m_keyboard_move_increment = 0.5f;
 
 	void CameraControlMainloop(wxTimerEvent& evt);
+
+	//render loop
+	bool m_loop_render = false;
 	void RenderMainloop(wxIdleEvent& evt);
 
 public:

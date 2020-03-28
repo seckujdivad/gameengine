@@ -86,6 +86,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	this->m_glcanvas->SetMouselook(true, this->m_scene->GetActiveCamera());
 	this->m_glcanvas->SetKeyboardMove(true, this->m_scene->GetActiveCamera());
+	this->m_glcanvas->SetRenderLoop(true);
 
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
