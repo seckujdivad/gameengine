@@ -29,6 +29,7 @@ private:
 
 	//mouse look
 	bool m_mouselook = false;
+	bool m_mouselook_active = false;
 	Camera* m_look_camera = nullptr;
 	wxCursor m_blank_cursor;
 	float m_mouselook_multiplier = 3.0f;
@@ -44,6 +45,11 @@ private:
 	//render loop
 	bool m_loop_render = false;
 	void RenderMainloop(wxIdleEvent& evt);
+
+	//key press handling
+	void KeyDown(wxKeyEvent& evt);
+	void Clicked(wxMouseEvent& evt);
+	void SetMouselookActive(bool enable);
 
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);

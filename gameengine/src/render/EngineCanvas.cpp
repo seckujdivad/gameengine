@@ -33,6 +33,8 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
 	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
+	this->Bind(wxEVT_KEY_DOWN, &EngineCanvas::KeyDown, this);
+	this->Bind(wxEVT_LEFT_DOWN, &EngineCanvas::Clicked, this);
 	this->Render();
 }
 
@@ -107,7 +109,7 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	}
 
 	//check mouse delta and apply
-	if (this->m_mouselook)
+	if (this->m_mouselook_active)
 	{
 		int mousedelta[2];
 		mousedelta[0] = mouse_position[0] - screen_centre[0];
@@ -141,12 +143,45 @@ void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 	}
 }
 
+void EngineCanvas::KeyDown(wxKeyEvent& evt)
+{
+	if ((evt.GetKeyCode() == WXK_ESCAPE) && this->m_mouselook_active)
+	{
+		this->SetMouselookActive(false);
+	}
+
+	evt.Skip();
+}
+
+void EngineCanvas::Clicked(wxMouseEvent& evt)
+{
+	if (!this->m_mouselook_active)
+	{
+		this->SetMouselookActive(true);
+	}
+
+	evt.Skip();
+}
+
+void EngineCanvas::SetMouselookActive(bool enable)
+{
+	if (enable)
+	{
+		this->SetCursor(this->m_blank_cursor);
+		this->WarpPointer(this->GetSize().x / 2, this->GetSize().y / 2);
+	}
+	else
+	{
+		this->SetCursor(wxNullCursor);
+	}
+
+	this->m_mouselook_active = enable;
+}
+
 void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 {
 	if (enable)
 	{
-		this->WarpPointer(this->GetSize().x / 2, this->GetSize().y / 2);
-
 		if ((camera == nullptr) && (this->m_look_camera == nullptr))
 		{
 			throw std::runtime_error("No camera specified and no camera stored");
@@ -155,15 +190,10 @@ void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 		{
 			this->m_look_camera = camera;
 		}
-
-		this->SetCursor(this->m_blank_cursor);
 	}
-	else
-	{
-		this->SetCursor(wxNullCursor);
-	}
-
+	
 	this->m_mouselook = enable;
+	this->SetMouselookActive(enable);
 }
 
 void EngineCanvas::SetKeyboardMove(bool enable, Camera* camera)
@@ -178,9 +208,6 @@ void EngineCanvas::SetKeyboardMove(bool enable, Camera* camera)
 		{
 			this->m_move_camera = camera;
 		}
-	}
-	else
-	{
 	}
 
 	this->m_keyboard_move = enable;
