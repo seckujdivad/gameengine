@@ -22,25 +22,17 @@ class Camera;
 class EngineCanvas : public wxGLCanvas
 {
 private:
+	//rendering
 	wxGLContext* m_glcontext;
 	Scene* m_scene = nullptr;
 
-	unsigned int m_VAO;
-	unsigned int m_shader_program;
+	void Paint(wxPaintEvent& evt);
 
-	glm::mat4 m_perspmat;
-	glm::mat4 m_viewmat;
-	glm::mat4 m_mdlmat;
-
-	GLuint m_perspmat_id;
-	GLuint m_viewmat_id;
-	GLuint m_mdlmat_id;
-
+	//mouse look
 	bool m_mouselook = false;
 	Camera* m_look_camera = nullptr;
 	wxCursor m_blank_cursor;
-
-	void Paint(wxPaintEvent& evt);
+	
 	void MouseMove(wxMouseEvent& evt);
 
 public:
