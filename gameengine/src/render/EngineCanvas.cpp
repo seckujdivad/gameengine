@@ -157,7 +157,6 @@ void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 		}
 
 		this->SetCursor(this->m_blank_cursor);
-		
 	}
 	else
 	{
