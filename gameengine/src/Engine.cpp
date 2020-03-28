@@ -139,14 +139,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetMaterial(mat);
 
 		// load texture
-		
-		auto a = it.value()["shader"]["textures"]["colour"];
-
-		wxImage texture_image = CreateTexture(path, it.value()["shader"]["textures"]["colour"], 1.0f, 1.0f, 1.0f);
-		shader_program->LoadTexture("colourTexture", texture_image.GetData(), texture_image.GetWidth(), texture_image.GetHeight());
-
-		wxImage normal_image = CreateTexture(path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
-		shader_program->LoadTexture("normalTexture", normal_image.GetData(), normal_image.GetWidth(), normal_image.GetHeight());
+		CreateTexture(shader_program, "colourTexture", path, it.value()["shader"]["textures"]["colour"], 1.0f, 1.0f, 1.0f);
+		CreateTexture(shader_program, "normalTexture", path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
 
 		// store shader program
 		model->SetShaderProgram(shader_program);
@@ -198,18 +192,61 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 	return output;
 }
 
-wxImage CreateTexture(std::string base_path, json image_specifier, float default_r, float default_g, float default_b)
+void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::string base_path, json image_specifier, float default_r, float default_g, float default_b)
 {
+	//load image
 	wxImage image;
-	
+
 	float r;
 	float g;
 	float b;
 	bool generate_texture = false;
 
+	GLuint mag_filter = GL_NEAREST;
+	GLuint min_filter = GL_NEAREST;
+
 	if (image_specifier.is_string()) //image is given as a file path
 	{
 		image.LoadFile(base_path + '/' + image_specifier.get<std::string>(), wxBITMAP_TYPE_ANY);
+
+		mag_filter = GL_LINEAR;
+		min_filter = GL_LINEAR;
+	}
+	else if (image_specifier.is_object())
+	{
+		image.LoadFile(base_path + '/' + image_specifier["path"].get<std::string>(), wxBITMAP_TYPE_ANY);
+
+		if (image_specifier.contains("magnify filter"))
+		{
+			if (image_specifier["magnify filter"].get<std::string>() == "linear")
+			{
+				mag_filter = GL_LINEAR;
+			}
+			else if (image_specifier["magnify filter"].get<std::string>() == "nearest")
+			{
+				mag_filter = GL_NEAREST;
+			}
+			else
+			{
+				throw std::runtime_error("Invalid texture filter " + image_specifier["magnify filter"].get<std::string>());
+			}
+		}
+
+		if (image_specifier.contains("shrink filter"))
+		{
+			if (image_specifier["shrink filter"].get<std::string>() == "linear")
+			{
+				min_filter = GL_LINEAR;
+			}
+			else if (image_specifier["shrink filter"].get<std::string>() == "nearest")
+			{
+				min_filter = GL_NEAREST;
+			}
+			else
+			{
+				throw std::runtime_error("Invalid texture filter " + image_specifier["shrink filter"].get<std::string>());
+			}
+		}
 	}
 	else if (image_specifier.is_array() && (image_specifier.size() == 3))
 	{
@@ -236,7 +273,11 @@ wxImage CreateTexture(std::string base_path, json image_specifier, float default
 		data[2] = (unsigned char)(b * ((2 << 7) - 1));
 
 		image.SetData(data, 1, 1);
+
+		mag_filter = GL_NEAREST;
+		min_filter = GL_NEAREST;
 	}
-	
-	return image;
+
+	//send image to GPU
+	shader_program->LoadTexture("normalTexture", image.GetData(), image.GetWidth(), image.GetHeight(), -1, min_filter, mag_filter);
 }

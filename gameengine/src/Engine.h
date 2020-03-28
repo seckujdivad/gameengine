@@ -21,4 +21,4 @@ Scene* InitialiseScene(std::string path, std::string filename);
 
 std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, nlohmann::json config, nlohmann::basic_json<> shader_config);
 
-wxImage CreateTexture(std::string base_path, json image_specifier, float default_r = 1.0f, float default_g = 1.0f, float default_b = 1.0f);
+void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::string base_path, json image_specifier, float default_r = 1.0f, float default_g = 1.0f, float default_b = 1.0f);
