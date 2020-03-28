@@ -18,7 +18,6 @@ private:
 	EngineCanvas* m_glcanvas;
 	wxButton* m_btn_render;
 	wxListBox* m_lb_models;
-	wxTimer* m_timer_mainloop;
 
 	std::string m_scene_path = "resources";
 	std::string m_scene_filename = "simplescene.json";
@@ -33,8 +32,6 @@ private:
 	void btn_render_OnClick(wxCommandEvent& evt);
 	void sld_OnChange(wxCommandEvent& evt);
 	void lb_models_OnSelection(wxCommandEvent& evt);
-
-	void Mainloop(wxTimerEvent& evt);
 
 public:
 	Main();

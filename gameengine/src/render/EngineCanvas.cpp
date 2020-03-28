@@ -26,57 +26,26 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	glDebugMessageCallback(MessageCallback, 0);
 
 	this->m_blank_cursor = wxCursor(wxCURSOR_BLANK);
+	
+	this->m_timer_mainloop = new wxTimer(this);
+	this->Bind(wxEVT_TIMER, &EngineCanvas::CameraControlMainloop, this);
+	this->m_timer_mainloop->Start(10);
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
-	this->Bind(wxEVT_MOTION, &EngineCanvas::MouseMove, this);
+	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
 	this->Render();
 }
 
 EngineCanvas::~EngineCanvas()
 {
+	this->m_timer_mainloop->Stop();
+	delete this->m_timer_mainloop;
 	wxDELETE(this->m_glcontext);
 }
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
 {
 	this->Render();
-	evt.Skip();
-}
-
-void EngineCanvas::MouseMove(wxMouseEvent& evt)
-{
-	if ((evt.Leaving()) || !(this->m_mouselook))
-	{
-		
-	}
-	else
-	{
-		int centre_coords[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
-		this->WarpPointer(centre_coords[0], centre_coords[1]); //more responsive if we move it before rendering
-
-		if (!(evt.Entering()))
-		{
-			int delta_coords[2] = { evt.GetPosition().x - centre_coords[0], evt.GetPosition().y - centre_coords[1] };
-
-			if ((delta_coords[0] != 0) || (delta_coords[1] != 0))
-			{
-				float fov_fraction_x = (float)delta_coords[0] / (float)this->GetSize().x;
-				float fov_fraction_y = (float)delta_coords[1] / (float)this->GetSize().x;
-
-				float fov = this->m_look_camera->GetFOV();
-
-				float rotation_z = fov_fraction_x * fov;
-				float rotation_x = fov_fraction_y * fov;
-
-				this->m_look_camera->SetRotation(0, this->m_look_camera->GetRotation(0) - rotation_x);
-				this->m_look_camera->SetRotation(2, this->m_look_camera->GetRotation(2) - rotation_z);
-
-				this->Render();
-			}
-		}
-
-	}
-	
 	evt.Skip();
 }
 
@@ -90,6 +59,83 @@ void EngineCanvas::Render()
 
 	glFlush();
 	this->SwapBuffers();
+}
+
+void EngineCanvas::SetScene(Scene* scene)
+{
+	this->m_scene = scene;
+}
+
+void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
+{
+	//stop timer
+	this->m_timer_mainloop->Stop();
+
+	wxMouseState mouse_state = wxGetMouseState();
+	int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
+	int mouse_position[2];
+	mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	//poll keyboard movement keys
+	if (this->m_keyboard_move)
+	{
+		if (wxGetKeyState(wxKeyCode('W')))
+		{
+			this->m_move_camera->MoveLocally(0.0f, 0.0f, this->m_keyboard_move_increment);
+		}
+		if (wxGetKeyState(wxKeyCode('S')))
+		{
+			this->m_move_camera->MoveLocally(0.0f, 0.0f, 0.0f - this->m_keyboard_move_increment);
+		}
+		if (wxGetKeyState(wxKeyCode('D')))
+		{
+			this->m_move_camera->MoveLocally(0.0f - this->m_keyboard_move_increment, 0.0f, 0.0f);
+		}
+		if (wxGetKeyState(wxKeyCode('A')))
+		{
+			this->m_move_camera->MoveLocally(this->m_keyboard_move_increment, 0.0f, 0.0f);
+		}
+		if (wxGetKeyState(WXK_CONTROL))
+		{
+			this->m_move_camera->MoveLocally(0.0f, this->m_keyboard_move_increment, 0.0f);
+		}
+		if (wxGetKeyState(WXK_SHIFT))
+		{
+			this->m_move_camera->MoveLocally(0.0f, 0.0f - this->m_keyboard_move_increment, 0.0f);
+		}
+	}
+
+	//check mouse delta and apply
+	if (this->m_mouselook)
+	{
+		int mousedelta[2];
+		mousedelta[0] = mouse_position[0] - screen_centre[0];
+		mousedelta[1] = mouse_position[1] - screen_centre[1];
+
+		float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+		float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+
+		float fov = this->m_look_camera->GetFOV();
+
+		float rotation_z = fov_fraction_x * fov;
+		float rotation_x = fov_fraction_y * fov;
+
+		this->m_look_camera->SetRotation(0, this->m_look_camera->GetRotation(0) - rotation_x);
+		this->m_look_camera->SetRotation(2, this->m_look_camera->GetRotation(2) - rotation_z);
+
+		this->WarpPointer(screen_centre[0], screen_centre[1]);
+	}
+
+	//restart timer
+	this->m_timer_mainloop->Start();
+	evt.Skip();
+}
+
+void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
+{
+	this->Render();
+	evt.Skip();
 }
 
 void EngineCanvas::SetMouselook(bool enable, Camera* camera)
@@ -115,9 +161,32 @@ void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 	this->m_mouselook = enable;
 }
 
-void EngineCanvas::SetScene(Scene* scene)
+void EngineCanvas::SetKeyboardMove(bool enable, Camera* camera)
 {
-	this->m_scene = scene;
+	if (enable)
+	{
+		if ((camera == nullptr) && (this->m_move_camera == nullptr))
+		{
+			throw std::runtime_error("No camera specified and no camera stored");
+		}
+		else if (camera != nullptr)
+		{
+			this->m_move_camera = camera;
+		}
+	}
+	else
+	{
+	}
+
+	this->m_keyboard_move = enable;
+}
+
+void EngineCanvas::SetRenderLoop(bool enable)
+{
+	if (enable)
+	{
+
+	}
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

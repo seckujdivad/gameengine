@@ -85,6 +85,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_scene->PushUniforms();
 
 	this->m_glcanvas->SetMouselook(true, this->m_scene->GetActiveCamera());
+	this->m_glcanvas->SetKeyboardMove(true, this->m_scene->GetActiveCamera());
 
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
@@ -93,11 +94,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	{
 		this->m_lb_models->Append(this->m_scene->models.at(i)->GetIdentifier());
 	}
-
-	//start mainloop
-	this->Bind(wxEVT_TIMER, &Main::Mainloop, this);
-	this->m_timer_mainloop = new wxTimer(this);
-	this->m_timer_mainloop->Start(30);
 
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
@@ -111,9 +107,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 Main::~Main()
 {
-	this->m_timer_mainloop->Stop();
 	delete this->m_scene;
-	delete this->m_timer_mainloop;
 }
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
@@ -222,78 +216,4 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 			}
 		}
 	}
-}
-
-void Main::Mainloop(wxTimerEvent& evt) //this method is called repeatedly by the window manager
-{
-	this->m_timer_mainloop->Stop();
-
-	bool redraw_required = false;
-
-	float translate_increment = 0.5;
-	float rotate_increment = 5;
-
-	//poll keys
-	// translation
-	if (wxGetKeyState(wxKeyCode('W')))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(0.0f, 0.0f, translate_increment);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(wxKeyCode('S')))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(0.0f, 0.0f, 0.0f - translate_increment);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(wxKeyCode('D')))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(0.0f - translate_increment, 0.0f, 0.0f);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(wxKeyCode('A')))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(translate_increment, 0.0f, 0.0f);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(WXK_CONTROL))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(0.0f, translate_increment, 0.0f);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(WXK_SHIFT))
-	{
-		this->m_scene->GetActiveCamera()->MoveLocally(0.0f, 0.0f - translate_increment, 0.0f);
-		redraw_required = true;
-	}
-
-	// rotation
-	if (wxGetKeyState(WXK_UP))
-	{
-		this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) + rotate_increment);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(WXK_DOWN))
-	{
-		this->m_scene->GetActiveCamera()->SetRotation(0, this->m_scene->GetActiveCamera()->GetRotation(0) - rotate_increment);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(WXK_RIGHT))
-	{
-		this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) - rotate_increment);
-		redraw_required = true;
-	}
-	if (wxGetKeyState(WXK_LEFT))
-	{
-		this->m_scene->GetActiveCamera()->SetRotation(2, this->m_scene->GetActiveCamera()->GetRotation(2) + rotate_increment);
-		redraw_required = true;
-	}
-
-	//redraw if required
-	if (redraw_required)
-	{
-		this->m_glcanvas->Render();
-	}
-
-	this->m_timer_mainloop->Start();
-	evt.Skip();
 }
