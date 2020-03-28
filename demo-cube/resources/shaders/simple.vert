@@ -50,7 +50,7 @@ void main()
 	globalUV = inUV;
 
 	//create tbn matrix
-	globalNormalTBN[0] = normalize(vec3(mdl_rotate * vec4(inTangent, 0.0f)));
-	globalNormalTBN[1] = normalize(vec3(mdl_rotate * vec4(inBitangent, 0.0f)));
+	globalNormalTBN[0] = normalize(vec3(mdl_rotate * vec4(inTangent, 1.0f)));
+	globalNormalTBN[1] = normalize(vec3(mdl_rotate * vec4(inBitangent, 1.0f)));
 	globalNormalTBN[2] = globalSceneSpaceNormal.xyz;
 }
