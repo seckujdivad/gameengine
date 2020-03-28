@@ -37,7 +37,7 @@ private:
 	bool m_keyboard_move = false;
 	Camera* m_move_camera = nullptr;
 	wxTimer* m_timer_mainloop;
-	float m_keyboard_move_increment = 0.5f;
+	float m_keyboard_move_increment = 0.1f;
 
 	void CameraControlMainloop(wxTimerEvent& evt);
 

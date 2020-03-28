@@ -145,6 +145,8 @@ void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 {
 	if (enable)
 	{
+		this->WarpPointer(this->GetSize().x / 2, this->GetSize().y / 2);
+
 		if ((camera == nullptr) && (this->m_look_camera == nullptr))
 		{
 			throw std::runtime_error("No camera specified and no camera stored");
@@ -155,6 +157,7 @@ void EngineCanvas::SetMouselook(bool enable, Camera* camera)
 		}
 
 		this->SetCursor(this->m_blank_cursor);
+		
 	}
 	else
 	{
