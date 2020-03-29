@@ -141,6 +141,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		// load texture
 		CreateTexture(shader_program, "colourTexture", path, it.value()["shader"]["textures"]["colour"], 1.0f, 1.0f, 1.0f);
 		CreateTexture(shader_program, "normalTexture", path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
+		CreateTexture(shader_program, "specularTexture", path, it.value()["shader"]["textures"]["specular"], 1.0f, 1.0f, 1.0f);
 
 		// store shader program
 		model->SetShaderProgram(shader_program);

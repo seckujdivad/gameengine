@@ -35,6 +35,7 @@ uniform float mat_specular_highlight;
 //textures
 uniform sampler2D colourTexture;
 uniform sampler2D normalTexture;
+uniform sampler2D specularTexture;
 
 //lighting
 uniform vec3 light_ambient;
@@ -81,19 +82,18 @@ void main()
 {
 	//get base colour
 	frag_out = texture(colourTexture, globalUV);
-
-	//apply normal map
 	
-	//calculate light intensity
-	// ambient
+	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
 	frag_intensity = frag_intensity + light_ambient;
 
-	// diffuse
+	//calculate local mapped normal
 	vec3 sample_normal = texture(normalTexture, globalUV).rgb;
 	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
-
 	vec3 normal = globalNormalTBN * sample_normal;
+
+	//sample specular map
+	vec3 sample_specular = texture(specularTexture, globalUV).rgb * mat_specular;
 
 	//vars for loop
 	float diffuse_intensity;
@@ -116,24 +116,21 @@ void main()
 		//calculate light
 		light_change = vec3(0.0f);
 		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz); //get direction from the fragment to the light source
-		fragtocam = normalize(vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
+		fragtocam = normalize(0 - vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
 
 		// diffuse
 		diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
 		light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
 		
-		// specular
-		// phong
-		//perfect_reflection = reflect(0 - fragtolight, normal); //calculate the direction that light bounces off the surface at
-		//specular_intensity = pow(max(dot(fragtocam, perfect_reflection), 0.0f), mat_specular_highlight); //use angle between the ideal bounce direction and the bounce direction to reach the camera to get the intensity
-		// blinn-phong
+		// specular blinn-phong
 		halfway_dir = normalize(fragtolight + fragtocam);
 		specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
-		light_change = light_change + (specular_intensity * mat_specular * light_points[i].intensity); //apply specular intensity and material specular colour to fragment intensity
+		light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
 		
-		//apply light to fragment
-		// get shadow intensity multiplier
+		//get shadow intensity multiplier
 		shadow_intensity = GetShadowIntensity(globalSceneSpacePos.xyz, i);
+
+		//apply light to fragment
 		frag_intensity = frag_intensity + (light_change * shadow_intensity);
 	}
 
