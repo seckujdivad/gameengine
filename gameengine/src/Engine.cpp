@@ -279,5 +279,5 @@ void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::
 	}
 
 	//send image to GPU
-	shader_program->LoadTexture("normalTexture", image.GetData(), image.GetWidth(), image.GetHeight(), -1, min_filter, mag_filter);
+	shader_program->LoadTexture(shader_name, image.GetData(), image.GetWidth(), image.GetHeight(), -1, min_filter, mag_filter);
 }
