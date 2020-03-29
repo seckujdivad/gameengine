@@ -37,12 +37,12 @@
         },
         "textures": {
           "colour": [ 1, 1, 1 ],
-          "normal": "textures/cube_normals.png"
+          "specular": [ 1, 1, 1 ]
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
-          "specular": [ 0.4, 0.4, 0.4 ],
-          "specular highlight": 32
+          "specular": [ 2, 2, 2 ],
+          "specular highlight": 8
         }
       }
     },
@@ -67,12 +67,13 @@
             "path": "textures/unnamed.jpg",
             "magnify filter": "nearest",
             "shrink filter": "nearest"
-          }
           },
+          "specular": "textures/SuzanneSpecularMap.png"
+        },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
-          "specular": [ 0.4, 0.4, 0.4 ],
-          "specular highlight": 32
+          "specular": [ 2, 2, 2 ],
+          "specular highlight": 8
         }
       }
     },
@@ -93,12 +94,13 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": [ 1, 1, 1 ]
+          "colour": [ 1, 1, 1 ],
+          "specular": [ 1.0, 1.0, 1.0 ]
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
           "specular": [ 0.1, 0.1, 0.1 ],
-          "specular highlight": 32
+          "specular highlight": 6
         }
       }
     }
@@ -129,7 +131,7 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "intensity": [ 2.0, 2.0, 2.0 ],
+        "intensity": [ 2, 2, 2 ],
         "shadows": true,
         "shadow texture": [ 2048, 2048 ],
         "shadow clips": [ 0.1, 100 ]
