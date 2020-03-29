@@ -184,6 +184,7 @@
   <ItemGroup>
     <Image Include="resources\textures\cube_normals.png" />
     <Image Include="resources\textures\sky.jpg" />
+    <Image Include="resources\textures\SuzanneSpecularMap.png" />
     <Image Include="resources\textures\TwoTone.png" />
     <Image Include="resources\textures\unnamed.jpg" />
   </ItemGroup>
