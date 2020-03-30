@@ -41,7 +41,7 @@
           "normal": "textures/cube_normals.png"
         },
         "phong": {
-          "diffuse": [ 0.4, 0.4, 0.4 ],
+          "diffuse": [ 0.2, 0.2, 0.2 ],
           "specular": [ 2, 2, 2 ],
           "specular highlight": 8
         }
@@ -99,8 +99,8 @@
           "specular": [ 1.0, 1.0, 1.0 ]
         },
         "phong": {
-          "diffuse": [ 0.4, 0.4, 0.4 ],
-          "specular": [ 0.1, 0.1, 0.1 ],
+          "diffuse": [ 0.2, 0.2, 0.2 ],
+          "specular": [ 1, 1, 1 ],
           "specular highlight": 6
         }
       }
