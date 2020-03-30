@@ -84,6 +84,16 @@ Scene* InitialiseScene(std::string path, std::string filename)
 				it.value()["shadow clips"][0].get<float>(), it.value()["shadow clips"][1].get<float>());
 		}
 
+		for (auto model_it = it.value()["static draw"].begin(); model_it != it.value()["static draw"].end(); model_it++)
+		{
+			pointlight->AddStaticModel(model_it.value().get<std::string>());
+		}
+
+		for (auto model_it = it.value()["dynamic draw"].begin(); model_it != it.value()["dynamic draw"].end(); model_it++)
+		{
+			pointlight->AddDynamicModel(model_it.value().get<std::string>());
+		}
+
 		scene->AddPointLight(pointlight);
 
 		num_point_lights++;

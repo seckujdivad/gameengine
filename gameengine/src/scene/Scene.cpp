@@ -193,11 +193,14 @@ void Scene::Render(GLuint framebuffer)
 
 			for (size_t j = 0; j < this->models.size(); j++)
 			{
-				this->models.at(j)->GetShadowShaderProgram()->Select();
-				this->models.at(j)->BindVAO();
-				this->models.at(j)->SetShadowUniforms();
-				this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
-				this->models.at(j)->DrawVBOs();
+				if (this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier()))
+				{
+					this->models.at(j)->GetShadowShaderProgram()->Select();
+					this->models.at(j)->BindVAO();
+					this->models.at(j)->SetShadowUniforms();
+					this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
+					this->models.at(j)->DrawVBOs();
+				}
 			}
 		}
 	}

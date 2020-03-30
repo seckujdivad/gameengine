@@ -107,6 +107,82 @@ void PointLight::SetUniforms(ShaderProgram* shader_program)
 	}
 }
 
+void PointLight::AddStaticModel(std::string identifier)
+{
+	if (!this->ModelIsStatic(identifier))
+	{
+		this->m_shadow_static_models.push_back(identifier);
+	}
+}
+
+void PointLight::RemoveStaticModel(std::string identifier)
+{
+	std::vector<int> to_remove;
+
+	for (size_t i = 0; i < this->m_shadow_static_models.size(); i++)
+	{
+		if (this->m_shadow_static_models.at(i) == identifier)
+		{
+			to_remove.push_back(i);
+		}
+	}
+
+	for (size_t i = to_remove.size() - 1; i > -1; i--)
+	{
+		this->m_shadow_static_models.erase(this->m_shadow_static_models.begin() + to_remove.at(i));
+	}
+}
+
+bool PointLight::ModelIsStatic(std::string identifier)
+{
+	for (size_t i = 0; i < this->m_shadow_static_models.size(); i++)
+	{
+		if (this->m_shadow_static_models.at(i) == identifier)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void PointLight::AddDynamicModel(std::string identifier)
+{
+	if (!this->ModelIsDynamic(identifier))
+	{
+		this->m_shadow_dynamic_models.push_back(identifier);
+	}
+}
+
+void PointLight::RemoveDynamicModel(std::string identifier)
+{
+	std::vector<int> to_remove;
+
+	for (size_t i = 0; i < this->m_shadow_dynamic_models.size(); i++)
+	{
+		if (this->m_shadow_dynamic_models.at(i) == identifier)
+		{
+			to_remove.push_back(i);
+		}
+	}
+
+	for (size_t i = to_remove.size() - 1; i > -1; i--)
+	{
+		this->m_shadow_dynamic_models.erase(this->m_shadow_dynamic_models.begin() + to_remove.at(i));
+	}
+}
+
+bool PointLight::ModelIsDynamic(std::string identifier)
+{
+	for (size_t i = 0; i < this->m_shadow_dynamic_models.size(); i++)
+	{
+		if (this->m_shadow_dynamic_models.at(i) == identifier)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void PointLight::InitialiseViewport()
 {
 	glViewport(0, 0, this->m_shadowtex_width, this->m_shadowtex_height);

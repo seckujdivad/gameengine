@@ -28,6 +28,9 @@ private:
 	float m_shadow_clip_far = 100.0f;
 	float m_shadow_bias = -0.05f;
 
+	std::vector<std::string> m_shadow_static_models;
+	std::vector<std::string> m_shadow_dynamic_models;
+
 public:
 	PointLight(int light_index);
 	~PointLight();
@@ -43,4 +46,12 @@ public:
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);
+
+	void AddStaticModel(std::string identifier);
+	void RemoveStaticModel(std::string identifier);
+	bool ModelIsStatic(std::string identifier);
+
+	void AddDynamicModel(std::string identifier);
+	void RemoveDynamicModel(std::string identifier);
+	bool ModelIsDynamic(std::string identifier);
 };
