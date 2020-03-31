@@ -137,7 +137,8 @@
         "shadow texture": [ 2048, 2048 ],
         "shadow clips": [ 0.1, 100 ],
         "dynamic draw": [ "simple cube", "blender suzanne" ],
-        "static draw": [ "ground" ]
+        "static draw": [ "ground" ],
+        "dynamic refresh rate": 10
       }
     ]
   }

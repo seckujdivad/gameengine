@@ -69,7 +69,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	int num_point_lights = 0;
 	for (auto it = config["lighting"]["point lights"].begin(); it != config["lighting"]["point lights"].end(); it++)
 	{
-		PointLight* pointlight = new PointLight(num_point_lights);
+		PointLight* pointlight = new PointLight(num_point_lights, it.value()["dynamic refresh rate"].get<int>());
 		pointlight->SetIdentifier(it.value()["name"].get<std::string>());
 		pointlight->SetIntensity(glm::vec3(it.value()["intensity"][0].get<float>(),
 			it.value()["intensity"][1].get<float>(),

@@ -25,6 +25,9 @@ private:
 	unsigned int m_shadowtex_height = 1024;
 	std::vector<glm::mat4> m_transforms;
 
+	int m_refresh_frames = 0;
+	int m_frames_since_last_refresh = 0;
+
 	float m_shadow_clip_near = 0.1f;
 	float m_shadow_clip_far = 100.0f;
 	float m_shadow_bias = -0.05f;
@@ -33,7 +36,7 @@ private:
 	std::vector<std::string> m_shadow_dynamic_models;
 
 public:
-	PointLight(int light_index);
+	PointLight(int light_index, int refresh_frames);
 	~PointLight();
 
 	void SetIntensity(glm::vec3 intensity);
@@ -58,4 +61,7 @@ public:
 	void AddDynamicModel(std::string identifier);
 	void RemoveDynamicModel(std::string identifier);
 	bool ModelIsDynamic(std::string identifier);
+
+	void IncrementFrameCounter(int increment = 1);
+	bool DynamicNeedsRedrawing(bool reset_if_redraw = true);
 };

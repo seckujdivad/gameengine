@@ -227,45 +227,49 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 	{
 		if (this->pointlights.at(i)->ShadowsEnabled())
 		{
-			this->pointlights.at(i)->InitialiseViewport();
+			if ((mode == 0) || ((mode == 1) && this->pointlights.at(i)->DynamicNeedsRedrawing(true)))
+			{
+				this->pointlights.at(i)->InitialiseViewport();
 
-			if (mode == 0)
-			{
-				this->pointlights.at(i)->SelectFBO();
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-			else
-			{
-				this->pointlights.at(i)->CopyStaticToDynamic();
-				this->pointlights.at(i)->SelectFBO();
-			}
-
-			for (size_t j = 0; j < this->models.size(); j++)
-			{
 				if (mode == 0)
 				{
-					draw_model = this->pointlights.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+					this->pointlights.at(i)->SelectFBO();
+					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 				else
 				{
-					draw_model = this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+					this->pointlights.at(i)->CopyStaticToDynamic();
+					this->pointlights.at(i)->SelectFBO();
 				}
-				
 
-				if (draw_model)
+				for (size_t j = 0; j < this->models.size(); j++)
 				{
-					this->models.at(j)->GetShadowShaderProgram()->Select();
-					this->models.at(j)->BindVAO();
-					this->models.at(j)->SetShadowUniforms();
-					this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
-					this->models.at(j)->DrawVBOs();
+					if (mode == 0)
+					{
+						draw_model = this->pointlights.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+					}
+					else
+					{
+						draw_model = this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+					}
+
+					if (draw_model)
+					{
+						this->models.at(j)->GetShadowShaderProgram()->Select();
+						this->models.at(j)->BindVAO();
+						this->models.at(j)->SetShadowUniforms();
+						this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
+						this->models.at(j)->DrawVBOs();
+					}
+				}
+
+				if (mode == 0)
+				{
+					this->pointlights.at(i)->CopyDynamicToStatic();
 				}
 			}
 
-			if (mode == 0)
-			{
-				this->pointlights.at(i)->CopyDynamicToStatic();
-			}
+			this->pointlights.at(i)->IncrementFrameCounter(1);
 		}
 	}
 }

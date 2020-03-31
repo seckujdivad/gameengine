@@ -1,9 +1,10 @@
 #include <wx/wxprec.h>
 #include "PointLight.h"
 
-PointLight::PointLight(int light_index) : Positionable(), Nameable()
+PointLight::PointLight(int light_index, int refresh_frames) : Positionable(), Nameable()
 {
 	this->m_light_index = light_index;
+	this->m_refresh_frames = refresh_frames;
 
 	this->m_intensity = glm::vec3(0.0f);
 }
@@ -199,6 +200,23 @@ bool PointLight::ModelIsDynamic(std::string identifier)
 		}
 	}
 	return false;
+}
+
+void PointLight::IncrementFrameCounter(int increment)
+{
+	this->m_frames_since_last_refresh += increment;
+}
+
+bool PointLight::DynamicNeedsRedrawing(bool reset_if_redraw)
+{
+	bool result = this->m_frames_since_last_refresh >= this->m_refresh_frames;
+
+	if (result && reset_if_redraw)
+	{
+		this->m_frames_since_last_refresh = 0;
+	}
+
+	return result;
 }
 
 void PointLight::InitialiseViewport()
