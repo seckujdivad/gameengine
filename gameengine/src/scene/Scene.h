@@ -51,6 +51,7 @@ public:
 	void ClearAllCameras(bool destroy = false);
 
 	void Render(GLuint framebuffer = 0); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
+	void DrawShadows(int mode = 0); //0: static, 1: dynamic
 
 	void PushUniforms();
 

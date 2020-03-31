@@ -32,6 +32,7 @@ void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int s
 	this->m_shadow_clip_far = far_plane;
 
 	//make cubemap
+	// dynamic
 	glGenTextures(1, &this->m_depth_cubemap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_depth_cubemap);
 	for (int i = 0; i < 6; i++)
@@ -44,6 +45,21 @@ void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int s
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	// static
+	glGenTextures(1, &this->m_depth_cubemap_static);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_depth_cubemap_static);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, this->m_shadowtex_width, this->m_shadowtex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	//attach dynamic cubemap to a framebuffer
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_depth_cubemap);
 	glGenFramebuffers(1, &this->m_depth_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_depth_fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_depth_cubemap, 0);
@@ -191,6 +207,20 @@ void PointLight::InitialiseViewport()
 void PointLight::SelectFBO()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_depth_fbo);
+}
+
+void PointLight::CopyStaticToDynamic()
+{
+	glCopyImageSubData(this->m_depth_cubemap_static, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_depth_cubemap, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_shadowtex_width, this->m_shadowtex_height, 6);
+}
+
+void PointLight::CopyDynamicToStatic()
+{
+	glCopyImageSubData(this->m_depth_cubemap, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_depth_cubemap_static, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_shadowtex_width, this->m_shadowtex_height, 6);
 }
 
 void PointLight::RegisterShadowUniforms(ShaderProgram* shader_program)

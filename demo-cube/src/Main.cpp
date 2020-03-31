@@ -83,6 +83,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_scene = InitialiseScene(this->m_scene_path, this->m_scene_filename);
 	this->m_glcanvas->SetScene(this->m_scene);
 	this->m_scene->PushUniforms();
+	this->m_scene->DrawShadows(0);
 
 	this->m_glcanvas->SetMouselook(true, this->m_scene->GetActiveCamera());
 	this->m_glcanvas->SetKeyboardMove(true, this->m_scene->GetActiveCamera());

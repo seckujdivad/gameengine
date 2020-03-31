@@ -19,6 +19,7 @@ private:
 
 	bool m_shadows_enabled = false;
 	GLuint m_depth_cubemap = NULL;
+	GLuint m_depth_cubemap_static = NULL;
 	GLuint m_depth_fbo = NULL;
 	unsigned int m_shadowtex_width = 1024;
 	unsigned int m_shadowtex_height = 1024;
@@ -41,6 +42,9 @@ public:
 
 	void InitialiseViewport();
 	void SelectFBO();
+	void CopyStaticToDynamic();
+	void CopyDynamicToStatic();
+
 	void RegisterShadowUniforms(ShaderProgram* shader_program);
 	void SetShadowUniforms(ShaderProgram* shader_program);
 

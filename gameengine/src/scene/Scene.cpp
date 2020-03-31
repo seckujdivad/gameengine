@@ -182,28 +182,7 @@ void Scene::Render(GLuint framebuffer)
 	}
 	
 	//draw shadows
-	glCullFace(GL_FRONT);
-	for (size_t i = 0; i < this->pointlights.size(); i++)
-	{
-		if (this->pointlights.at(i)->ShadowsEnabled())
-		{
-			this->pointlights.at(i)->InitialiseViewport();
-			this->pointlights.at(i)->SelectFBO();
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-			for (size_t j = 0; j < this->models.size(); j++)
-			{
-				if (this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier()))
-				{
-					this->models.at(j)->GetShadowShaderProgram()->Select();
-					this->models.at(j)->BindVAO();
-					this->models.at(j)->SetShadowUniforms();
-					this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
-					this->models.at(j)->DrawVBOs();
-				}
-			}
-		}
-	}
+	this->DrawShadows(1);
 
 	//prepare for camera draw
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -230,6 +209,64 @@ void Scene::Render(GLuint framebuffer)
 		}
 
 		this->models.at(i)->DrawVBOs();
+	}
+}
+
+void Scene::DrawShadows(int mode) //0: static, 1: dynamic
+{
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->GenPosMat();
+	}
+
+	glCullFace(GL_FRONT);
+
+	bool draw_model;
+
+	for (size_t i = 0; i < this->pointlights.size(); i++)
+	{
+		if (this->pointlights.at(i)->ShadowsEnabled())
+		{
+			this->pointlights.at(i)->InitialiseViewport();
+
+			if (mode == 0)
+			{
+				this->pointlights.at(i)->SelectFBO();
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+			else
+			{
+				this->pointlights.at(i)->CopyStaticToDynamic();
+				this->pointlights.at(i)->SelectFBO();
+			}
+
+			for (size_t j = 0; j < this->models.size(); j++)
+			{
+				if (mode == 0)
+				{
+					draw_model = this->pointlights.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+				}
+				else
+				{
+					draw_model = this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+				}
+				
+
+				if (draw_model)
+				{
+					this->models.at(j)->GetShadowShaderProgram()->Select();
+					this->models.at(j)->BindVAO();
+					this->models.at(j)->SetShadowUniforms();
+					this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
+					this->models.at(j)->DrawVBOs();
+				}
+			}
+
+			if (mode == 0)
+			{
+				this->pointlights.at(i)->CopyDynamicToStatic();
+			}
+		}
 	}
 }
 
