@@ -25,8 +25,8 @@ private:
 	unsigned int m_shadowtex_height = 1024;
 	std::vector<glm::mat4> m_transforms;
 
-	int m_refresh_frames = 0;
-	int m_frames_since_last_refresh = 0;
+	unsigned int m_refresh_frames = 0;
+	unsigned int m_frames_since_last_refresh = 0;
 
 	float m_shadow_clip_near = 0.1f;
 	float m_shadow_clip_far = 100.0f;
