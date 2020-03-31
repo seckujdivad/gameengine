@@ -10,7 +10,9 @@ PointLight::PointLight(int light_index) : Positionable(), Nameable()
 
 PointLight::~PointLight()
 {
-
+	glDeleteTextures(1, &this->m_depth_cubemap);
+	glDeleteTextures(1, &this->m_depth_cubemap_static);
+	glDeleteFramebuffers(1, &this->m_depth_fbo);
 }
 
 void PointLight::SetIntensity(glm::vec3 intensity)
