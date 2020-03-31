@@ -115,23 +115,28 @@ void main()
 	{
 		//calculate light
 		light_change = vec3(0.0f);
-		fragtolight = normalize(light_points[i].position - globalSceneSpacePos.xyz); //get direction from the fragment to the light source
 		fragtocam = normalize(0 - vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
 
-		// diffuse
-		diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
-		light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
-		
-		// specular blinn-phong
-		halfway_dir = normalize(fragtolight + fragtocam);
-		specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
-		light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
-		
-		//get shadow intensity multiplier
-		shadow_intensity = GetShadowIntensity(globalSceneSpacePos.xyz, i);
+		fragtolight = light_points[i].position - globalSceneSpacePos.xyz; //get direction from the fragment to the light source
+		if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
+		{
+			fragtolight = normalize(fragtolight);
 
-		//apply light to fragment
-		frag_intensity = frag_intensity + (light_change * shadow_intensity);
+			// diffuse
+			diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
+			light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
+		
+			// specular blinn-phong
+			halfway_dir = normalize(fragtolight + fragtocam);
+			specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
+			light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
+		
+			//get shadow intensity multiplier
+			shadow_intensity = GetShadowIntensity(globalSceneSpacePos.xyz, i);
+
+			//apply light to fragment
+			frag_intensity = frag_intensity + (light_change * shadow_intensity);
+		}
 	}
 
 	//apply lighting to fragment
