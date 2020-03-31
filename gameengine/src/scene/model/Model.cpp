@@ -75,6 +75,13 @@ Model::~Model()
 	{
 		delete this->m_shadow_shader_program;
 	}
+
+	glDeleteBuffers(1, &this->m_vao);
+
+	for (size_t i = 0; i < this->m_vertex_buffers.size(); i++)
+	{
+		glDeleteVertexArrays(1, &this->m_vertex_buffers.at(i));
+	}
 }
 
 int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
