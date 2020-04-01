@@ -94,6 +94,7 @@ void Reflection::SetUniforms(ShaderProgram* shader_program)
 		this->GetPosition(1), 
 		this->GetPosition(2));
 	glUniform3fv(shader_program->GetUniform("reflection_position"), 1, glm::value_ptr(position));
+	shader_program->UpdateTexture("reflection_cubemap", this->m_cubemap);
 }
 
 void Reflection::GenerateCameraData()
