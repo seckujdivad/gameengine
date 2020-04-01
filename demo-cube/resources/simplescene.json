@@ -45,7 +45,7 @@
           "specular highlight": 8
         },
         "reflections": {
-          "reflection": "main",
+          "reflection": "simple cube reflection",
           "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
@@ -80,8 +80,8 @@
           "specular highlight": 8
         },
         "reflections": {
-          "reflection": "main",
-          "intensity": [ 0.1, 0.1, 0.1 ]
+          "reflection": "blender suzanne reflection",
+          "intensity": [ 0.4, 0.4, 0.4 ]
         }
       }
     },
@@ -175,9 +175,18 @@
       "texture": [ 1, 1 ]
     },
     {
-      "name": "main",
+      "name": "simple cube reflection",
       "position": [ 8, -5, -5 ],
       "dynamic draw": [ "blender suzanne" ],
+      "static draw": [ "ground" ],
+      "dynamic refresh rate": 10,
+      "clips": [ 0.1, 100 ],
+      "texture": [ 1024, 1024 ]
+    },
+    {
+      "name": "blender suzanne reflection",
+      "position": [ 5, 3, 0 ],
+      "dynamic draw": [ "simple cube" ],
       "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
