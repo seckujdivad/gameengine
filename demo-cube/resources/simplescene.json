@@ -111,7 +111,7 @@
           "specular highlight": 6
         },
         "reflections": {
-          "reflection": "main",
+          "reflection": "blank",
           "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
@@ -154,6 +154,15 @@
     ]
   },
   "reflections": [
+    {
+      "name": "blank",
+      "position": [ 0, 0, 0 ],
+      "dynamic draw": [],
+      "static draw": [],
+      "dynamic refresh rate": -1,
+      "clips": [ 1, 2 ],
+      "texture": [ 1, 1 ]
+    },
     {
       "name": "main",
       "position": [ 8, -5, -5 ],
