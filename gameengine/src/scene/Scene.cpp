@@ -334,17 +334,18 @@ void Scene::DrawReflections(int mode)
 	{
 		if ((mode == 0) || ((mode == 1) && this->reflections.at(i)->DynamicNeedsRedrawing(true)))
 		{
+			if (mode == 1)
+			{
+				this->reflections.at(i)->CopyStaticToDynamic();
+			}
+
 			for (int face = 0; face < 6; face++)
 			{
+				this->reflections.at(i)->SelectFBO(face);
+
 				if (mode == 0)
 				{
-					this->reflections.at(i)->SelectFBO(face);
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				}
-				else
-				{
-					this->reflections.at(i)->CopyStaticToDynamic();
-					this->reflections.at(i)->SelectFBO(face);
 				}
 
 				for (size_t j = 0; j < this->models.size(); j++)

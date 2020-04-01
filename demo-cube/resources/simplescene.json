@@ -157,8 +157,8 @@
     {
       "name": "main",
       "position": [ 8, -5, -5 ],
-      "dynamic draw": [  ],
-      "static draw": [ "ground", "blender suzanne" ],
+      "dynamic draw": [ "blender suzanne" ],
+      "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
       "texture": [ 512, 512 ]
