@@ -388,12 +388,10 @@ void Scene::DrawReflections(int mode)
 					if (draw_model)
 					{
 						this->models.at(j)->GetShaderProgram()->Select();
-						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face);
-						this->reflections.at(i)->InitialiseViewport();
-
-						this->models.at(j)->BindVAO();
 
 						glUniform3fv(this->models.at(j)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
+
+						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face);
 						this->models.at(j)->SetUniforms();
 
 						for (size_t k = 0; k < this->pointlights.size(); k++)
@@ -401,14 +399,16 @@ void Scene::DrawReflections(int mode)
 							this->pointlights.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
 						}
 
+						this->reflections.at(i)->InitialiseViewport();
+						this->models.at(j)->BindVAO();
 						this->models.at(j)->DrawVBOs();
 					}
 				}
+			}
 
-				if (mode == 0)
-				{
-					this->reflections.at(i)->CopyDynamicToStatic();
-				}
+			if (mode == 0)
+			{
+				this->reflections.at(i)->CopyDynamicToStatic();
 			}
 		}
 
