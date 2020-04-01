@@ -564,16 +564,6 @@ void Model::SetMaterial(Material material)
 	this->m_material = material;
 }
 
-void Model::SetReflectionIdentifier(std::string identifier)
-{
-	this->m_reflection_identifier = identifier;
-}
-
-std::string Model::GetReflectionIdentifier()
-{
-	return this->m_reflection_identifier;
-}
-
 void Model::SetShadowShaderProgram(ShaderProgram* shader_program)
 {
 	if (this->m_shadow_shader_program != nullptr)

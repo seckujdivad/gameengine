@@ -30,6 +30,9 @@ public:
 	void SetSpecularHighlight(float intensity);
 	float GetSpecularHighlight();
 
+	void SetReflection(Reflection* reflection);
+	Reflection* GetReflection();
+
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);
 };

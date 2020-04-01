@@ -43,11 +43,23 @@ float Material::GetSpecularHighlight()
 	return this->m_specular_highlight;
 }
 
+void Material::SetReflection(Reflection* reflection)
+{
+	this->m_reflection = reflection;
+}
+
+Reflection* Material::GetReflection()
+{
+	return this->m_reflection;
+}
+
 void Material::RegisterUniforms(ShaderProgram* shader_program)
 {
 	shader_program->RegisterUniform("mat_diffuse");
 	shader_program->RegisterUniform("mat_specular");
 	shader_program->RegisterUniform("mat_specular_highlight");
+
+	this->m_reflection->RegisterUniforms(shader_program);
 }
 
 void Material::SetUniforms(ShaderProgram* shader_program)
@@ -55,4 +67,6 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 	glUniform3fv(shader_program->GetUniform("mat_diffuse"), 1, glm::value_ptr(this->m_diffuse));
 	glUniform3fv(shader_program->GetUniform("mat_specular"), 1, glm::value_ptr(this->m_specular));
 	glUniform1f(shader_program->GetUniform("mat_specular_highlight"), this->m_specular_highlight);
+
+	this->m_reflection->SetUniforms(shader_program);
 }

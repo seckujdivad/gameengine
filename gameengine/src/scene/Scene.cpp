@@ -166,6 +166,39 @@ void Scene::RemoveReflection(Reflection* reflection)
 	}
 }
 
+Nameable* Scene::GetByIdentifier(std::string identifier, int type)
+{
+	size_t size;
+	switch (type)
+	{
+	case 0: size = this->models.size(); break;
+	case 1: size = this->cameras.size(); break;
+	case 2: size = this->pointlights.size(); break;
+	case 3: size = this->reflections.size(); break;
+	default: return nullptr;
+	}
+
+	Nameable* object;
+	for (size_t i = 0; i < size; i++)
+	{
+		switch (type)
+		{
+		case 0: object = this->models.at(i); break;
+		case 1: object = this->cameras.at(i); break;
+		case 2: object = this->pointlights.at(i); break;
+		case 3: object = this->reflections.at(i); break;
+		default: return nullptr;
+		}
+
+		if (object->GetIdentifier() == identifier)
+		{
+			return object;
+		}
+	}
+
+	return nullptr;
+}
+
 size_t Scene::NumModels()
 {
 	return this->models.size();
@@ -244,14 +277,6 @@ void Scene::Render(GLuint framebuffer)
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
 			this->pointlights.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
-		}
-
-		for (size_t j = 0; j < this->reflections.size(); j++)
-		{
-			if (this->reflections.at(j)->GetIdentifier() == this->models.at(i)->GetReflectionIdentifier())
-			{
-				this->reflections.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
-			}
 		}
 
 		this->models.at(i)->DrawVBOs();
@@ -374,14 +399,6 @@ void Scene::DrawReflections(int mode)
 						for (size_t k = 0; k < this->pointlights.size(); k++)
 						{
 							this->pointlights.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
-						}
-
-						for (size_t k = 0; k < this->reflections.size(); k++)
-						{
-							if (this->reflections.at(k)->GetIdentifier() == this->models.at(j)->GetReflectionIdentifier())
-							{
-								this->reflections.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
-							}
 						}
 
 						this->models.at(j)->DrawVBOs();

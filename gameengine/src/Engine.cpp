@@ -176,6 +176,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["shader"]["phong"]["specular"][2].get<float>()));
 		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
 
+		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3));
+
 		model->SetMaterial(mat);
 
 		// load texture
@@ -189,8 +191,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		//load shadow shader
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["shadow"]), {});
 		model->SetShadowShaderProgram(shader_program);
-
-		model->SetReflectionIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>());
 
 		//store model
 		scene->AddModel(model);

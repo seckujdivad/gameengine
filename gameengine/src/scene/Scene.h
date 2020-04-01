@@ -48,6 +48,8 @@ public:
 	void RemovePointLight(PointLight* pointlight);
 	void AddReflection(Reflection* reflection);
 	void RemoveReflection(Reflection* reflection);
+	
+	Nameable* GetByIdentifier(std::string identifier, int type); //types: 0 - model, 1 - camera, 2 - point light, 3 - reflection
 
 	size_t NumModels();
 	size_t NumCameras();
