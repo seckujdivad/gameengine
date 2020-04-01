@@ -23,6 +23,11 @@ Scene::~Scene()
 	{
 		delete this->pointlights.at(i);
 	}
+
+	for (size_t i = 0; i < this->reflections.size(); i++)
+	{
+		delete this->reflections.at(i);
+	}
 }
 
 int Scene::GetModelIndex(Model* model)
@@ -54,6 +59,18 @@ int Scene::GetPointLightIndex(PointLight* pointlight)
 	for (size_t i = 0; i < this->pointlights.size(); i++)
 	{
 		if (pointlight == this->pointlights.at(i))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+int Scene::GetReflectionIndex(Reflection* reflection)
+{
+	for (size_t i = 0; i < this->reflections.size(); i++)
+	{
+		if (reflection == this->reflections.at(i))
 		{
 			return i;
 		}
@@ -131,6 +148,24 @@ void Scene::RemovePointLight(PointLight* pointlight)
 	}
 }
 
+void Scene::AddReflection(Reflection* reflection)
+{
+	this->reflections.push_back(reflection);
+}
+
+void Scene::RemoveReflection(Reflection* reflection)
+{
+	int reflection_index = this->GetReflectionIndex(reflection);
+	if (reflection_index == -1)
+	{
+		throw std::runtime_error("PointLight doesn't exist in this scene");
+	}
+	else
+	{
+		this->reflections.erase(this->reflections.begin() + reflection_index);
+	}
+}
+
 size_t Scene::NumModels()
 {
 	return this->models.size();
@@ -184,6 +219,9 @@ void Scene::Render(GLuint framebuffer)
 	//draw shadows
 	this->DrawShadows(1);
 
+	//draw reflections
+	this->DrawReflections(1);
+
 	//prepare for camera draw
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	glCullFace(GL_BACK);
@@ -206,6 +244,14 @@ void Scene::Render(GLuint framebuffer)
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
 			this->pointlights.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
+		}
+
+		for (size_t j = 0; j < this->reflections.size(); j++)
+		{
+			if (this->reflections.at(j)->GetIdentifier() == this->models.at(i)->GetReflectionIdentifier())
+			{
+				this->reflections.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
+			}
 		}
 
 		this->models.at(i)->DrawVBOs();
@@ -274,6 +320,84 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 	}
 }
 
+void Scene::DrawReflections(int mode)
+{
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->GenPosMat();
+	}
+
+	glCullFace(GL_BACK);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	for (size_t i = 0; i < this->reflections.size(); i++)
+	{
+		if ((mode == 0) || ((mode == 1) && this->reflections.at(i)->DynamicNeedsRedrawing(true)))
+		{
+			for (int face = 0; face < 6; face++)
+			{
+				if (mode == 0)
+				{
+					this->reflections.at(i)->SelectFBO(face);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				}
+				else
+				{
+					this->reflections.at(i)->CopyStaticToDynamic();
+					this->reflections.at(i)->SelectFBO(face);
+				}
+
+				for (size_t j = 0; j < this->models.size(); j++)
+				{
+					bool draw_model;
+					if (mode == 0)
+					{
+						draw_model = this->reflections.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+					}
+					else
+					{
+						draw_model = this->reflections.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+					}
+
+					if (draw_model)
+					{
+						this->models.at(j)->GetShaderProgram()->Select();
+						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face);
+						this->reflections.at(i)->InitialiseViewport();
+
+						this->models.at(j)->BindVAO();
+
+						glUniform3fv(this->models.at(j)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
+						this->models.at(j)->SetUniforms();
+
+						for (size_t k = 0; k < this->pointlights.size(); k++)
+						{
+							this->pointlights.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
+						}
+
+						for (size_t k = 0; k < this->reflections.size(); k++)
+						{
+							if (this->reflections.at(k)->GetIdentifier() == this->models.at(j)->GetReflectionIdentifier())
+							{
+								this->reflections.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
+							}
+						}
+
+						this->models.at(j)->DrawVBOs();
+					}
+				}
+
+				if (mode == 0)
+				{
+					this->reflections.at(i)->CopyDynamicToStatic();
+				}
+			}
+		}
+
+		this->reflections.at(i)->IncrementFrameCounter(1);
+	}
+}
+
 void Scene::PushUniforms()
 {
 	for (size_t i = 0; i < this->models.size(); i++)
@@ -292,6 +416,11 @@ void Scene::PushUniforms()
 		{
 			this->pointlights.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 			this->pointlights.at(j)->RegisterShadowUniforms(this->models.at(i)->GetShadowShaderProgram());
+		}
+
+		for (size_t j = 0; j < this->reflections.size(); j++)
+		{
+			this->reflections.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 		}
 	}
 }

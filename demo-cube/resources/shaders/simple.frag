@@ -52,6 +52,10 @@ struct PointLight
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
 
+//reflections
+uniform vec3 reflection_position;
+uniform samplerCube reflection_cubemap;
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (!light_points[lightindex].shadows_enabled)
@@ -106,7 +110,7 @@ void main()
 	float diffuse_intensity;
 	float specular_intensity;
 	vec3 fragtolight;
-	vec3 fragtocam;
+	vec3 fragtocam = normalize(0 - vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
 
 	//phong
 	//vec3 perfect_reflection;
@@ -122,9 +126,9 @@ void main()
 	{
 		//calculate light
 		light_change = vec3(0.0f);
-		fragtocam = normalize(0 - vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
 
 		fragtolight = light_points[i].position - globalSceneSpacePos.xyz; //get direction from the fragment to the light source
+
 		if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
 		{
 			fragtolight = normalize(fragtolight);
@@ -145,6 +149,12 @@ void main()
 			frag_intensity = frag_intensity + (light_change * shadow_intensity);
 		}
 	}
+
+	//apply reflection to fragment
+	vec3 reflection;
+	reflection = texture(reflection_cubemap, reflect(-fragtocam, normalize(normal))).xyz;
+
+	frag_intensity += 0.1f * reflection;
 
 	//apply lighting to fragment
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;

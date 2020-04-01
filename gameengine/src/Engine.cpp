@@ -98,6 +98,36 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		num_point_lights++;
 	}
+
+	//load reflections
+	Reflection* reflection;
+	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
+	{
+		reflection = new Reflection(it.value()["texture"][0].get<int>(),
+			it.value()["texture"][1].get<int>(),
+			it.value()["clips"][0].get<int>(),
+			it.value()["clips"][1].get<int>(),
+			it.value()["dynamic refresh rate"].get<unsigned int>());
+
+		reflection->SetIdentifier(it.value()["name"].get<std::string>());
+		reflection->SetPosition(it.value()["position"][0].get<float>(),
+			it.value()["position"][1].get<float>(),
+			it.value()["position"][2].get<float>());
+
+		for (auto model_it = it.value()["static draw"].begin(); model_it != it.value()["static draw"].end(); model_it++)
+		{
+			reflection->AddStaticModel(model_it.value().get<std::string>());
+		}
+
+		for (auto model_it = it.value()["dynamic draw"].begin(); model_it != it.value()["dynamic draw"].end(); model_it++)
+		{
+			reflection->AddDynamicModel(model_it.value().get<std::string>());
+		}
+
+		reflection->GenerateCameraData();
+
+		scene->AddReflection(reflection);
+	}
 	
 	// create model object library
 	std::map<std::string, Model*> model_lib;
@@ -159,6 +189,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		//load shadow shader
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["shadow"]), {});
 		model->SetShadowShaderProgram(shader_program);
+
+		model->SetReflectionIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>());
 
 		//store model
 		scene->AddModel(model);

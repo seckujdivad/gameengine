@@ -43,6 +43,8 @@ private:
 
 	Material m_material;
 
+	std::string m_reflection_identifier = "";
+
 public:
 	Model();
 	Model(Model& copy_from);
@@ -91,4 +93,7 @@ public:
 	void DrawVBOs();
 
 	void SetMaterial(Material material);
+
+	void SetReflectionIdentifier(std::string identifier);
+	std::string GetReflectionIdentifier();
 };

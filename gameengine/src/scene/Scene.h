@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "../render/EngineCanvas.h"
 #include "light/PointLight.h"
+#include "model/Reflection.h"
 
 class Scene
 {
@@ -23,6 +24,7 @@ private:
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
 	int GetPointLightIndex(PointLight* pointlight);
+	int GetReflectionIndex(Reflection* reflection);
 	
 public:
 	Scene(Camera* active_camera);
@@ -34,6 +36,7 @@ public:
 	std::vector<Model*> models;
 	std::vector<Camera*> cameras;
 	std::vector<PointLight*> pointlights;
+	std::vector<Reflection*> reflections;
 
 	void AddModel(Model* model);
 	void RemoveModel(Model* model);
@@ -43,6 +46,8 @@ public:
 	Camera* GetActiveCamera();
 	void AddPointLight(PointLight* pointlight);
 	void RemovePointLight(PointLight* pointlight);
+	void AddReflection(Reflection* reflection);
+	void RemoveReflection(Reflection* reflection);
 
 	size_t NumModels();
 	size_t NumCameras();
@@ -52,6 +57,7 @@ public:
 
 	void Render(GLuint framebuffer = 0); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
 	void DrawShadows(int mode = 0); //0: static, 1: dynamic
+	void DrawReflections(int mode = 0); //0: static, 1: dynamic
 
 	void PushUniforms();
 
