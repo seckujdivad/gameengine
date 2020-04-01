@@ -253,12 +253,20 @@ void Reflection::IncrementFrameCounter(int increment)
 
 bool Reflection::DynamicNeedsRedrawing(bool reset_if_redraw)
 {
-	bool result = this->m_frames_since_last_refresh >= this->m_refresh_frames;
-
-	if (result && reset_if_redraw)
+	if (this->m_refresh_frames < 0)
 	{
 		this->m_frames_since_last_refresh = 0;
+		return false;
 	}
+	else
+	{
+		bool result = this->m_frames_since_last_refresh >= this->m_refresh_frames;
 
-	return result;
+		if (result && reset_if_redraw)
+		{
+			this->m_frames_since_last_refresh = 0;
+		}
+
+		return result;
+	}
 }
