@@ -29,6 +29,7 @@ private:
 		-1, -1, -1, -1,
 		-1, -1, -1, -1,
 	};
+	std::string m_texture_names[16] = { "" };
 
 public:
 	ShaderProgram();
@@ -45,4 +46,6 @@ public:
 
 	void LoadTexture(std::string name, unsigned char* data, int width, int height, int index = -1, GLuint min_filter = GL_NEAREST, GLuint mag_filter = GL_NEAREST);
 	void RegisterTexture(std::string name, GLuint texture, GLuint type, int index = -1);
+	void UpdateTexture(std::string name, GLuint texture);
+	void UpdateTexture(int index, GLuint texture);
 };

@@ -229,4 +229,24 @@ void ShaderProgram::RegisterTexture(std::string name, GLuint texture, GLuint typ
 
 	this->m_textures[index] = texture;
 	this->m_texture_types[index] = type;
+	this->m_texture_names[index] = name;
+}
+
+void ShaderProgram::UpdateTexture(std::string name, GLuint texture)
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (this->m_textures[i] != -1)
+		{
+			if (this->m_texture_names[i] == name)
+			{
+				this->UpdateTexture(i, texture);
+			}
+		}
+	}
+}
+
+void ShaderProgram::UpdateTexture(int index, GLuint texture)
+{
+	this->m_textures[index] = texture;
 }
