@@ -17,7 +17,7 @@ private:
 	float m_specular_highlight;
 
 	Reflection* m_reflection;
-	glm::vec3 m_reflection_intensity;
+	glm::vec3 m_reflection_intensity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 public:
 	Material();
@@ -32,6 +32,8 @@ public:
 
 	void SetReflection(Reflection* reflection);
 	Reflection* GetReflection();
+	void SetReflectionIntensity(glm::vec3 intensity);
+	glm::vec3 GetReflectionIntensity();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);

@@ -31,6 +31,7 @@ uniform mat4 cam_persp;
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
+uniform vec3 mat_reflection_intensity;
 
 //textures
 uniform sampler2D colourTexture;
@@ -154,7 +155,7 @@ void main()
 	vec3 reflection;
 	reflection = texture(reflection_cubemap, reflect(-fragtocam, normalize(normal))).xyz;
 
-	frag_intensity += 0.1f * reflection;
+	frag_intensity += mat_reflection_intensity * reflection;
 
 	//apply lighting to fragment
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;

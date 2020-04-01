@@ -46,7 +46,7 @@
         },
         "reflections": {
           "reflection": "main",
-          "intensity": [ 1, 1, 1 ]
+          "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
     },
@@ -81,7 +81,7 @@
         },
         "reflections": {
           "reflection": "main",
-          "intensity": [ 1, 1, 1 ]
+          "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
     },
@@ -112,7 +112,7 @@
         },
         "reflections": {
           "reflection": "main",
-          "intensity": [ 1, 1, 1 ]
+          "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
     }
@@ -161,7 +161,7 @@
       "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
-      "texture": [ 512, 512 ]
+      "texture": [ 1024, 1024 ]
     }
   ]
 }

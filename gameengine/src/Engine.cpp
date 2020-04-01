@@ -177,6 +177,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
 
 		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3));
+		mat.SetReflectionIntensity(glm::vec3(it.value()["shader"]["reflections"]["intensity"][0].get<float>(),
+			it.value()["shader"]["reflections"]["intensity"][1].get<float>(),
+			it.value()["shader"]["reflections"]["intensity"][2].get<float>()));
 
 		model->SetMaterial(mat);
 
