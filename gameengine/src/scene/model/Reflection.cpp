@@ -1,20 +1,21 @@
 #include <wx/wxprec.h>
 #include "Reflection.h"
 
-Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames) : Positionable(), Nameable()
+Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames, unsigned int parallax_correction_iterations) : Positionable(), Nameable()
 {
 	this->m_tex_width = texture_width;
 	this->m_tex_height = texture_height;
 	this->m_clip_near = near_plane;
 	this->m_clip_far = far_plane;
 	this->m_refresh_frames = refresh_frames;
+	this->m_parallax_correction_iterations = parallax_correction_iterations;
 
 	//make cubemap
 	glGenTextures(1, &this->m_cubemap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap);
 	for (int i = 0; i < 6; i++)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, this->m_tex_width, this->m_tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, this->m_tex_width, this->m_tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -26,7 +27,7 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap_static);
 	for (int i = 0; i < 6; i++)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, this->m_tex_width, this->m_tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, this->m_tex_width, this->m_tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -48,6 +49,8 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	this->GenerateCameraData();
 }
 
 Reflection::~Reflection()
@@ -86,6 +89,10 @@ void Reflection::RegisterUniforms(ShaderProgram* shader_program)
 {
 	shader_program->RegisterUniform("reflection_position");
 	shader_program->RegisterTexture("reflection_cubemap", this->m_cubemap, GL_TEXTURE_CUBE_MAP);
+	shader_program->RegisterUniform("reflection_isdrawing");
+	shader_program->RegisterUniform("reflection_clip_near");
+	shader_program->RegisterUniform("reflection_clip_far");
+	shader_program->RegisterUniform("reflection_parallax_correction_iterations");
 }
 
 void Reflection::SetUniforms(ShaderProgram* shader_program)
@@ -95,6 +102,10 @@ void Reflection::SetUniforms(ShaderProgram* shader_program)
 		this->GetPosition(2));
 	glUniform3fv(shader_program->GetUniform("reflection_position"), 1, glm::value_ptr(position));
 	shader_program->UpdateTexture("reflection_cubemap", this->m_cubemap);
+	glUniform1f(shader_program->GetUniform("reflection_clip_near"), this->m_clip_near);
+	glUniform1f(shader_program->GetUniform("reflection_clip_far"), this->m_clip_far);
+	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_FALSE);
+	glUniform1i(shader_program->GetUniform("reflection_parallax_correction_iterations"), this->m_parallax_correction_iterations);
 }
 
 void Reflection::GenerateCameraData()
@@ -105,50 +116,6 @@ void Reflection::GenerateCameraData()
 		0.0f);
 
 	this->m_transform_perspective = glm::perspective(glm::pi<float>() / 2.0f, 1.0f, this->m_clip_near, this->m_clip_far);
-
-	/*
-	glm::mat4 rotation;
-	float x_rot;
-	float y_rot;
-	float z_rot;
-	for (int i = 0; i < 6; i++)
-	{
-		x_rot = 0.0f;
-		y_rot = 0.0f;
-		z_rot = 0.0f;
-
-		if (i == 0) //positive x
-		{
-			y_rot = 0.0f - (glm::pi<float>() / 2.0f);
-		}
-		else if (i == 1) //negative x
-		{
-			y_rot = glm::pi<float>() / 2.0f;
-		}
-		else if (i == 2) //positive y
-		{
-			x_rot = glm::pi<float>() / 2.0f;
-		}
-		else if (i == 3) //negative y
-		{
-			x_rot = 0.0f - (glm::pi<float>() / 2.0f);
-		}
-		else if (i == 4) //positive z
-		{
-			x_rot = glm::pi<float>();
-		}
-		else if (i == 5) //negative z
-		{
-			
-		}
-
-		rotation = glm::mat4(1.0f);
-		rotation = glm::rotate(rotation, 0.0f - x_rot, glm::vec3(1.0f, 0.0f, 0.0f));
-		rotation = glm::rotate(rotation, 0.0f - y_rot, glm::vec3(0.0f, 1.0f, 0.0f));
-		rotation = glm::rotate(rotation, 0.0f - z_rot, glm::vec3(0.0f, 0.0f, 1.0f));
-
-		this->m_transform_rotate.push_back(rotation);
-	}*/
 
 	glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
 	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
@@ -245,6 +212,7 @@ void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face)
 	glUniform4fv(shader_program->GetUniform("cam_translate"), 1, glm::value_ptr(this->m_transform_translate));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_transform_rotate.at(face)));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->m_transform_perspective));
+	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_TRUE);
 }
 
 void Reflection::IncrementFrameCounter(int increment)

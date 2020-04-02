@@ -107,7 +107,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["texture"][1].get<int>(),
 			it.value()["clips"][0].get<int>(),
 			it.value()["clips"][1].get<int>(),
-			it.value()["dynamic refresh rate"].get<unsigned int>());
+			it.value()["dynamic refresh rate"].get<unsigned int>(),
+			it.value()["parallax correction iterations"].get<unsigned int>());
 
 		reflection->SetIdentifier(it.value()["name"].get<std::string>());
 		reflection->SetPosition(it.value()["position"][0].get<float>(),

@@ -37,8 +37,7 @@
         },
         "textures": {
           "colour": [ 1, 1, 1 ],
-          "specular": [ 1, 1, 1 ],
-          "normal": "textures/cube_normals.png"
+          "specular": [ 1, 1, 1 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -168,12 +167,13 @@
   "reflections": [
     {
       "name": "blank",
-      "position": [ 0, 0, 0 ],
-      "dynamic draw": [],
+      "position": [ 0, 0, -8 ],
+      "dynamic draw": [ "blender suzanne", "simple cube" ],
       "static draw": [],
-      "dynamic refresh rate": -1,
-      "clips": [ 1, 2 ],
-      "texture": [ 1, 1 ]
+      "dynamic refresh rate": 10,
+      "clips": [ 0.1, 100 ],
+      "texture": [ 1024, 1024 ],
+      "parallax correction iterations": 5
     },
     {
       "name": "simple cube reflection",
@@ -182,7 +182,8 @@
       "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ]
+      "texture": [ 1024, 1024 ],
+      "parallax correction iterations": 1
     },
     {
       "name": "blender suzanne reflection",
@@ -191,7 +192,8 @@
       "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ]
+      "texture": [ 1024, 1024 ],
+      "parallax correction iterations": 3
     }
   ]
 }

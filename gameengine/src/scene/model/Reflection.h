@@ -24,6 +24,8 @@ private:
 	unsigned int m_refresh_frames = 0;
 	unsigned int m_frames_since_last_refresh = 0;
 
+	unsigned int m_parallax_correction_iterations = 1;
+
 	glm::vec4 m_transform_translate; //cam pos
 	glm::mat4 m_transform_perspective; //cam perspective
 	std::vector<glm::mat4> m_transform_rotate; //cam rotate
@@ -32,7 +34,7 @@ private:
 	std::vector<std::string> m_models_dynamic;
 
 public:
-	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames);
+	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames, unsigned int parallax_correction_iterations);
 	~Reflection();
 
 	void InitialiseViewport();

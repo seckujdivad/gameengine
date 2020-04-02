@@ -56,6 +56,10 @@ uniform PointLight light_points[POINT_LIGHT_NUM];
 //reflections
 uniform vec3 reflection_position;
 uniform samplerCube reflection_cubemap;
+uniform bool reflection_isdrawing;
+uniform float reflection_clip_near;
+uniform float reflection_clip_far;
+uniform int reflection_parallax_correction_iterations;
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
@@ -151,12 +155,30 @@ void main()
 		}
 	}
 
-	//apply reflection to fragment
-	vec3 reflection;
-	reflection = texture(reflection_cubemap, reflect(-fragtocam, normalize(normal))).xyz;
+	//reflections
+	vec3 sample_vector = reflect(-fragtocam, normalize(normal));
+
+	//iteratively apply perspective correction
+	float depth_sample;
+	float sample_space_length = reflection_clip_far - reflection_clip_near;
+	vec3 offset = globalSceneSpacePos.xyz - reflection_position;
+	for (int i = 0; i < reflection_parallax_correction_iterations; i++)
+	{
+		depth_sample = (texture(reflection_cubemap, sample_vector).a * sample_space_length) + reflection_clip_near;
+		sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+	}
+
+	//sample using the final values
+	vec3 reflection = texture(reflection_cubemap, sample_vector).rgb;
 
 	frag_intensity += mat_reflection_intensity * reflection;
 
 	//apply lighting to fragment
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
+
+	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
+	if (reflection_isdrawing)
+	{
+		frag_out.a = gl_FragDepth;
+	}
 }
