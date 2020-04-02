@@ -27,6 +27,8 @@ uniform mat4 mdl_scale;
 uniform vec4 cam_translate;
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
+uniform float cam_clip_near;
+uniform float cam_clip_far;
 
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
@@ -164,7 +166,8 @@ void main()
 	vec3 offset = globalSceneSpacePos.xyz - reflection_position;
 	for (int i = 0; i < reflection_parallax_correction_iterations; i++)
 	{
-		depth_sample = (texture(reflection_cubemap, sample_vector).a * sample_space_length) + reflection_clip_near;
+		depth_sample = texture(reflection_cubemap, sample_vector).a;
+		depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
 		sample_vector = (normalize(sample_vector) * depth_sample) + offset;
 	}
 

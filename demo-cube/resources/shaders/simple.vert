@@ -24,6 +24,8 @@ uniform mat4 mdl_scale;
 uniform vec4 cam_translate;
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
+uniform float cam_clip_near;
+uniform float cam_clip_far;
 
 void main()
 {

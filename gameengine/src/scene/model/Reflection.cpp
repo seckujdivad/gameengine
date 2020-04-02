@@ -213,6 +213,8 @@ void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face)
 	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_transform_rotate.at(face)));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->m_transform_perspective));
 	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_TRUE);
+	glUniform1f(shader_program->GetUniform("cam_clip_near"), this->m_clip_near);
+	glUniform1f(shader_program->GetUniform("cam_clip_far"), this->m_clip_far);
 }
 
 void Reflection::IncrementFrameCounter(int increment)

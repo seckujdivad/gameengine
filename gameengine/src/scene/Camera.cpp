@@ -61,6 +61,8 @@ void Camera::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("cam_translate");
 	shader_program->RegisterUniform("cam_rotate");
 	shader_program->RegisterUniform("cam_persp");
+	shader_program->RegisterUniform("cam_clip_near");
+	shader_program->RegisterUniform("cam_clip_far");
 }
 
 void Camera::SetUniforms(ShaderProgram* shader_program)
@@ -68,4 +70,6 @@ void Camera::SetUniforms(ShaderProgram* shader_program)
 	glUniform4fv(shader_program->GetUniform("cam_translate"), 1, glm::value_ptr(this->view_translate_vector));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->view_rotate_matrix));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));
+	glUniform1f(shader_program->GetUniform("cam_clip_near"), this->m_clip_near);
+	glUniform1f(shader_program->GetUniform("cam_clip_far"), this->m_clip_far);
 }

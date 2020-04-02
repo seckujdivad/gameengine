@@ -37,7 +37,8 @@
         },
         "textures": {
           "colour": [ 1, 1, 1 ],
-          "specular": [ 1, 1, 1 ]
+          "specular": [ 1, 1, 1 ],
+          "normal": "textures/cube_normals.png"
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -169,7 +170,7 @@
       "name": "blank",
       "position": [ 0, 0, -8 ],
       "dynamic draw": [ "blender suzanne", "simple cube" ],
-      "static draw": [],
+      "static draw": [  ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
