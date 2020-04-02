@@ -256,6 +256,7 @@ void PointLight::RegisterShadowUniforms(ShaderProgram* shader_program)
 	
 	shader_program->RegisterUniform("light_position");
 	shader_program->RegisterUniform("light_far_plane");
+	shader_program->RegisterUniform("light_near_plane");
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -274,4 +275,5 @@ void PointLight::SetShadowUniforms(ShaderProgram* shader_program)
 	glUniform3fv(shader_program->GetUniform("light_position"), 1, glm::value_ptr(light_pos));
 
 	glUniform1f(shader_program->GetUniform("light_far_plane"), this->m_shadow_clip_far);
+	glUniform1f(shader_program->GetUniform("light_near_plane"), this->m_shadow_clip_near);
 }
