@@ -105,8 +105,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	{
 		reflection = new Reflection(it.value()["texture"][0].get<int>(),
 			it.value()["texture"][1].get<int>(),
-			it.value()["clips"][0].get<int>(),
-			it.value()["clips"][1].get<int>(),
+			it.value()["clips"][0].get<float>(),
+			it.value()["clips"][1].get<float>(),
 			it.value()["dynamic refresh rate"].get<unsigned int>(),
 			it.value()["parallax correction iterations"].get<unsigned int>());
 
