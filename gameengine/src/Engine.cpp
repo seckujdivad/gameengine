@@ -196,6 +196,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["shadow"]), {});
 		model->SetShadowShaderProgram(shader_program);
 
+		//flip normals if required
+		if (it.value()["invert normals"].is_boolean() && it.value()["invert normals"].get<bool>())
+		{
+			model->InvertNormals();
+		}
+
 		//store model
 		scene->AddModel(model);
 	}
