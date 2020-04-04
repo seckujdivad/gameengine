@@ -89,9 +89,10 @@
     {
       "model": "cube",
       "name": "ground",
-      "position": [ 0, 0, -8 ],
+      "position": [ 0, 0, 0 ],
       "rotation": [ 0, 0, 0 ],
-      "scale": [ 25, 25, 1 ],
+      "scale": [ 25, 25, 10 ],
+      "invert normals": true,
       "shader": {
         "render": {
           "vertex": "simple",
@@ -168,8 +169,8 @@
   "reflections": [
     {
       "name": "blank",
-      "position": [ 0, 0, -8 ],
-      "dynamic draw": [ "blender suzanne", "simple cube" ],
+      "position": [ 0, 0, 0 ],
+      "dynamic draw": [ "blender suzanne", "simple cube", "ground" ],
       "static draw": [  ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
@@ -194,7 +195,7 @@
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
-      "parallax correction iterations": 3
+      "parallax correction iterations": 0
     }
   ]
 }
