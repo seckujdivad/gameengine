@@ -346,11 +346,14 @@ std::vector<GLfloat> Model::GetTriangles()
 
 				//calculate ccw normal
 				ccw_normal = glm::cross(tri_vecs.at(1) - tri_vecs.at(0), tri_vecs.at(2) - tri_vecs.at(0)); //follows right hand rule
-				normal_angle_diff = std::abs(std::fmod(std::acos(glm::dot(ccw_normal, face_normal) / (glm::length(ccw_normal) * glm::length(face_normal))) + glm::pi<float>(), glm::pi<float>() * 2.0f) - glm::pi<float>());
+				normal_angle_diff = std::abs(std::fmod(
+						std::acos(glm::dot(ccw_normal, face_normal) / (glm::length(ccw_normal) * glm::length(face_normal))) + glm::pi<float>(),
+					glm::pi<float>() * 2.0f) - glm::pi<float>());
 
-				if (normal_angle_diff > (glm::pi<float>() / 2))
+				if (normal_angle_diff > (glm::pi<float>() / 2.0f))
 				{
-					std::reverse(face_tri_verts.begin(), face_tri_verts.end());
+					std::reverse(face_tri_verts.at(j).begin(), face_tri_verts.at(j).end());
+					std::reverse(face_tri_uvs.at(j).begin(), face_tri_uvs.at(j).end());
 				}
 
 				//prep for array
@@ -562,6 +565,18 @@ void Model::DrawVBOs()
 void Model::SetMaterial(Material material)
 {
 	this->m_material = material;
+}
+
+void Model::InvertNormals()
+{
+	glm::vec3* normal;
+	for (size_t i = 0; i < this->m_face_normals.size(); i++)
+	{
+		normal = this->m_face_normals.at(i);
+		normal->x = 0.0f - normal->x;
+		normal->y = 0.0f - normal->y;
+		normal->z = 0.0f - normal->z;
+	}
 }
 
 void Model::SetShadowShaderProgram(ShaderProgram* shader_program)
