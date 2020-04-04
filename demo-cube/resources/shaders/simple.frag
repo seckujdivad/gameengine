@@ -158,23 +158,59 @@ void main()
 	}
 
 	//reflections
-	vec3 sample_vector = reflect(-fragtocam, normalize(normal));
-
 	//iteratively apply perspective correction
-	float depth_sample;
-	float sample_space_length = reflection_clip_far - reflection_clip_near;
-	vec3 offset = globalSceneSpacePos.xyz - reflection_position;
-	for (int i = 0; i < reflection_parallax_correction_iterations; i++)
+	if (true) //(!reflection_isdrawing)
 	{
-		depth_sample = texture(reflection_cubemap, sample_vector).a;
-		depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
-		sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+		vec3 oob_translation = vec3(25.0f, 25.0f, 10.0f);
+		mat3 oob_rotation = mat3(1.0f);
+		mat3 oob_rotation_inverse = mat3(1.0f);
+		vec3 aabb = vec3(50.0f, 50.0f, 20.0f);
+
+		vec3 reflection = normalize(reflect(-fragtocam, normalize(normal)));
+		vec3 fragpos_oob = (globalSceneSpacePos.xyz + oob_translation) * oob_rotation_inverse;
+		vec3 reflection_oob = reflection * oob_rotation_inverse;
+		
+		vec3 intersection;
+		float lambda;
+		float pinned_value;
+		float second_axis_value;
+		float third_axis_value;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 2; j++)
+			{
+				if (j == 0)
+				{
+					pinned_value = 0.0f;
+				}
+				else
+				{
+					pinned_value = aabb[i];
+				}
+				
+				lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
+				if (lambda > 0.1) //direction vector is normalised, so length is equal to lambda
+				{
+					second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
+					third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
+					if ((0.0f < second_axis_value) && (second_axis_value < aabb[(i + 1) % 3]) &&
+						(0.0f < third_axis_value) && (third_axis_value < aabb[(i + 2) % 3]))
+					{
+						intersection[i] = pinned_value;
+						intersection[(i + 1) % 3] = second_axis_value;
+						intersection[(i + 2) % 3] = third_axis_value;
+					}
+				}
+			}
+		}
+
+		intersection = (intersection * oob_rotation) - oob_translation;
+
+		//sample using the final values
+		vec3 reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;
+
+		frag_intensity += mat_reflection_intensity * reflection_colour;
 	}
-
-	//sample using the final values
-	vec3 reflection = texture(reflection_cubemap, sample_vector).rgb;
-
-	frag_intensity += mat_reflection_intensity * reflection;
 
 	//apply lighting to fragment
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
