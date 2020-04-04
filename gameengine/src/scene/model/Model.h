@@ -91,4 +91,6 @@ public:
 	void DrawVBOs();
 
 	void SetMaterial(Material material);
+
+	void InvertNormals();
 };
