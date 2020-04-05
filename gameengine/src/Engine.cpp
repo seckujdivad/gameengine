@@ -107,13 +107,23 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["texture"][1].get<int>(),
 			it.value()["clips"][0].get<float>(),
 			it.value()["clips"][1].get<float>(),
-			it.value()["dynamic refresh rate"].get<unsigned int>(),
-			it.value()["parallax correction iterations"].get<unsigned int>());
+			it.value()["dynamic refresh rate"].get<unsigned int>());
 
 		reflection->SetIdentifier(it.value()["name"].get<std::string>());
 		reflection->SetPosition(it.value()["position"][0].get<float>(),
 			it.value()["position"][1].get<float>(),
 			it.value()["position"][2].get<float>());
+
+		reflection->ConfigureIterative(it.value()["corrections"]["iterative sampling"]["iterations"].get<unsigned int>());
+		reflection->ConfigureOBB(glm::vec3(it.value()["corrections"]["oriented bounding box"]["position"][0].get<float>(),
+			it.value()["corrections"]["oriented bounding box"]["position"][1].get<float>(),
+			it.value()["corrections"]["oriented bounding box"]["position"][2].get<float>()),
+			glm::vec3(it.value()["corrections"]["oriented bounding box"]["dimensions"][0].get<float>(),
+				it.value()["corrections"]["oriented bounding box"]["dimensions"][1].get<float>(),
+				it.value()["corrections"]["oriented bounding box"]["dimensions"][2].get<float>()),
+			glm::vec3(it.value()["corrections"]["oriented bounding box"]["rotation"][0].get<float>(),
+				it.value()["corrections"]["oriented bounding box"]["rotation"][1].get<float>(),
+				it.value()["corrections"]["oriented bounding box"]["rotation"][2].get<float>()));
 
 		for (auto model_it = it.value()["static draw"].begin(); model_it != it.value()["static draw"].end(); model_it++)
 		{
@@ -152,6 +162,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	// clone model objects into scene
 	ShaderProgram* shader_program;
+	int reflection_mode;
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
 	{
 		model = new Model(*model_lib.at(it.value()["model"].get<std::string>()));
@@ -177,7 +188,27 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["shader"]["phong"]["specular"][2].get<float>()));
 		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
 
-		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3));
+		if (it.value()["shader"]["reflections"]["mode"].is_string())
+		{
+			if (it.value()["shader"]["reflections"]["mode"].get<std::string>() == "iterative sampling")
+			{
+				reflection_mode = 0;
+			}
+			else if (it.value()["shader"]["reflections"]["mode"].get<std::string>() == "oriented bounding box")
+			{
+				reflection_mode = 1;
+			}
+			else
+			{
+				throw std::runtime_error("Unknown reflection mode " + it.value()["shader"]["reflections"]["mode"].get<std::string>());
+			}
+		}
+		else
+		{
+			reflection_mode = it.value()["shader"]["reflections"]["mode"].get<int>();
+		}
+
+		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3), reflection_mode);
 		mat.SetReflectionIntensity(glm::vec3(it.value()["shader"]["reflections"]["intensity"][0].get<float>(),
 			it.value()["shader"]["reflections"]["intensity"][1].get<float>(),
 			it.value()["shader"]["reflections"]["intensity"][2].get<float>()));

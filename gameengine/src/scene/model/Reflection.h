@@ -24,7 +24,14 @@ private:
 	unsigned int m_refresh_frames = 0;
 	unsigned int m_frames_since_last_refresh = 0;
 
-	unsigned int m_parallax_correction_iterations = 1;
+	//iterative parallax correction
+	unsigned int m_parallax_iterations = 1;
+
+	//obb parallax correction
+	glm::vec3 m_parallax_obb_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_parallax_obb_dimensions = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::mat4 m_parallax_obb_rotation = glm::mat4(1.0f);
+	glm::mat4 m_parallax_obb_rotation_inverse = glm::mat4(1.0f);
 
 	glm::vec4 m_transform_translate; //cam pos
 	glm::mat4 m_transform_perspective; //cam perspective
@@ -34,8 +41,11 @@ private:
 	std::vector<std::string> m_models_dynamic;
 
 public:
-	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames, unsigned int parallax_correction_iterations);
+	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames);
 	~Reflection();
+
+	void ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation);
+	void ConfigureIterative(unsigned int iterations);
 
 	void InitialiseViewport();
 	void SelectFBO(int face);

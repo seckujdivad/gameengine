@@ -18,6 +18,7 @@ private:
 
 	Reflection* m_reflection;
 	glm::vec3 m_reflection_intensity = glm::vec3(0.0f, 0.0f, 0.0f);
+	int m_reflection_mode = 0;
 
 public:
 	Material();
@@ -30,7 +31,7 @@ public:
 	void SetSpecularHighlight(float intensity);
 	float GetSpecularHighlight();
 
-	void SetReflection(Reflection* reflection);
+	void SetReflection(Reflection* reflection, int mode);
 	Reflection* GetReflection();
 	void SetReflectionIntensity(glm::vec3 intensity);
 	glm::vec3 GetReflectionIntensity();

@@ -1,14 +1,14 @@
 #include <wx/wxprec.h>
 #include "Reflection.h"
 
-Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames, unsigned int parallax_correction_iterations) : Positionable(), Nameable()
+Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames) : Positionable(), Nameable()
 {
 	this->m_tex_width = texture_width;
 	this->m_tex_height = texture_height;
 	this->m_clip_near = near_plane;
 	this->m_clip_far = far_plane;
 	this->m_refresh_frames = refresh_frames;
-	this->m_parallax_correction_iterations = parallax_correction_iterations;
+	
 
 	//make cubemap
 	glGenTextures(1, &this->m_cubemap);
@@ -60,6 +60,22 @@ Reflection::~Reflection()
 	glDeleteFramebuffers(1, &this->m_fbo);
 }
 
+void Reflection::ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation)
+{
+	this->m_parallax_obb_position = obb_position;
+	this->m_parallax_obb_dimensions = obb_dimensions;
+
+	this->m_parallax_obb_rotation = glm::mat4(1.0f);
+	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+}
+
+void Reflection::ConfigureIterative(unsigned int iterations)
+{
+	this->m_parallax_iterations = iterations;
+}
+
 void Reflection::InitialiseViewport()
 {
 	glViewport(0, 0, this->m_tex_width, this->m_tex_height);
@@ -92,7 +108,11 @@ void Reflection::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("reflection_isdrawing");
 	shader_program->RegisterUniform("reflection_clip_near");
 	shader_program->RegisterUniform("reflection_clip_far");
-	shader_program->RegisterUniform("reflection_parallax_correction_iterations");
+	shader_program->RegisterUniform("reflection_parallax_it_iterations");
+	shader_program->RegisterUniform("reflection_parallax_obb_position");
+	shader_program->RegisterUniform("reflection_parallax_obb_dimensions");
+	shader_program->RegisterUniform("reflection_parallax_obb_rotation");
+	shader_program->RegisterUniform("reflection_parallax_obb_rotation_inverse");
 }
 
 void Reflection::SetUniforms(ShaderProgram* shader_program)
@@ -105,7 +125,12 @@ void Reflection::SetUniforms(ShaderProgram* shader_program)
 	glUniform1f(shader_program->GetUniform("reflection_clip_near"), this->m_clip_near);
 	glUniform1f(shader_program->GetUniform("reflection_clip_far"), this->m_clip_far);
 	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_FALSE);
-	glUniform1i(shader_program->GetUniform("reflection_parallax_correction_iterations"), this->m_parallax_correction_iterations);
+	glUniform1i(shader_program->GetUniform("reflection_parallax_it_iterations"), this->m_parallax_iterations);
+	glUniform3fv(shader_program->GetUniform("reflection_parallax_obb_position"), 1, glm::value_ptr(this->m_parallax_obb_position));
+	glUniform3fv(shader_program->GetUniform("reflection_parallax_obb_dimensions"), 1, glm::value_ptr(this->m_parallax_obb_dimensions));
+	glUniformMatrix4fv(shader_program->GetUniform("reflection_parallax_obb_rotation"), 1, GL_FALSE, glm::value_ptr(this->m_parallax_obb_rotation));
+	glUniformMatrix4fv(shader_program->GetUniform("reflection_parallax_obb_rotation_inverse"), 1, GL_FALSE, glm::value_ptr(this->m_parallax_obb_rotation_inverse));
+
 }
 
 void Reflection::GenerateCameraData()

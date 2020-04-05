@@ -46,7 +46,8 @@
           "specular highlight": 8
         },
         "reflections": {
-          "reflection": "simple cube reflection",
+          "reflection": "simple cube",
+          "mode": "iterative sampling",
           "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
@@ -81,7 +82,8 @@
           "specular highlight": 8
         },
         "reflections": {
-          "reflection": "blender suzanne reflection",
+          "reflection": "main",
+          "mode": "iterative sampling",
           "intensity": [ 0.4, 0.4, 0.4 ]
         }
       }
@@ -113,7 +115,8 @@
           "specular highlight": 6
         },
         "reflections": {
-          "reflection": "blank",
+          "reflection": "main",
+          "mode": "oriented bounding box",
           "intensity": [ 0.1, 0.1, 0.1 ]
         }
       }
@@ -168,34 +171,42 @@
   },
   "reflections": [
     {
-      "name": "blank",
+      "name": "main",
       "position": [ 0, 0, 0 ],
       "dynamic draw": [ "blender suzanne", "simple cube", "ground" ],
-      "static draw": [  ],
+      "static draw": [],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
-      "parallax correction iterations": 5
+      "corrections": {
+        "oriented bounding box": {
+          "dimensions": [ 50, 50, 20 ],
+          "position": [ 0, 0, 0 ],
+          "rotation": [ 0, 0, 0 ]
+        },
+        "iterative sampling": {
+          "iterations": 0
+        }
+      }
     },
     {
-      "name": "simple cube reflection",
+      "name": "simple cube",
       "position": [ 8, -5, -5 ],
       "dynamic draw": [ "blender suzanne" ],
       "static draw": [ "ground" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
-      "parallax correction iterations": 1
-    },
-    {
-      "name": "blender suzanne reflection",
-      "position": [ 5, 3, 0 ],
-      "dynamic draw": [ "simple cube" ],
-      "static draw": [ "ground" ],
-      "dynamic refresh rate": 10,
-      "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ],
-      "parallax correction iterations": 0
+      "corrections": {
+        "oriented bounding box": {
+          "dimensions": [ 50, 50, 20 ],
+          "position": [ 0, 0, 0 ],
+          "rotation": [ 0, 0, 0 ]
+        },
+        "iterative sampling": {
+          "iterations": 0
+        }
+      }
     }
   ]
 }

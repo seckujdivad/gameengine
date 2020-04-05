@@ -34,6 +34,7 @@ uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
 uniform vec3 mat_reflection_intensity;
+uniform int mat_reflection_mode; //0: iterative, 1: obb
 
 //textures
 uniform sampler2D colourTexture;
@@ -61,7 +62,11 @@ uniform samplerCube reflection_cubemap;
 uniform bool reflection_isdrawing;
 uniform float reflection_clip_near;
 uniform float reflection_clip_far;
-uniform int reflection_parallax_correction_iterations;
+uniform int reflection_parallax_it_iterations;
+uniform vec3 reflection_parallax_obb_position;
+uniform vec3 reflection_parallax_obb_dimensions;
+uniform mat4 reflection_parallax_obb_rotation;
+uniform mat4 reflection_parallax_obb_rotation_inverse;
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
@@ -158,13 +163,30 @@ void main()
 	}
 
 	//reflections
-	//iteratively apply perspective correction
-	if (true) //(!reflection_isdrawing)
+	if (mat_reflection_mode == 0) //iteratively apply perspective correction
 	{
-		vec3 oob_translation = vec3(25.0f, 25.0f, 10.0f);
-		mat3 oob_rotation = mat3(1.0f);
-		mat3 oob_rotation_inverse = mat3(1.0f);
-		vec3 aabb = vec3(50.0f, 50.0f, 20.0f);
+		vec3 sample_vector = reflect(-fragtocam, normalize(normal));
+		float depth_sample;
+		float sample_space_length = reflection_clip_far - reflection_clip_near;
+		vec3 offset = globalSceneSpacePos.xyz - reflection_position;
+
+		for (int i = 0; i < reflection_parallax_it_iterations; i++)
+		{
+			depth_sample = texture(reflection_cubemap, sample_vector).a;
+			depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
+			sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+		}
+
+		vec3 reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
+
+		frag_intensity += mat_reflection_intensity * reflection_colour;
+	}
+	else if (mat_reflection_mode == 1) //oriented bounding box
+	{
+		vec3 oob_translation = reflection_parallax_obb_position + (0.5f * reflection_parallax_obb_dimensions);
+		mat3 oob_rotation = mat3(reflection_parallax_obb_rotation);
+		mat3 oob_rotation_inverse = mat3(reflection_parallax_obb_rotation_inverse);
+		vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
 
 		vec3 reflection = normalize(reflect(-fragtocam, normalize(normal)));
 		vec3 fragpos_oob = (globalSceneSpacePos.xyz + oob_translation) * oob_rotation_inverse;
