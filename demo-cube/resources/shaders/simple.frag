@@ -65,8 +65,8 @@ uniform float reflection_clip_far;
 uniform int reflection_parallax_it_iterations;
 uniform vec3 reflection_parallax_obb_position;
 uniform vec3 reflection_parallax_obb_dimensions;
-uniform mat4 reflection_parallax_obb_rotation;
-uniform mat4 reflection_parallax_obb_rotation_inverse;
+uniform mat3 reflection_parallax_obb_rotation;
+uniform mat3 reflection_parallax_obb_rotation_inverse;
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
@@ -183,14 +183,15 @@ void main()
 	}
 	else if (mat_reflection_mode == 1) //oriented bounding box
 	{
-		vec3 oob_translation = reflection_parallax_obb_position + (0.5f * reflection_parallax_obb_dimensions);
-		mat3 oob_rotation = mat3(reflection_parallax_obb_rotation);
-		mat3 oob_rotation_inverse = mat3(reflection_parallax_obb_rotation_inverse);
+		
+		mat3 oob_rotation = reflection_parallax_obb_rotation;
+		mat3 oob_rotation_inverse = reflection_parallax_obb_rotation_inverse;
 		vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
 
-		vec3 fragpos_oob = (globalSceneSpacePos.xyz + oob_translation) * oob_rotation_inverse;
-		vec3 reflection_oob = reflection * oob_rotation_inverse;
+		vec3 oob_translation = reflection_parallax_obb_position - (oob_rotation * 0.5f * reflection_parallax_obb_dimensions);
 		vec3 reflection = normalize(reflect(-fragtocam, normal));
+		vec3 fragpos_oob = oob_rotation_inverse * (globalSceneSpacePos.xyz - oob_translation);
+		vec3 reflection_oob = oob_rotation_inverse * reflection;
 		
 		vec3 intersection;
 		float lambda;
@@ -201,7 +202,7 @@ void main()
 		{
 			for (int j = 0; j < 2; j++)
 			{
-				if (j == 0)
+				if (j == 0) //at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
 				{
 					pinned_value = 0.0f;
 				}
@@ -215,8 +216,8 @@ void main()
 				{
 					second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
 					third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
-					if ((0.0f < second_axis_value) && (second_axis_value < aabb[(i + 1) % 3]) &&
-						(0.0f < third_axis_value) && (third_axis_value < aabb[(i + 2) % 3]))
+					if ((0.0f <= second_axis_value) && (second_axis_value <= aabb[(i + 1) % 3]) &&
+						(0.0f <= third_axis_value) && (third_axis_value <= aabb[(i + 2) % 3]))
 					{
 						intersection[i] = pinned_value;
 						intersection[(i + 1) % 3] = second_axis_value;
@@ -226,7 +227,7 @@ void main()
 			}
 		}
 
-		intersection = (intersection * oob_rotation) - oob_translation;
+		intersection = (oob_rotation * intersection) + oob_translation;
 
 		//sample using the final values
 		vec3 reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;

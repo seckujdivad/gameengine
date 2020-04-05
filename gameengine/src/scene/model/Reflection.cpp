@@ -69,6 +69,11 @@ void Reflection::ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, 
 	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
 	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 	this->m_parallax_obb_rotation = glm::rotate(this->m_parallax_obb_rotation, glm::radians(obb_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	this->m_parallax_obb_rotation_inverse = glm::mat4(1.0f);
+	this->m_parallax_obb_rotation_inverse = glm::rotate(this->m_parallax_obb_rotation_inverse, glm::radians(0.0f - obb_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	this->m_parallax_obb_rotation_inverse = glm::rotate(this->m_parallax_obb_rotation_inverse, glm::radians(0.0f - obb_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	this->m_parallax_obb_rotation_inverse = glm::rotate(this->m_parallax_obb_rotation_inverse, glm::radians(0.0f - obb_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void Reflection::ConfigureIterative(unsigned int iterations)
@@ -128,8 +133,8 @@ void Reflection::SetUniforms(ShaderProgram* shader_program)
 	glUniform1i(shader_program->GetUniform("reflection_parallax_it_iterations"), this->m_parallax_iterations);
 	glUniform3fv(shader_program->GetUniform("reflection_parallax_obb_position"), 1, glm::value_ptr(this->m_parallax_obb_position));
 	glUniform3fv(shader_program->GetUniform("reflection_parallax_obb_dimensions"), 1, glm::value_ptr(this->m_parallax_obb_dimensions));
-	glUniformMatrix4fv(shader_program->GetUniform("reflection_parallax_obb_rotation"), 1, GL_FALSE, glm::value_ptr(this->m_parallax_obb_rotation));
-	glUniformMatrix4fv(shader_program->GetUniform("reflection_parallax_obb_rotation_inverse"), 1, GL_FALSE, glm::value_ptr(this->m_parallax_obb_rotation_inverse));
+	glUniformMatrix3fv(shader_program->GetUniform("reflection_parallax_obb_rotation"), 1, GL_FALSE, glm::value_ptr(glm::mat3(this->m_parallax_obb_rotation)));
+	glUniformMatrix3fv(shader_program->GetUniform("reflection_parallax_obb_rotation_inverse"), 1, GL_FALSE, glm::value_ptr(glm::mat3(this->m_parallax_obb_rotation_inverse)));
 
 }
 
