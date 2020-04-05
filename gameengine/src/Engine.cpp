@@ -35,6 +35,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		camera->SetPosition(it.value()["position"][0].get<GLfloat>(), it.value()["position"][1].get<GLfloat>(), it.value()["position"][2].get<GLfloat>());
 		camera->SetRotation(it.value()["rotation"][0].get<GLfloat>(), it.value()["rotation"][1].get<GLfloat>(), it.value()["rotation"][2].get<GLfloat>());
 		camera->SetFOV(it.value()["fov"].get<GLfloat>());
+		camera->SetNearClip(it.value()["clips"][0].get<GLfloat>());
+		camera->SetFarClip(it.value()["clips"][1].get<GLfloat>());
 		cameras.push_back(camera);
 
 		if (it.key() == config["metadata"]["default camera"].get<std::string>())
