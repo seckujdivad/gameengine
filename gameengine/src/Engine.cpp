@@ -116,8 +116,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		reflection->ConfigureIterative(it.value()["corrections"]["iterative sampling"]["iterations"].get<unsigned int>());
 		reflection->ConfigureOBB(glm::vec3(it.value()["corrections"]["oriented bounding box"]["position"][0].get<float>(),
-			it.value()["corrections"]["oriented bounding box"]["position"][1].get<float>(),
-			it.value()["corrections"]["oriented bounding box"]["position"][2].get<float>()),
+				it.value()["corrections"]["oriented bounding box"]["position"][1].get<float>(),
+				it.value()["corrections"]["oriented bounding box"]["position"][2].get<float>()),
 			glm::vec3(it.value()["corrections"]["oriented bounding box"]["dimensions"][0].get<float>(),
 				it.value()["corrections"]["oriented bounding box"]["dimensions"][1].get<float>(),
 				it.value()["corrections"]["oriented bounding box"]["dimensions"][2].get<float>()),
