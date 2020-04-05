@@ -113,7 +113,7 @@ void main()
 	//calculate local mapped normal
 	vec3 sample_normal = texture(normalTexture, globalUV).rgb;
 	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
-	vec3 normal = globalNormalTBN * sample_normal;
+	vec3 normal = normalize(globalNormalTBN * sample_normal);
 
 	//sample specular map
 	vec3 sample_specular = texture(specularTexture, globalUV).rgb * mat_specular;
@@ -165,7 +165,7 @@ void main()
 	//reflections
 	if (mat_reflection_mode == 0) //iteratively apply perspective correction
 	{
-		vec3 sample_vector = reflect(-fragtocam, normalize(normal));
+		vec3 sample_vector = reflect(-fragtocam, normal);
 		float depth_sample;
 		float sample_space_length = reflection_clip_far - reflection_clip_near;
 		vec3 offset = globalSceneSpacePos.xyz - reflection_position;
@@ -188,9 +188,9 @@ void main()
 		mat3 oob_rotation_inverse = mat3(reflection_parallax_obb_rotation_inverse);
 		vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
 
-		vec3 reflection = normalize(reflect(-fragtocam, normalize(normal)));
 		vec3 fragpos_oob = (globalSceneSpacePos.xyz + oob_translation) * oob_rotation_inverse;
 		vec3 reflection_oob = reflection * oob_rotation_inverse;
+		vec3 reflection = normalize(reflect(-fragtocam, normal));
 		
 		vec3 intersection;
 		float lambda;

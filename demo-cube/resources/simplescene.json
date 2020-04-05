@@ -42,8 +42,8 @@
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
-          "specular": [ 2, 2, 2 ],
-          "specular highlight": 8
+          "specular": [ 0.2, 0.2, 0.2 ],
+          "specular highlight": 32
         },
         "reflections": {
           "reflection": "simple cube",
@@ -78,8 +78,8 @@
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
-          "specular": [ 2, 2, 2 ],
-          "specular highlight": 8
+          "specular": [ 0.2, 0.2, 0.2 ],
+          "specular highlight": 32
         },
         "reflections": {
           "reflection": "main",
@@ -111,8 +111,8 @@
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
-          "specular": [ 1, 1, 1 ],
-          "specular highlight": 6
+          "specular": [ 0.2, 0.2, 0.2 ],
+          "specular highlight": 32
         },
         "reflections": {
           "reflection": "main",
@@ -148,17 +148,6 @@
       {
         "name": "simple light",
         "position": [ 5, -5, 0 ],
-        "intensity": [ 1, 1, 1 ],
-        "shadows": true,
-        "shadow texture": [ 2048, 2048 ],
-        "shadow clips": [ 0.1, 100 ],
-        "dynamic draw": [ "simple cube", "blender suzanne" ],
-        "static draw": [ "ground" ],
-        "dynamic refresh rate": 10
-      },
-      {
-        "name": "simple light 2",
-        "position": [ 5, 5, 0 ],
         "intensity": [ 1, 1, 1 ],
         "shadows": true,
         "shadow texture": [ 2048, 2048 ],
