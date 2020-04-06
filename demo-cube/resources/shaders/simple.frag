@@ -163,7 +163,13 @@ void main()
 	}
 
 	//reflections
-	if (mat_reflection_mode == 0) //iteratively apply perspective correction
+	vec3 reflection_intensity = mat_reflection_intensity;
+	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
+	if (reflection_intensity == vec3(0.0f, 0.0f, 0.0f))
+	{
+		//do nothing - reflections have no effect on this fragment
+	}
+	else if (mat_reflection_mode == 0) //iteratively apply perspective correction
 	{
 		vec3 sample_vector = reflect(-fragtocam, normal);
 		float depth_sample;
@@ -177,9 +183,7 @@ void main()
 			sample_vector = (normalize(sample_vector) * depth_sample) + offset;
 		}
 
-		vec3 reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
-
-		frag_intensity += mat_reflection_intensity * reflection_colour;
+		reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
 	}
 	else if (mat_reflection_mode == 1) //oriented bounding box
 	{
@@ -230,10 +234,10 @@ void main()
 		intersection = (oob_rotation * intersection) + oob_translation;
 
 		//sample using the final values
-		vec3 reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;
-
-		frag_intensity += mat_reflection_intensity * reflection_colour;
+		reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;
 	}
+
+	frag_intensity += reflection_intensity * reflection_colour;
 
 	//apply lighting to fragment
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
