@@ -73,11 +73,19 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	//stop timer
 	this->m_timer_mainloop->Stop();
 
+	//get mouse info
 	wxMouseState mouse_state = wxGetMouseState();
 	int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
 	int mouse_position[2];
 	mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
 	mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	//make sure the control still has focus
+	if ((this->m_keyboard_move_active || this->m_mouselook_active) && !this->HasFocus())
+	{
+		this->SetMouselookActive(false);
+		this->SetKeyboardMoveActive(false);
+	}
 
 	//poll keyboard movement keys
 	if (this->m_keyboard_move_active)
