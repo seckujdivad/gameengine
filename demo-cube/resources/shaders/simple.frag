@@ -33,13 +33,13 @@ uniform float cam_clip_far;
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
-uniform vec3 mat_reflection_intensity;
 uniform int mat_reflection_mode; //0: iterative, 1: obb
 
 //textures
 uniform sampler2D colourTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D specularTexture;
+uniform sampler2D reflectionIntensityTexture;
 
 //lighting
 uniform vec3 light_ambient;
@@ -163,7 +163,7 @@ void main()
 	}
 
 	//reflections
-	vec3 reflection_intensity = mat_reflection_intensity;
+	vec3 reflection_intensity = texture(reflectionIntensityTexture, globalUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	if (reflection_intensity == vec3(0.0f, 0.0f, 0.0f))
 	{

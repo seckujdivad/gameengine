@@ -12,12 +12,11 @@
 class Material
 {
 private:
-	glm::vec3 m_diffuse;
-	glm::vec3 m_specular;
-	float m_specular_highlight;
+	glm::vec3 m_diffuse = glm::vec3(0.0f);
+	glm::vec3 m_specular = glm::vec3(0.0f);
+	float m_specular_highlight = 2.0f;
 
 	Reflection* m_reflection;
-	glm::vec3 m_reflection_intensity = glm::vec3(0.0f, 0.0f, 0.0f);
 	int m_reflection_mode = 0;
 
 public:
@@ -33,8 +32,6 @@ public:
 
 	void SetReflection(Reflection* reflection, int mode);
 	Reflection* GetReflection();
-	void SetReflectionIntensity(glm::vec3 intensity);
-	glm::vec3 GetReflectionIntensity();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);

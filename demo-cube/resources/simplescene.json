@@ -38,7 +38,8 @@
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1, 1, 1 ],
-          "normal": "textures/cube_normals.png"
+          "normal": "textures/cube_normals.png",
+          "reflection intensity": [ 0.1, 0.1, 0.1 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -47,8 +48,7 @@
         },
         "reflections": {
           "reflection": "simple cube",
-          "mode": "iterative sampling",
-          "intensity": [ 0.1, 0.1, 0.1 ]
+          "mode": "iterative sampling"
         }
       }
     },
@@ -74,7 +74,8 @@
             "magnify filter": "nearest",
             "shrink filter": "nearest"
           },
-          "specular": "textures/SuzanneSpecularMap.png"
+          "specular": "textures/SuzanneSpecularMap.png",
+          "reflection intensity": [ 0.4, 0.4, 0.4 ]
         },
         "phong": {
           "diffuse": [ 0.4, 0.4, 0.4 ],
@@ -83,8 +84,7 @@
         },
         "reflections": {
           "reflection": "main",
-          "mode": "iterative sampling",
-          "intensity": [ 0.4, 0.4, 0.4 ]
+          "mode": "iterative sampling"
         }
       }
     },
@@ -107,7 +107,8 @@
         },
         "textures": {
           "colour": [ 1, 1, 1 ],
-          "specular": [ 1.0, 1.0, 1.0 ]
+          "specular": [ 1.0, 1.0, 1.0 ],
+          "reflection intensity": [ 0.1, 0.1, 0.1 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -116,8 +117,7 @@
         },
         "reflections": {
           "reflection": "main",
-          "mode": "oriented bounding box",
-          "intensity": [ 0.1, 0.1, 0.1 ]
+          "mode": "oriented bounding box"
         }
       }
     }

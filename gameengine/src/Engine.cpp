@@ -211,9 +211,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		}
 
 		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3), reflection_mode);
-		mat.SetReflectionIntensity(glm::vec3(it.value()["shader"]["reflections"]["intensity"][0].get<float>(),
-			it.value()["shader"]["reflections"]["intensity"][1].get<float>(),
-			it.value()["shader"]["reflections"]["intensity"][2].get<float>()));
 
 		model->SetMaterial(mat);
 
@@ -221,6 +218,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		CreateTexture(shader_program, "colourTexture", path, it.value()["shader"]["textures"]["colour"], 1.0f, 1.0f, 1.0f);
 		CreateTexture(shader_program, "normalTexture", path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
 		CreateTexture(shader_program, "specularTexture", path, it.value()["shader"]["textures"]["specular"], 0.0f, 0.0f, 0.0f);
+		CreateTexture(shader_program, "reflectionIntensityTexture", path, it.value()["shader"]["textures"]["reflection intensity"], 0.0f, 0.0f, 0.0f);
 
 		// store shader program
 		model->SetShaderProgram(shader_program);
