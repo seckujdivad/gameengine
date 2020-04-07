@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Reflection.h"
 
-Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames) : Positionable(), Nameable()
+Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, int refresh_frames) : Positionable(), Nameable()
 {
 	this->m_tex_width = texture_width;
 	this->m_tex_height = texture_height;

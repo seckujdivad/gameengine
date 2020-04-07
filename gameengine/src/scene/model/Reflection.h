@@ -21,7 +21,7 @@ private:
 	float m_clip_near = 0.1f;
 	float m_clip_far = 100.0f;
 
-	unsigned int m_refresh_frames = 0;
+	int m_refresh_frames = 0;
 	unsigned int m_frames_since_last_refresh = 0;
 
 	//iterative parallax correction
@@ -41,7 +41,7 @@ private:
 	std::vector<std::string> m_models_dynamic;
 
 public:
-	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, unsigned int refresh_frames);
+	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, int refresh_frames);
 	~Reflection();
 
 	void ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation);
