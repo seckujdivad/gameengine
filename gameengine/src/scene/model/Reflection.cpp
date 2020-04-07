@@ -8,7 +8,6 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 	this->m_clip_near = near_plane;
 	this->m_clip_far = far_plane;
 	this->m_refresh_frames = refresh_frames;
-	
 
 	//make cubemap
 	glGenTextures(1, &this->m_cubemap);

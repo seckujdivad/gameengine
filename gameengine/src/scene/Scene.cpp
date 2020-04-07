@@ -5,6 +5,8 @@ Scene::Scene(Camera* active_camera)
 {
 	this->m_active_camera = active_camera;
 	this->m_identifier = "";
+
+	this->InitialiseSkyboxTexture(1, 1);
 }
 
 Scene::~Scene()
@@ -28,6 +30,18 @@ Scene::~Scene()
 	{
 		delete this->reflections.at(i);
 	}
+
+	if (this->m_skybox_texture != NULL)
+	{
+		glDeleteTextures(1, &this->m_skybox_texture);
+	}
+	
+	if (this->m_skybox_fbo != NULL)
+	{
+		glDeleteFramebuffers(1, &this->m_skybox_fbo);
+	}
+
+	delete this->m_skybox_scene;
 }
 
 int Scene::GetModelIndex(Model* model)
@@ -83,6 +97,7 @@ void Scene::AddModel(Model* model)
 	this->models.push_back(model);
 
 	model->GenVertexBuffer(GL_TRIANGLES);
+	model->GetShaderProgram()->RegisterTexture("skyboxTexture", this->m_skybox_texture, GL_TEXTURE_CUBE_MAP);
 }
 
 void Scene::RemoveModel(Model* model)
@@ -456,4 +471,129 @@ std::string Scene::GetIdentifier()
 void Scene::SetAmbientLight(glm::vec3 light_intensity)
 {
 	this->m_light_ambient = light_intensity;
+}
+
+void Scene::InitialiseSkyboxTexture(unsigned int texture_width, unsigned int texture_height)
+{
+	this->m_skybox_texture_dimensions[0] = texture_width;
+	this->m_skybox_texture_dimensions[1] = texture_height;
+
+	if (this->m_skybox_texture != NULL)
+	{
+		glDeleteTextures(1, &this->m_skybox_texture);
+	}
+
+	if (this->m_skybox_fbo != NULL)
+	{
+		glDeleteFramebuffers(1, &this->m_skybox_fbo);
+	}
+
+	glGenTextures(1, &this->m_skybox_texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_skybox_texture);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, this->m_skybox_texture_dimensions[0], this->m_skybox_texture_dimensions[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glGenFramebuffers(1, &this->m_skybox_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->m_skybox_fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_skybox_texture, 0);
+
+	GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("Framebuffer error, status " + std::to_string(framebuffer_status));
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	for (size_t i = 0; i < this->models.size(); i++)
+	{
+		this->models.at(i)->GetShaderProgram()->UpdateTexture("skyboxTexture", this->m_skybox_texture);
+	}
+}
+
+void Scene::SetSkyboxScene(Scene* scene)
+{
+	this->m_skybox_scene = scene;
+
+	this->m_skybox_scene->PushUniforms();
+	this->m_skybox_scene->DrawShadows(0);
+	this->m_skybox_scene->DrawReflections(0);
+}
+
+void Scene::DrawSkyboxScene()
+{
+	if (this->m_skybox_scene != nullptr)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, this->m_skybox_fbo);
+		glViewport(0, 0, this->m_skybox_texture_dimensions[0], this->m_skybox_texture_dimensions[1]);
+
+		Camera* scene_camera = this->m_skybox_scene->GetActiveCamera();
+
+		int rotation_change[3] = { 0, 0, 0 };
+
+		//render all six sides of the skybox texture
+		for (int i = 0; i < 6; i++)
+		{
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->m_skybox_texture, 0);
+
+			if (i == 0) //x+
+			{
+				rotation_change[0] = 90;
+				rotation_change[1] = 0;
+				rotation_change[2] = -90;
+			}
+			else if (i == 1) //x-
+			{
+				rotation_change[0] = 90;
+				rotation_change[1] = 0;
+				rotation_change[2] = 90;
+			}
+			else if(i == 2) //y+
+			{
+				rotation_change[0] = 90;
+				rotation_change[1] = 0;
+				rotation_change[2] = 0;
+			}
+			else if(i == 3) //y-
+			{
+				rotation_change[0] = 90;
+				rotation_change[1] = 0;
+				rotation_change[2] = 180;
+			}
+			else if(i == 4) //z+
+			{
+				rotation_change[0] = 180;
+				rotation_change[1] = 0;
+				rotation_change[2] = 0;
+			}
+			else if(i == 5) //z-
+			{
+				rotation_change[0] = 0;
+				rotation_change[1] = 0;
+				rotation_change[2] = 0;
+			}
+
+			for (int j = 0; j < 3; j++)
+			{
+				scene_camera->SetRotation(j, scene_camera->GetRotation(j) + rotation_change[j]);
+			}
+
+			this->m_skybox_scene->Render(this->m_skybox_fbo);
+
+			for (int j = 0; j < 3; j++)
+			{
+				scene_camera->SetRotation(j, scene_camera->GetRotation(j) - rotation_change[j]);
+			}
+		}
+
+		glFlush();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

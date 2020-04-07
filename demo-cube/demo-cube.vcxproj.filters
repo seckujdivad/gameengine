@@ -48,6 +48,9 @@
     <None Include="resources\shaders\simple_shadow.geom">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="resources\simplescene_skybox.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">

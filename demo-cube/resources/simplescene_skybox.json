@@ -1,0 +1,105 @@
+{
+  "metadata": {
+    "name": "Simple Scene (skybox)",
+    "default camera": "main"
+  },
+  "models": {
+    "cube": {
+      "type": "ply",
+      "geometry": "models/cube.ply",
+      "merge geometry": true,
+      "merge distance": 0.01
+    }
+  },
+  "layout": [
+    {
+      "model": "cube",
+      "name": "cube",
+      "position": [ 0, 5, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ],
+      "shader": {
+        "render": {
+          "vertex": "simple",
+          "fragment": "simple"
+        },
+        "shadow": {
+          "vertex": "simple shadow",
+          "fragment": "simple shadow",
+          "geometry": "simple shadow"
+        },
+        "textures": {
+          "colour": [ 1, 1, 0 ],
+          "reflection intensity": [ 0, 0, 0 ]
+        },
+        "phong": {
+          "diffuse": [ 0.2, 0.2, 0.2 ],
+          "specular": [ 0.2, 0.2, 0.2 ],
+          "specular highlight": 32
+        },
+        "reflections": {
+          "reflection": "blank",
+          "mode": "iterative sampling"
+        }
+      }
+    }
+  ],
+  "cameras": {
+    "main": {
+      "position": [ 0, 0, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "clips": [ 0.1, 100 ],
+      "fov": 60
+    }
+  },
+  "shaders": {
+    "fragment": {
+      "simple": "shaders/simple.frag",
+      "simple shadow": "shaders/simple_shadow.frag"
+    },
+    "vertex": {
+      "simple": "shaders/simple.vert",
+      "simple shadow": "shaders/simple_shadow.vert"
+    },
+    "geometry": {
+      "simple shadow": "shaders/simple_shadow.geom"
+    }
+  },
+  "lighting": {
+    "ambient": [ 1, 1, 1 ],
+    "point lights": [
+      {
+        "name": "simple light",
+        "position": [ 5, -5, 0 ],
+        "intensity": [ 1, 1, 1 ],
+        "shadows": true,
+        "shadow texture": [ 2048, 2048 ],
+        "shadow clips": [ 0.1, 100 ],
+        "dynamic draw": [ "simple cube", "blender suzanne" ],
+        "static draw": [ "ground" ],
+        "dynamic refresh rate": 10
+      }
+    ]
+  },
+  "reflections": [
+    {
+      "name": "blank",
+      "position": [ 0, 0, 0 ],
+      "dynamic draw": [],
+      "static draw": [],
+      "dynamic refresh rate": -1,
+      "clips": [ 1, 2 ],
+      "texture": [ 1, 1 ],
+      "corrections": {
+        "oriented bounding box": {
+          "dimensions": [ 1, 1, 1 ],
+          "position": [ 0, 0, 0 ],
+          "rotation": [ 0, 0, 0 ]
+        },
+        "iterative sampling": {
+          "iterations": 0
+        }
+      }
+    }
+  ]
+}

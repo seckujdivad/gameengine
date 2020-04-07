@@ -68,6 +68,10 @@ uniform vec3 reflection_parallax_obb_dimensions;
 uniform mat3 reflection_parallax_obb_rotation;
 uniform mat3 reflection_parallax_obb_rotation_inverse;
 
+//skybox
+uniform sampler2D skyboxMaskTexture;
+uniform samplerCube skyboxTexture;
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (!light_points[lightindex].shadows_enabled)
@@ -162,6 +166,9 @@ void main()
 		}
 	}
 
+	//apply lighting to fragment
+	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
+
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, globalUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
@@ -237,10 +244,14 @@ void main()
 		reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;
 	}
 
-	frag_intensity += reflection_intensity * reflection_colour;
+	frag_out += vec4(reflection_intensity * reflection_colour, 0.0f);
 
-	//apply lighting to fragment
-	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
+	//apply skybox
+	vec3 skybox_intensity = texture(skyboxMaskTexture, globalUV).rgb;
+	if (skybox_intensity != vec3(0.0f, 0.0f, 0.0f))
+	{
+		frag_out += vec4(skybox_intensity * texture(skyboxTexture, globalSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
+	}
 
 	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
 	if (reflection_isdrawing)

@@ -166,6 +166,7 @@
     <None Include="resources\shaders\simple_shadow.geom" />
     <None Include="resources\shaders\simple_shadow.vert" />
     <None Include="resources\simplescene.json" />
+    <None Include="resources\simplescene_skybox.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />

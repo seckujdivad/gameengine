@@ -219,6 +219,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		CreateTexture(shader_program, "normalTexture", path, it.value()["shader"]["textures"]["normal"], 0.5f, 0.5f, 1.0f);
 		CreateTexture(shader_program, "specularTexture", path, it.value()["shader"]["textures"]["specular"], 0.0f, 0.0f, 0.0f);
 		CreateTexture(shader_program, "reflectionIntensityTexture", path, it.value()["shader"]["textures"]["reflection intensity"], 0.0f, 0.0f, 0.0f);
+		CreateTexture(shader_program, "skyboxMaskTexture", path, it.value()["shader"]["textures"]["skybox mask"], 0.0f, 0.0f, 0.0f);
 
 		// store shader program
 		model->SetShaderProgram(shader_program);
@@ -241,6 +242,15 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	for (std::map<std::string, Model*>::iterator it = model_lib.begin(); it != model_lib.end(); it++)
 	{
 		delete it->second;
+	}
+
+	//make skybox scene (if specified)
+	if (config["metadata"]["skybox scene"].is_object())
+	{
+		Scene* skybox_scene = InitialiseScene(path, config["metadata"]["skybox scene"]["file"].get<std::string>());
+		scene->SetSkyboxScene(skybox_scene);
+		scene->InitialiseSkyboxTexture(config["metadata"]["skybox scene"]["texture"][0].get<unsigned int>(),
+			config["metadata"]["skybox scene"]["texture"][1].get<unsigned int>());
 	}
 
 	return scene;

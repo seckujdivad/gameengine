@@ -21,6 +21,11 @@ private:
 
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	Scene* m_skybox_scene = nullptr;
+	GLuint m_skybox_texture = NULL;
+	unsigned int m_skybox_texture_dimensions[2] = { 1, 1 };
+	GLuint m_skybox_fbo = NULL;
+
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
 	int GetPointLightIndex(PointLight* pointlight);
@@ -40,12 +45,15 @@ public:
 
 	void AddModel(Model* model);
 	void RemoveModel(Model* model);
+
 	void AddCamera(Camera* camera);
 	void RemoveCamera(Camera* camera);
 	void SetActiveCamera(Camera* camera);
 	Camera* GetActiveCamera();
+
 	void AddPointLight(PointLight* pointlight);
 	void RemovePointLight(PointLight* pointlight);
+
 	void AddReflection(Reflection* reflection);
 	void RemoveReflection(Reflection* reflection);
 	
@@ -64,4 +72,8 @@ public:
 	void PushUniforms();
 
 	void SetAmbientLight(glm::vec3 light_intensity);
+
+	void InitialiseSkyboxTexture(unsigned int texture_width, unsigned int texture_height);
+	void SetSkyboxScene(Scene* scene);
+	void DrawSkyboxScene();
 };
