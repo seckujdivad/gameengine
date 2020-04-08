@@ -72,7 +72,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	for (auto it = config["lighting"]["point lights"].begin(); it != config["lighting"]["point lights"].end(); it++)
 	{
 		PointLight* pointlight = new PointLight(num_point_lights, it.value()["dynamic refresh rate"].get<int>());
-		pointlight->SetIdentifier(it.value()["name"].get<std::string>());
+		pointlight->SetIdentifier(it.key());
 		pointlight->SetIntensity(glm::vec3(it.value()["intensity"][0].get<float>(),
 			it.value()["intensity"][1].get<float>(),
 			it.value()["intensity"][2].get<float>()));
@@ -111,7 +111,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["clips"][1].get<float>(),
 			it.value()["dynamic refresh rate"].get<int>());
 
-		reflection->SetIdentifier(it.value()["name"].get<std::string>());
+		reflection->SetIdentifier(it.key());
 		reflection->SetPosition(it.value()["position"][0].get<float>(),
 			it.value()["position"][1].get<float>(),
 			it.value()["position"][2].get<float>());
@@ -173,7 +173,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetRotation(it.value()["rotation"][0].get<GLfloat>(), it.value()["rotation"][1].get<GLfloat>(), it.value()["rotation"][2].get<GLfloat>());
 		model->SetScale(it.value()["scale"][0].get<GLfloat>(), it.value()["scale"][1].get<GLfloat>(), it.value()["scale"][2].get<GLfloat>());
 
-		model->SetIdentifier(it.value()["name"].get<std::string>());
+		model->SetIdentifier(it.key());
 
 		//load shader
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["render"]),
