@@ -16,7 +16,7 @@
       "model": "cube",
       "name": "cube",
       "position": [ 0, 5, 0 ],
-      "rotation": [ 0, 0, 0 ],
+      "rotation": [ 0, 0, 90 ],
       "scale": [ 1, 1, 1 ],
       "shader": {
         "render": {
@@ -29,7 +29,7 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": [ 1, 1, 0 ],
+          "colour": "textures/sky.jpg",
           "reflection intensity": [ 0, 0, 0 ]
         },
         "phong": {
