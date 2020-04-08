@@ -405,9 +405,9 @@ void Scene::DrawReflections(int mode)
 						this->models.at(j)->GetShaderProgram()->Select();
 
 						glUniform3fv(this->models.at(j)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
-
-						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face);
+						
 						this->models.at(j)->SetUniforms();
+						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
 
 						for (size_t k = 0; k < this->pointlights.size(); k++)
 						{
