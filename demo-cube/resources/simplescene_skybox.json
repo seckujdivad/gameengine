@@ -1,7 +1,8 @@
 {
   "metadata": {
     "name": "Simple Scene (skybox)",
-    "default camera": "main"
+    "default camera": "main",
+    "background colour": [ 1, 1, 0, 1 ]
   },
   "models": {
     "cube": {

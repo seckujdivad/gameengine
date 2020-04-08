@@ -256,7 +256,7 @@ void Scene::Render(GLuint framebuffer)
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 
 	//generate values
 	for (size_t i = 0; i < this->models.size(); i++)
@@ -368,7 +368,7 @@ void Scene::DrawReflections(int mode)
 	}
 
 	glCullFace(GL_BACK);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 
 	for (size_t i = 0; i < this->reflections.size(); i++)
 	{
@@ -596,4 +596,14 @@ void Scene::DrawSkyboxScene()
 		glFlush();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+}
+
+void Scene::SetClearColour(glm::vec4 colour)
+{
+	this->m_clear_colour = colour;
+}
+
+glm::vec4 Scene::GetClearColour()
+{
+	return this->m_clear_colour;
 }

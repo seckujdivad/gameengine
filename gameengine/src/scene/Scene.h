@@ -21,6 +21,8 @@ private:
 
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
 	Scene* m_skybox_scene = nullptr;
 	GLuint m_skybox_texture = NULL;
 	unsigned int m_skybox_texture_dimensions[2] = { 1, 1 };
@@ -76,4 +78,7 @@ public:
 	void InitialiseSkyboxTexture(unsigned int texture_width, unsigned int texture_height);
 	void SetSkyboxScene(Scene* scene);
 	void DrawSkyboxScene();
+
+	void SetClearColour(glm::vec4 colour);
+	glm::vec4 GetClearColour();
 };

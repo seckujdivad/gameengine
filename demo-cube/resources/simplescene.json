@@ -6,7 +6,7 @@
       "file": "simplescene_skybox.json",
       "texture": [ 2048, 2048 ]
     }
-    },
+  },
   "models": {
     "cube": {
       "type": "ply",

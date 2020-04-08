@@ -253,6 +253,14 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			config["metadata"]["skybox scene"]["texture"][1].get<unsigned int>());
 	}
 
+	if (config["metadata"]["background colour"].is_array())
+	{
+		scene->SetClearColour(glm::vec4(config["metadata"]["background colour"][0].get<float>(),
+			config["metadata"]["background colour"][1].get<float>(),
+			config["metadata"]["background colour"][2].get<float>(),
+			config["metadata"]["background colour"][3].get<float>()));
+	}
+
 	return scene;
 }
 
