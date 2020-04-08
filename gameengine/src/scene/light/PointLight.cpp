@@ -214,6 +214,14 @@ bool PointLight::DynamicNeedsRedrawing(bool reset_if_redraw)
 		this->m_frames_since_last_refresh = 0;
 		return false;
 	}
+	else if ((this->m_intensity.r == 0.0f) && (this->m_intensity.g == 0.0f) && (this->m_intensity.b == 0.0f)) //skip redrawing if the light is disabled
+	{
+		if (this->m_frames_since_last_refresh > this->m_refresh_frames)
+		{
+			this->m_refresh_frames = this->m_frames_since_last_refresh;
+		}
+		return false;
+	}
 	else
 	{
 		bool result = this->m_frames_since_last_refresh >= this->m_refresh_frames;
