@@ -109,7 +109,7 @@ void main()
 {
 	//get base colour
 	frag_out = texture(colourTexture, globalUV);
-	
+
 	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
 	frag_intensity = frag_intensity + light_ambient;
@@ -186,11 +186,25 @@ void main()
 		for (int i = 0; i < reflection_parallax_it_iterations; i++)
 		{
 			depth_sample = texture(reflection_cubemap, sample_vector).a;
-			depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
-			sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+			if (depth_sample == 1.0f)
+			{
+				i = reflection_parallax_it_iterations; //exit loop
+			}
+			else
+			{
+				depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
+				sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+			}
 		}
 
-		reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
+		if (texture(reflection_cubemap, sample_vector).a == 1.0f)
+		{
+			reflection_colour = texture(skyboxTexture, sample_vector).rgb;
+		}
+		else
+		{
+			reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
+		}
 	}
 	else if (mat_reflection_mode == 1) //oriented bounding box
 	{
@@ -239,9 +253,18 @@ void main()
 		}
 
 		intersection = (oob_rotation * intersection) + oob_translation;
-
+		
 		//sample using the final values
-		reflection_colour = texture(reflection_cubemap, intersection - reflection_position).rgb;
+		vec3 sample_vector = intersection - reflection_position;
+		vec4 reflection_sample = texture(reflection_cubemap, sample_vector).rgba;
+		if (reflection_sample.a == 1.0f)
+		{
+			reflection_colour = texture(skyboxTexture, reflection).rgb;
+		}
+		else
+		{
+			reflection_colour = reflection_sample.rgb;
+		}
 	}
 
 	frag_out += vec4(reflection_intensity * reflection_colour, 0.0f);
@@ -250,12 +273,20 @@ void main()
 	vec3 skybox_intensity = texture(skyboxMaskTexture, globalUV).rgb;
 	if (skybox_intensity != vec3(0.0f, 0.0f, 0.0f))
 	{
+		frag_out = vec4(1 - skybox_intensity, 1.0f) * frag_out;
 		frag_out += vec4(skybox_intensity * texture(skyboxTexture, globalSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
 	}
 
 	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
 	if (reflection_isdrawing)
 	{
-		frag_out.a = gl_FragDepth;
+		if (skybox_intensity == vec3(1.0f, 1.0f, 1.0f))
+		{
+			frag_out.a = 1.0f;
+		}
+		else
+		{
+			frag_out.a = gl_FragDepth;
+		}
 	}
 }
