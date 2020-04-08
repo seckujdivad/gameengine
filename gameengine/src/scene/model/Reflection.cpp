@@ -75,7 +75,7 @@ void Reflection::ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, 
 	this->m_parallax_obb_rotation_inverse = glm::rotate(this->m_parallax_obb_rotation_inverse, glm::radians(0.0f - obb_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
-void Reflection::ConfigureIterative(unsigned int iterations)
+void Reflection::ConfigureIterative(int iterations)
 {
 	this->m_parallax_iterations = iterations;
 }
@@ -175,7 +175,7 @@ void Reflection::RemoveStaticModel(std::string identifier)
 		}
 	}
 
-	for (size_t i = to_remove.size() - 1; i > -1; i--)
+	for (int i = to_remove.size() - 1; i > -1; i--)
 	{
 		this->m_models_static.erase(this->m_models_static.begin() + to_remove.at(i));
 	}
@@ -213,7 +213,7 @@ void Reflection::RemoveDynamicModel(std::string identifier)
 		}
 	}
 
-	for (size_t i = to_remove.size() - 1; i > -1; i--)
+	for (int i = to_remove.size() - 1; i > -1; i--)
 	{
 		this->m_models_dynamic.erase(this->m_models_dynamic.begin() + to_remove.at(i));
 	}

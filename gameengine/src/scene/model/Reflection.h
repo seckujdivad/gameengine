@@ -22,10 +22,10 @@ private:
 	float m_clip_far = 100.0f;
 
 	int m_refresh_frames = 0;
-	unsigned int m_frames_since_last_refresh = 0;
+	int m_frames_since_last_refresh = 0;
 
 	//iterative parallax correction
-	unsigned int m_parallax_iterations = 1;
+	int m_parallax_iterations = 1;
 
 	//obb parallax correction
 	glm::vec3 m_parallax_obb_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -45,7 +45,7 @@ public:
 	~Reflection();
 
 	void ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation);
-	void ConfigureIterative(unsigned int iterations);
+	void ConfigureIterative(int iterations);
 
 	void InitialiseViewport();
 	void SelectFBO(int face);
