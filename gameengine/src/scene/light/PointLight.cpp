@@ -7,6 +7,8 @@ PointLight::PointLight(int light_index, int refresh_frames) : Positionable(), Na
 	this->m_refresh_frames = refresh_frames;
 
 	this->m_intensity = glm::vec3(0.0f);
+
+	this->CreateShadowTextures(1, 1);
 }
 
 PointLight::~PointLight()
@@ -23,16 +25,47 @@ void PointLight::SetIntensity(glm::vec3 intensity)
 
 void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int shadow_texture_height, float near_plane, float far_plane)
 {
-	if (this->m_shadows_enabled)
-	{
-		throw std::runtime_error("Can't reenable shadows, shadows are already enabled for this PointLight");
-	}
-
 	this->m_shadowtex_width = shadow_texture_width;
 	this->m_shadowtex_height = shadow_texture_height;
 	this->m_shadows_enabled = true;
 	this->m_shadow_clip_near = near_plane;
 	this->m_shadow_clip_far = far_plane;
+
+	glm::vec3 translate = glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2));
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)this->m_shadowtex_width / (float)this->m_shadowtex_height, this->m_shadow_clip_near, this->m_shadow_clip_far);
+	
+	this->m_transforms.clear();
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+	this->CreateShadowTextures(shadow_texture_width, shadow_texture_height);
+}
+
+bool PointLight::ShadowsEnabled()
+{
+	return this->m_shadows_enabled;
+}
+
+void PointLight::CreateShadowTextures(unsigned int shadow_texture_width, unsigned int shadow_texture_height)
+{
+	if (this->m_depth_fbo != NULL)
+	{
+		glDeleteFramebuffers(1, &this->m_depth_fbo);
+	}
+
+	if (this->m_depth_cubemap != NULL)
+	{
+		glDeleteTextures(1, &this->m_depth_cubemap);
+	}
+
+	if (this->m_depth_cubemap_static != NULL)
+	{
+		glDeleteTextures(1, &this->m_depth_cubemap_static);
+	}
 
 	//make cubemap
 	// dynamic
@@ -76,22 +109,6 @@ void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int s
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glm::vec3 translate = glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2));
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)this->m_shadowtex_width / (float)this->m_shadowtex_height, this->m_shadow_clip_near, this->m_shadow_clip_far);
-	
-	this->m_transforms.clear();
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-}
-
-bool PointLight::ShadowsEnabled()
-{
-	return this->m_shadows_enabled;
 }
 
 void PointLight::RegisterUniforms(ShaderProgram* shader_program)
@@ -100,14 +117,9 @@ void PointLight::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform(prefix + "position");
 	shader_program->RegisterUniform(prefix + "intensity");
 	shader_program->RegisterUniform(prefix + "shadows_enabled");
-	shader_program->RegisterUniform(prefix + "shadow_cubemap");
-
-	if (this->m_shadows_enabled)
-	{
-		shader_program->RegisterTexture(prefix + "shadow_cubemap", this->m_depth_cubemap, GL_TEXTURE_CUBE_MAP);
-		shader_program->RegisterUniform(prefix + "shadow_bias");
-		shader_program->RegisterUniform(prefix + "shadow_far_plane");
-	}
+	shader_program->RegisterTexture(prefix + "shadow_cubemap", this->m_depth_cubemap, GL_TEXTURE_CUBE_MAP);
+	shader_program->RegisterUniform(prefix + "shadow_bias");
+	shader_program->RegisterUniform(prefix + "shadow_far_plane");
 }
 
 void PointLight::SetUniforms(ShaderProgram* shader_program)
@@ -118,12 +130,8 @@ void PointLight::SetUniforms(ShaderProgram* shader_program)
 	glUniform3fv(shader_program->GetUniform(prefix + "position"), 1, glm::value_ptr(position));
 	glUniform3fv(shader_program->GetUniform(prefix + "intensity"), 1, glm::value_ptr(this->m_intensity));
 	glUniform1i(shader_program->GetUniform(prefix + "shadows_enabled"), this->m_shadows_enabled);
-
-	if (this->m_shadows_enabled)
-	{
-		glUniform1f(shader_program->GetUniform(prefix + "shadow_bias"), this->m_shadow_bias);
-		glUniform1f(shader_program->GetUniform(prefix + "shadow_far_plane"), this->m_shadow_clip_far);
-	}
+	glUniform1f(shader_program->GetUniform(prefix + "shadow_bias"), this->m_shadow_bias);
+	glUniform1f(shader_program->GetUniform(prefix + "shadow_far_plane"), this->m_shadow_clip_far);
 }
 
 void PointLight::AddStaticModel(std::string identifier)

@@ -42,6 +42,7 @@ public:
 	void SetIntensity(glm::vec3 intensity);
 	void EnableShadows(unsigned int shadow_texture_width = 1024, unsigned int shadow_texture_height = 1024, float near_plane = 0.1f, float far_plane = 50.0f);
 	bool ShadowsEnabled();
+	void CreateShadowTextures(unsigned int shadow_texture_width = 1024, unsigned int shadow_texture_height = 1024);
 
 	void InitialiseViewport();
 	void SelectFBO();
