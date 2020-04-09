@@ -18,7 +18,7 @@ struct PlyType
 struct PlyElement
 {
 	std::string name;
-	int num_elements;
+	int num_elements = 0;
 	std::vector<PlyType> types;
 	std::vector<std::string> field_names;
 	std::map<std::string, int> field_name_map;

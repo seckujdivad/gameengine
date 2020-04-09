@@ -54,7 +54,7 @@ public:
 	bool RemoveVertex(int index);
 	bool RemoveVertex(size_t index);
 	int FindVertex(GLfloat x, GLfloat y, GLfloat z);
-	int FindVertex(std::vector<int> vertex);
+	int FindVertex(std::vector<GLfloat> vertex);
 	std::vector<GLfloat>* GetVertex(int index);
 	std::vector<std::vector<GLfloat>> GetVerticesCopy();
 

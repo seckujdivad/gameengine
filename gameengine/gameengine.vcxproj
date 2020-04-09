@@ -88,6 +88,9 @@
       <PreprocessorDefinitions>WXUSINGDLL;wxUSE_OPENGL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>stdafx.h;wx/wxprec.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -105,6 +108,9 @@
       <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>stdafx.h;wx/wxprec.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,6 +130,9 @@
       <PreprocessorDefinitions>WXUSINGDLL;wxUSE_OPENGL;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>stdafx.h;wx/wxprec.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -145,6 +154,9 @@
       <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>stdafx.h;wx/wxprec.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

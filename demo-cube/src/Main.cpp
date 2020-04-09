@@ -129,39 +129,39 @@ void Main::sld_OnChange(wxCommandEvent& evt)
 
 		if (slider_name == "Rotate X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(0, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(0, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Rotate Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(1, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(1, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Rotate Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(2, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(2, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Translate X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(0, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(0, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Translate Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(1, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(1, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Translate Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(2, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(2, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Scale X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(0, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetScale(0, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Scale Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(1, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetScale(1, (GLfloat)slider->GetValue());
 		}
 		else if (slider_name == "Scale Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(2, slider->GetValue());
+			this->m_scene->models.at(this->m_model_selection_index)->SetScale(2, (GLfloat)slider->GetValue());
 		}
 
 		this->m_glcanvas->Render();
@@ -184,39 +184,39 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 
 			if (slider_name == "Rotate X")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetRotation(0));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(0));
 			}
 			else if (slider_name == "Rotate Y")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetRotation(1));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(1));
 			}
 			else if (slider_name == "Rotate Z")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetRotation(2));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(2));
 			}
 			else if (slider_name == "Translate X")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetPosition(0));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(0));
 			}
 			else if (slider_name == "Translate Y")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetPosition(1));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(1));
 			}
 			else if (slider_name == "Translate Z")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetPosition(2));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(2));
 			}
 			else if (slider_name == "Scale X")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetScale(0));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(0));
 			}
 			else if (slider_name == "Scale Y")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetScale(1));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(1));
 			}
 			else if (slider_name == "Scale Z")
 			{
-				slider->SetValue(this->m_scene->models.at(this->m_model_selection_index)->GetScale(2));
+				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(2));
 			}
 		}
 	}

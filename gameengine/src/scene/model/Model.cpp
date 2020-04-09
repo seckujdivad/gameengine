@@ -136,7 +136,7 @@ int Model::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 	return -1;
 }
 
-int Model::FindVertex(std::vector<int> vertex)
+int Model::FindVertex(std::vector<GLfloat> vertex)
 {
 	return this->FindVertex(vertex.at(0), vertex.at(1), vertex.at(2));
 }
