@@ -159,6 +159,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="resources\models\cube.ply" />
+    <None Include="resources\models\joining section.ply" />
+    <None Include="resources\models\opened cube.ply" />
     <None Include="resources\models\suzanne.ply" />
     <None Include="resources\shaders\simple.frag" />
     <None Include="resources\shaders\simple.vert" />
