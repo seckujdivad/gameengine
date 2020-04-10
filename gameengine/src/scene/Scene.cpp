@@ -357,6 +357,10 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 		{
 			if ((mode == 0) || ((mode == 1) && this->pointlights.at(i)->DynamicNeedsRedrawing(true)))
 			{
+				std::unordered_set<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->pointlights.at(i)->GetPosition(0),
+					this->pointlights.at(i)->GetPosition(1),
+					this->pointlights.at(i)->GetPosition(2)));
+
 				this->pointlights.at(i)->InitialiseViewport();
 
 				if (mode == 0)
@@ -370,24 +374,26 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 					this->pointlights.at(i)->SelectFBO();
 				}
 
-				for (size_t j = 0; j < this->models.size(); j++)
+				for (auto it = models_to_draw.begin(); it != models_to_draw.end(); it++)
 				{
+					Model* model = *it;
+
 					if (mode == 0)
 					{
-						draw_model = this->pointlights.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+						draw_model = this->pointlights.at(i)->ModelIsStatic(model->GetIdentifier());
 					}
 					else
 					{
-						draw_model = this->pointlights.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+						draw_model = this->pointlights.at(i)->ModelIsDynamic(model->GetIdentifier());
 					}
 
 					if (draw_model)
 					{
-						this->models.at(j)->GetShadowShaderProgram()->Select();
-						this->models.at(j)->BindVAO();
-						this->models.at(j)->SetShadowUniforms();
-						this->pointlights.at(i)->SetShadowUniforms(this->models.at(j)->GetShadowShaderProgram());
-						this->models.at(j)->DrawVBOs();
+						model->GetShadowShaderProgram()->Select();
+						model->BindVAO();
+						model->SetShadowUniforms();
+						this->pointlights.at(i)->SetShadowUniforms(model->GetShadowShaderProgram());
+						model->DrawVBOs();
 					}
 				}
 
@@ -421,6 +427,10 @@ void Scene::DrawReflections(int mode)
 				this->reflections.at(i)->CopyStaticToDynamic();
 			}
 
+			std::unordered_set<Model*> models = this->GetVisibleModels(glm::vec3(this->reflections.at(i)->GetPosition(0),
+				this->reflections.at(i)->GetPosition(1),
+				this->reflections.at(i)->GetPosition(2)));
+
 			for (int face = 0; face < 6; face++)
 			{
 				this->reflections.at(i)->SelectFBO(face);
@@ -430,35 +440,37 @@ void Scene::DrawReflections(int mode)
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (size_t j = 0; j < this->models.size(); j++)
+				for (auto it = models.begin(); it != models.end(); it++)
 				{
+					Model* model = *it;
+
 					bool draw_model;
 					if (mode == 0)
 					{
-						draw_model = this->reflections.at(i)->ModelIsStatic(this->models.at(j)->GetIdentifier());
+						draw_model = this->reflections.at(i)->ModelIsStatic(model->GetIdentifier());
 					}
 					else
 					{
-						draw_model = this->reflections.at(i)->ModelIsDynamic(this->models.at(j)->GetIdentifier());
+						draw_model = this->reflections.at(i)->ModelIsDynamic(model->GetIdentifier());
 					}
 
 					if (draw_model)
 					{
-						this->models.at(j)->GetShaderProgram()->Select();
+						model->GetShaderProgram()->Select();
 
-						glUniform3fv(this->models.at(j)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
+						glUniform3fv(model->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 						
-						this->models.at(j)->SetUniforms();
-						this->reflections.at(i)->SetGenerateUniforms(this->models.at(j)->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
+						model->SetUniforms();
+						this->reflections.at(i)->SetGenerateUniforms(model->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
 
 						for (size_t k = 0; k < this->pointlights.size(); k++)
 						{
-							this->pointlights.at(k)->SetUniforms(this->models.at(j)->GetShaderProgram());
+							this->pointlights.at(k)->SetUniforms(model->GetShaderProgram());
 						}
 
 						this->reflections.at(i)->InitialiseViewport();
-						this->models.at(j)->BindVAO();
-						this->models.at(j)->DrawVBOs();
+						model->BindVAO();
+						model->DrawVBOs();
 					}
 				}
 			}
