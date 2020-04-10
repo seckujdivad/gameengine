@@ -18,6 +18,7 @@
       "position": [ 0, 5, 0 ],
       "rotation": [ 0, 0, 90 ],
       "scale": [ 1, 1, 1 ],
+      "vis box": "main",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -98,6 +99,15 @@
           "iterations": 0
         }
       }
+    }
+  },
+  "vis boxes": {
+    "main": {
+      "position": [ 0, 0, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "dimensions": [ 15, 15, 15 ],
+      "bias": [ 0.1, 0.1, 0.1 ],
+      "pvs": []
     }
   }
 }

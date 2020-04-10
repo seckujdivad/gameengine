@@ -141,6 +141,46 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		scene->AddReflection(reflection);
 	}
+
+	//load vis boxes
+	std::map<std::string, VisBox*> visboxes;
+	std::map<VisBox*, std::vector<std::string>> visbox_pvs;
+	for (auto it = config["vis boxes"].begin(); it != config["vis boxes"].end(); it++)
+	{
+		VisBox* visbox = new VisBox();
+
+		visbox->SetIdentifier(it.key());
+		visbox->SetPosition(it.value()["position"][0].get<float>(),
+			it.value()["position"][1].get<float>(),
+			it.value()["position"][2].get<float>());
+		visbox->SetRotation(it.value()["rotation"][0].get<float>(),
+			it.value()["rotation"][1].get<float>(),
+			it.value()["rotation"][2].get<float>());
+		visbox->SetScale(it.value()["dimensions"][0].get<float>() / 2.0f,
+			it.value()["position"][1].get<float>() / 2.0f,
+			it.value()["position"][2].get<float>() / 2.0f);
+		visbox->SetOBBBias(glm::vec3(it.value()["bias"][0].get<float>(),
+			it.value()["bias"][1].get<float>(),
+			it.value()["bias"][2].get<float>()));
+
+		visboxes.at(it.key()) = visbox;
+
+		std::vector<std::string> pvs;
+		for (auto itb = it.value()["pvs"].begin(); itb != it.value()["pvs"].end(); itb++)
+		{
+			pvs.push_back(itb.value().get<std::string>());
+		}
+		visbox_pvs.at(visbox) = pvs;
+	}
+
+	//load vis box potentially visible sets
+	for (auto it = visbox_pvs.begin(); it != visbox_pvs.end(); it++)
+	{
+		for (size_t i = 0; i < it->second.size(); i++)
+		{
+			it->first->AddPotentiallyVisible(visboxes.at(it->second.at(i)));
+		}
+	}
 	
 	// create model object library
 	std::map<std::string, Model*> model_lib;
@@ -233,6 +273,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		{
 			model->InvertNormals();
 		}
+
+		//add to correct vis box
+		visboxes.at(it.value()["vis box"].get<std::string>())->AddMemberModel(model);
 
 		//store model
 		scene->AddModel(model);

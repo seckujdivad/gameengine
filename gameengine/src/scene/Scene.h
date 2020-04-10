@@ -11,6 +11,7 @@
 #include "../render/EngineCanvas.h"
 #include "light/PointLight.h"
 #include "model/Reflection.h"
+#include "VisBox.h"
 
 class Scene
 {
@@ -32,6 +33,7 @@ private:
 	int GetCameraIndex(Camera* camera);
 	int GetPointLightIndex(PointLight* pointlight);
 	int GetReflectionIndex(Reflection* reflection);
+	int GetVisBoxIndex(VisBox* visbox);
 	
 public:
 	Scene(Camera* active_camera);
@@ -44,6 +46,7 @@ public:
 	std::vector<Camera*> cameras;
 	std::vector<PointLight*> pointlights;
 	std::vector<Reflection*> reflections;
+	std::vector<VisBox*> visboxes;
 
 	void AddModel(Model* model);
 	void RemoveModel(Model* model);
@@ -58,8 +61,11 @@ public:
 
 	void AddReflection(Reflection* reflection);
 	void RemoveReflection(Reflection* reflection);
+
+	void AddVisBox(VisBox* visbox);
+	void RemoveVisBox(VisBox* visbox);
 	
-	Nameable* GetByIdentifier(std::string identifier, int type); //types: 0 - model, 1 - camera, 2 - point light, 3 - reflection
+	Nameable* GetByIdentifier(std::string identifier, int type); //types: 0 - model, 1 - camera, 2 - point light, 3 - reflection, 4 - vis box
 
 	size_t NumModels();
 	size_t NumCameras();

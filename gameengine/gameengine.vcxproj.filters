@@ -99,6 +99,9 @@
     <ClInclude Include="src\scene\model\Reflection.h">
       <Filter>Header Files\scene\model</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\VisBox.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -148,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\model\Reflection.cpp">
       <Filter>Source Files\scene\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\VisBox.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

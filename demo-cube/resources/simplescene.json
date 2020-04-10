@@ -39,6 +39,7 @@
       "position": [ 8, -20, -2 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
+      "vis box": "level section 3",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -71,6 +72,7 @@
       "position": [ 0, 2, 0 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
+      "vis box": "level section 2",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -107,6 +109,7 @@
       "rotation": [ 90, 270, 0 ],
       "scale": [ 5, 5, 5 ],
       "invert normals": true,
+      "vis box": "level section 1",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -120,7 +123,7 @@
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1.0, 1.0, 1.0 ],
-          "reflection intensity": [ 0.1, 0.1, 0.1 ]
+          "reflection intensity": [ 0.05, 0.05, 0.05 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -139,6 +142,7 @@
       "rotation": [ 0, 0, 0 ],
       "scale": [ 5, 5, 5 ],
       "invert normals": true,
+      "vis box": "level section 2",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -152,7 +156,7 @@
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1.0, 1.0, 1.0 ],
-          "reflection intensity": [ 0.1, 0.1, 0.1 ]
+          "reflection intensity": [ 0.05, 0.05, 0.05 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -171,6 +175,7 @@
       "rotation": [ 90, 270, 0 ],
       "scale": [ 5, 5, 5 ],
       "invert normals": true,
+      "vis box": "level section 3",
       "shader": {
         "render": {
           "vertex": "simple",
@@ -184,7 +189,7 @@
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1.0, 1.0, 1.0 ],
-          "reflection intensity": [ 0.1, 0.1, 0.1 ]
+          "reflection intensity": [ 0.05, 0.05, 0.05 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
@@ -254,8 +259,8 @@
       "texture": [ 1024, 1024 ],
       "corrections": {
         "oriented bounding box": {
-          "dimensions": [ 10, 35, 10 ],
-          "position": [ 0, -7.5, 0 ],
+          "dimensions": [ 10, 30, 10 ],
+          "position": [ 0, -10, 0 ],
           "rotation": [ 0, 0, 0 ]
         },
         "iterative sampling": {
@@ -316,6 +321,29 @@
           "iterations": 0
         }
       }
+    }
+  },
+  "vis boxes": {
+    "level section 1": {
+      "position": [ 10, 0, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "dimensions": [ 10, 10, 10 ],
+      "bias": [ 0.1, 0.1, 0.1 ],
+      "pvs": [ "level section 2" ]
+    },
+    "level section 2": {
+      "position": [ 0, -10, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "dimensions": [ 10, 30, 10 ],
+      "bias": [ 0.1, 0.1, 0.1 ],
+      "pvs": [ "level section 1", "level section 3" ]
+    },
+    "level section 3": {
+      "position": [ 10, -20, 0 ],
+      "rotation": [ 0, 0, 0 ],
+      "dimensions": [ 10, 10, 10 ],
+      "bias": [ 0.1, 0.1, 0.1 ],
+      "pvs": [ "level section 2" ]
     }
   }
 }

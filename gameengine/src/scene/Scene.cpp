@@ -31,6 +31,11 @@ Scene::~Scene()
 		delete this->reflections.at(i);
 	}
 
+	for (size_t i = 0; i < this->visboxes.size(); i++)
+	{
+		delete this->visboxes.at(i);
+	}
+
 	if (this->m_skybox_texture != NULL)
 	{
 		glDeleteTextures(1, &this->m_skybox_texture);
@@ -85,6 +90,18 @@ int Scene::GetReflectionIndex(Reflection* reflection)
 	for (size_t i = 0; i < this->reflections.size(); i++)
 	{
 		if (reflection == this->reflections.at(i))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+int Scene::GetVisBoxIndex(VisBox* visbox)
+{
+	for (size_t i = 0; i < this->visboxes.size(); i++)
+	{
+		if (visbox == this->visboxes.at(i))
 		{
 			return i;
 		}
@@ -173,11 +190,29 @@ void Scene::RemoveReflection(Reflection* reflection)
 	int reflection_index = this->GetReflectionIndex(reflection);
 	if (reflection_index == -1)
 	{
-		throw std::runtime_error("PointLight doesn't exist in this scene");
+		throw std::runtime_error("Reflection doesn't exist in this scene");
 	}
 	else
 	{
 		this->reflections.erase(this->reflections.begin() + reflection_index);
+	}
+}
+
+void Scene::AddVisBox(VisBox* visbox)
+{
+	this->visboxes.push_back(visbox);
+}
+
+void Scene::RemoveVisBox(VisBox* visbox)
+{
+	int visbox_index = this->GetVisBoxIndex(visbox);
+	if (visbox_index == -1)
+	{
+		throw std::runtime_error("VisBox doesn't exist in this scene");
+	}
+	else
+	{
+		this->visboxes.erase(this->visboxes.begin() + visbox_index);
 	}
 }
 
@@ -190,6 +225,7 @@ Nameable* Scene::GetByIdentifier(std::string identifier, int type)
 	case 1: size = this->cameras.size(); break;
 	case 2: size = this->pointlights.size(); break;
 	case 3: size = this->reflections.size(); break;
+	case 4: size = this->visboxes.size(); break;
 	default: return nullptr;
 	}
 
@@ -202,6 +238,7 @@ Nameable* Scene::GetByIdentifier(std::string identifier, int type)
 		case 1: object = this->cameras.at(i); break;
 		case 2: object = this->pointlights.at(i); break;
 		case 3: object = this->reflections.at(i); break;
+		case 4: object = this->visboxes.at(i); break;
 		default: return nullptr;
 		}
 
