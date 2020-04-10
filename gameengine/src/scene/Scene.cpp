@@ -663,10 +663,20 @@ std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
 		}
 	}
 
-	for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+	if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
 	{
-		std::unordered_set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
-		visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
+		for (size_t i = 0; i < this->models.size(); i++)
+		{
+			visible_models.insert(this->models.at(i));
+		}
+	}
+	else
+	{
+		for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+		{
+			std::unordered_set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+			visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
+		}
 	}
 
 	return visible_models;
