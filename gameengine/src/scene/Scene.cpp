@@ -317,21 +317,26 @@ void Scene::Render(GLuint framebuffer)
 	this->m_active_camera->GenViewMat();
 
 	//draw scene
-	for (size_t i = 0; i < this->models.size(); i++)
-	{
-		this->models.at(i)->GetShaderProgram()->Select();
-		this->models.at(i)->BindVAO();
+	std::unordered_set<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->m_active_camera->GetPosition(0),
+		this->m_active_camera->GetPosition(1),
+		this->m_active_camera->GetPosition(2)));
 
-		glUniform3fv(this->models.at(i)->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
-		this->m_active_camera->SetUniforms(this->models.at(i)->GetShaderProgram());
-		this->models.at(i)->SetUniforms();
+	for (auto it = models_to_draw.begin(); it != models_to_draw.end(); it++)
+	{
+		Model* model = *it;
+		model->GetShaderProgram()->Select();
+		model->BindVAO();
+
+		glUniform3fv(model->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
+		this->m_active_camera->SetUniforms(model->GetShaderProgram());
+		model->SetUniforms();
 
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
-			this->pointlights.at(j)->SetUniforms(this->models.at(i)->GetShaderProgram());
+			this->pointlights.at(j)->SetUniforms(model->GetShaderProgram());
 		}
 
-		this->models.at(i)->DrawVBOs();
+		model->DrawVBOs();
 	}
 }
 
@@ -643,4 +648,26 @@ void Scene::SetClearColour(glm::vec4 colour)
 glm::vec4 Scene::GetClearColour()
 {
 	return this->m_clear_colour;
+}
+
+std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
+{
+	std::unordered_set<Model*> visible_models;
+	std::unordered_set<VisBox*> enclosed_visboxes;
+
+	for (size_t i = 0; i < this->visboxes.size(); i++)
+	{
+		if (this->visboxes.at(i)->PointInOBB(position))
+		{
+			enclosed_visboxes.insert(this->visboxes.at(i));
+		}
+	}
+
+	for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+	{
+		std::unordered_set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+		visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
+	}
+
+	return visible_models;
 }

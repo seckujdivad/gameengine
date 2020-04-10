@@ -19,52 +19,79 @@ glm::vec3 VisBox::GetOBBBias()
 	return this->m_obb_bias;
 }
 
-std::vector<Model*> VisBox::GetPotentiallyVisibleModels()
+std::unordered_set<Model*> VisBox::GetPotentiallyVisibleModels()
 {
-	std::vector<Model*> output;
-	for (size_t i = 0; i < this->m_pvs.size(); i++)
+	std::unordered_set<Model*> output = this->m_members;
+
+	for (auto it = this->m_pvs.begin(); it != this->m_pvs.end(); it++)
 	{
-		std::vector<Model*> visbox_models = this->m_pvs.at(i)->GetMemberModels();
-		for (size_t j = 0; j < visbox_models.size(); j++)
-		{
-			output.push_back(visbox_models.at(j));
-		}
+		VisBox* visbox = *it;
+		std::unordered_set<Model*> member_models = visbox->GetMemberModels();
+		output.insert(member_models.begin(), member_models.end());
 	}
+	
 	return output;
 }
 
-std::vector<Model*> VisBox::GetMemberModels()
+std::unordered_set<Model*> VisBox::GetMemberModels()
 {
 	return this->m_members;
 }
 
 void VisBox::AddMemberModel(Model* model)
 {
-	this->m_members.push_back(model);
+	this->m_members.insert(model);
 }
 
 void VisBox::RemoveMemberModel(Model* model)
 {
-	int index = -1;
-	for (size_t i = 0; i < this->m_members.size(); i++)
-	{
-		if (this->m_members.at(i) == model)
-		{
-			index = i;
-		}
-	}
-
-	if (index != -1)
-	{
-		this->m_members.erase(this->m_members.begin() + index);
-	}
-}
-
-void VisBox::GeneratePotentiallyVisibleSet(std::vector<VisBox*> visboxes)
-{
+	this->m_members.erase(this->m_members.find(model));
 }
 
 void VisBox::AddPotentiallyVisible(VisBox* visbox)
 {
-	this->m_pvs.push_back(visbox);
+	this->m_pvs.insert(visbox);
+}
+
+bool VisBox::PointInOBB(glm::vec3 point)
+{
+	//set up matrices
+	glm::mat4 rotation_4d = glm::mat4(1.0f);
+	rotation_4d = glm::rotate(rotation_4d, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+	rotation_4d = glm::rotate(rotation_4d, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotation_4d = glm::rotate(rotation_4d, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat3 rotation = glm::mat3(rotation_4d);
+
+	glm::mat4 rotation_inverse_4d = glm::mat4(1.0f);
+	rotation_inverse_4d = glm::rotate(rotation_inverse_4d, glm::radians(0 - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+	rotation_inverse_4d = glm::rotate(rotation_inverse_4d, glm::radians(0 - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotation_inverse_4d = glm::rotate(rotation_inverse_4d, glm::radians(0 - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat3 rotation_inverse = glm::mat3(rotation_inverse_4d);
+
+	glm::vec3 position = glm::vec3(this->GetPosition(0),
+		this->GetPosition(1),
+		this->GetPosition(2));
+	
+	glm::vec3 dimensions = glm::vec3(this->GetScale(0) * 2.0f,
+		this->GetScale(1) * 2.0f,
+		this->GetScale(2) * 2.0f);
+	
+	glm::vec3 translation = position - (0.5f * rotation * dimensions);
+
+	glm::vec3 obb_space_point = rotation_inverse * (point - translation);
+
+	for (int i = 0; i < 3; i++)
+	{
+		if ((0.0f - this->m_obb_bias[i] > obb_space_point[i]) || (dimensions[i] + this->m_obb_bias[i] < obb_space_point[i]))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool VisBox::PointInOBB(float x, float y, float z)
+{
+	return this->PointInOBB(glm::vec3(x, y, z));
 }

@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <unordered_set>
+
 #include "Nameable.h"
 #include "Positionable.h"
 #include "Rotatable.h"
@@ -17,8 +19,8 @@ class VisBox : public Nameable, public Positionable, public Rotatable, public Sc
 private:
 	glm::vec3 m_obb_bias = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	std::vector<VisBox*> m_pvs;
-	std::vector<Model*> m_members;
+	std::unordered_set<VisBox*> m_pvs;
+	std::unordered_set<Model*> m_members;
 	
 public:
 	VisBox();
@@ -27,11 +29,13 @@ public:
 	void SetOBBBias(glm::vec3 obb_bias);
 	glm::vec3 GetOBBBias();
 
-	std::vector<Model*> GetPotentiallyVisibleModels();
-	std::vector<Model*> GetMemberModels();
+	std::unordered_set<Model*> GetPotentiallyVisibleModels();
+	std::unordered_set<Model*> GetMemberModels();
 	void AddMemberModel(Model* model);
 	void RemoveMemberModel(Model* model);
-
-	void GeneratePotentiallyVisibleSet(std::vector<VisBox*> visboxes);
+	
 	void AddPotentiallyVisible(VisBox* visbox);
+
+	bool PointInOBB(glm::vec3 point);
+	bool PointInOBB(float x, float y, float z);
 };

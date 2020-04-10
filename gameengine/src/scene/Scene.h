@@ -4,6 +4,7 @@
 #include "../GLComponents.h"
 
 #include <vector>
+#include <unordered_set>
 
 #include "../render/ShaderProgram.h"
 #include "model/Model.h"
@@ -87,4 +88,6 @@ public:
 
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour();
+
+	std::unordered_set<Model*> GetVisibleModels(glm::vec3 position);
 };

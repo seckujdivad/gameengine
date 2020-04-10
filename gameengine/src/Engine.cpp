@@ -157,20 +157,22 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["rotation"][1].get<float>(),
 			it.value()["rotation"][2].get<float>());
 		visbox->SetScale(it.value()["dimensions"][0].get<float>() / 2.0f,
-			it.value()["position"][1].get<float>() / 2.0f,
-			it.value()["position"][2].get<float>() / 2.0f);
+			it.value()["dimensions"][1].get<float>() / 2.0f,
+			it.value()["dimensions"][2].get<float>() / 2.0f);
 		visbox->SetOBBBias(glm::vec3(it.value()["bias"][0].get<float>(),
 			it.value()["bias"][1].get<float>(),
 			it.value()["bias"][2].get<float>()));
 
-		visboxes.at(it.key()) = visbox;
+		visboxes.insert({ it.key(), visbox });
 
 		std::vector<std::string> pvs;
 		for (auto itb = it.value()["pvs"].begin(); itb != it.value()["pvs"].end(); itb++)
 		{
 			pvs.push_back(itb.value().get<std::string>());
 		}
-		visbox_pvs.at(visbox) = pvs;
+		visbox_pvs.insert({ visbox, pvs });
+
+		scene->AddVisBox(visbox);
 	}
 
 	//load vis box potentially visible sets
