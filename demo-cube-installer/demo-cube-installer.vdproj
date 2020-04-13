@@ -81,7 +81,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:demo-cube-x86-win.msi"
+        "OutputFilename" = "8:Release/demo-cube-x86-win.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -98,6 +98,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -105,7 +113,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:demo-cube-x86-win.msi"
+        "OutputFilename" = "8:Release/demo-cube-x86-win.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -389,7 +397,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Demo Cube"
         "ProductCode" = "8:{9AADDA8E-BAE4-4F31-A631-2BD355FF8E84}"
-        "PackageCode" = "8:{22B83053-4B2A-4A74-A224-ABF91F5272D5}"
+        "PackageCode" = "8:{051B054F-5D8E-4B29-B1AE-9BC7C08AD5FA}"
         "UpgradeCode" = "8:{F13D2970-7C51-4377-8CA2-9633F19D3233}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
