@@ -11,8 +11,7 @@ An x86 installer is provided, but it isn't as thoroughly tested as the zip file.
 * glew
 * opengl
 
-This project statically links to wxWidgets. vcpkg builds the dynamic version by default, so you will need to edit the CMake files for your platform triplets.
-On 64-bit Windows, the triplet is x64-windows. Therefore, you will need to edit the file at `vcpkg/triplets/x64-windows.cmake` before building and add the following to the end:
+This project statically links to wxWidgets. vcpkg builds the dynamic version by default, so you will need to edit the CMake files for your platform triplets. On 64-bit Windows, the triplet is `x64-windows`. Therefore, you will need to edit the file at `vcpkg/triplets/x64-windows.cmake` before building and add the following to the end before building through vcpkg:
 ```cmake
 if (PORT STREQUAL wxwidgets)
 	set(VCPKG_LIBRARY_LINKAGE static)
