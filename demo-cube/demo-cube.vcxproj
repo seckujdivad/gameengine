@@ -85,7 +85,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\gameengine\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
@@ -96,13 +96,14 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\gameengine\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
@@ -113,6 +114,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,7 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\gameengine\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
@@ -134,6 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>py $(SolutionDir)\packaged-releases/package-releases.py</Command>
@@ -148,7 +151,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\gameengine\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/external:W0 /experimental:external /external:anglebrackets /external:I "D:\Programs\vcpkg" %(AdditionalOptions)</AdditionalOptions>
@@ -161,6 +164,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>py $(SolutionDir)\packaged-releases/package-releases.py</Command>
@@ -170,17 +174,39 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="resources\models\cube.ply" />
-    <None Include="resources\models\joining section.ply" />
-    <None Include="resources\models\opened cube.ply" />
-    <None Include="resources\models\suzanne.ply" />
-    <None Include="resources\shaders\simple.frag" />
-    <None Include="resources\shaders\simple.vert" />
-    <None Include="resources\shaders\simple_shadow.frag" />
-    <None Include="resources\shaders\simple_shadow.geom" />
-    <None Include="resources\shaders\simple_shadow.vert" />
-    <None Include="resources\simplescene.json" />
-    <None Include="resources\simplescene_skybox.json" />
+    <None Include="resources\models\cube.ply">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\models\joining section.ply">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\models\opened cube.ply">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\models\suzanne.ply">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\shaders\simple.frag">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\shaders\simple.vert">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\shaders\simple_shadow.frag">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\shaders\simple_shadow.geom">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\shaders\simple_shadow.vert">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\simplescene.json">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="resources\simplescene_skybox.json">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -197,11 +223,24 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\cube_normals.png" />
-    <Image Include="resources\textures\sky.jpg" />
-    <Image Include="resources\textures\SuzanneSpecularMap.png" />
-    <Image Include="resources\textures\TwoTone.png" />
-    <Image Include="resources\textures\unnamed.jpg" />
+    <Image Include="main.ico">
+      <DeploymentContent>false</DeploymentContent>
+    </Image>
+    <Image Include="resources\textures\cube_normals.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\textures\sky.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\textures\SuzanneSpecularMap.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\textures\TwoTone.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="resources\textures\unnamed.jpg">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

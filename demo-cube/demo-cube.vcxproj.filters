@@ -90,6 +90,9 @@
     <Image Include="resources\textures\SuzanneSpecularMap.png">
       <Filter>Resource Files\textures</Filter>
     </Image>
+    <Image Include="main.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">

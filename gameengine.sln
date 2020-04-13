@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packaged-releases", "packag
 		packaged-releases\packages.json = packaged-releases\packages.json
 	EndProjectSection
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "demo-cube-installer", "demo-cube-installer\demo-cube-installer.vdproj", "{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,9 +43,7 @@ Global
 		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Debug|x86.ActiveCfg = Debug|Win32
 		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Debug|x86.Build.0 = Debug|Win32
 		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Release|x64.ActiveCfg = Release|x64
-		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Release|x64.Build.0 = Release|x64
-		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Release|x86.ActiveCfg = Debug|Win32
-		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Release|x86.Build.0 = Debug|Win32
+		{1D671D2A-1098-4AAF-9E7C-778C660E37B2}.Release|x86.ActiveCfg = Release|Win32
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Debug|x64.ActiveCfg = Debug|x64
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Debug|x64.Build.0 = Debug|x64
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Debug|x86.ActiveCfg = Debug|Win32
@@ -52,6 +52,12 @@ Global
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Release|x64.Build.0 = Release|x64
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Release|x86.ActiveCfg = Release|Win32
 		{1D0D906D-6A21-4AE3-A07C-41CE44B49082}.Release|x86.Build.0 = Release|Win32
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Debug|x64.ActiveCfg = Debug
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Debug|x86.ActiveCfg = Debug
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x64.ActiveCfg = Release
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x64.Build.0 = Release
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x86.ActiveCfg = Release
+		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
