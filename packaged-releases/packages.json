@@ -16,5 +16,8 @@
         }
       }
     }
+  },
+  "additional files": {
+    "demo-cube-installer/Release/*.msi": ""
   }
 }
