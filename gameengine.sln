@@ -22,6 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packaged-releases", "packag
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "demo-cube-installer", "demo-cube-installer\demo-cube-installer.vdproj", "{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gameengine-editor", "gameengine-editor\gameengine-editor.vcxproj", "{62088BFF-5FE7-46F5-943B-E7DF5F97595D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4F4B007F-EE21-46CF-B8DE-2447B8B8015A} = {4F4B007F-EE21-46CF-B8DE-2447B8B8015A}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -58,6 +63,14 @@ Global
 		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x64.Build.0 = Release
 		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x86.ActiveCfg = Release
 		{57DB5E9F-473D-42F5-B13A-56DF8469B7CF}.Release|x86.Build.0 = Release
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Debug|x64.ActiveCfg = Debug|x64
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Debug|x64.Build.0 = Debug|x64
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Debug|x86.ActiveCfg = Debug|Win32
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Debug|x86.Build.0 = Debug|Win32
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Release|x64.ActiveCfg = Release|x64
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Release|x64.Build.0 = Release|x64
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Release|x86.ActiveCfg = Release|Win32
+		{62088BFF-5FE7-46F5-943B-E7DF5F97595D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
