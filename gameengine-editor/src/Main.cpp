@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Main.h"
 
-void Main::tlb_btn_AddPane_clicked(wxCommandEvent& evt)
+void Main::tlbr_btn_AddPane_clicked(wxCommandEvent& evt)
 {
 	wxButton* button = (wxButton*)evt.GetEventObject();
 	if (button->GetLabelText() == "Viewport")
@@ -29,7 +29,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	for (int i = 0; i < (int)panes.size(); i++)
 	{
 		button = new wxButton(this->m_toolbar, wxID_ANY, panes.at(i));
-		button->Bind(wxEVT_BUTTON, &Main::tlb_btn_AddPane_clicked, this);
+		button->Bind(wxEVT_BUTTON, &Main::tlbr_btn_AddPane_clicked, this);
 		this->m_toolbar->AddControl(button);
 	}
 	

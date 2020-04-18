@@ -18,7 +18,7 @@ private:
 	PaneHost* m_panehost;
 	wxToolBar* m_toolbar;
 
-	void tlb_btn_AddPane_clicked(wxCommandEvent& evt);
+	void tlbr_btn_AddPane_clicked(wxCommandEvent& evt);
 
 public:
 	Main();

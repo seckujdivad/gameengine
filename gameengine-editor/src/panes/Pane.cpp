@@ -14,3 +14,29 @@ std::string Pane::GetDisplayName()
 {
 	return "Pane";
 }
+
+void Pane::SetPaneID(int id)
+{
+	this->m_pane_id = id;
+}
+
+int Pane::GetPaneID()
+{
+	if (this->m_pane_id == -1)
+	{
+		throw std::runtime_error("No pane ID has been set");
+	}
+	else
+	{
+		return this->m_pane_id;
+	}
+}
+
+wxAuiPaneInfo Pane::GetPaneInfo()
+{
+	return this->m_parent->GetPaneInfo((Pane*)this);
+}
+
+void Pane::PaneDockStateChanged(wxAuiPaneInfo info)
+{
+}
