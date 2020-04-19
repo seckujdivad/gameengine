@@ -100,6 +100,13 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		num_point_lights++;
 	}
+	
+	//load default screen space reflection values
+	MaterialSSRConfig default_ssr;
+	default_ssr.samples = config["screen space reflection defaults"]["samples"].get<int>();
+	default_ssr.distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
+	default_ssr.depth_acceptance = config["screen space reflection defaults"]["acceptable depth distance"].get<float>();
+	default_ssr.max_cam_distance = config["screen space reflection defaults"]["max camera distance"].get<float>();
 
 	//load reflections
 	Reflection* reflection;
@@ -232,27 +239,44 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["shader"]["phong"]["specular"][2].get<float>()));
 		mat.SetSpecularHighlight(it.value()["shader"]["phong"]["specular highlight"].get<float>());
 
-		if (it.value()["shader"]["reflections"]["mode"].is_string())
+		if (it.value()["shader"]["reflections"]["screen space"].is_boolean())
 		{
-			if (it.value()["shader"]["reflections"]["mode"].get<std::string>() == "iterative sampling")
+			mat.SetSSRConfig(default_ssr);
+			mat.EnableSSR(it.value()["shader"]["reflections"]["screen space"].get<bool>());
+		}
+		else
+		{
+			MaterialSSRConfig ssr_config;
+			ssr_config.samples = it.value()["shader"]["reflections"]["screen space"]["samples"].get<int>();
+			ssr_config.distance_limit = it.value()["shader"]["reflections"]["screen space"]["distance limit"].get<float>();
+			ssr_config.depth_acceptance = it.value()["shader"]["reflections"]["screen space"]["acceptable depth distance"].get<float>();
+			ssr_config.max_cam_distance = it.value()["shader"]["reflections"]["screen space"]["max camera distance"].get<float>();
+			mat.SetSSRConfig(ssr_config);
+
+			mat.EnableSSR(it.value()["shader"]["reflections"]["screen space"]["enabled"].get<bool>());
+		}
+
+		if (it.value()["shader"]["reflections"]["fallback"]["mode"].is_string())
+		{
+			if (it.value()["shader"]["reflections"]["fallback"]["mode"].get<std::string>() == "iterative sampling")
 			{
 				reflection_mode = 0;
 			}
-			else if (it.value()["shader"]["reflections"]["mode"].get<std::string>() == "oriented bounding box")
+			else if (it.value()["shader"]["reflections"]["fallback"]["mode"].get<std::string>() == "oriented bounding box")
 			{
 				reflection_mode = 1;
 			}
 			else
 			{
-				throw std::runtime_error("Unknown reflection mode " + it.value()["shader"]["reflections"]["mode"].get<std::string>());
+				throw std::runtime_error("Unknown reflection mode " + it.value()["shader"]["reflections"]["fallback"]["mode"].get<std::string>());
 			}
 		}
 		else
 		{
-			reflection_mode = it.value()["shader"]["reflections"]["mode"].get<int>();
+			reflection_mode = it.value()["shader"]["reflections"]["fallback"]["mode"].get<int>();
 		}
 
-		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["reflection"].get<std::string>(), 3), reflection_mode);
+		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["fallback"]["reflection"].get<std::string>(), 3), reflection_mode);
 
 		model->SetMaterial(mat);
 

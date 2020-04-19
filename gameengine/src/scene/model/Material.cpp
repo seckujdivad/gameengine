@@ -71,3 +71,23 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 
 	this->m_reflection->SetUniforms(shader_program);
 }
+
+void Material::EnableSSR(bool enable)
+{
+	this->m_ssr_enabled = enable;
+}
+
+bool Material::SSREnabled()
+{
+	return this->m_ssr_enabled;
+}
+
+void Material::SetSSRConfig(MaterialSSRConfig config)
+{
+	this->m_ssr_config = config;
+}
+
+MaterialSSRConfig Material::GetSSRConfig()
+{
+	return this->m_ssr_config;
+}

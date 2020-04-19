@@ -9,6 +9,14 @@
 #include "../../render/ShaderProgram.h"
 #include "Reflection.h"
 
+struct MaterialSSRConfig
+{
+	int samples = 1;
+	float distance_limit = 1.0f;
+	float depth_acceptance = 0.1f;
+	float max_cam_distance = 10.0f;
+};
+
 class Material
 {
 private:
@@ -16,8 +24,11 @@ private:
 	glm::vec3 m_specular = glm::vec3(0.0f);
 	float m_specular_highlight = 2.0f;
 
-	Reflection* m_reflection;
+	Reflection* m_reflection = nullptr;
 	int m_reflection_mode = 0;
+
+	bool m_ssr_enabled = false;
+	MaterialSSRConfig m_ssr_config;
 
 public:
 	Material();
@@ -35,4 +46,9 @@ public:
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);
+
+	void EnableSSR(bool enable);
+	bool SSREnabled();
+	void SetSSRConfig(MaterialSSRConfig config);
+	MaterialSSRConfig GetSSRConfig();
 };

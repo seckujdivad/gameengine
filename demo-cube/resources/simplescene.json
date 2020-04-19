@@ -62,8 +62,17 @@
           "specular highlight": 32
         },
         "reflections": {
-          "reflection": "simple cube",
-          "mode": "iterative sampling"
+          "screen space": {
+            "enabled": true,
+            "samples": 100,
+            "distance limit": 10,
+            "acceptable depth distance": 0.1,
+            "max camera distance": 25
+          },
+          "fallback": {
+            "reflection": "simple cube",
+            "mode": "iterative sampling"
+          }
         }
       }
     },
@@ -98,8 +107,11 @@
           "specular highlight": 32
         },
         "reflections": {
-          "reflection": "level section 2 reflection",
-          "mode": "iterative sampling"
+          "screen space": true,
+          "fallback": {
+            "reflection": "level section 2 reflection",
+            "mode": "iterative sampling"
+          }
         }
       }
     },
@@ -131,8 +143,11 @@
           "specular highlight": 32
         },
         "reflections": {
-          "reflection": "level section 1 reflection",
-          "mode": "oriented bounding box"
+          "screen space": true,
+          "fallback": {
+            "reflection": "level section 1 reflection",
+            "mode": "oriented bounding box"
+          }
         }
       }
     },
@@ -164,8 +179,11 @@
           "specular highlight": 32
         },
         "reflections": {
-          "reflection": "level section 2 reflection",
-          "mode": "oriented bounding box"
+          "screen space": true,
+          "fallback": {
+            "reflection": "level section 2 reflection",
+            "mode": "oriented bounding box"
+          }
         }
       }
     },
@@ -197,8 +215,11 @@
           "specular highlight": 32
         },
         "reflections": {
-          "reflection": "level section 3 reflection",
-          "mode": "oriented bounding box"
+          "screen space": true,
+          "fallback": {
+            "reflection": "level section 3 reflection",
+            "mode": "oriented bounding box"
+          }
         }
       }
     }
@@ -322,6 +343,12 @@
         }
       }
     }
+  },
+  "screen space reflection defaults": {
+    "samples": 100,
+    "distance limit": 10,
+    "acceptable depth distance": 0.1,
+    "max camera distance": 25
   },
   "vis boxes": {
     "level section 1": {
