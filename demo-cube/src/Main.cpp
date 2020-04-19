@@ -81,7 +81,15 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	//load scene
 	std::string scene_path = "resources";
 	this->m_scene = InitialiseScene(this->m_scene_path, this->m_scene_filename);
+
+	this->m_glcanvas->SetPostProcessorShaderProgram(new ShaderProgram(
+		{
+			{ "resources/shaders/postprocess.vert", GL_VERTEX_SHADER },
+			{ "resources/shaders/postprocess.frag", GL_FRAGMENT_SHADER }
+		},
+		{}));
 	this->m_glcanvas->SetScene(this->m_scene);
+
 	this->m_scene->PushUniforms();
 	this->m_scene->DrawShadows(0);
 	this->m_scene->DrawReflections(0);

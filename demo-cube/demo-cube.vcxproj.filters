@@ -57,6 +57,12 @@
     <None Include="resources\models\opened cube.ply">
       <Filter>Resource Files\models</Filter>
     </None>
+    <None Include="resources\shaders\postprocess.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\postprocess.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">

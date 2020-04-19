@@ -26,6 +26,23 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	glDebugMessageCallback(MessageCallback, 0);
 
 	this->m_blank_cursor = wxCursor(wxCURSOR_BLANK);
+
+	//create preprocessor vertices
+	float vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		- 1.0f, 1.0f, 0.0f
+	};
+	glGenVertexArrays(1, &this->m_postprocessor_vao);
+	glBindVertexArray(this->m_postprocessor_vao);
+	glGenBuffers(1, &this->m_postprocessor_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, this->m_postprocessor_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 	
 	this->m_timer_mainloop = new wxTimer(this);
 	this->Bind(wxEVT_TIMER, &EngineCanvas::CameraControlMainloop, this);
@@ -43,6 +60,14 @@ EngineCanvas::~EngineCanvas()
 	this->m_timer_mainloop->Stop();
 	delete this->m_timer_mainloop;
 	wxDELETE(this->m_glcontext);
+
+	if (this->m_postprocessor != nullptr)
+	{
+		delete this->m_postprocessor;
+		glDeleteTextures(1, &this->m_postprocessor_colour_texture);
+		glDeleteTextures(1, &this->m_postprocessor_depth_texture);
+		glDeleteFramebuffers(1, &this->m_postprocessor_fbo);
+	}
 }
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
@@ -55,8 +80,29 @@ void EngineCanvas::Render()
 {
 	if (this->m_scene != nullptr)
 	{
-		glViewport(0, 0, this->GetSize().x, this->GetSize().y);
-		this->m_scene->Render();
+		if (this->m_postprocessor == nullptr)
+		{
+			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
+			this->m_scene->Render(0);
+		}
+		else
+		{
+			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
+			this->m_scene->Render(this->m_postprocessor_fbo);
+
+			glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_colour_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->GetSize().x, this->GetSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_depth_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->GetSize().x, this->GetSize().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			this->m_postprocessor->Select();
+			glBindVertexArray(this->m_postprocessor_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
 	}
 
 	glFlush();
@@ -233,6 +279,44 @@ void EngineCanvas::SetKeyboardMoveActive(bool enable)
 void EngineCanvas::SetRenderLoop(bool enable)
 {
 	this->m_loop_render = enable;
+}
+
+void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
+{
+	this->m_postprocessor = postprocessor;
+	
+	glGenTextures(1, &this->m_postprocessor_colour_texture);
+	glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_colour_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->GetSize().x, this->GetSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glGenTextures(1, &this->m_postprocessor_depth_texture);
+	glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_depth_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->GetSize().x, this->GetSize().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glGenFramebuffers(1, &this->m_postprocessor_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->m_postprocessor_fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_postprocessor_colour_texture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_postprocessor_depth_texture, 0);
+
+	GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("Framebuffer error, status " + std::to_string(framebuffer_status));
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	this->m_postprocessor->RegisterTexture("render_output", this->m_postprocessor_colour_texture, GL_TEXTURE_2D);
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

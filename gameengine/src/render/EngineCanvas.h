@@ -9,6 +9,7 @@
 #include <fstream>
 
 #include "../scene/Scene.h"
+#include "ShaderProgram.h"
 
 #ifndef ENGINECANVAS_LOG_PATH
 #define ENGINECANVAS_LOG_PATH "gameengine_GL.log"
@@ -53,7 +54,14 @@ private:
 	//key press handling
 	void KeyDown(wxKeyEvent& evt);
 	void Clicked(wxMouseEvent& evt);
-	
+
+	//post processing
+	ShaderProgram* m_postprocessor = nullptr;
+	GLuint m_postprocessor_fbo = NULL;
+	GLuint m_postprocessor_depth_texture = NULL;
+	GLuint m_postprocessor_colour_texture = NULL;
+	GLuint m_postprocessor_vao = NULL;
+	GLuint m_postprocessor_vbo = NULL;
 
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
@@ -65,6 +73,8 @@ public:
 	void SetMouselook(bool enable, Camera* camera = nullptr);
 	void SetKeyboardMove(bool enable, Camera* camera = nullptr);
 	void SetRenderLoop(bool enable);
+
+	void SetPostProcessorShaderProgram(ShaderProgram* postprocessor);
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
