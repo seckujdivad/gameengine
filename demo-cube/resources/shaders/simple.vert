@@ -26,6 +26,8 @@ uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 uniform float cam_clip_near;
 uniform float cam_clip_far;
+uniform mat4 cam_transform;
+uniform mat4 cam_transform_inverse;
 
 void main()
 {

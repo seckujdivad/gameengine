@@ -20,16 +20,21 @@ in vec4 globalCamSpaceNormal;
 
 in mat3 globalNormalTBN;
 
+//model
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
 uniform mat4 mdl_scale;
 
+//camera
 uniform vec4 cam_translate;
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 uniform float cam_clip_near;
 uniform float cam_clip_far;
+uniform mat4 cam_transform;
+uniform mat4 cam_transform_inverse;
 
+//material
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;

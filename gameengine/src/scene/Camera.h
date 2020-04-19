@@ -23,9 +23,11 @@ private:
 	GLfloat m_clip_far = 100.0f;
 
 public:
-	glm::mat4 view_rotate_matrix;
-	glm::vec4 view_translate_vector;
-	glm::mat4 perspective_matrix;
+	glm::mat4 view_rotate_matrix = glm::mat4(1.0f);
+	glm::vec4 view_translate_vector = glm::vec4(0.0f);
+	glm::mat4 perspective_matrix = glm::mat4(1.0f);
+	glm::mat4 transform_matrix = glm::mat4(1.0f);
+	glm::mat4 transform_inverse_matrix = glm::mat4(1.0f);
 
 	Camera();
 	~Camera();
@@ -41,6 +43,7 @@ public:
 
 	void GenViewMat();
 	void GenPerspMat(float window_width, float window_height);
+	void GenCombinedTransformMat();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);

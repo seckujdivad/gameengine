@@ -153,6 +153,18 @@ void Reflection::GenerateCameraData()
 	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+	this->m_transform_combined.clear();
+	this->m_transform_inverse_combined.clear();
+
+	for (int i = 0; i < 6; i++)
+	{
+		glm::mat4 matrix = glm::mat4(1.0f);
+		matrix = glm::translate(matrix, glm::vec3(this->m_transform_translate));
+		matrix = this->m_transform_perspective * this->m_transform_rotate.at(i) * matrix;
+		this->m_transform_combined.push_back(matrix);
+		this->m_transform_inverse_combined.push_back(glm::inverse(matrix));
+	}
 }
 
 void Reflection::AddStaticModel(std::string identifier)
@@ -244,6 +256,8 @@ void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face)
 	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_TRUE);
 	glUniform1f(shader_program->GetUniform("cam_clip_near"), this->m_clip_near);
 	glUniform1f(shader_program->GetUniform("cam_clip_far"), this->m_clip_far);
+	glUniformMatrix4fv(shader_program->GetUniform("cam_transform"), 1, GL_FALSE, glm::value_ptr(this->m_transform_combined.at(face)));
+	glUniformMatrix4fv(shader_program->GetUniform("cam_transform_inverse"), 1, GL_FALSE, glm::value_ptr(this->m_transform_inverse_combined.at(face)));
 }
 
 void Reflection::IncrementFrameCounter(int increment)

@@ -36,6 +36,8 @@ private:
 	glm::vec4 m_transform_translate; //cam pos
 	glm::mat4 m_transform_perspective; //cam perspective
 	std::vector<glm::mat4> m_transform_rotate; //cam rotate
+	std::vector<glm::mat4> m_transform_combined;
+	std::vector<glm::mat4> m_transform_inverse_combined;
 
 	std::vector<std::string> m_models_static;
 	std::vector<std::string> m_models_dynamic;

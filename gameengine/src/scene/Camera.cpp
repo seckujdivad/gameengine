@@ -56,6 +56,15 @@ void Camera::GenPerspMat(float window_width, float window_height)
 	this->perspective_matrix = glm::perspective(glm::radians(this->m_fov), window_width / window_height, this->m_clip_near, this->m_clip_far);
 }
 
+void Camera::GenCombinedTransformMat()
+{
+	this->transform_matrix = glm::mat4(1.0f);
+	this->transform_matrix = glm::translate(this->transform_matrix, glm::vec3(this->view_translate_vector));
+	this->transform_matrix = this->perspective_matrix * this->view_rotate_matrix * this->transform_matrix;
+
+	this->transform_inverse_matrix = glm::inverse(this->transform_matrix);
+}
+
 void Camera::RegisterUniforms(ShaderProgram* shader_program)
 {
 	shader_program->RegisterUniform("cam_translate");
@@ -63,6 +72,8 @@ void Camera::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("cam_persp");
 	shader_program->RegisterUniform("cam_clip_near");
 	shader_program->RegisterUniform("cam_clip_far");
+	shader_program->RegisterUniform("cam_transform");
+	shader_program->RegisterUniform("cam_transform_inverse");
 }
 
 void Camera::SetUniforms(ShaderProgram* shader_program)
@@ -72,4 +83,6 @@ void Camera::SetUniforms(ShaderProgram* shader_program)
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));
 	glUniform1f(shader_program->GetUniform("cam_clip_near"), this->m_clip_near);
 	glUniform1f(shader_program->GetUniform("cam_clip_far"), this->m_clip_far);
+	glUniformMatrix4fv(shader_program->GetUniform("cam_transform"), 1, GL_FALSE, glm::value_ptr(this->transform_matrix));
+	glUniformMatrix4fv(shader_program->GetUniform("cam_transform_inverse"), 1, GL_FALSE, glm::value_ptr(this->transform_inverse_matrix));
 }
