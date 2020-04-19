@@ -8,6 +8,7 @@
 
 #include "PaneHost.h"
 #include "panes/Viewport.h"
+#include "panes/Lights.h"
 
 class PaneHost;
 

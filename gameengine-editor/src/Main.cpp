@@ -8,6 +8,10 @@ void Main::tlbr_btn_AddPane_clicked(wxCommandEvent& evt)
 	{
 		this->m_panehost->AddPane<Viewport>(wxAUI_DOCK_BOTTOM);
 	}
+	else if (button->GetLabelText() == "Lights")
+	{
+		this->m_panehost->AddPane<Lights>(wxAUI_DOCK_BOTTOM);
+	}
 
 	//evt.Skip(); //don't skip as it seems to call this function again (maybe it's the toolbar doing it?)
 }
@@ -22,7 +26,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	this->m_toolbar = this->CreateToolBar(wxTB_FLAT | wxTB_HORIZONTAL);
 	
 	std::vector<std::string> panes = {
-		"Viewport"
+		"Viewport",
+		"Lights"
 	};
 
 	wxButton* button;
@@ -32,6 +37,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 		button->Bind(wxEVT_BUTTON, &Main::tlbr_btn_AddPane_clicked, this);
 		this->m_toolbar->AddControl(button);
 	}
+
+	this->m_toolbar->Realize();
 	
 	//create pane host
 	this->m_panehost = new PaneHost(this);
