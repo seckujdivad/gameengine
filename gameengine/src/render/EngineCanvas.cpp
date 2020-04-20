@@ -113,6 +113,7 @@ void EngineCanvas::Render()
 void EngineCanvas::SetScene(Scene* scene)
 {
 	this->m_scene = scene;
+	this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture);
 }
 
 void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
@@ -318,6 +319,11 @@ void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	this->m_postprocessor->RegisterTexture("render_output", this->m_postprocessor_colour_texture, GL_TEXTURE_2D);
+
+	if (this->m_scene != nullptr)
+	{
+		this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture);
+	}
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

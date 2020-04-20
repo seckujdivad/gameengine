@@ -115,6 +115,9 @@ void Scene::AddModel(Model* model)
 
 	model->GenVertexBuffer(GL_TRIANGLES);
 	model->GetShaderProgram()->RegisterTexture("skyboxTexture", this->m_skybox_texture, GL_TEXTURE_CUBE_MAP);
+	model->GetShaderProgram()->RegisterTexture("render_output_colour", this->m_output_colour, GL_TEXTURE_2D);
+	model->GetShaderProgram()->RegisterTexture("render_output_depth", this->m_output_depth, GL_TEXTURE_2D);
+	model->GetShaderProgram()->RegisterUniform("render_output_valid");
 }
 
 void Scene::RemoveModel(Model* model)
@@ -335,6 +338,15 @@ void Scene::Render(GLuint framebuffer)
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
 			this->pointlights.at(j)->SetUniforms(model->GetShaderProgram());
+		}
+
+		if (this->m_output_colour == NULL)
+		{
+			glUniform1i(model->GetShaderProgram()->GetUniform("render_output_valid"), false);
+		}
+		else
+		{
+			glUniform1i(model->GetShaderProgram()->GetUniform("render_output_valid"), true);
 		}
 
 		model->DrawVBOs();
@@ -693,4 +705,16 @@ std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
 	}
 
 	return visible_models;
+}
+
+void Scene::SetReceivedOutputTextures(GLuint colour, GLuint depth)
+{
+	this->m_output_colour = colour;
+	this->m_output_depth = depth;
+
+	for (int i = 0; i < (int)this->models.size(); i++)
+	{
+		this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_colour", this->m_output_colour);
+		this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_depth", this->m_output_depth);
+	}
 }

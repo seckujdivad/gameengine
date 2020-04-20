@@ -30,6 +30,10 @@ private:
 	unsigned int m_skybox_texture_dimensions[2] = { 1, 1 };
 	GLuint m_skybox_fbo = NULL;
 
+	//received render outputs
+	GLuint m_output_colour = NULL;
+	GLuint m_output_depth = NULL;
+
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
 	int GetPointLightIndex(PointLight* pointlight);
@@ -90,4 +94,6 @@ public:
 	glm::vec4 GetClearColour();
 
 	std::unordered_set<Model*> GetVisibleModels(glm::vec3 position);
+
+	void SetReceivedOutputTextures(GLuint colour, GLuint depth);
 };
