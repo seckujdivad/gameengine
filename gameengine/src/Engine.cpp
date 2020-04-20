@@ -104,7 +104,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	//load default screen space reflection values
 	MaterialSSRConfig default_ssr;
 	default_ssr.samples = config["screen space reflection defaults"]["samples"].get<int>();
-	default_ssr.distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
+	default_ssr.cast_distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
 	default_ssr.depth_acceptance = config["screen space reflection defaults"]["acceptable depth distance"].get<float>();
 	default_ssr.max_cam_distance = config["screen space reflection defaults"]["max camera distance"].get<float>();
 
@@ -248,7 +248,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		{
 			MaterialSSRConfig ssr_config;
 			ssr_config.samples = it.value()["shader"]["reflections"]["screen space"]["samples"].get<int>();
-			ssr_config.distance_limit = it.value()["shader"]["reflections"]["screen space"]["distance limit"].get<float>();
+			ssr_config.cast_distance_limit = it.value()["shader"]["reflections"]["screen space"]["distance limit"].get<float>();
 			ssr_config.depth_acceptance = it.value()["shader"]["reflections"]["screen space"]["acceptable depth distance"].get<float>();
 			ssr_config.max_cam_distance = it.value()["shader"]["reflections"]["screen space"]["max camera distance"].get<float>();
 			mat.SetSSRConfig(ssr_config);

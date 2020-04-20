@@ -59,6 +59,12 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("mat_specular_highlight");
 	shader_program->RegisterUniform("mat_reflection_mode");
 
+	shader_program->RegisterUniform("mat_ssr_enabled");
+	shader_program->RegisterUniform("mat_ssr_samples");
+	shader_program->RegisterUniform("mat_ssr_max_distance");
+	shader_program->RegisterUniform("mat_ssr_max_cast_distance");
+	shader_program->RegisterUniform("mat_ssr_depth_acceptance");
+
 	this->m_reflection->RegisterUniforms(shader_program);
 }
 
@@ -68,6 +74,12 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 	glUniform3fv(shader_program->GetUniform("mat_specular"), 1, glm::value_ptr(this->m_specular));
 	glUniform1f(shader_program->GetUniform("mat_specular_highlight"), this->m_specular_highlight);
 	glUniform1i(shader_program->GetUniform("mat_reflection_mode"), this->m_reflection_mode);
+
+	glUniform1i(shader_program->GetUniform("mat_ssr_enabled"), this->m_ssr_enabled);
+	glUniform1i(shader_program->GetUniform("mat_ssr_samples"), this->m_ssr_config.samples);
+	glUniform1f(shader_program->GetUniform("mat_ssr_max_distance"), this->m_ssr_config.max_cam_distance);
+	glUniform1f(shader_program->GetUniform("mat_ssr_max_cast_distance"), this->m_ssr_config.cast_distance_limit);
+	glUniform1f(shader_program->GetUniform("mat_ssr_depth_acceptance"), this->m_ssr_config.depth_acceptance);
 
 	this->m_reflection->SetUniforms(shader_program);
 }
