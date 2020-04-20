@@ -87,13 +87,14 @@ void EngineCanvas::Render()
 		}
 		else
 		{
-			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
-			this->m_scene->Render(this->m_postprocessor_fbo);
-
+			glBindFramebuffer(GL_FRAMEBUFFER, this->m_postprocessor_fbo);
 			glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_colour_texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->GetSize().x, this->GetSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_depth_texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->GetSize().x, this->GetSize().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
+
+			this->m_scene->Render(this->m_postprocessor_fbo);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
