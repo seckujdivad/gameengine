@@ -38,10 +38,12 @@ void main()
 	globalSceneSpacePos = mdl_scale * globalMdlSpacePos;
 	globalSceneSpacePos = mdl_rotate * globalSceneSpacePos;
 	globalSceneSpacePos = globalSceneSpacePos + mdl_translate;
+	globalSceneSpacePos = globalSceneSpacePos / globalSceneSpacePos.w;
 
 	// camera
 	globalCamSpacePos = globalSceneSpacePos + cam_translate;
 	globalCamSpacePos = cam_rotate * globalCamSpacePos;
+	globalCamSpacePos = globalCamSpacePos / globalCamSpacePos.w;
 
 	// perspective
 	gl_Position = cam_persp * globalCamSpacePos;
