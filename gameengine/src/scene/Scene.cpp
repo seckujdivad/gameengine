@@ -51,7 +51,7 @@ Scene::~Scene()
 
 int Scene::GetModelIndex(Model* model)
 {
-	for (size_t i = 0; i < this->models.size(); i++)
+	for (int i = 0; i < (int)this->models.size(); i++)
 	{
 		if (model == this->models.at(i))
 		{
@@ -63,7 +63,7 @@ int Scene::GetModelIndex(Model* model)
 
 int Scene::GetCameraIndex(Camera* camera)
 {
-	for (size_t i = 0; i < this->cameras.size(); i++)
+	for (int i = 0; i < (int)this->cameras.size(); i++)
 	{
 		if (camera == this->cameras.at(i))
 		{
@@ -75,7 +75,7 @@ int Scene::GetCameraIndex(Camera* camera)
 
 int Scene::GetPointLightIndex(PointLight* pointlight)
 {
-	for (size_t i = 0; i < this->pointlights.size(); i++)
+	for (int i = 0; i < (int)this->pointlights.size(); i++)
 	{
 		if (pointlight == this->pointlights.at(i))
 		{
@@ -87,7 +87,7 @@ int Scene::GetPointLightIndex(PointLight* pointlight)
 
 int Scene::GetReflectionIndex(Reflection* reflection)
 {
-	for (size_t i = 0; i < this->reflections.size(); i++)
+	for (int i = 0; i < (int)this->reflections.size(); i++)
 	{
 		if (reflection == this->reflections.at(i))
 		{
@@ -99,7 +99,7 @@ int Scene::GetReflectionIndex(Reflection* reflection)
 
 int Scene::GetVisBoxIndex(VisBox* visbox)
 {
-	for (size_t i = 0; i < this->visboxes.size(); i++)
+	for (int i = 0; i < (int)this->visboxes.size(); i++)
 	{
 		if (visbox == this->visboxes.at(i))
 		{
@@ -118,6 +118,16 @@ void Scene::AddModel(Model* model)
 	model->GetShaderProgram()->RegisterTexture("render_output_colour", this->m_output_colour, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterTexture("render_output_depth", this->m_output_depth, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterUniform("render_output_valid");
+
+	for (int i = 0; i < (int)this->m_output_data.size(); i++)
+	{
+		model->GetShaderProgram()->RegisterTexture("render_output_data[" + std::to_string(i) + "]", this->m_output_data.at(i), GL_TEXTURE_2D);
+	}
+
+	for (int i = (int)this->m_output_data.size(); i < ENGINECANVAS_NUM_DATA_TEX; i++)
+	{
+		model->GetShaderProgram()->RegisterTexture("render_output_data[" + std::to_string(i) + "]", NULL, GL_TEXTURE_2D);
+	}
 }
 
 void Scene::RemoveModel(Model* model)
@@ -707,14 +717,20 @@ std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
 	return visible_models;
 }
 
-void Scene::SetReceivedOutputTextures(GLuint colour, GLuint depth)
+void Scene::SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data)
 {
 	this->m_output_colour = colour;
 	this->m_output_depth = depth;
+	this->m_output_data = data;
 
 	for (int i = 0; i < (int)this->models.size(); i++)
 	{
 		this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_colour", this->m_output_colour);
 		this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_depth", this->m_output_depth);
+
+		for (int j = 0; j < (int)this->m_output_data.size(); j++)
+		{
+			this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_data[" + std::to_string(j) + "]", this->m_output_data.at(j));
+		}
 	}
 }

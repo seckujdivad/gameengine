@@ -5,8 +5,13 @@
 #define POINT_LIGHT_NUM 1
 #endif
 
+#if !defined(DATA_TEX_NUM)
+#define DATA_TEX_NUM 1
+#endif
+
 //shader input-output
 layout(location = 0) out vec4 frag_out;
+layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
 
 in vec4 globalMdlSpacePos;
 in vec4 globalSceneSpacePos;
@@ -88,6 +93,7 @@ uniform samplerCube skyboxTexture;
 uniform bool render_output_valid;
 uniform sampler2D render_output_colour;
 uniform sampler2D render_output_depth;
+uniform sampler2D render_output_data[DATA_TEX_NUM];
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {

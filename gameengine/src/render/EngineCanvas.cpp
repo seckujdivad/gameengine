@@ -63,6 +63,11 @@ EngineCanvas::~EngineCanvas()
 
 	if (this->m_postprocessor != nullptr)
 	{
+		for (int i = 0; i < (int)this->m_postprocessor_data_textures.size(); i++)
+		{
+			glDeleteTextures(1, &this->m_postprocessor_data_textures.at(i));
+		}
+
 		delete this->m_postprocessor;
 		glDeleteTextures(1, &this->m_postprocessor_colour_texture);
 		glDeleteTextures(1, &this->m_postprocessor_depth_texture);
@@ -94,6 +99,12 @@ void EngineCanvas::Render()
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->GetSize().x, this->GetSize().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
 
+			for (int i = 0; i < (int)this->m_postprocessor_data_textures.size(); i++)
+			{
+				glBindTexture(GL_TEXTURE_2D, this->m_postprocessor_data_textures.at(i));
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->GetSize().x, this->GetSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			}
+
 			this->m_scene->Render(this->m_postprocessor_fbo);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -113,7 +124,7 @@ void EngineCanvas::Render()
 void EngineCanvas::SetScene(Scene* scene)
 {
 	this->m_scene = scene;
-	this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture);
+	this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture, this->m_postprocessor_data_textures);
 }
 
 void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
@@ -311,10 +322,30 @@ void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	for (int i = 0; i < ENGINECANVAS_NUM_DATA_TEX; i++)
+	{
+		GLuint texture_id;
+		glGenTextures(1, &texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->GetSize().x, this->GetSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		this->m_postprocessor_data_textures.push_back(texture_id);
+	}
+
 	glGenFramebuffers(1, &this->m_postprocessor_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_postprocessor_fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_postprocessor_colour_texture, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_postprocessor_depth_texture, 0);
+
+	for (int i = 0; i < (int)this->m_postprocessor_data_textures.size(); i++)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_postprocessor_data_textures.at(i), 0);
+	}
 
 	GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE)
@@ -328,7 +359,7 @@ void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
 
 	if (this->m_scene != nullptr)
 	{
-		this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture);
+		this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture, this->m_postprocessor_depth_texture, this->m_postprocessor_data_textures);
 	}
 }
 

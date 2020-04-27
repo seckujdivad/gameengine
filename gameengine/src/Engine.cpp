@@ -227,7 +227,8 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		//load shader
 		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["render"]),
 			{
-				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)}
+				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
+				{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)}
 			});
 		
 		Material mat;
@@ -338,7 +339,7 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 	std::vector<std::tuple<std::string, GLenum>> output = {};
 
 	int shader_type;
-	int j = shader_config.size();
+	int j = (int)shader_config.size();
 	for (auto it = shader_config.begin(); it != shader_config.end(); it++)
 	{
 		if (it.key() == "vertex")

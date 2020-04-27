@@ -33,6 +33,7 @@ private:
 	//received render outputs
 	GLuint m_output_colour = NULL;
 	GLuint m_output_depth = NULL;
+	std::vector<GLuint> m_output_data;
 
 	int GetModelIndex(Model* model);
 	int GetCameraIndex(Camera* camera);
@@ -95,5 +96,5 @@ public:
 
 	std::unordered_set<Model*> GetVisibleModels(glm::vec3 position);
 
-	void SetReceivedOutputTextures(GLuint colour, GLuint depth);
+	void SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data);
 };

@@ -11,12 +11,10 @@
 #include "../scene/Scene.h"
 #include "ShaderProgram.h"
 
-#ifndef ENGINECANVAS_LOG_PATH
-#define ENGINECANVAS_LOG_PATH "gameengine_GL.log"
-#endif
+const char ENGINECANVAS_LOG_PATH[] = "gameengine_GL.log";
+const int ENGINECANVAS_NUM_DATA_TEX = 1;
 
 class Scene;
-
 class Camera;
 
 class EngineCanvas : public wxGLCanvas
@@ -60,6 +58,7 @@ private:
 	GLuint m_postprocessor_fbo = NULL;
 	GLuint m_postprocessor_depth_texture = NULL;
 	GLuint m_postprocessor_colour_texture = NULL;
+	std::vector<GLuint> m_postprocessor_data_textures;
 	GLuint m_postprocessor_vao = NULL;
 	GLuint m_postprocessor_vbo = NULL;
 

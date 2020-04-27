@@ -87,7 +87,7 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	}
 
 	//add preprocessor defines
-	for (size_t i = 0; i < preprocessor_defines.size(); i++)
+	for (int i = 0; i < (int)preprocessor_defines.size(); i++)
 	{
 		shader_file_contents = "#define " + std::get<0>(preprocessor_defines.at(i)) + " " + std::get<1>(preprocessor_defines.at(i)) + "\n" + shader_file_contents;
 	}

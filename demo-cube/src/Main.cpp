@@ -36,7 +36,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	wxSlider* current_slider;
 	wxStaticText* current_text;
 	int min, max;
-	for (size_t i = 0; i < attr_names.size(); i++)
+	for (int i = 0; i < (int)attr_names.size(); i++)
 	{
 		if (attr_names.at(i).substr(0, 7) == "Rotate ")
 		{
@@ -69,12 +69,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	//make render button
 	this->m_btn_render = new wxButton(this, wxID_ANY, wxString("Render"));
 	this->m_btn_render->Bind(wxEVT_BUTTON, &Main::btn_render_OnClick, this);
-	this->m_sizer->Add(this->m_btn_render, wxGBPosition(attr_names.size(), 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
+	this->m_sizer->Add(this->m_btn_render, wxGBPosition((int)attr_names.size(), 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
 	//make list to hold all models
 	this->m_lb_models = new wxListBox(this, wxID_ANY);
 	this->m_lb_models->Bind(wxEVT_LISTBOX, &Main::lb_models_OnSelection, this);
-	this->m_sizer->Add(this->m_lb_models, wxGBPosition(1, 0), wxGBSpan(attr_names.size() - 1, 1), wxEXPAND | wxALL);
+	this->m_sizer->Add(this->m_lb_models, wxGBPosition(1, 0), wxGBSpan((int)attr_names.size() - 1, 1), wxEXPAND | wxALL);
 
 	this->m_model_selection_index = -1;
 
