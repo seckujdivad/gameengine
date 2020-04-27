@@ -138,29 +138,35 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	//poll keyboard movement keys
 	if (this->m_keyboard_move_active)
 	{
+		float move_increment = this->m_keyboard_move_increment;
+		if (wxGetKeyState(WXK_SPACE))
+		{
+			move_increment = move_increment * 5;
+		}
+
 		if (wxGetKeyState(wxKeyCode('W')))
 		{
-			this->m_move_camera->MoveLocally(0.0f, 0.0f, this->m_keyboard_move_increment);
+			this->m_move_camera->MoveLocally(0.0f, 0.0f, move_increment);
 		}
 		if (wxGetKeyState(wxKeyCode('S')))
 		{
-			this->m_move_camera->MoveLocally(0.0f, 0.0f, 0.0f - this->m_keyboard_move_increment);
+			this->m_move_camera->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
 		}
 		if (wxGetKeyState(wxKeyCode('D')))
 		{
-			this->m_move_camera->MoveLocally(0.0f - this->m_keyboard_move_increment, 0.0f, 0.0f);
+			this->m_move_camera->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
 		}
 		if (wxGetKeyState(wxKeyCode('A')))
 		{
-			this->m_move_camera->MoveLocally(this->m_keyboard_move_increment, 0.0f, 0.0f);
+			this->m_move_camera->MoveLocally(move_increment, 0.0f, 0.0f);
 		}
 		if (wxGetKeyState(WXK_CONTROL))
 		{
-			this->m_move_camera->MoveLocally(0.0f, this->m_keyboard_move_increment, 0.0f);
+			this->m_move_camera->MoveLocally(0.0f, move_increment, 0.0f);
 		}
 		if (wxGetKeyState(WXK_SHIFT))
 		{
-			this->m_move_camera->MoveLocally(0.0f, 0.0f - this->m_keyboard_move_increment, 0.0f);
+			this->m_move_camera->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
 		}
 	}
 
