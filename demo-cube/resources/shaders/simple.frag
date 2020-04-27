@@ -40,6 +40,13 @@ uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
 uniform int mat_reflection_mode; //0: iterative, 1: obb
 
+// screen space reflections
+uniform bool mat_ssr_enabled;
+uniform int mat_ssr_samples;
+uniform float mat_ssr_max_distance;
+uniform float mat_ssr_max_cast_distance;
+uniform float mat_ssr_depth_acceptance;
+
 //textures
 uniform sampler2D colourTexture;
 uniform sampler2D normalTexture;
@@ -77,6 +84,11 @@ uniform mat3 reflection_parallax_obb_rotation_inverse;
 uniform sampler2D skyboxMaskTexture;
 uniform samplerCube skyboxTexture;
 
+//previous render result
+uniform bool render_output_valid;
+uniform sampler2D render_output_colour;
+uniform sampler2D render_output_depth;
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (!light_points[lightindex].shadows_enabled)
@@ -108,6 +120,18 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 	{
 		return 1.0f;
 	}
+}
+
+float NDCZToCamZ(float ndc_z)
+{
+	return (ndc_z * (cam_clip_far - cam_clip_near)) + cam_clip_near;
+	//return (2.0f * cam_clip_far * cam_clip_near) / ((ndc_z / (cam_clip_far - cam_clip_near)) - cam_clip_far - cam_clip_near);
+}
+
+float CamZToNDCZ(float cam_z)
+{
+	return (cam_z - cam_clip_near) / (cam_clip_far - cam_clip_near);
+	//return cam_z * ((cam_clip_near + cam_clip_far) / (2.0f * cam_clip_near * cam_clip_far));
 }
 
 void main()
@@ -184,94 +208,160 @@ void main()
 	{
 		//do nothing - reflections have no effect on this fragment
 	}
-	else if (mat_reflection_mode == 0) //iteratively apply perspective correction
+	else
 	{
-		vec3 sample_vector = reflect(-fragtocam, normal);
-		float depth_sample;
-		float sample_space_length = reflection_clip_far - reflection_clip_near;
-		vec3 offset = globalSceneSpacePos.xyz - reflection_position;
-
-		for (int i = 0; i < reflection_parallax_it_iterations; i++)
+		bool ssr_reflection_applied = false;
+		if (render_output_valid)
 		{
-			depth_sample = texture(reflection_cubemap, sample_vector).a;
-			if (depth_sample == 1.0f)
+			if ((length(globalCamSpacePos.xyz) < mat_ssr_max_distance))
 			{
-				i = reflection_parallax_it_iterations; //exit loop
-			}
-			else
-			{
-				depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
-				sample_vector = (normalize(sample_vector) * depth_sample) + offset;
-			}
-		}
+				//vec3 direction = normalize(-fragtocam);
+				vec3 direction = normalize(reflect(-fragtocam, normal));
+				vec3 start_pos = globalSceneSpacePos.xyz;
 
-		if (texture(reflection_cubemap, sample_vector).a == 1.0f)
-		{
-			reflection_colour = texture(skyboxTexture, sample_vector).rgb;
-		}
-		else
-		{
-			reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
-		}
-	}
-	else if (mat_reflection_mode == 1) //oriented bounding box
-	{
-		
-		mat3 oob_rotation = reflection_parallax_obb_rotation;
-		mat3 oob_rotation_inverse = reflection_parallax_obb_rotation_inverse;
-		vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
-
-		vec3 oob_translation = reflection_parallax_obb_position - (oob_rotation * 0.5f * reflection_parallax_obb_dimensions);
-		vec3 reflection = normalize(reflect(-fragtocam, normal));
-		vec3 fragpos_oob = oob_rotation_inverse * (globalSceneSpacePos.xyz - oob_translation);
-		vec3 reflection_oob = oob_rotation_inverse * reflection;
-		
-		vec3 intersection;
-		float lambda;
-		float pinned_value;
-		float second_axis_value;
-		float third_axis_value;
-		for (int i = 0; i < 3; i++)
-		{
-			for (int j = 0; j < 2; j++)
-			{
-				if (j == 0) //at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
-				{
-					pinned_value = 0.0f;
-				}
-				else
-				{
-					pinned_value = aabb[i];
-				}
+				float lambda = ((mat_ssr_depth_acceptance * 2.0f) + 1.0f) / dot(direction, normal);
+				float lambda_increment = (mat_ssr_max_cast_distance - lambda) / mat_ssr_samples;
 				
-				lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
-				if (lambda > 0.1) //direction vector is normalised, so length is equal to lambda
+				if (lambda_increment > 0.001f)
 				{
-					second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
-					third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
-					if ((0.0f <= second_axis_value) && (second_axis_value <= aabb[(i + 1) % 3]) &&
-						(0.0f <= third_axis_value) && (third_axis_value <= aabb[(i + 2) % 3]))
+					vec3 marched_pos;
+					vec3 marched_screen_pos = vec3(0.0f);
+					vec4 marched_pos_prediv;
+					vec3 marched_pos_texspace;
+					float sample_depth;
+					
+					bool continue_check = (lambda < mat_ssr_max_cast_distance) && all(greaterThan(marched_screen_pos, vec3(-1.0f))) && all(lessThan(marched_screen_pos, vec3(1.0f)));
+					while ((!ssr_reflection_applied) && continue_check)
 					{
-						intersection[i] = pinned_value;
-						intersection[(i + 1) % 3] = second_axis_value;
-						intersection[(i + 2) % 3] = third_axis_value;
+						lambda += lambda_increment;
+						marched_pos = start_pos + (lambda * direction);
+
+						marched_pos_prediv = cam_transform * vec4(marched_pos, 1.0f);
+						marched_screen_pos = marched_pos_prediv.xyz / marched_pos_prediv.w;
+						marched_pos_texspace = (marched_screen_pos + 1.0f) * 0.5f;
+
+						sample_depth = (texture(render_output_depth, marched_pos_texspace.xy).r * 2.0f) - 1.0f;
+
+						continue_check = (lambda < mat_ssr_max_cast_distance) && all(greaterThan(marched_screen_pos, vec3(-1.0f))) && all(lessThan(marched_screen_pos, vec3(1.0f)));
+						if (continue_check && (sample_depth < 0.99f) && (abs(NDCZToCamZ(sample_depth) - NDCZToCamZ(marched_screen_pos.z)) < mat_ssr_depth_acceptance))
+						{
+							//reflection_colour = vec3(0.0f, 0.0f, 1.0f);
+							reflection_colour = texture(render_output_colour, marched_pos_texspace.xy).rgb;
+							ssr_reflection_applied = true;
+						}
+
+						if (lambda >= mat_ssr_max_cast_distance)
+						{
+							//reflection_colour = vec3(1.0f, 0.0f, 0.0f);
+							//ssr_reflection_applied = true;
+						}
+						else if (!continue_check)
+						{
+							//reflection_colour = vec3(0.0f, 1.0f, 0.0f);
+							//ssr_reflection_applied = true;
+						}
 					}
 				}
 			}
 		}
 
-		intersection = (oob_rotation * intersection) + oob_translation;
-		
-		//sample using the final values
-		vec3 sample_vector = intersection - reflection_position;
-		vec4 reflection_sample = texture(reflection_cubemap, sample_vector).rgba;
-		if (reflection_sample.a == 1.0f)
+		if (!ssr_reflection_applied)
 		{
-			reflection_colour = texture(skyboxTexture, reflection).rgb;
+			
 		}
-		else
+
+		if (!ssr_reflection_applied)
 		{
-			reflection_colour = reflection_sample.rgb;
+			if (mat_reflection_mode == 0) //iteratively apply perspective correction
+			{
+				vec3 sample_vector = reflect(-fragtocam, normal);
+				float depth_sample;
+				float sample_space_length = reflection_clip_far - reflection_clip_near;
+				vec3 offset = globalSceneSpacePos.xyz - reflection_position;
+
+				for (int i = 0; i < reflection_parallax_it_iterations; i++)
+				{
+					depth_sample = texture(reflection_cubemap, sample_vector).a;
+					if (depth_sample == 1.0f)
+					{
+						i = reflection_parallax_it_iterations; //exit loop
+					}
+					else
+					{
+						depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
+						sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+					}
+				}
+
+				if (texture(reflection_cubemap, sample_vector).a == 1.0f)
+				{
+					reflection_colour = texture(skyboxTexture, sample_vector).rgb;
+				}
+				else
+				{
+					reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
+				}
+			}
+			else if (mat_reflection_mode == 1) //oriented bounding box
+			{
+		
+				mat3 oob_rotation = reflection_parallax_obb_rotation;
+				mat3 oob_rotation_inverse = reflection_parallax_obb_rotation_inverse;
+				vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
+
+				vec3 oob_translation = reflection_parallax_obb_position - (oob_rotation * 0.5f * reflection_parallax_obb_dimensions);
+				vec3 reflection = normalize(reflect(-fragtocam, normal));
+				vec3 fragpos_oob = oob_rotation_inverse * (globalSceneSpacePos.xyz - oob_translation);
+				vec3 reflection_oob = oob_rotation_inverse * reflection;
+		
+				vec3 intersection;
+				float lambda;
+				float pinned_value;
+				float second_axis_value;
+				float third_axis_value;
+				for (int i = 0; i < 3; i++)
+				{
+					for (int j = 0; j < 2; j++)
+					{
+						if (j == 0) //at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
+						{
+							pinned_value = 0.0f;
+						}
+						else
+						{
+							pinned_value = aabb[i];
+						}
+				
+						lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
+						if (lambda > 0.1) //direction vector is normalised, so length is equal to lambda
+						{
+							second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
+							third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
+							if ((0.0f <= second_axis_value) && (second_axis_value <= aabb[(i + 1) % 3]) &&
+								(0.0f <= third_axis_value) && (third_axis_value <= aabb[(i + 2) % 3]))
+							{
+								intersection[i] = pinned_value;
+								intersection[(i + 1) % 3] = second_axis_value;
+								intersection[(i + 2) % 3] = third_axis_value;
+							}
+						}
+					}
+				}
+
+				intersection = (oob_rotation * intersection) + oob_translation;
+		
+				//sample using the final values
+				vec3 sample_vector = intersection - reflection_position;
+				vec4 reflection_sample = texture(reflection_cubemap, sample_vector).rgba;
+				if (reflection_sample.a == 1.0f)
+				{
+					reflection_colour = texture(skyboxTexture, reflection).rgb;
+				}
+				else
+				{
+					reflection_colour = reflection_sample.rgb;
+				}
+			}
 		}
 	}
 

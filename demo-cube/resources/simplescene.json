@@ -36,7 +36,7 @@
   "layout": {
     "simple cube": {
       "model": "cube",
-      "position": [ 8, -20, -2 ],
+      "position": [ 8, -20, -3 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
       "vis box": "level section 3",
@@ -51,7 +51,7 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": [ 1, 1, 1 ],
+          "colour": [ 1, 0, 0 ],
           "specular": [ 1, 1, 1 ],
           "normal": "textures/cube_normals.png",
           "reflection intensity": [ 0.1, 0.1, 0.1 ]
@@ -78,7 +78,7 @@
     },
     "blender suzanne": {
       "model": "suzanne",
-      "position": [ 0, 2, 0 ],
+      "position": [ -2, 2, 0 ],
       "rotation": [ 0, 0, 0 ],
       "scale": [ 1, 1, 1 ],
       "vis box": "level section 2",
@@ -102,8 +102,8 @@
           "reflection intensity": [ 0.4, 0.4, 0.4 ]
         },
         "phong": {
-          "diffuse": [ 0.4, 0.4, 0.4 ],
-          "specular": [ 0.2, 0.2, 0.2 ],
+          "diffuse": [ 0.2, 0.2, 0.2 ],
+          "specular": [ 0.1, 0.1, 0.1 ],
           "specular highlight": 32
         },
         "reflections": {
@@ -228,7 +228,7 @@
     "main": {
       "position": [ 0, 0, 0 ],
       "rotation": [ 90, 0, -90 ],
-      "clips": [ 0.1, 100 ],
+      "clips": [ 0.1, 50 ],
       "fov": 60
     }
   },
@@ -273,7 +273,7 @@
   "reflections": {
     "level section 2 reflection": {
       "position": [ 0, -7.5, 0 ],
-      "dynamic draw": [ "blender suzanne", "simple cube" ],
+      "dynamic draw": [  ],
       "static draw": [ "level section 1", "level section 2", "level section 3" ],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
@@ -309,7 +309,7 @@
     },
     "level section 1 reflection": {
       "position": [ 5, 0, 0 ],
-      "dynamic draw": [ "blender suzanne", "level section 1", "level section 2", "level section 3" ],
+      "dynamic draw": [ "level section 1", "level section 2", "level section 3" ],
       "static draw": [],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
@@ -327,7 +327,7 @@
     },
     "level section 3 reflection": {
       "position": [ 5, -20, 0 ],
-      "dynamic draw": [ "blender suzanne", "level section 1", "level section 2", "level section 3" ],
+      "dynamic draw": [ "level section 1", "level section 2", "level section 3" ],
       "static draw": [],
       "dynamic refresh rate": 10,
       "clips": [ 0.1, 100 ],
@@ -345,9 +345,9 @@
     }
   },
   "screen space reflection defaults": {
-    "samples": 100,
-    "distance limit": 10,
-    "acceptable depth distance": 0.1,
+    "samples": 150,
+    "distance limit": 15,
+    "acceptable depth distance": 0.05,
     "max camera distance": 25
   },
   "vis boxes": {
