@@ -54,13 +54,20 @@ private:
 	void Clicked(wxMouseEvent& evt);
 
 	//post processing
+	int m_old_size[2] = { 1, 1 };
+
 	ShaderProgram* m_postprocessor = nullptr;
 	GLuint m_postprocessor_fbo = NULL;
-	GLuint m_postprocessor_depth_texture = NULL;
-	GLuint m_postprocessor_colour_texture = NULL;
-	std::vector<GLuint> m_postprocessor_data_textures;
 	GLuint m_postprocessor_vao = NULL;
 	GLuint m_postprocessor_vbo = NULL;
+
+	GLuint m_postprocessor_depth_texture_write = NULL;
+	GLuint m_postprocessor_colour_texture_write = NULL;
+	std::vector<GLuint> m_postprocessor_data_textures_write;
+
+	GLuint m_postprocessor_depth_texture_read = NULL;
+	GLuint m_postprocessor_colour_texture_read = NULL;
+	std::vector<GLuint> m_postprocessor_data_textures_read;
 
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
