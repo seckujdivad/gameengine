@@ -118,7 +118,7 @@ void Scene::AddModel(Model* model)
 	model->GetShaderProgram()->RegisterTexture("render_output_colour", this->m_output_colour, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterTexture("render_output_depth", this->m_output_depth, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterUniform("render_output_valid");
-
+	
 	for (int i = 0; i < (int)this->m_output_data.size(); i++)
 	{
 		model->GetShaderProgram()->RegisterTexture("render_output_data[" + std::to_string(i) + "]", this->m_output_data.at(i), GL_TEXTURE_2D);
@@ -322,6 +322,7 @@ void Scene::Render(GLuint framebuffer)
 
 	//prepare for camera draw
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
 	glCullFace(GL_BACK);
 	glViewport(viewport_dimensions[0], viewport_dimensions[1], viewport_dimensions[2], viewport_dimensions[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

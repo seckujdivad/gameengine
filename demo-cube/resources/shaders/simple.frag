@@ -51,6 +51,7 @@ uniform int mat_ssr_samples;
 uniform float mat_ssr_max_distance;
 uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
+uniform bool mat_ssr_show_this;
 
 //textures
 uniform sampler2D colourTexture;
@@ -142,6 +143,11 @@ float CamZToNDCZ(float cam_z)
 
 void main()
 {
+	for (int i = 0; i < DATA_TEX_NUM; i++)
+	{
+		data_out[0] = vec4(0.0f);
+	}
+
 	//get base colour
 	frag_out = texture(colourTexture, globalUV);
 
@@ -249,31 +255,14 @@ void main()
 						sample_depth = (texture(render_output_depth, marched_pos_texspace.xy).r * 2.0f) - 1.0f;
 
 						continue_check = (lambda < mat_ssr_max_cast_distance) && all(greaterThan(marched_screen_pos, vec3(-1.0f))) && all(lessThan(marched_screen_pos, vec3(1.0f)));
-						if (continue_check && (sample_depth < 0.99f) && (abs(NDCZToCamZ(sample_depth) - NDCZToCamZ(marched_screen_pos.z)) < mat_ssr_depth_acceptance))
+						if (continue_check && (sample_depth < 0.99f) && (texture(render_output_data[0], marched_pos_texspace.xy).r > 0.5f) && (abs(NDCZToCamZ(sample_depth) - NDCZToCamZ(marched_screen_pos.z)) < mat_ssr_depth_acceptance))
 						{
-							//reflection_colour = vec3(0.0f, 0.0f, 1.0f);
 							reflection_colour = texture(render_output_colour, marched_pos_texspace.xy).rgb;
 							ssr_reflection_applied = true;
-						}
-
-						if (lambda >= mat_ssr_max_cast_distance)
-						{
-							//reflection_colour = vec3(1.0f, 0.0f, 0.0f);
-							//ssr_reflection_applied = true;
-						}
-						else if (!continue_check)
-						{
-							//reflection_colour = vec3(0.0f, 1.0f, 0.0f);
-							//ssr_reflection_applied = true;
 						}
 					}
 				}
 			}
-		}
-
-		if (!ssr_reflection_applied)
-		{
-			
 		}
 
 		if (!ssr_reflection_applied)
@@ -392,5 +381,14 @@ void main()
 		{
 			frag_out.a = gl_FragDepth;
 		}
+	}
+	
+	if (mat_ssr_show_this) //output whether or not to draw reflections on certain fragments in the next frame
+	{
+		data_out[0].r = 1.0f;
+	}
+	else
+	{
+		data_out[0].r = 0.0f;
 	}
 }
