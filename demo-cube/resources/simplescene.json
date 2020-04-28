@@ -143,7 +143,7 @@
           "specular highlight": 32
         },
         "reflections": {
-          "screen space": false,
+          "screen space": true,
           "fallback": {
             "reflection": "level section 1 reflection",
             "mode": "oriented bounding box"
