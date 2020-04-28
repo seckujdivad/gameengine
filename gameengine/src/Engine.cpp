@@ -107,6 +107,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	default_ssr.cast_distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
 	default_ssr.depth_acceptance = config["screen space reflection defaults"]["acceptable depth distance"].get<float>();
 	default_ssr.max_cam_distance = config["screen space reflection defaults"]["max camera distance"].get<float>();
+	default_ssr.appear_in_ssr = config["screen space reflection defaults"]["appear in ssr"].get<bool>();
 
 	//load reflections
 	Reflection* reflection;
@@ -247,11 +248,34 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		}
 		else
 		{
-			MaterialSSRConfig ssr_config;
-			ssr_config.samples = it.value()["shader"]["reflections"]["screen space"]["samples"].get<int>();
-			ssr_config.cast_distance_limit = it.value()["shader"]["reflections"]["screen space"]["distance limit"].get<float>();
-			ssr_config.depth_acceptance = it.value()["shader"]["reflections"]["screen space"]["acceptable depth distance"].get<float>();
-			ssr_config.max_cam_distance = it.value()["shader"]["reflections"]["screen space"]["max camera distance"].get<float>();
+			MaterialSSRConfig ssr_config = default_ssr;
+			auto config = it.value()["shader"]["reflections"]["screen space"];
+
+			if (config["samples"].is_number_integer())
+			{
+				ssr_config.samples = config["samples"].get<int>();
+			}
+			
+			if (config["distance limit"].is_number_float())
+			{
+				ssr_config.cast_distance_limit = config["distance limit"].get<float>();
+			}
+			
+			if (config["acceptable depth distance"].is_number_float())
+			{
+				ssr_config.depth_acceptance = config["acceptable depth distance"].get<float>();
+			}
+			
+			if (config["max camera distance"].is_number_float())
+			{
+				ssr_config.max_cam_distance = config["max camera distance"].get<float>();
+			}
+
+			if (config["appear in ssr"].is_boolean())
+			{
+				ssr_config.appear_in_ssr = config["appear in ssr"].get<bool>();
+			}
+
 			mat.SetSSRConfig(ssr_config);
 
 			mat.EnableSSR(it.value()["shader"]["reflections"]["screen space"]["enabled"].get<bool>());

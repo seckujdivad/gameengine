@@ -64,10 +64,7 @@
         "reflections": {
           "screen space": {
             "enabled": true,
-            "samples": 100,
-            "distance limit": 10,
-            "acceptable depth distance": 0.1,
-            "max camera distance": 25
+            "appear in ssr": true
           },
           "fallback": {
             "reflection": "simple cube",
@@ -107,7 +104,10 @@
           "specular highlight": 32
         },
         "reflections": {
-          "screen space": true,
+          "screen space": {
+            "enabled": true,
+            "appear in ssr": true
+          },
           "fallback": {
             "reflection": "level section 2 reflection",
             "mode": "iterative sampling"
@@ -143,7 +143,7 @@
           "specular highlight": 32
         },
         "reflections": {
-          "screen space": true,
+          "screen space": false,
           "fallback": {
             "reflection": "level section 1 reflection",
             "mode": "oriented bounding box"
@@ -348,7 +348,8 @@
     "samples": 150,
     "distance limit": 15,
     "acceptable depth distance": 0.05,
-    "max camera distance": 25
+    "max camera distance": 25,
+    "appear in ssr": false
   },
   "vis boxes": {
     "level section 1": {
