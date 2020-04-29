@@ -14,6 +14,8 @@ Camera::~Camera()
 void Camera::SetFOV(GLfloat fov)
 {
 	this->m_fov = fov;
+
+	this->m_persp_transforms_need_update = true;
 }
 
 GLfloat Camera::GetFOV()
@@ -24,6 +26,8 @@ GLfloat Camera::GetFOV()
 void Camera::SetNearClip(GLfloat nearclip)
 {
 	this->m_clip_near = nearclip;
+
+	this->m_persp_transforms_need_update = true;
 }
 
 GLfloat Camera::GetNearClip()
@@ -34,6 +38,8 @@ GLfloat Camera::GetNearClip()
 void Camera::SetFarClip(GLfloat farclip)
 {
 	this->m_clip_far = farclip;
+
+	this->m_persp_transforms_need_update = true;
 }
 
 GLfloat Camera::GetFarClip()
@@ -41,28 +47,12 @@ GLfloat Camera::GetFarClip()
 	return this->m_clip_far;
 }
 
-void Camera::GenViewMat()
+void Camera::SetViewportDimensions(int width, int height)
 {
-	this->view_translate_vector = glm::vec4(0 - this->GetPosition(0), 0 - this->GetPosition(1), 0 - this->GetPosition(2), 0.0f);
+	this->m_window_dimensions[0] = width;
+	this->m_window_dimensions[1] = height;
 
-	this->view_rotate_matrix = glm::mat4(1.0f);
-	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-	this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
-}
-
-void Camera::GenPerspMat(float window_width, float window_height)
-{
-	this->perspective_matrix = glm::perspective(glm::radians(this->m_fov), window_width / window_height, this->m_clip_near, this->m_clip_far);
-}
-
-void Camera::GenCombinedTransformMat()
-{
-	this->transform_matrix = glm::mat4(1.0f);
-	this->transform_matrix = glm::translate(this->transform_matrix, glm::vec3(this->view_translate_vector));
-	this->transform_matrix = this->perspective_matrix * this->view_rotate_matrix * this->transform_matrix;
-
-	this->transform_inverse_matrix = glm::inverse(this->transform_matrix);
+	this->m_persp_transforms_need_update = true;
 }
 
 void Camera::RegisterUniforms(ShaderProgram* shader_program)
@@ -78,6 +68,45 @@ void Camera::RegisterUniforms(ShaderProgram* shader_program)
 
 void Camera::SetUniforms(ShaderProgram* shader_program)
 {
+	//generate matrices and vectors if required
+	bool remake_combined = false;
+	
+	if (this->CheckIfRepositioned(true))
+	{
+		this->view_translate_vector = glm::vec4(0 - this->GetPosition(0), 0 - this->GetPosition(1), 0 - this->GetPosition(2), 0.0f);
+
+		remake_combined = true;
+	}
+
+	if (this->CheckIfRotated(true))
+	{
+		this->view_rotate_matrix = glm::mat4(1.0f);
+		this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+		this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+		this->view_rotate_matrix = glm::rotate(this->view_rotate_matrix, glm::radians(0 - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		remake_combined = true;
+	}
+
+	if (this->m_persp_transforms_need_update)
+	{
+		this->perspective_matrix = glm::perspective(glm::radians(this->m_fov), (float)this->m_window_dimensions[0] / (float)this->m_window_dimensions[1], this->m_clip_near, this->m_clip_far);
+
+		remake_combined = true;
+	}
+
+	if (remake_combined)
+	{
+		this->transform_matrix = glm::mat4(1.0f);
+		this->transform_matrix = glm::translate(this->transform_matrix, glm::vec3(this->view_translate_vector));
+		this->transform_matrix = this->perspective_matrix * this->view_rotate_matrix * this->transform_matrix;
+
+		this->transform_inverse_matrix = glm::inverse(this->transform_matrix);
+	}
+
+	this->m_persp_transforms_need_update = false;
+
+	//send matrices and vectors to gpu
 	glUniform4fv(shader_program->GetUniform("cam_translate"), 1, glm::value_ptr(this->view_translate_vector));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->view_rotate_matrix));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->perspective_matrix));

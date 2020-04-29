@@ -327,9 +327,7 @@ void Scene::Render(GLuint framebuffer)
 	glViewport(viewport_dimensions[0], viewport_dimensions[1], viewport_dimensions[2], viewport_dimensions[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	this->m_active_camera->GenPerspMat((float)(viewport_dimensions[2] - viewport_dimensions[0]), (float)(viewport_dimensions[3] - viewport_dimensions[1]));
-	this->m_active_camera->GenViewMat();
-	this->m_active_camera->GenCombinedTransformMat();
+	this->m_active_camera->SetViewportDimensions(viewport_dimensions[2] - viewport_dimensions[0], viewport_dimensions[3] - viewport_dimensions[1]);
 
 	//draw scene
 	std::unordered_set<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->m_active_camera->GetPosition(0),

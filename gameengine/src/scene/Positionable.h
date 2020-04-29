@@ -10,6 +10,8 @@ class Positionable
 private:
 	std::array<GLfloat, 3> m_position = { 0.0f, 0.0f, 0.0f };
 
+	bool m_repositioned = true;
+
 public:
 	Positionable();
 	Positionable(Positionable& copyfrom);
@@ -21,4 +23,6 @@ public:
 	void SetPosition(int index, GLfloat value);
 	std::array<GLfloat, 3> GetPosition();
 	GLfloat GetPosition(int index);
+
+	bool CheckIfRepositioned(bool reset = true);
 };
