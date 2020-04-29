@@ -52,6 +52,13 @@ void Positionable::SetPosition(int index, GLfloat value)
 	this->m_repositioned = true;
 }
 
+void Positionable::SetPosition(glm::vec3 position)
+{
+	this->m_position.at(0) = position.x;
+	this->m_position.at(1) = position.y;
+	this->m_position.at(2) = position.z;
+}
+
 std::array<GLfloat, 3> Positionable::GetPosition()
 {
 	return this->m_position;
@@ -60,4 +67,9 @@ std::array<GLfloat, 3> Positionable::GetPosition()
 GLfloat Positionable::GetPosition(int index)
 {
 	return this->m_position.at(index);
+}
+
+glm::vec3 Positionable::GetPositionVec()
+{
+	return glm::vec3(this->m_position.at(0), this->m_position.at(1), this->m_position.at(2));
 }

@@ -5,6 +5,9 @@
 
 #include <array>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 class Positionable
 {
 private:
@@ -21,8 +24,10 @@ public:
 	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
 	void SetPosition(std::array<GLfloat, 3> point);
 	void SetPosition(int index, GLfloat value);
+	void SetPosition(glm::vec3 position);
 	std::array<GLfloat, 3> GetPosition();
 	GLfloat GetPosition(int index);
+	glm::vec3 GetPositionVec();
 
 	bool CheckIfRepositioned(bool reset = true);
 };

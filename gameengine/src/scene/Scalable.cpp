@@ -53,9 +53,21 @@ void Scalable::SetScale(int index, GLfloat value)
 	this->m_rescaled = true;
 }
 
+void Scalable::SetScale(glm::vec3 scale)
+{
+	this->m_scale.at(0) = scale.x;
+	this->m_scale.at(1) = scale.y;
+	this->m_scale.at(2) = scale.z;
+}
+
 std::array<GLfloat, 3> Scalable::GetScale()
 {
 	return this->m_scale;
+}
+
+glm::vec3 Scalable::GetScaleVec()
+{
+	return glm::vec3(this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2));
 }
 
 GLfloat Scalable::GetScale(int index)

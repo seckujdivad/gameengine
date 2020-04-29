@@ -5,6 +5,9 @@
 
 #include <array>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 class Scalable
 {
 private:
@@ -21,8 +24,10 @@ public:
 	void SetScale(GLfloat x, GLfloat y, GLfloat z);
 	void SetScale(std::array<GLfloat, 3> scale);
 	void SetScale(int index, GLfloat value);
+	void SetScale(glm::vec3 scale);
 	std::array<GLfloat, 3> GetScale();
 	GLfloat GetScale(int index);
+	glm::vec3 GetScaleVec();
 
 	bool CheckIfRescaled(bool reset = true);
 };

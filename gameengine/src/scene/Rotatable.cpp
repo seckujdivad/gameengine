@@ -52,6 +52,13 @@ void Rotatable::SetRotation(int index, GLfloat value)
 	this->m_rotated = true;
 }
 
+void Rotatable::SetRotation(glm::vec3 rotation)
+{
+	this->m_rotation.at(0) = rotation.x;
+	this->m_rotation.at(1) = rotation.y;
+	this->m_rotation.at(2) = rotation.z;
+}
+
 std::array<GLfloat, 3> Rotatable::GetRotation()
 {
 	return this->m_rotation;
@@ -60,4 +67,9 @@ std::array<GLfloat, 3> Rotatable::GetRotation()
 GLfloat Rotatable::GetRotation(int index)
 {
 	return this->m_rotation.at(index);
+}
+
+glm::vec3 Rotatable::GetRotationVec()
+{
+	return glm::vec3(this->m_rotation.at(0), this->m_rotation.at(1), this->m_rotation.at(2));
 }

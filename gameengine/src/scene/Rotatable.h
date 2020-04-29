@@ -5,6 +5,9 @@
 
 #include <array>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 class Rotatable
 {
 private:
@@ -21,8 +24,10 @@ public:
 	void SetRotation(GLfloat x, GLfloat y, GLfloat z);
 	void SetRotation(std::array<GLfloat, 3> rotation);
 	void SetRotation(int index, GLfloat value);
+	void SetRotation(glm::vec3 rotation);
 	std::array<GLfloat, 3> GetRotation();
 	GLfloat GetRotation(int index);
+	glm::vec3 GetRotationVec();
 
 	bool CheckIfRotated(bool reset = true);
 };
