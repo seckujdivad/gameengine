@@ -94,7 +94,7 @@ public:
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour();
 
-	std::unordered_set<Model*> GetVisibleModels(glm::vec3 position);
+	std::unordered_set<Model*, HashPointer<Model>> GetVisibleModels(glm::vec3 position);
 
 	void SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data);
 };

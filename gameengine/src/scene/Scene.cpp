@@ -324,7 +324,7 @@ void Scene::Render(GLuint framebuffer)
 	this->m_active_camera->SetViewportDimensions(viewport_dimensions[2] - viewport_dimensions[0], viewport_dimensions[3] - viewport_dimensions[1]);
 
 	//draw scene
-	std::unordered_set<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->m_active_camera->GetPosition(0),
+	std::unordered_set<Model*, HashPointer<Model>> models_to_draw = this->GetVisibleModels(glm::vec3(this->m_active_camera->GetPosition(0),
 		this->m_active_camera->GetPosition(1),
 		this->m_active_camera->GetPosition(2)));
 
@@ -368,7 +368,7 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 		{
 			if ((mode == 0) || ((mode == 1) && this->pointlights.at(i)->DynamicNeedsRedrawing(true)))
 			{
-				std::unordered_set<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->pointlights.at(i)->GetPosition(0),
+				std::unordered_set<Model*, HashPointer<Model>> models_to_draw = this->GetVisibleModels(glm::vec3(this->pointlights.at(i)->GetPosition(0),
 					this->pointlights.at(i)->GetPosition(1),
 					this->pointlights.at(i)->GetPosition(2)));
 
@@ -433,7 +433,7 @@ void Scene::DrawReflections(int mode)
 				this->reflections.at(i)->CopyStaticToDynamic();
 			}
 
-			std::unordered_set<Model*> models = this->GetVisibleModels(glm::vec3(this->reflections.at(i)->GetPosition(0),
+			std::unordered_set<Model*, HashPointer<Model>> models = this->GetVisibleModels(glm::vec3(this->reflections.at(i)->GetPosition(0),
 				this->reflections.at(i)->GetPosition(1),
 				this->reflections.at(i)->GetPosition(2)));
 
@@ -668,10 +668,10 @@ glm::vec4 Scene::GetClearColour()
 	return this->m_clear_colour;
 }
 
-std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
+std::unordered_set<Model*, HashPointer<Model>> Scene::GetVisibleModels(glm::vec3 position)
 {
-	std::unordered_set<Model*> visible_models;
-	std::unordered_set<VisBox*> enclosed_visboxes;
+	std::unordered_set<Model*, HashPointer<Model>> visible_models;
+	std::unordered_set<VisBox*, HashPointer<VisBox>> enclosed_visboxes;
 
 	for (size_t i = 0; i < this->visboxes.size(); i++)
 	{
@@ -692,7 +692,7 @@ std::unordered_set<Model*> Scene::GetVisibleModels(glm::vec3 position)
 	{
 		for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
 		{
-			std::unordered_set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+			std::unordered_set<Model*, HashPointer<Model>> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
 			visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
 		}
 	}

@@ -19,21 +19,21 @@ glm::vec3 VisBox::GetOBBBias()
 	return this->m_obb_bias;
 }
 
-std::unordered_set<Model*> VisBox::GetPotentiallyVisibleModels()
+std::unordered_set<Model*, HashPointer<Model>> VisBox::GetPotentiallyVisibleModels()
 {
-	std::unordered_set<Model*> output = this->m_members;
+	std::unordered_set<Model*, HashPointer<Model>> output = this->m_members;
 
 	for (auto it = this->m_pvs.begin(); it != this->m_pvs.end(); it++)
 	{
 		VisBox* visbox = *it;
-		std::unordered_set<Model*> member_models = visbox->GetMemberModels();
+		std::unordered_set<Model*, HashPointer<Model>> member_models = visbox->GetMemberModels();
 		output.insert(member_models.begin(), member_models.end());
 	}
 	
 	return output;
 }
 
-std::unordered_set<Model*> VisBox::GetMemberModels()
+std::unordered_set<Model*, HashPointer<Model>> VisBox::GetMemberModels()
 {
 	return this->m_members;
 }
