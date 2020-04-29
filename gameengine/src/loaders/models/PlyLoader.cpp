@@ -229,7 +229,7 @@ std::vector<std::string> SplitOnChar(std::string string, char splitter)
 	{
 		if (string.at(i) == splitter)
 		{
-			current_slice = string.substr(prev_slice, i - prev_slice);
+			current_slice = string.substr(prev_slice, i - (int)prev_slice);
 			if (current_slice != "")
 			{
 				result.push_back(current_slice);
