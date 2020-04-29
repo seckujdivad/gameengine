@@ -11,7 +11,7 @@ Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), 
 	//copy geometry
 	std::vector<std::vector<GLfloat>> vertices = copy_from.GetVerticesCopy();
 	std::vector<GLfloat>* vertex_subvector;
-	for (size_t i = 0; i < vertices.size(); i++)
+	for (int i = 0; i < (int)vertices.size(); i++)
 	{
 		vertex_subvector = new std::vector<GLfloat>;
 		vertex_subvector->reserve(vertices.at(i).size());
@@ -26,7 +26,7 @@ Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), 
 	std::vector<int>* faces_subvector;
 	std::vector<glm::vec2>* face_uv_source;
 	std::vector<glm::vec2>* face_uv;
-	for (size_t i = 0; i < faces.size(); i++)
+	for (int i = 0; i < (int)faces.size(); i++)
 	{
 		//vertices
 		faces_subvector = new std::vector<int>;
@@ -94,7 +94,7 @@ int Model::AddVertex(GLfloat x, GLfloat y, GLfloat z)
 
 	this->m_vertices.push_back(vertex);
 
-	return this->m_vertices.size() - 1;
+	return (int)this->m_vertices.size() - 1;
 }
 
 int Model::AddVertex(std::vector<GLfloat> vertex)
@@ -124,7 +124,7 @@ int Model::FindVertex(GLfloat x, GLfloat y, GLfloat z)
 {
 	std::vector<GLfloat>* current_item;
 
-	for (size_t i = 0; i < this->m_vertices.size(); i++)
+	for (int i = 0; i < (int)this->m_vertices.size(); i++)
 	{
 		current_item = this->m_vertices.at(i);
 		
@@ -188,7 +188,7 @@ int Model::AddFace(std::vector<int> vertex_indices, glm::vec3 normal, std::vecto
 	this->m_face_uvs.push_back(uv_copy);
 
 	//return face index
-	return this->m_faces.size() - 1;
+	return (int)this->m_faces.size() - 1;
 }
 
 bool Model::RemoveFace(int index)
@@ -299,10 +299,10 @@ std::vector<GLfloat> Model::GetTriangles()
 	glm::vec2 edgeuv1;
 	glm::vec2 edgeuv2;
 
-	for (size_t i = 0; i < this->m_faces.size(); i++)
+	for (int i = 0; i < (int)this->m_faces.size(); i++)
 	{
 		face_vertex_indices = this->m_faces.at(i);
-		if (face_vertex_indices->size() > 2) //lines aren't faces and shouldn't be rendered
+		if ((int)face_vertex_indices->size() > 2) //lines aren't faces and shouldn't be rendered
 		{
 			face_tri_verts.clear();
 			face_tri_uvs.clear();
@@ -464,7 +464,7 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 	glGenVertexArrays(1, &this->m_vao);
 	glBindVertexArray(this->m_vao);
 
-	for (size_t i = 0; i < this->m_vertex_buffers.size(); i++)
+	for (int i = 0; i < (int)this->m_vertex_buffers.size(); i++)
 	{
 		glDeleteBuffers(1, &this->m_vertex_buffers.at(i));
 	}
@@ -479,14 +479,14 @@ void Model::GenVertexBuffer(GLuint triangle_mode)
 		std::vector<GLfloat> triangles = this->GetTriangles();
 
 		GLfloat* tris = triangles.data();
-		int size = triangles.size();
+		int size = (int)triangles.size();
 
 		GLuint vertex_buffer;
 		glGenBuffers(1, &vertex_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
 		this->m_vertex_buffers.push_back(vertex_buffer);
-		this->m_vertex_buffers_count.push_back(triangles.size() / 14);
+		this->m_vertex_buffers_count.push_back((int)triangles.size() / 14);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), 0);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));

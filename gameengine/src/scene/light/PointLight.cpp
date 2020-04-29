@@ -156,7 +156,7 @@ void PointLight::RemoveStaticModel(std::string identifier)
 {
 	std::vector<int> to_remove;
 
-	for (size_t i = 0; i < this->m_shadow_static_models.size(); i++)
+	for (int i = 0; i < (int)this->m_shadow_static_models.size(); i++)
 	{
 		if (this->m_shadow_static_models.at(i) == identifier)
 		{
@@ -194,7 +194,7 @@ void PointLight::RemoveDynamicModel(std::string identifier)
 {
 	std::vector<int> to_remove;
 
-	for (size_t i = 0; i < this->m_shadow_dynamic_models.size(); i++)
+	for (int i = 0; i < (int)this->m_shadow_dynamic_models.size(); i++)
 	{
 		if (this->m_shadow_dynamic_models.at(i) == identifier)
 		{
@@ -202,7 +202,7 @@ void PointLight::RemoveDynamicModel(std::string identifier)
 		}
 	}
 
-	for (size_t i = to_remove.size() - 1; i > -1; i--)
+	for (int i = (int)to_remove.size() - 1; i > -1; i--)
 	{
 		this->m_shadow_dynamic_models.erase(this->m_shadow_dynamic_models.begin() + to_remove.at(i));
 	}
@@ -210,7 +210,7 @@ void PointLight::RemoveDynamicModel(std::string identifier)
 
 bool PointLight::ModelIsDynamic(std::string identifier)
 {
-	for (size_t i = 0; i < this->m_shadow_dynamic_models.size(); i++)
+	for (int i = 0; i < (int)this->m_shadow_dynamic_models.size(); i++)
 	{
 		if (this->m_shadow_dynamic_models.at(i) == identifier)
 		{

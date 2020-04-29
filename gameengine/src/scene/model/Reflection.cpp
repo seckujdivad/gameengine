@@ -218,7 +218,7 @@ void Reflection::RemoveStaticModel(std::string identifier)
 {
 	std::vector<int> to_remove;
 
-	for (size_t i = 0; i < this->m_models_static.size(); i++)
+	for (int i = 0; i < (int)this->m_models_static.size(); i++)
 	{
 		if (this->m_models_static.at(i) == identifier)
 		{
@@ -226,7 +226,7 @@ void Reflection::RemoveStaticModel(std::string identifier)
 		}
 	}
 
-	for (int i = to_remove.size() - 1; i > -1; i--)
+	for (int i = (int)to_remove.size() - 1; i > -1; i--)
 	{
 		this->m_models_static.erase(this->m_models_static.begin() + to_remove.at(i));
 	}
@@ -234,7 +234,7 @@ void Reflection::RemoveStaticModel(std::string identifier)
 
 bool Reflection::ModelIsStatic(std::string identifier)
 {
-	for (size_t i = 0; i < this->m_models_static.size(); i++)
+	for (int i = 0; i < (int)this->m_models_static.size(); i++)
 	{
 		if (this->m_models_static.at(i) == identifier)
 		{
@@ -256,7 +256,7 @@ void Reflection::RemoveDynamicModel(std::string identifier)
 {
 	std::vector<int> to_remove;
 
-	for (size_t i = 0; i < this->m_models_dynamic.size(); i++)
+	for (int i = 0; i < (int)this->m_models_dynamic.size(); i++)
 	{
 		if (this->m_models_dynamic.at(i) == identifier)
 		{
@@ -264,7 +264,7 @@ void Reflection::RemoveDynamicModel(std::string identifier)
 		}
 	}
 
-	for (int i = to_remove.size() - 1; i > -1; i--)
+	for (int i = (int)to_remove.size() - 1; i > -1; i--)
 	{
 		this->m_models_dynamic.erase(this->m_models_dynamic.begin() + to_remove.at(i));
 	}

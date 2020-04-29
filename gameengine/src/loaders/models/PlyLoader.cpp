@@ -55,10 +55,10 @@ Model* ModelFromPly(std::string path)
 					if (line == "end_header")
 					{
 						
-						for (size_t i = 0; i < header_layout.size(); i++)
+						for (int i = 0; i < (int)header_layout.size(); i++)
 						{
 							current_element = header_layout.at(i);
-							for (size_t j = 0; j < current_element->field_names.size(); j++)
+							for (int j = 0; j < (int)current_element->field_names.size(); j++)
 							{
 								current_element->field_name_map.insert(std::pair<std::string, int>(current_element->field_names.at(j), j));
 							}
@@ -225,7 +225,7 @@ std::vector<std::string> SplitOnChar(std::string string, char splitter)
 	std::string current_slice = "";
 	int prev_slice = 0;
 
-	for (size_t i = 0; i < string.size(); i++)
+	for (int i = 0; i < (int)string.size(); i++)
 	{
 		if (string.at(i) == splitter)
 		{
@@ -238,7 +238,7 @@ std::vector<std::string> SplitOnChar(std::string string, char splitter)
 		}
 	}
 
-	if (prev_slice != string.size())
+	if (prev_slice != (int)string.size())
 	{
 		current_slice = string.substr(prev_slice, string.size() - prev_slice);
 		if (current_slice != "")
