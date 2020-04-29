@@ -17,6 +17,8 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
+	this->SetVerticalSync(false);
+
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_BLEND);
 
@@ -440,6 +442,15 @@ void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
 	{
 		this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture_read, this->m_postprocessor_depth_texture_read, this->m_postprocessor_data_textures_read);
 	}
+}
+
+void EngineCanvas::SetVerticalSync(bool enabled)
+{
+#ifdef _WIN32 //both 32 and 64 bit windows
+	wglSwapIntervalEXT(enabled);
+#else
+	throw std::runtime_error("Disabling/reenabling VSync isn't implemented outside of Windows");
+#endif
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
