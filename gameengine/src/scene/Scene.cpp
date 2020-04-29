@@ -307,12 +307,6 @@ void Scene::Render(GLuint framebuffer)
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
 	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
-
-	//generate values
-	for (size_t i = 0; i < this->models.size(); i++)
-	{
-		this->models.at(i)->GenPosMat();
-	}
 	
 	//draw shadows
 	this->DrawShadows(1);
@@ -364,11 +358,6 @@ void Scene::Render(GLuint framebuffer)
 
 void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 {
-	for (size_t i = 0; i < this->models.size(); i++)
-	{
-		this->models.at(i)->GenPosMat();
-	}
-
 	glCullFace(GL_FRONT);
 
 	bool draw_model;
@@ -432,11 +421,6 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 
 void Scene::DrawReflections(int mode)
 {
-	for (size_t i = 0; i < this->models.size(); i++)
-	{
-		this->models.at(i)->GenPosMat();
-	}
-
 	glCullFace(GL_BACK);
 	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 

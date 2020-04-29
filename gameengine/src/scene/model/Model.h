@@ -74,7 +74,6 @@ public:
 	int MergeVertices();
 	int MergeVertices(GLfloat threshold);
 
-	void GenPosMat();
 	void GenVertexBuffer(GLuint triangle_mode);
 
 	void RegisterUniforms();

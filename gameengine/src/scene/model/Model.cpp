@@ -453,19 +453,6 @@ int Model::MergeVertices(GLfloat threshold)
 	return (int)merged_vertices.size();
 }
 
-void Model::GenPosMat()
-{
-	this->m_position_rotate_matrix = glm::mat4(1.0f);
-	this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-	this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-	this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	this->m_position_scale_matrix = glm::mat4(1.0f);
-	this->m_position_scale_matrix = glm::scale(this->m_position_scale_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
-
-	this->m_position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
-}
-
 void Model::GenVertexBuffer(GLuint triangle_mode)
 {
 	//delete left over arrays and buffers
@@ -526,6 +513,25 @@ void Model::RegisterUniforms()
 
 void Model::SetUniforms()
 {
+	if (this->CheckIfRepositioned(true))
+	{
+		this->m_position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
+	}
+
+	if (this->CheckIfRotated(true))
+	{
+		this->m_position_rotate_matrix = glm::mat4(1.0f);
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	}
+
+	if (this->CheckIfRescaled(true))
+	{
+		this->m_position_scale_matrix = glm::mat4(1.0f);
+		this->m_position_scale_matrix = glm::scale(this->m_position_scale_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
+	}
+
 	glUniformMatrix4fv(this->m_shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_position_rotate_matrix));
 	glUniformMatrix4fv(this->m_shader_program->GetUniform("mdl_scale"), 1, GL_FALSE, glm::value_ptr(this->m_position_scale_matrix));
 	glUniform4fv(this->m_shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->m_position_translate_vector));
@@ -603,6 +609,25 @@ void Model::RegisterShadowUniforms()
 
 void Model::SetShadowUniforms()
 {
+	if (this->CheckIfRepositioned(true))
+	{
+		this->m_position_translate_vector = glm::vec4(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2), 0.0f);
+	}
+
+	if (this->CheckIfRotated(true))
+	{
+		this->m_position_rotate_matrix = glm::mat4(1.0f);
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
+		this->m_position_rotate_matrix = glm::rotate(this->m_position_rotate_matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+	}
+
+	if (this->CheckIfRescaled(true))
+	{
+		this->m_position_scale_matrix = glm::mat4(1.0f);
+		this->m_position_scale_matrix = glm::scale(this->m_position_scale_matrix, glm::vec3(this->GetScale(0), this->GetScale(1), this->GetScale(2)));
+	}
+
 	glUniformMatrix4fv(this->m_shadow_shader_program->GetUniform("mdl_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_position_rotate_matrix));
 	glUniformMatrix4fv(this->m_shadow_shader_program->GetUniform("mdl_scale"), 1, GL_FALSE, glm::value_ptr(this->m_position_scale_matrix));
 	glUniform4fv(this->m_shadow_shader_program->GetUniform("mdl_translate"), 1, glm::value_ptr(this->m_position_translate_vector));
