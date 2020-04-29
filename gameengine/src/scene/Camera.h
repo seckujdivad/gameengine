@@ -22,17 +22,16 @@ private:
 	GLfloat m_clip_near = 0.1f;
 	GLfloat m_clip_far = 100.0f;
 
-	bool m_persp_transforms_need_update = true;
-
 	int m_window_dimensions[2] = { 1, 1 };
 
-public:
-	glm::mat4 view_rotate_matrix = glm::mat4(1.0f);
-	glm::vec4 view_translate_vector = glm::vec4(0.0f);
-	glm::mat4 perspective_matrix = glm::mat4(1.0f);
-	glm::mat4 transform_matrix = glm::mat4(1.0f);
-	glm::mat4 transform_inverse_matrix = glm::mat4(1.0f);
+	glm::mat4 m_view_rotate_matrix = glm::mat4(1.0f);
+	glm::vec4 m_view_translate_vector = glm::vec4(0.0f);
+	glm::mat4 m_perspective_matrix = glm::mat4(1.0f);
+	glm::mat4 m_transform_matrix = glm::mat4(1.0f);
+	glm::mat4 m_transform_inverse_matrix = glm::mat4(1.0f);
+	bool m_persp_transforms_need_update = true;
 
+public:
 	Camera();
 	~Camera();
 
