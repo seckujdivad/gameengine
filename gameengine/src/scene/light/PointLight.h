@@ -31,9 +31,12 @@ private:
 	float m_shadow_clip_near = 0.1f;
 	float m_shadow_clip_far = 100.0f;
 	float m_shadow_bias = -0.05f;
+	bool m_clips_changed = true;
 
 	std::vector<std::string> m_shadow_static_models;
 	std::vector<std::string> m_shadow_dynamic_models;
+
+	void UpdateTransforms();
 
 public:
 	PointLight(int light_index, int refresh_frames);
@@ -48,6 +51,12 @@ public:
 	void SelectFBO();
 	void CopyStaticToDynamic();
 	void CopyDynamicToStatic();
+
+	void SetNearClip(float near_clip);
+	float GetNearClip();
+
+	void SetFarClip(float far_clip);
+	float GetFarClip();
 
 	void RegisterShadowUniforms(ShaderProgram* shader_program);
 	void SetShadowUniforms(ShaderProgram* shader_program);

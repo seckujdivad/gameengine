@@ -1,6 +1,23 @@
 #include <wx/wxprec.h>
 #include "PointLight.h"
 
+void PointLight::UpdateTransforms()
+{
+	if (this->CheckIfRepositioned(true) || this->m_clips_changed || (this->m_transforms.size() == 0))
+	{
+		glm::vec3 translate = glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2));
+		glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)this->m_shadowtex_width / (float)this->m_shadowtex_height, this->m_shadow_clip_near, this->m_shadow_clip_far);
+
+		this->m_transforms.clear();
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	}
+}
+
 PointLight::PointLight(int light_index, int refresh_frames) : Positionable(), Nameable()
 {
 	this->m_light_index = light_index;
@@ -31,16 +48,7 @@ void PointLight::EnableShadows(unsigned int shadow_texture_width, unsigned int s
 	this->m_shadow_clip_near = near_plane;
 	this->m_shadow_clip_far = far_plane;
 
-	glm::vec3 translate = glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2));
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)this->m_shadowtex_width / (float)this->m_shadowtex_height, this->m_shadow_clip_near, this->m_shadow_clip_far);
-	
-	this->m_transforms.clear();
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	this->m_clips_changed = true;
 
 	this->CreateShadowTextures(shadow_texture_width, shadow_texture_height);
 }
@@ -124,6 +132,8 @@ void PointLight::RegisterUniforms(ShaderProgram* shader_program)
 
 void PointLight::SetUniforms(ShaderProgram* shader_program)
 {
+	this->UpdateTransforms();
+
 	std::string prefix = "light_points[" + std::to_string(this->m_light_index) + "].";
 
 	glm::vec3 position = glm::vec3(this->GetPosition(0), this->GetPosition(1), this->GetPosition(2));
@@ -267,6 +277,28 @@ void PointLight::CopyDynamicToStatic()
 		this->m_shadowtex_width, this->m_shadowtex_height, 6);
 }
 
+void PointLight::SetNearClip(float near_clip)
+{
+	this->m_shadow_clip_near = near_clip;
+	this->m_clips_changed = true;
+}
+
+float PointLight::GetNearClip()
+{
+	return this->m_shadow_clip_near;
+}
+
+void PointLight::SetFarClip(float far_clip)
+{
+	this->m_shadow_clip_far = far_clip;
+	this->m_clips_changed = true;
+}
+
+float PointLight::GetFarClip()
+{
+	return this->m_shadow_clip_far;
+}
+
 void PointLight::RegisterShadowUniforms(ShaderProgram* shader_program)
 {
 	
@@ -282,6 +314,8 @@ void PointLight::RegisterShadowUniforms(ShaderProgram* shader_program)
 
 void PointLight::SetShadowUniforms(ShaderProgram* shader_program)
 {
+	this->UpdateTransforms();
+
 	for (int i = 0; i < 6; i++)
 	{
 		glUniformMatrix4fv(shader_program->GetUniform("light_transform[" + std::to_string(i) + "]"), 1, GL_FALSE, glm::value_ptr(this->m_transforms.at(i)));
