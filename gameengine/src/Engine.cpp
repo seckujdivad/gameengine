@@ -145,8 +145,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			reflection->AddDynamicModel(model_it.value().get<std::string>());
 		}
 
-		reflection->GenerateCameraData();
-
 		scene->AddReflection(reflection);
 	}
 

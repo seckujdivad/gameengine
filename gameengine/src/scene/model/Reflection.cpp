@@ -49,7 +49,7 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	this->GenerateCameraData();
+	this->UpdateCameraData();
 }
 
 Reflection::~Reflection()
@@ -57,6 +57,24 @@ Reflection::~Reflection()
 	glDeleteTextures(1, &this->m_cubemap);
 	glDeleteTextures(1, &this->m_cubemap_static);
 	glDeleteFramebuffers(1, &this->m_fbo);
+}
+
+void Reflection::SetNearClip(float near_clip)
+{
+}
+
+float Reflection::GetNearClip()
+{
+	return 0.0f;
+}
+
+void Reflection::SetFarClip(float far_clip)
+{
+}
+
+float Reflection::GetFarClip()
+{
+	return 0.0f;
 }
 
 void Reflection::ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation)
@@ -137,33 +155,54 @@ void Reflection::SetUniforms(ShaderProgram* shader_program)
 
 }
 
-void Reflection::GenerateCameraData()
+void Reflection::UpdateCameraData()
 {
-	this->m_transform_translate = glm::vec4(0 - this->GetPosition(0),
-		0 - this->GetPosition(1),
-		0 - this->GetPosition(2),
-		0.0f);
+	bool remake_composite = false;
 
-	this->m_transform_perspective = glm::perspective(glm::pi<float>() / 2.0f, 1.0f, this->m_clip_near, this->m_clip_far);
-
-	glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-	this->m_transform_combined.clear();
-	this->m_transform_inverse_combined.clear();
-
-	for (int i = 0; i < 6; i++)
+	if (this->CheckIfRepositioned(true))
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, glm::vec3(this->m_transform_translate));
-		matrix = this->m_transform_perspective * this->m_transform_rotate.at(i) * matrix;
-		this->m_transform_combined.push_back(matrix);
-		this->m_transform_inverse_combined.push_back(glm::inverse(matrix));
+		this->m_transform_translate = glm::vec4(0 - this->GetPosition(0),
+			0 - this->GetPosition(1),
+			0 - this->GetPosition(2),
+			0.0f);
+		
+		remake_composite = true;
+	}
+
+	if (this->m_clips_changed)
+	{
+		this->m_transform_perspective = glm::perspective(glm::pi<float>() / 2.0f, 1.0f, this->m_clip_near, this->m_clip_far);
+
+		this->m_clips_changed = false;
+		remake_composite = true;
+	}
+
+	if (this->m_transform_rotate.size() == 0)
+	{
+		glm::vec3 translate = glm::vec3(0.0f, 0.0f, 0.0f);
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		this->m_transform_rotate.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+		remake_composite = true;
+	}
+
+	if (remake_composite || (this->m_transform_combined.size() == 0))
+	{
+		this->m_transform_combined.clear();
+		this->m_transform_inverse_combined.clear();
+
+		for (int i = 0; i < 6; i++)
+		{
+			glm::mat4 matrix = glm::mat4(1.0f);
+			matrix = glm::translate(matrix, glm::vec3(this->m_transform_translate));
+			matrix = this->m_transform_perspective * this->m_transform_rotate.at(i) * matrix;
+			this->m_transform_combined.push_back(matrix);
+			this->m_transform_inverse_combined.push_back(glm::inverse(matrix));
+		}
 	}
 }
 
@@ -250,6 +289,8 @@ void Reflection::RegisterGenerateUniforms(ShaderProgram* shader_program)
 
 void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face)
 {
+	this->UpdateCameraData();
+
 	glUniform4fv(shader_program->GetUniform("cam_translate"), 1, glm::value_ptr(this->m_transform_translate));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_rotate"), 1, GL_FALSE, glm::value_ptr(this->m_transform_rotate.at(face)));
 	glUniformMatrix4fv(shader_program->GetUniform("cam_persp"), 1, GL_FALSE, glm::value_ptr(this->m_transform_perspective));

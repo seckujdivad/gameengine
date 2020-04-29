@@ -20,6 +20,7 @@ private:
 	unsigned int m_tex_height = 1024;
 	float m_clip_near = 0.1f;
 	float m_clip_far = 100.0f;
+	bool m_clips_changed = true;
 
 	int m_refresh_frames = 0;
 	int m_frames_since_last_refresh = 0;
@@ -42,9 +43,16 @@ private:
 	std::vector<std::string> m_models_static;
 	std::vector<std::string> m_models_dynamic;
 
+	void UpdateCameraData();
+
 public:
 	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, int refresh_frames);
 	~Reflection();
+
+	void SetNearClip(float near_clip);
+	float GetNearClip();
+	void SetFarClip(float far_clip);
+	float GetFarClip();
 
 	void ConfigureOBB(glm::vec3 obb_position, glm::vec3 obb_dimensions, glm::vec3 obb_rotation);
 	void ConfigureIterative(int iterations);
@@ -56,7 +64,6 @@ public:
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);
-	void GenerateCameraData();
 
 	void AddStaticModel(std::string identifier);
 	void RemoveStaticModel(std::string identifier);
