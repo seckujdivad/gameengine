@@ -76,7 +76,7 @@ public:
 	~EngineCanvas();
 
 	void SetScene(Scene* scene);
-	void Render();
+	void Render(bool continuous_draw = false);
 
 	void SetMouselook(bool enable, Camera* camera = nullptr);
 	void SetKeyboardMove(bool enable, Camera* camera = nullptr);

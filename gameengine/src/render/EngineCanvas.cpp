@@ -54,7 +54,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
 	this->Bind(wxEVT_KEY_DOWN, &EngineCanvas::KeyDown, this);
 	this->Bind(wxEVT_LEFT_DOWN, &EngineCanvas::Clicked, this);
-	this->Render();
+	this->Render(this->m_loop_render);
 }
 
 EngineCanvas::~EngineCanvas()
@@ -81,14 +81,20 @@ EngineCanvas::~EngineCanvas()
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
 {
-	this->Render();
+	this->Render(this->m_loop_render);
 	evt.Skip();
 }
 
-void EngineCanvas::Render()
+void EngineCanvas::Render(bool continuous_draw)
 {
 	if (this->m_scene != nullptr)
 	{
+		if (continuous_draw)
+		{
+			glFlush();
+			this->SwapBuffers();
+		}
+
 		if (this->m_postprocessor == nullptr)
 		{
 			glViewport(0, 0, this->GetSize().x, this->GetSize().y);
@@ -154,10 +160,13 @@ void EngineCanvas::Render()
 					this->GetSize().x, this->GetSize().y, 1);
 			}
 		}
-	}
 
-	glFlush();
-	this->SwapBuffers();
+		if (!continuous_draw)
+		{
+			glFlush();
+			this->SwapBuffers();
+		}
+	}
 }
 
 void EngineCanvas::SetScene(Scene* scene)
@@ -250,7 +259,7 @@ void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 {
 	if (this->m_loop_render)
 	{
-		this->Render();
+		this->Render(true);
 		evt.RequestMore();
 	}
 }
@@ -337,6 +346,9 @@ void EngineCanvas::SetKeyboardMoveActive(bool enable)
 void EngineCanvas::SetRenderLoop(bool enable)
 {
 	this->m_loop_render = enable;
+
+	glFlush();
+	this->SwapBuffers();
 }
 
 void EngineCanvas::SetPostProcessorShaderProgram(ShaderProgram* postprocessor)
