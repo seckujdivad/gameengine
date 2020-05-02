@@ -328,7 +328,13 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		{
 			visboxes.at(it.value()["vis box"].get<std::string>())->AddMemberModel(model);
 		}
-		else
+		else if (it.value()["vis box"].is_array())
+		{
+			for (auto it2 = it.value()["vis box"].begin(); it2 != it.value()["vis box"].end(); it2++)
+			{
+				visboxes.at(it2.value().get<std::string>())->AddMemberModel(model);
+			}
+		}
 		{
 			for (int i = 0; i < (int)scene->visboxes.size(); i++)
 			{
