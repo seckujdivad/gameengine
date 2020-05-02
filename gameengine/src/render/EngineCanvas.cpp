@@ -19,9 +19,6 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 
 	this->SetVerticalSync(false);
 
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_BLEND);
-
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
@@ -180,6 +177,13 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	//stop timer
 	this->m_timer_mainloop->Stop();
 
+	//make sure the control still has focus
+	if ((this->m_keyboard_move_active || this->m_mouselook_active) && !this->HasFocus())
+	{
+		this->SetMouselookActive(false);
+		this->SetKeyboardMoveActive(false);
+	}
+
 	//get mouse info
 	wxMouseState mouse_state = wxGetMouseState();
 	int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
@@ -187,11 +191,25 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
 	mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
 
-	//make sure the control still has focus
-	if ((this->m_keyboard_move_active || this->m_mouselook_active) && !this->HasFocus())
+	//check mouse delta and apply
+	if (this->m_mouselook_active)
 	{
-		this->SetMouselookActive(false);
-		this->SetKeyboardMoveActive(false);
+		int mousedelta[2];
+		mousedelta[0] = mouse_position[0] - screen_centre[0];
+		mousedelta[1] = mouse_position[1] - screen_centre[1];
+
+		float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+		float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+
+		float fov = this->m_look_camera->GetFOV();
+
+		float rotation_z = fov_fraction_x * fov;
+		float rotation_x = fov_fraction_y * fov;
+
+		this->m_look_camera->SetRotation(0, this->m_look_camera->GetRotation(0) - rotation_x);
+		this->m_look_camera->SetRotation(2, this->m_look_camera->GetRotation(2) - rotation_z);
+
+		this->WarpPointer(screen_centre[0], screen_centre[1]);
 	}
 
 	//poll keyboard movement keys
@@ -227,27 +245,6 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		{
 			this->m_move_camera->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
 		}
-	}
-
-	//check mouse delta and apply
-	if (this->m_mouselook_active)
-	{
-		int mousedelta[2];
-		mousedelta[0] = mouse_position[0] - screen_centre[0];
-		mousedelta[1] = mouse_position[1] - screen_centre[1];
-
-		float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
-		float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
-
-		float fov = this->m_look_camera->GetFOV();
-
-		float rotation_z = fov_fraction_x * fov;
-		float rotation_x = fov_fraction_y * fov;
-
-		this->m_look_camera->SetRotation(0, this->m_look_camera->GetRotation(0) - rotation_x);
-		this->m_look_camera->SetRotation(2, this->m_look_camera->GetRotation(2) - rotation_z);
-
-		this->WarpPointer(screen_centre[0], screen_centre[1]);
 	}
 
 	//restart timer

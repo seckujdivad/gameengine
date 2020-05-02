@@ -47,7 +47,7 @@ uniform int mat_reflection_mode; //0: iterative, 1: obb
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
-uniform int mat_ssr_samples;
+uniform int mat_ssr_resolution;
 uniform float mat_ssr_max_distance;
 uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
@@ -95,6 +95,8 @@ uniform bool render_output_valid;
 uniform sampler2D render_output_colour;
 uniform sampler2D render_output_depth;
 uniform sampler2D render_output_data[DATA_TEX_NUM];
+uniform int render_output_x;
+uniform int render_output_y;
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
@@ -232,7 +234,22 @@ void main()
 				vec3 start_pos = globalSceneSpacePos.xyz;
 
 				float lambda = ((mat_ssr_depth_acceptance * 2.0f) + 1.0f) / dot(direction, normal);
-				float lambda_increment = (mat_ssr_max_cast_distance - lambda) / mat_ssr_samples;
+
+				vec4 direction_screenspace_prediv = cam_transform * vec4(direction * (mat_ssr_max_cast_distance - lambda), 0.0f);
+				vec3 direction_screenspace = direction_screenspace_prediv.xyz / direction_screenspace_prediv.w;
+
+				float pixels_covered;
+				
+				if (direction_screenspace.x > direction_screenspace.y)
+				{
+					pixels_covered = abs(direction_screenspace.x) * float(render_output_x) * 0.5f;
+				}
+				else
+				{
+					pixels_covered = abs(direction_screenspace.y) * float(render_output_y) * 0.5f;
+				}
+
+				float lambda_increment = ((mat_ssr_max_cast_distance - lambda) * mat_ssr_resolution) / pixels_covered;
 				
 				if (lambda_increment > 0.001f)
 				{

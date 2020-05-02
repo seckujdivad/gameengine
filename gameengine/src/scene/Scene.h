@@ -14,6 +14,12 @@
 #include "model/Reflection.h"
 #include "VisBox.h"
 
+struct ShaderDescription
+{
+	std::vector<std::tuple<std::string, GLenum>> shaders;
+	std::vector<std::tuple<std::string, std::string>> preprocessor_defines;
+};
+
 class Scene
 {
 private:
@@ -40,6 +46,10 @@ private:
 	int GetPointLightIndex(PointLight* pointlight);
 	int GetReflectionIndex(Reflection* reflection);
 	int GetVisBoxIndex(VisBox* visbox);
+
+	//managed shaders
+	std::vector<ShaderDescription> m_shader_descriptions;
+	std::vector<ShaderProgram*> m_shader_programs;
 	
 public:
 	Scene(Camera* active_camera);
@@ -97,4 +107,6 @@ public:
 	std::vector<Model*> GetVisibleModels(glm::vec3 position);
 
 	void SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data);
+
+	ShaderProgram* GetShaderProgram(ShaderDescription description);
 };

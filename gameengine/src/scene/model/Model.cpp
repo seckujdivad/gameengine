@@ -67,10 +67,6 @@ Model::~Model()
 		delete this->m_face_uvs.at(i);
 	}
 
-	if (this->m_shader_program != nullptr)
-	{
-		delete this->m_shader_program;
-	}
 	if (this->m_shadow_shader_program != nullptr)
 	{
 		delete this->m_shadow_shader_program;

@@ -36,6 +36,11 @@ Scene::~Scene()
 		delete this->visboxes.at(i);
 	}
 
+	for (size_t i = 0; i < this->m_shader_programs.size(); i++)
+	{
+		delete this->m_shader_programs.at(i);
+	}
+
 	if (this->m_skybox_texture != NULL)
 	{
 		glDeleteTextures(1, &this->m_skybox_texture);
@@ -118,6 +123,8 @@ void Scene::AddModel(Model* model)
 	model->GetShaderProgram()->RegisterTexture("render_output_colour", this->m_output_colour, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterTexture("render_output_depth", this->m_output_depth, GL_TEXTURE_2D);
 	model->GetShaderProgram()->RegisterUniform("render_output_valid");
+	model->GetShaderProgram()->RegisterUniform("render_output_x");
+	model->GetShaderProgram()->RegisterUniform("render_output_y");
 	
 	for (int i = 0; i < (int)this->m_output_data.size(); i++)
 	{
@@ -328,29 +335,40 @@ void Scene::Render(GLuint framebuffer)
 		this->m_active_camera->GetPosition(1),
 		this->m_active_camera->GetPosition(2)));
 
+	ShaderProgram* model_shader_program = nullptr;
+
 	for (auto it = models_to_draw.begin(); it != models_to_draw.end(); it++)
 	{
 		Model* model = *it;
-		model->GetShaderProgram()->Select();
+
+		if (model_shader_program != model->GetShaderProgram())
+		{
+			model_shader_program = model->GetShaderProgram();
+			model_shader_program->Select();
+		}
+		
 		model->BindVAO();
 
-		glUniform3fv(model->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
-		this->m_active_camera->SetUniforms(model->GetShaderProgram());
+		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
+		this->m_active_camera->SetUniforms(model_shader_program);
 		model->SetUniforms();
 
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
-			this->pointlights.at(j)->SetUniforms(model->GetShaderProgram());
+			this->pointlights.at(j)->SetUniforms(model_shader_program);
 		}
 
 		if (this->m_output_colour == NULL)
 		{
-			glUniform1i(model->GetShaderProgram()->GetUniform("render_output_valid"), false);
+			glUniform1i(model_shader_program->GetUniform("render_output_valid"), false);
 		}
 		else
 		{
-			glUniform1i(model->GetShaderProgram()->GetUniform("render_output_valid"), true);
+			glUniform1i(model_shader_program->GetUniform("render_output_valid"), true);
 		}
+
+		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
+		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
 
 		model->DrawVBOs();
 	}
@@ -721,4 +739,19 @@ void Scene::SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<G
 			this->models.at(i)->GetShaderProgram()->UpdateTexture("render_output_data[" + std::to_string(j) + "]", this->m_output_data.at(j));
 		}
 	}
+}
+
+ShaderProgram* Scene::GetShaderProgram(ShaderDescription description)
+{
+	for (int i = 0; i < (int)this->m_shader_descriptions.size(); i++)
+	{
+		if ((description.shaders == this->m_shader_descriptions.at(i).shaders) && (description.preprocessor_defines == this->m_shader_descriptions.at(i).preprocessor_defines))
+		{
+			return this->m_shader_programs.at(i);
+		}
+	}
+
+	ShaderProgram* new_program = new ShaderProgram(description.shaders, description.preprocessor_defines);
+	this->m_shader_programs.push_back(new_program);
+	return new_program;
 }

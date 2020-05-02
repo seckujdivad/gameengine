@@ -11,7 +11,7 @@
 
 struct MaterialSSRConfig
 {
-	int samples = 1;
+	int resolution = 1;
 	float cast_distance_limit = 1.0f;
 	float depth_acceptance = 0.1f;
 	float max_cam_distance = 10.0f;

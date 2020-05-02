@@ -114,7 +114,7 @@
     }
   },
   "screen space reflection defaults": {
-    "samples": 100,
+    "resolution": 2048,
     "distance limit": 10,
     "acceptable depth distance": 0.1,
     "max camera distance": 25,

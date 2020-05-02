@@ -103,7 +103,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	
 	//load default screen space reflection values
 	MaterialSSRConfig default_ssr;
-	default_ssr.samples = config["screen space reflection defaults"]["samples"].get<int>();
+	default_ssr.resolution = config["screen space reflection defaults"]["resolution"].get<int>();
 	default_ssr.cast_distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
 	default_ssr.depth_acceptance = config["screen space reflection defaults"]["acceptable depth distance"].get<float>();
 	default_ssr.max_cam_distance = config["screen space reflection defaults"]["max camera distance"].get<float>();
@@ -213,6 +213,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	// clone model objects into scene
 	ShaderProgram* shader_program;
 	int reflection_mode;
+	ShaderDescription shader_description;
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
 	{
 		model = new Model(*model_lib.at(it.value()["model"].get<std::string>()));
@@ -224,11 +225,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		model->SetIdentifier(it.key());
 
 		//load shader
-		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["render"]),
-			{
+		shader_description.shaders = GetShaders(path, config, it.value()["shader"]["render"]);
+		shader_description.preprocessor_defines = {
 				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
 				{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)}
-			});
+		};
+		shader_program = scene->GetShaderProgram(shader_description);
 		
 		Material mat;
 		mat.SetDiffuse(glm::vec3(it.value()["shader"]["phong"]["diffuse"][0].get<float>(),
@@ -249,9 +251,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			MaterialSSRConfig ssr_config = default_ssr;
 			auto config = it.value()["shader"]["reflections"]["screen space"];
 
-			if (config["samples"].is_number_integer())
+			if (config["resolution"].is_number_integer())
 			{
-				ssr_config.samples = config["samples"].get<int>();
+				ssr_config.resolution = config["resolution"].get<int>();
 			}
 			
 			if (config["distance limit"].is_number_float())
