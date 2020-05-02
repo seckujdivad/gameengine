@@ -324,7 +324,17 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		}
 
 		//add to correct vis box
-		visboxes.at(it.value()["vis box"].get<std::string>())->AddMemberModel(model);
+		if (it.value()["vis box"].is_string())
+		{
+			visboxes.at(it.value()["vis box"].get<std::string>())->AddMemberModel(model);
+		}
+		else
+		{
+			for (int i = 0; i < (int)scene->visboxes.size(); i++)
+			{
+				scene->visboxes.at(i)->AddMemberModel(model);
+			}
+		}
 
 		//store model
 		scene->AddModel(model);
