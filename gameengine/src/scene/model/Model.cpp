@@ -3,7 +3,7 @@
 
 Model::Model() : Positionable(), Rotatable(), Nameable(), Scalable()
 {
-	this->m_shader_program = new ShaderProgram(); //make blank shader program so that proper errors are thrown
+	this->m_shader_program = nullptr; //make blank shader program so that proper errors are thrown
 }
 
 Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), Nameable(copy_from), Scalable(copy_from)
@@ -50,7 +50,7 @@ Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), 
 		this->m_face_uvs.push_back(face_uv);
 	}
 
-	this->m_shader_program = new ShaderProgram();
+	this->m_shader_program = nullptr;
 }
 
 Model::~Model()
