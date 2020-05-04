@@ -308,14 +308,7 @@ void main()
 					}
 				}
 
-				if (texture(reflection_cubemap, sample_vector).a == 1.0f)
-				{
-					reflection_colour = texture(skyboxTexture, sample_vector).rgb;
-				}
-				else
-				{
-					reflection_colour = texture(reflection_cubemap, sample_vector).rgb;
-				}
+				reflection_colour = (texture(reflection_cubemap, sample_vector).a == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemap, sample_vector).rgb;
 			}
 			else if (mat_reflection_mode == 1) //oriented bounding box
 			{
@@ -338,14 +331,8 @@ void main()
 				{
 					for (int j = 0; j < 2; j++)
 					{
-						if (j == 0) //at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
-						{
-							pinned_value = 0.0f;
-						}
-						else
-						{
-							pinned_value = aabb[i];
-						}
+						//at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
+						pinned_value = (j == 0) ? 0.0f : aabb[i];
 				
 						lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
 						if (lambda > 0.1) //direction vector is normalised, so length is equal to lambda
@@ -368,14 +355,8 @@ void main()
 				//sample using the final values
 				vec3 sample_vector = intersection - reflection_position;
 				vec4 reflection_sample = texture(reflection_cubemap, sample_vector).rgba;
-				if (reflection_sample.a == 1.0f)
-				{
-					reflection_colour = texture(skyboxTexture, reflection).rgb;
-				}
-				else
-				{
-					reflection_colour = reflection_sample.rgb;
-				}
+
+				reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture, reflection).rgb : reflection_sample.rgb;
 			}
 		}
 	}
@@ -393,22 +374,9 @@ void main()
 	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
 	if (reflection_isdrawing)
 	{
-		if (skybox_intensity == vec3(1.0f, 1.0f, 1.0f))
-		{
-			frag_out.a = 1.0f;
-		}
-		else
-		{
-			frag_out.a = gl_FragDepth;
-		}
+		frag_out.a = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
 	}
 	
-	if (mat_ssr_show_this) //output whether or not to draw reflections on certain fragments in the next frame
-	{
-		data_out[0].r = 1.0f;
-	}
-	else
-	{
-		data_out[0].r = 0.0f;
-	}
+	//output whether or not to draw reflections on certain fragments in the next frame
+	data_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
 }
