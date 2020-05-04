@@ -186,6 +186,7 @@
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\model\Reflection.h" />
     <ClInclude Include="src\scene\Nameable.h" />
+    <ClInclude Include="src\scene\OrientedBoundingBox.h" />
     <ClInclude Include="src\scene\Positionable.h" />
     <ClInclude Include="src\scene\Rotatable.h" />
     <ClInclude Include="src\scene\Scalable.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="src\scene\model\Model.cpp" />
     <ClCompile Include="src\scene\model\Reflection.cpp" />
     <ClCompile Include="src\scene\Nameable.cpp" />
+    <ClCompile Include="src\scene\OrientedBoundingBox.cpp" />
     <ClCompile Include="src\scene\Positionable.cpp" />
     <ClCompile Include="src\scene\Rotatable.cpp" />
     <ClCompile Include="src\scene\Scalable.cpp" />

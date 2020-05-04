@@ -102,6 +102,9 @@
     <ClInclude Include="src\scene\VisBox.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\OrientedBoundingBox.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -153,6 +156,9 @@
       <Filter>Source Files\scene\model</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\VisBox.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\OrientedBoundingBox.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
