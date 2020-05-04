@@ -65,6 +65,7 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("mat_ssr_max_cast_distance");
 	shader_program->RegisterUniform("mat_ssr_depth_acceptance");
 	shader_program->RegisterUniform("mat_ssr_show_this");
+	shader_program->RegisterUniform("mat_ssr_refinements");
 
 	this->m_reflection->RegisterUniforms(shader_program);
 }
@@ -77,11 +78,12 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 	glUniform1i(shader_program->GetUniform("mat_reflection_mode"), this->m_reflection_mode);
 
 	glUniform1i(shader_program->GetUniform("mat_ssr_enabled"), this->m_ssr_enabled);
-	glUniform1i(shader_program->GetUniform("mat_ssr_resolution"), this->m_ssr_config.resolution);
+	glUniform1f(shader_program->GetUniform("mat_ssr_resolution"), this->m_ssr_config.resolution);
 	glUniform1f(shader_program->GetUniform("mat_ssr_max_distance"), this->m_ssr_config.max_cam_distance);
 	glUniform1f(shader_program->GetUniform("mat_ssr_max_cast_distance"), this->m_ssr_config.cast_distance_limit);
 	glUniform1f(shader_program->GetUniform("mat_ssr_depth_acceptance"), this->m_ssr_config.depth_acceptance);
 	glUniform1i(shader_program->GetUniform("mat_ssr_show_this"), this->m_ssr_config.appear_in_ssr);
+	glUniform1i(shader_program->GetUniform("mat_ssr_refinements"), this->m_ssr_config.refinements);
 
 	this->m_reflection->SetUniforms(shader_program);
 }

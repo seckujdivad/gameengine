@@ -346,6 +346,9 @@ void Scene::Render(GLuint framebuffer)
 			model_shader_program = model->GetShaderProgram();
 			model_shader_program->Select();
 		}
+
+		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
+		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
 		
 		model->BindVAO();
 
@@ -366,9 +369,6 @@ void Scene::Render(GLuint framebuffer)
 		{
 			glUniform1i(model_shader_program->GetUniform("render_output_valid"), true);
 		}
-
-		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
-		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
 
 		model->DrawVBOs();
 	}

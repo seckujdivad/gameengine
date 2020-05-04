@@ -11,11 +11,12 @@
 
 struct MaterialSSRConfig
 {
-	int resolution = 1;
+	float resolution = 1.0f;
 	float cast_distance_limit = 1.0f;
 	float depth_acceptance = 0.1f;
 	float max_cam_distance = 10.0f;
 	bool appear_in_ssr = false;
+	int refinements = 1;
 };
 
 class Material

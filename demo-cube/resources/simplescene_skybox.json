@@ -114,6 +114,7 @@
     }
   },
   "screen space reflection defaults": {
+    "refinements": 0,
     "resolution": 2048,
     "distance limit": 10,
     "acceptable depth distance": 0.1,

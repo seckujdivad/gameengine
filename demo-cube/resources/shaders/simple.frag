@@ -47,11 +47,12 @@ uniform int mat_reflection_mode; //0: iterative, 1: obb
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
-uniform int mat_ssr_resolution;
+uniform float mat_ssr_resolution;
 uniform float mat_ssr_max_distance;
 uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
 uniform bool mat_ssr_show_this;
+uniform int mat_ssr_refinements;
 
 //textures
 uniform sampler2D colourTexture;
@@ -229,55 +230,57 @@ void main()
 		{
 			if ((length(globalCamSpacePos.xyz) < mat_ssr_max_distance))
 			{
-				//vec3 direction = normalize(-fragtocam);
 				vec3 direction = normalize(reflect(-fragtocam, normal));
 				vec3 start_pos = globalSceneSpacePos.xyz;
+				vec3 end_pos = start_pos + (direction * mat_ssr_max_cast_distance);
+				start_pos = start_pos + (direction * ((mat_ssr_depth_acceptance * 1.5f) / dot(direction, normal)));
 
-				float lambda = ((mat_ssr_depth_acceptance * 2.0f) + 1.0f) / dot(direction, normal);
+				vec4 ss_start_pos_prediv = cam_transform * vec4(start_pos, 1.0f);
+				vec3 ss_start_pos = ss_start_pos_prediv.xyz / ss_start_pos_prediv.w;
 
-				vec4 direction_screenspace_prediv = cam_transform * vec4(direction * (mat_ssr_max_cast_distance - lambda), 0.0f);
-				vec3 direction_screenspace = direction_screenspace_prediv.xyz / direction_screenspace_prediv.w;
+				vec4 ss_depth_acceptance_prediv = cam_transform * (normalize(vec4(vec3(1.0f), 0.0f)) * mat_ssr_depth_acceptance);
+				float ss_depth_acceptance = length(ss_depth_acceptance_prediv.xyz / ss_depth_acceptance_prediv.w);
 
-				float pixels_covered;
+				vec4 ss_end_pos_prediv = cam_transform * vec4(end_pos, 1.0f);
+				vec3 ss_end_pos = ss_end_pos_prediv.xyz / ss_end_pos_prediv.w;
+
+				vec3 ss_direction = ss_end_pos - ss_start_pos;
+
+				int search_level = mat_ssr_refinements; //number of additional searches to carry out
+
+				float hit_increment = abs((mat_ssr_resolution * 2.0f * float(2 << (search_level - 1))) / ((ss_direction.x > ss_direction.y) ? (render_output_x * ss_direction.x) : (render_output_y * ss_direction.y)));
+				hit_increment = max(hit_increment, 1.0f / 500.0f);
+
+				vec3 ss_position;
+				float sample_depth;
+				vec2 tex_pos;
+				float hit_pos = 0.0f;
 				
-				if (direction_screenspace.x > direction_screenspace.y)
-				{
-					pixels_covered = abs(direction_screenspace.x) * float(render_output_x) * 0.5f;
-				}
-				else
-				{
-					pixels_covered = abs(direction_screenspace.y) * float(render_output_y) * 0.5f;
-				}
+				bool hit_detected;
 
-				float lambda_increment = ((mat_ssr_max_cast_distance - lambda) * mat_ssr_resolution) / pixels_covered;
-				
-				if (lambda_increment > 0.001f)
+				while (!ssr_reflection_applied && all(greaterThan(ss_position, vec3(-1.0f))) && all(lessThan(ss_position, vec3(1.0f))) && (hit_pos < 1.0f))
 				{
-					vec3 marched_pos;
-					vec3 marched_screen_pos = vec3(0.0f);
-					vec4 marched_pos_prediv;
-					vec3 marched_pos_texspace;
-					float sample_depth;
-					
-					bool continue_check = (lambda < mat_ssr_max_cast_distance) && all(greaterThan(marched_screen_pos, vec3(-1.0f))) && all(lessThan(marched_screen_pos, vec3(1.0f)));
-					while ((!ssr_reflection_applied) && continue_check)
+					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
+					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+					ss_position.z = 1 / mix(1 / ss_start_pos.z, 1 / ss_end_pos.z, hit_pos);
+
+					sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
+
+					hit_detected = (texture(render_output_data[0], tex_pos.xy).r > 0.5f) && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
+
+					if (hit_detected && (search_level == 0))
 					{
-						lambda += lambda_increment;
-						marched_pos = start_pos + (lambda * direction);
-
-						marched_pos_prediv = cam_transform * vec4(marched_pos, 1.0f);
-						marched_screen_pos = marched_pos_prediv.xyz / marched_pos_prediv.w;
-						marched_pos_texspace = (marched_screen_pos + 1.0f) * 0.5f;
-
-						sample_depth = (texture(render_output_depth, marched_pos_texspace.xy).r * 2.0f) - 1.0f;
-
-						continue_check = (lambda < mat_ssr_max_cast_distance) && all(greaterThan(marched_screen_pos, vec3(-1.0f))) && all(lessThan(marched_screen_pos, vec3(1.0f)));
-						if (continue_check && (sample_depth < 0.99f) && (texture(render_output_data[0], marched_pos_texspace.xy).r > 0.5f) && (abs(NDCZToCamZ(sample_depth) - NDCZToCamZ(marched_screen_pos.z)) < mat_ssr_depth_acceptance))
-						{
-							reflection_colour = texture(render_output_colour, marched_pos_texspace.xy).rgb;
-							ssr_reflection_applied = true;
-						}
+						reflection_colour = texture(render_output_colour, tex_pos.xy).rgb;
+						ssr_reflection_applied = true;
 					}
+					else if (hit_detected)
+					{
+						hit_pos = hit_pos - hit_increment;
+						hit_increment = hit_increment / 8;
+						search_level--;
+					}
+
+					hit_pos = hit_pos + hit_increment;
 				}
 			}
 		}

@@ -103,11 +103,12 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	
 	//load default screen space reflection values
 	MaterialSSRConfig default_ssr;
-	default_ssr.resolution = config["screen space reflection defaults"]["resolution"].get<int>();
+	default_ssr.resolution = config["screen space reflection defaults"]["resolution"].get<float>();
 	default_ssr.cast_distance_limit = config["screen space reflection defaults"]["distance limit"].get<float>();
 	default_ssr.depth_acceptance = config["screen space reflection defaults"]["acceptable depth distance"].get<float>();
 	default_ssr.max_cam_distance = config["screen space reflection defaults"]["max camera distance"].get<float>();
 	default_ssr.appear_in_ssr = config["screen space reflection defaults"]["appear in ssr"].get<bool>();
+	default_ssr.refinements = config["screen space reflection defaults"]["refinements"].get<int>();
 
 	//load reflections
 	Reflection* reflection;
@@ -251,9 +252,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			MaterialSSRConfig ssr_config = default_ssr;
 			auto config = it.value()["shader"]["reflections"]["screen space"];
 
-			if (config["resolution"].is_number_integer())
+			if (config["resolution"].is_number())
 			{
-				ssr_config.resolution = config["resolution"].get<int>();
+				ssr_config.resolution = config["resolution"].get<float>();
 			}
 			
 			if (config["distance limit"].is_number_float())
@@ -274,6 +275,11 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			if (config["appear in ssr"].is_boolean())
 			{
 				ssr_config.appear_in_ssr = config["appear in ssr"].get<bool>();
+			}
+
+			if (config["refinements"].is_number_integer())
+			{
+				ssr_config.refinements = config["refinements"].get<int>();
 			}
 
 			mat.SetSSRConfig(ssr_config);
@@ -337,6 +343,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 				visboxes.at(it2.value().get<std::string>())->AddMemberModel(model);
 			}
 		}
+		else
 		{
 			for (int i = 0; i < (int)scene->visboxes.size(); i++)
 			{

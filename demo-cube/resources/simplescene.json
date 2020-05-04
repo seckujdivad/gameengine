@@ -266,9 +266,10 @@
     }
   },
   "screen space reflection defaults": {
-    "resolution": 128,
-    "distance limit": 15,
-    "acceptable depth distance": 0.05,
+    "refinements": 3,
+    "resolution": 0.5,
+    "distance limit": 5,
+    "acceptable depth distance": 0.02,
     "max camera distance": 25,
     "appear in ssr": false
   },
