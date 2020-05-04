@@ -32,11 +32,11 @@ private:
 	ShaderProgram* m_shader_program = nullptr;
 	ShaderProgram* m_shadow_shader_program = nullptr;
 
-	glm::mat4 m_position_rotate_matrix;
-	glm::mat4 m_position_scale_matrix;
-	glm::vec4 m_position_translate_vector;
+	glm::mat4 m_position_rotate_matrix = glm::mat4(1.0f);
+	glm::mat4 m_position_scale_matrix = glm::mat4(1.0f);
+	glm::vec4 m_position_translate_vector = glm::vec4(0.0f);
 
-	GLuint m_triangle_mode;
+	GLuint m_triangle_mode = GL_TRIANGLES;
 	GLuint m_vao = NULL;
 	std::vector<GLuint> m_vertex_buffers;
 	std::vector<GLint> m_vertex_buffers_count; //number of sets of vertices (6 floats means 2 sets)
