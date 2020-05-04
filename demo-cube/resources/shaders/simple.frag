@@ -266,7 +266,7 @@ void main()
 
 					sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
-					hit_detected = (texture(render_output_data[0], tex_pos.xy).r > 0.5f) && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
+					hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f) && (texture(render_output_data[0], tex_pos.xy).r > 0.5f) && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
 
 					if (hit_detected && (search_level == 0))
 					{
