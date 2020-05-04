@@ -17,7 +17,7 @@ private:
 
 public:
 	Positionable();
-	Positionable(Positionable& copyfrom);
+	Positionable(const Positionable& copyfrom);
 	Positionable& operator=(Positionable& copyfrom);
 	~Positionable();
 

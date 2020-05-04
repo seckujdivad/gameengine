@@ -17,7 +17,7 @@ private:
 
 public:
 	Rotatable();
-	Rotatable(Rotatable& copyfrom);
+	Rotatable(const Rotatable& copyfrom);
 	Rotatable& operator=(Rotatable& copyfrom);
 	~Rotatable();
 

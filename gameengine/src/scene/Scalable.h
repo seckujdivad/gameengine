@@ -17,7 +17,7 @@ private:
 	
 public:
 	Scalable();
-	Scalable(Scalable& copyfrom);
+	Scalable(const Scalable& copyfrom);
 	Scalable& operator=(Scalable& copyfrom);
 	~Scalable();
 

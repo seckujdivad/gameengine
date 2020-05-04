@@ -18,9 +18,9 @@ Rotatable::Rotatable()
 {
 }
 
-Rotatable::Rotatable(Rotatable& copyfrom)
+Rotatable::Rotatable(const Rotatable& copyfrom)
 {
-	this->m_rotation = copyfrom.GetRotation();
+	this->m_rotation = copyfrom.m_rotation;
 }
 
 Rotatable& Rotatable::operator=(Rotatable& copyfrom)

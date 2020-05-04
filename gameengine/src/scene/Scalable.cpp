@@ -18,9 +18,9 @@ Scalable::Scalable()
 {
 }
 
-Scalable::Scalable(Scalable& copyfrom)
+Scalable::Scalable(const Scalable& copyfrom)
 {
-	this->m_scale = copyfrom.GetScale();
+	this->m_scale = copyfrom.m_scale;
 }
 
 Scalable& Scalable::operator=(Scalable& copyfrom)

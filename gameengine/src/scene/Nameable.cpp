@@ -5,9 +5,9 @@ Nameable::Nameable()
 {
 }
 
-Nameable::Nameable(Nameable& copyfrom)
+Nameable::Nameable(const Nameable& copyfrom)
 {
-	this->m_identifier = copyfrom.GetIdentifier();
+	this->m_identifier = copyfrom.m_identifier;
 }
 
 Nameable& Nameable::operator=(Nameable& copyfrom)

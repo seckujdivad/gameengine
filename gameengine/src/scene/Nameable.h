@@ -12,7 +12,7 @@ private:
 
 public:
 	Nameable();
-	Nameable(Nameable& copyfrom);
+	Nameable(const Nameable& copyfrom);
 	Nameable& operator=(Nameable& copyfrom);
 	~Nameable();
 

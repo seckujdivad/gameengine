@@ -18,9 +18,9 @@ Positionable::Positionable()
 {
 }
 
-Positionable::Positionable(Positionable& copyfrom)
+Positionable::Positionable(const Positionable& copyfrom)
 {
-	this->m_position = copyfrom.GetPosition();
+	this->m_position = copyfrom.m_position;
 }
 
 Positionable& Positionable::operator=(Positionable& copyfrom)
