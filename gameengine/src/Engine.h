@@ -8,6 +8,12 @@
 #include <vector>
 #include <map>
 
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include "GLComponents.h"
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
