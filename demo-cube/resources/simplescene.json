@@ -278,21 +278,18 @@
       "position": [ 10, 0, 0 ],
       "rotation": [ 0, 0, 0 ],
       "dimensions": [ 10, 10, 10 ],
-      "bias": [ 0, 0, 0 ],
       "pvs": [ "level section 2" ]
     },
     "level section 2": {
       "position": [ 0, -10, 0 ],
       "rotation": [ 0, 0, 0 ],
       "dimensions": [ 10, 30, 10 ],
-      "bias": [ 0, 0, 0 ],
       "pvs": [ "level section 1", "level section 3" ]
     },
     "level section 3": {
       "position": [ 10, -20, 0 ],
       "rotation": [ 0, 0, 0 ],
       "dimensions": [ 10, 10, 10 ],
-      "bias": [ 0, 0, 0 ],
       "pvs": [ "level section 2" ]
     }
   }

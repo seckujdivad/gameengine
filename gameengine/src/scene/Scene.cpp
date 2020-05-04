@@ -693,7 +693,7 @@ std::vector<Model*> Scene::GetVisibleModels(glm::vec3 position)
 
 	for (size_t i = 0; i < this->visboxes.size(); i++)
 	{
-		if (this->visboxes.at(i)->PointInOBB(position))
+		if (this->visboxes.at(i)->PointInBounds(position))
 		{
 			enclosed_visboxes.insert(this->visboxes.at(i));
 		}

@@ -166,9 +166,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		visbox->SetScale(it.value()["dimensions"][0].get<float>() / 2.0f,
 			it.value()["dimensions"][1].get<float>() / 2.0f,
 			it.value()["dimensions"][2].get<float>() / 2.0f);
-		visbox->SetOBBBias(glm::vec3(it.value()["bias"][0].get<float>(),
-			it.value()["bias"][1].get<float>(),
-			it.value()["bias"][2].get<float>()));
 
 		visboxes.insert({ it.key(), visbox });
 

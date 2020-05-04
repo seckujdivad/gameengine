@@ -13,6 +13,7 @@
 #include "Rotatable.h"
 #include "Scalable.h"
 #include "model/Model.h"
+#include "OrientedBoundingBox.h"
 
 template <typename T>
 class HashPointer : public std::hash<T*>
@@ -31,11 +32,9 @@ public:
 	}
 };
 
-class VisBox : public Nameable, public Positionable, public Rotatable, public Scalable
+class VisBox : virtual public Nameable, virtual public Positionable, virtual public Rotatable, virtual public Scalable, public OrientedBoundingBox
 {
 private:
-	glm::vec3 m_obb_bias = glm::vec3(0.0f, 0.0f, 0.0f);
-
 	std::unordered_set<VisBox*, HashPointer<VisBox>> m_pvs;
 	std::unordered_set<Model*, HashPointer<Model>> m_members;
 	
@@ -43,16 +42,10 @@ public:
 	VisBox();
 	~VisBox();
 
-	void SetOBBBias(glm::vec3 obb_bias);
-	glm::vec3 GetOBBBias();
-
 	std::unordered_set<Model*, HashPointer<Model>> GetPotentiallyVisibleModels();
 	std::unordered_set<Model*, HashPointer<Model>> GetMemberModels();
 	void AddMemberModel(Model* model);
 	void RemoveMemberModel(Model* model);
 	
 	void AddPotentiallyVisible(VisBox* visbox);
-
-	bool PointInOBB(glm::vec3 point);
-	bool PointInOBB(float x, float y, float z);
 };
