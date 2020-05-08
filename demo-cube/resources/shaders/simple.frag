@@ -9,6 +9,14 @@
 #define DATA_TEX_NUM 1
 #endif
 
+#if !defined(REFLECTION_MAX_OBB_NUM)
+#define REFLECTION_MAX_OBB_NUM 1
+#endif
+
+#if !defined(REFLECTION_NUM)
+#define REFLECTION_NUM 1
+#endif
+
 //shader input-output
 layout(location = 0) out vec4 frag_out;
 layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
@@ -43,7 +51,6 @@ uniform mat4 cam_transform_inverse;
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
-uniform int mat_reflection_mode; //0: iterative, 1: obb
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
@@ -76,16 +83,33 @@ struct PointLight
 uniform PointLight light_points[POINT_LIGHT_NUM];
 
 //reflections
-uniform vec3 reflection_position;
-uniform samplerCube reflection_cubemap;
 uniform bool reflection_isdrawing;
-uniform float reflection_clip_near;
-uniform float reflection_clip_far;
-uniform int reflection_parallax_it_iterations;
-uniform vec3 reflection_parallax_obb_position;
-uniform vec3 reflection_parallax_obb_dimensions;
-uniform mat3 reflection_parallax_obb_rotation;
-uniform mat3 reflection_parallax_obb_rotation_inverse;
+
+struct ParallaxOBB
+{
+	vec3 position;
+	vec3 dimensions;
+	mat3 rotation;
+	mat3 rotation_inverse;
+};
+
+uniform struct Reflection
+{
+	vec3 position;
+	bool isdrawing;
+	float clip_near;
+	float clip_far;
+
+	int mode; //0: iterative, 1: obb
+
+	int iterations;
+
+	ParallaxOBB parallax_obbs[REFLECTION_MAX_OBB_NUM];
+	int num_obbs;
+};
+
+uniform Reflection reflections[REFLECTION_NUM];
+uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
 
 //skybox
 uniform sampler2D skyboxMaskTexture;
@@ -132,16 +156,55 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 	}
 }
 
-float NDCZToCamZ(float ndc_z)
+void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, vec3 obb_dimensions, mat3 obb_rotation, mat3 obb_rotation_inverse, out bool isvalid, out vec3 results[2])
 {
-	return (ndc_z * (cam_clip_far - cam_clip_near)) + cam_clip_near;
-	//return (2.0f * cam_clip_far * cam_clip_near) / ((ndc_z / (cam_clip_far - cam_clip_near)) - cam_clip_far - cam_clip_near);
-}
+	vec3 obb_translation = obb_position - (obb_rotation * 0.5f * obb_dimensions);
+	vec3 reflection_oob = obb_rotation_inverse * normalize(direction);
+	vec3 fragpos_oob = obb_rotation_inverse * (start_pos - obb_translation);
 
-float CamZToNDCZ(float cam_z)
-{
-	return (cam_z - cam_clip_near) / (cam_clip_far - cam_clip_near);
-	//return cam_z * ((cam_clip_near + cam_clip_far) / (2.0f * cam_clip_near * cam_clip_far));
+	vec3 intersections[2];
+	float lambda;
+	float pinned_value;
+	float second_axis_value;
+	float third_axis_value;
+	int intersection_index = 0;
+	float lambdas[2];
+
+	isvalid = false;
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			//at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
+			pinned_value = (j == 0) ? 0.0f : obb_dimensions[i];
+			lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
+			//intersection_index = (lambda > 0.0) ? 1 : 0;
+
+			second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
+			third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
+			if ((0.0f <= second_axis_value) && (second_axis_value <= obb_dimensions[(i + 1) % 3]) &&
+				(0.0f <= third_axis_value) && (third_axis_value <= obb_dimensions[(i + 2) % 3]))
+			{
+				intersections[intersection_index][i] = pinned_value;
+				intersections[intersection_index][(i + 1) % 3] = second_axis_value;
+				intersections[intersection_index][(i + 2) % 3] = third_axis_value;
+				lambdas[intersection_index] = lambda;
+				isvalid = true;
+				intersection_index++;
+			}
+		}
+	}
+
+	results[0] = (obb_rotation * intersections[0]) + obb_translation;
+	results[1] = (obb_rotation * intersections[1]) + obb_translation;
+
+	if (lambdas[0] > lambdas[1])
+	{
+		vec3 swap = results[0];
+		results[0] = results[1];
+		results[1] = swap;
+	}
 }
 
 void main()
@@ -287,76 +350,113 @@ void main()
 
 		if (!ssr_reflection_applied)
 		{
-			if (mat_reflection_mode == 0) //iteratively apply perspective correction
+			//find reflection to use
+			float refl_distance = 0.0f;
+			float current_distance;
+			int reflection_index;
+			for (int i = 0; i < REFLECTION_NUM; i++)
+			{
+				current_distance = length(reflections[i].position - globalSceneSpacePos.xyz);
+
+				if ((refl_distance == 0.0f) || (current_distance < refl_distance))
+				{
+					reflection_index = i;
+					refl_distance = current_distance;
+				}
+			}
+
+			if (reflections[reflection_index].mode == 0) //iteratively apply perspective correction
 			{
 				vec3 sample_vector = reflect(-fragtocam, normal);
 				float depth_sample;
-				float sample_space_length = reflection_clip_far - reflection_clip_near;
-				vec3 offset = globalSceneSpacePos.xyz - reflection_position;
+				float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
+				vec3 offset = globalSceneSpacePos.xyz - reflections[reflection_index].position;
 
-				for (int i = 0; i < reflection_parallax_it_iterations; i++)
+				for (int i = 0; i < reflections[reflection_index].iterations; i++)
 				{
-					depth_sample = texture(reflection_cubemap, sample_vector).a;
+					depth_sample = texture(reflection_cubemaps[reflection_index], sample_vector).a;
 					if (depth_sample == 1.0f)
 					{
-						i = reflection_parallax_it_iterations; //exit loop
+						i = reflections[reflection_index].iterations; //exit loop
 					}
 					else
 					{
-						depth_sample = (depth_sample * sample_space_length) + reflection_clip_near;
+						depth_sample = (depth_sample * sample_space_length) + reflections[reflection_index].clip_near;
 						sample_vector = (normalize(sample_vector) * depth_sample) + offset;
 					}
 				}
 
-				reflection_colour = (texture(reflection_cubemap, sample_vector).a == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemap, sample_vector).rgb;
+				reflection_colour = (texture(reflection_cubemaps[reflection_index], sample_vector).a == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
 			}
-			else if (mat_reflection_mode == 1) //oriented bounding box
+			else if (reflections[reflection_index].mode == 1) //oriented bounding box
 			{
-		
-				mat3 oob_rotation = reflection_parallax_obb_rotation;
-				mat3 oob_rotation_inverse = reflection_parallax_obb_rotation_inverse;
-				vec3 aabb = reflection_parallax_obb_dimensions; //axis aligned bounding box
+				vec3 intersections[2];
+				vec3 all_intersections[2 * REFLECTION_MAX_OBB_NUM];
+				float final_length = -1.0f;
+				float current_length;
+				int search_index = -1;
+				vec3 refl_dir = normalize(reflect(-fragtocam, normal));
+				bool included_segments[REFLECTION_MAX_OBB_NUM];
+				bool is_valid;
 
-				vec3 oob_translation = reflection_parallax_obb_position - (oob_rotation * 0.5f * reflection_parallax_obb_dimensions);
-				vec3 reflection = normalize(reflect(-fragtocam, normal));
-				vec3 fragpos_oob = oob_rotation_inverse * (globalSceneSpacePos.xyz - oob_translation);
-				vec3 reflection_oob = oob_rotation_inverse * reflection;
-		
-				vec3 intersection;
-				float lambda;
-				float pinned_value;
-				float second_axis_value;
-				float third_axis_value;
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < reflections[reflection_index].num_obbs; i++)
 				{
-					for (int j = 0; j < 2; j++)
+					GetFirstOBBIntersection(globalSceneSpacePos.xyz, refl_dir, reflections[reflection_index].parallax_obbs[i].position, reflections[reflection_index].parallax_obbs[i].dimensions, reflections[reflection_index].parallax_obbs[i].rotation, reflections[reflection_index].parallax_obbs[i].rotation_inverse, is_valid, intersections);
+
+					all_intersections[(i * 2)] = intersections[0];
+					all_intersections[(i * 2) + 1] = intersections[1];
+
+					if (!is_valid)
 					{
-						//at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
-						pinned_value = (j == 0) ? 0.0f : aabb[i];
-				
-						lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
-						if (lambda > 0.1) //direction vector is normalised, so length is equal to lambda
+						included_segments[i] = true;
+					}
+					else
+					{
+						included_segments[i] = false;
+
+						current_length = length(intersections[1] - globalSceneSpacePos.xyz);
+
+						if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
 						{
-							second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
-							third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
-							if ((0.0f <= second_axis_value) && (second_axis_value <= aabb[(i + 1) % 3]) &&
-								(0.0f <= third_axis_value) && (third_axis_value <= aabb[(i + 2) % 3]))
-							{
-								intersection[i] = pinned_value;
-								intersection[(i + 1) % 3] = second_axis_value;
-								intersection[(i + 2) % 3] = third_axis_value;
-							}
+							final_length = current_length;
+							search_index = i;
 						}
 					}
 				}
+				
+				if (search_index != -1)
+				{
+					//search all values and see if you can step on from
+					included_segments[search_index] = true;
+				
+					vec3 line_start_pos = all_intersections[search_index * 2];
+					vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
+					int current_index = 0;
+					current_length = length(line_end_pos - line_start_pos);
+				
+					while (current_index < reflections[reflection_index].num_obbs)
+					{
+						if (!included_segments[current_index] && (length(all_intersections[current_index * 2] - line_start_pos) - 0.1f < current_length) && (length(all_intersections[(current_index * 2) + 1] - line_start_pos) > current_length))
+						{
+							line_end_pos = all_intersections[(current_index * 2) + 1];
+							included_segments[current_index] = true;
+							current_index = -1;
+							current_length = length(line_end_pos - line_start_pos);
+						}
+						current_index++;
+					}
+				
+					//sample using the final values
+					vec3 sample_vector = line_end_pos - reflections[reflection_index].position;
+					vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector).rgba;
+					//vec4 reflection_sample = vec4(vec3(length(line_end_pos - globalSceneSpacePos.xyz) / 15).xyz, 0.0f);
 
-				intersection = (oob_rotation * intersection) + oob_translation;
-		
-				//sample using the final values
-				vec3 sample_vector = intersection - reflection_position;
-				vec4 reflection_sample = texture(reflection_cubemap, sample_vector).rgba;
-
-				reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture, reflection).rgb : reflection_sample.rgb;
+					reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
+				}
+				else
+				{
+					reflection_colour = vec3(0.0f);
+				}
 			}
 		}
 	}
