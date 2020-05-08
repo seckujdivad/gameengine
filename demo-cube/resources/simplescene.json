@@ -45,7 +45,7 @@
           "geometry": "simple shadow"
         },
         "textures": {
-          "colour": [ 1, 0, 0 ],
+          "colour": [ 1, 1, 1 ],
           "specular": [ 1, 1, 1 ],
           "normal": "textures/cube_normals.png",
           "reflection intensity": [ 0.1, 0.1, 0.1 ]
