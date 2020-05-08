@@ -112,6 +112,9 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 	//load reflections
 	Reflection* reflection;
+	OrientedBoundingBox obb;
+	int reflection_max_obbs = 1;
+	int obb_count;
 	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
 	{
 		reflection = new Reflection(it.value()["texture"][0].get<int>(),
@@ -126,15 +129,28 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it.value()["position"][2].get<float>());
 
 		reflection->ConfigureIterative(it.value()["corrections"]["iterative sampling"]["iterations"].get<int>());
-		reflection->ConfigureOBB(glm::vec3(it.value()["corrections"]["oriented bounding box"]["position"][0].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["position"][1].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["position"][2].get<float>()),
-			glm::vec3(it.value()["corrections"]["oriented bounding box"]["dimensions"][0].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["dimensions"][1].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["dimensions"][2].get<float>()),
-			glm::vec3(it.value()["corrections"]["oriented bounding box"]["rotation"][0].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["rotation"][1].get<float>(),
-				it.value()["corrections"]["oriented bounding box"]["rotation"][2].get<float>()));
+
+		obb_count = 0;
+		for (auto it2 = it.value()["corrections"]["oriented bounding box"].begin(); it2 != it.value()["corrections"]["oriented bounding box"].end(); it2++)
+		{
+			obb.SetPosition(glm::vec3(it2.value()["position"][0].get<float>(),
+				it2.value()["position"][1].get<float>(),
+				it2.value()["position"][2].get<float>()));
+			obb.SetRotation(glm::vec3(it2.value()["rotation"][0].get<float>(),
+				it2.value()["rotation"][1].get<float>(),
+				it2.value()["rotation"][2].get<float>()));
+			obb.SetScale(glm::vec3(it2.value()["dimensions"][0].get<float>(),
+				it2.value()["dimensions"][1].get<float>(),
+				it2.value()["dimensions"][2].get<float>()) * 0.5f);
+			reflection->AddOBB(obb);
+
+			obb_count++;
+		}
+
+		if (obb_count > reflection_max_obbs)
+		{
+			reflection_max_obbs = obb_count;
+		}
 
 		for (auto model_it = it.value()["static draw"].begin(); model_it != it.value()["static draw"].end(); model_it++)
 		{
@@ -212,6 +228,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	ShaderProgram* shader_program;
 	int reflection_mode;
 	ShaderDescription shader_description;
+	int num_reflections;
 	for (auto it = config["layout"].begin(); it != config["layout"].end(); it++)
 	{
 		model = new Model(*model_lib.at(it.value()["model"].get<std::string>()));
@@ -222,11 +239,22 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		model->SetIdentifier(it.key());
 
+		if (it.value()["shader"]["reflections"]["fallback"]["reflection"].is_array())
+		{
+			num_reflections = (int)it.value()["shader"]["reflections"]["fallback"]["reflection"].size();
+		}
+		else
+		{
+			num_reflections = 1;
+		}
+
 		//load shader
 		shader_description.shaders = GetShaders(path, config, it.value()["shader"]["render"]);
 		shader_description.preprocessor_defines = {
-				{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
-				{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)}
+			{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
+			{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)},
+			{"REFLECTION_MAX_OBB_NUM", std::to_string(reflection_max_obbs)},
+			{"REFLECTION_NUM", std::to_string(num_reflections) }
 		};
 		shader_program = scene->GetShaderProgram(shader_description);
 		
@@ -304,7 +332,18 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			reflection_mode = it.value()["shader"]["reflections"]["fallback"]["mode"].get<int>();
 		}
 
-		mat.SetReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["fallback"]["reflection"].get<std::string>(), 3), reflection_mode);
+		if (it.value()["shader"]["reflections"]["fallback"]["reflection"].is_array())
+		{
+			int i = 0;
+			for (auto it2 = it.value()["shader"]["reflections"]["fallback"]["reflection"].begin(); it2 != it.value()["shader"]["reflections"]["fallback"]["reflection"].end(); it2++)
+			{
+				mat.AddReflection((Reflection*)scene->GetByIdentifier(it2.value().get<std::string>(), 3), reflection_mode);
+			}
+		}
+		else
+		{
+			mat.AddReflection((Reflection*)scene->GetByIdentifier(it.value()["shader"]["reflections"]["fallback"]["reflection"].get<std::string>(), 3), reflection_mode);
+		}
 
 		model->SetMaterial(mat);
 

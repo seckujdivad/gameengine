@@ -61,8 +61,9 @@
             "appear in ssr": true
           },
           "fallback": {
-            "reflection": "level section 3 reflection",
-            "mode": "iterative sampling"
+            "reflection": 
+              "level section 3 reflection",
+              "mode": "iterative sampling"
           }
         }
       }
@@ -138,7 +139,11 @@
         "reflections": {
           "screen space": true,
           "fallback": {
-            "reflection": "level section 2 reflection",
+            "reflection": [
+              "level section 1 reflection",
+              "level section 2 reflection",
+              "level section 3 reflection"
+            ],
             "mode": "oriented bounding box"
           }
         }
@@ -196,7 +201,7 @@
       "position": [ 10, 0, 0 ],
       "dynamic draw": [  ],
       "static draw": [ "level" ],
-      "dynamic refresh rate": 10,
+      "dynamic refresh rate": -1,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
       "corrections": {
@@ -223,10 +228,10 @@
       }
     },
     "level section 1 reflection": {
-      "position": [ 0, 5, 0 ],
-      "dynamic draw": [ "level" ],
-      "static draw": [],
-      "dynamic refresh rate": 10,
+      "position": [ 0, 10, 0 ],
+      "dynamic draw": [  ],
+      "static draw": [ "level" ],
+      "dynamic refresh rate": -1,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
       "corrections": {
@@ -253,10 +258,10 @@
       }
     },
     "level section 3 reflection": {
-      "position": [ 20, 5, 0 ],
-      "dynamic draw": [ "level" ],
-      "static draw": [],
-      "dynamic refresh rate": 10,
+      "position": [ 20, 10, 0 ],
+      "dynamic draw": [  ],
+      "static draw": [ "level" ],
+      "dynamic refresh rate": -1,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
       "corrections": {
@@ -293,19 +298,19 @@
   },
   "vis boxes": {
     "level section 1": {
-      "position": [ 10, 0, 0 ],
+      "position": [ 0, 10, 0 ],
       "rotation": [ 0, 0, 0 ],
       "dimensions": [ 10, 10, 10 ],
       "pvs": [ "level section 2" ]
     },
     "level section 2": {
-      "position": [ 0, -10, 0 ],
+      "position": [ 10, 0, 0 ],
       "rotation": [ 0, 0, 0 ],
-      "dimensions": [ 10, 30, 10 ],
+      "dimensions": [ 30, 10, 10 ],
       "pvs": [ "level section 1", "level section 3" ]
     },
     "level section 3": {
-      "position": [ 10, -20, 0 ],
+      "position": [ 20, 10, 0 ],
       "rotation": [ 0, 0, 0 ],
       "dimensions": [ 10, 10, 10 ],
       "pvs": [ "level section 2" ]
