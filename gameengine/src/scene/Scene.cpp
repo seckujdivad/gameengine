@@ -528,11 +528,6 @@ void Scene::PushUniforms()
 			this->pointlights.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 			this->pointlights.at(j)->RegisterShadowUniforms(this->models.at(i)->GetShadowShaderProgram());
 		}
-
-		for (size_t j = 0; j < this->reflections.size(); j++)
-		{
-			this->reflections.at(j)->RegisterUniforms(this->models.at(i)->GetShaderProgram());
-		}
 	}
 }
 
