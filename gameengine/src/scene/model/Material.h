@@ -26,11 +26,11 @@ private:
 	glm::vec3 m_specular = glm::vec3(0.0f);
 	float m_specular_highlight = 2.0f;
 
-	Reflection* m_reflection = nullptr;
-	int m_reflection_mode = 0;
-
 	bool m_ssr_enabled = false;
 	MaterialSSRConfig m_ssr_config;
+
+	std::vector<Reflection*> m_reflections;
+	std::vector<int> m_reflection_modes;
 
 public:
 	Material();
@@ -43,8 +43,8 @@ public:
 	void SetSpecularHighlight(float intensity);
 	float GetSpecularHighlight();
 
-	void SetReflection(Reflection* reflection, int mode);
-	Reflection* GetReflection();
+	void AddReflection(Reflection* reflection, int mode);
+	std::vector<Reflection*> GetReflections();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
 	void SetUniforms(ShaderProgram* shader_program);

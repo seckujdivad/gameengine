@@ -41,15 +41,15 @@ float Material::GetSpecularHighlight()
 	return this->m_specular_highlight;
 }
 
-void Material::SetReflection(Reflection* reflection, int mode)
+void Material::AddReflection(Reflection* reflection, int mode)
 {
-	this->m_reflection = reflection;
-	this->m_reflection_mode = mode;
+	this->m_reflections.push_back(reflection);
+	this->m_reflection_modes.push_back(mode);
 }
 
-Reflection* Material::GetReflection()
+std::vector<Reflection*> Material::GetReflections()
 {
-	return this->m_reflection;
+	return this->m_reflections;
 }
 
 void Material::RegisterUniforms(ShaderProgram* shader_program)
@@ -57,7 +57,6 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("mat_diffuse");
 	shader_program->RegisterUniform("mat_specular");
 	shader_program->RegisterUniform("mat_specular_highlight");
-	shader_program->RegisterUniform("mat_reflection_mode");
 
 	shader_program->RegisterUniform("mat_ssr_enabled");
 	shader_program->RegisterUniform("mat_ssr_resolution");
@@ -67,7 +66,10 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform("mat_ssr_show_this");
 	shader_program->RegisterUniform("mat_ssr_refinements");
 
-	this->m_reflection->RegisterUniforms(shader_program);
+	for (int i = 0; i < (int)this->m_reflections.size(); i++)
+	{
+		this->m_reflections.at(i)->RegisterUniforms(shader_program, i);
+	}
 }
 
 void Material::SetUniforms(ShaderProgram* shader_program)
@@ -75,7 +77,6 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 	glUniform3fv(shader_program->GetUniform("mat_diffuse"), 1, glm::value_ptr(this->m_diffuse));
 	glUniform3fv(shader_program->GetUniform("mat_specular"), 1, glm::value_ptr(this->m_specular));
 	glUniform1f(shader_program->GetUniform("mat_specular_highlight"), this->m_specular_highlight);
-	glUniform1i(shader_program->GetUniform("mat_reflection_mode"), this->m_reflection_mode);
 
 	glUniform1i(shader_program->GetUniform("mat_ssr_enabled"), this->m_ssr_enabled);
 	glUniform1f(shader_program->GetUniform("mat_ssr_resolution"), this->m_ssr_config.resolution);
@@ -85,7 +86,10 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 	glUniform1i(shader_program->GetUniform("mat_ssr_show_this"), this->m_ssr_config.appear_in_ssr);
 	glUniform1i(shader_program->GetUniform("mat_ssr_refinements"), this->m_ssr_config.refinements);
 
-	this->m_reflection->SetUniforms(shader_program);
+	for (int i = 0; i < (int)this->m_reflections.size(); i++)
+	{
+		this->m_reflections.at(i)->SetUniforms(shader_program, i, this->m_reflection_modes.at(i));
+	}
 }
 
 void Material::EnableSSR(bool enable)
