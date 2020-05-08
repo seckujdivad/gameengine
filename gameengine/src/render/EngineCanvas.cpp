@@ -4,7 +4,7 @@
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args) : wxGLCanvas(parent, args, id)
 {
 	wxGLContextAttrs ctx_attrs;
-	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(0).EndList();
+	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
 	this->m_glcontext = new wxGLContext(this, NULL, &ctx_attrs);
 	this->SetCurrent(*this->m_glcontext);
 
