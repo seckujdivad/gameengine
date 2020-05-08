@@ -57,13 +57,12 @@
         },
         "reflections": {
           "screen space": {
-            "enabled": true,
+            "enabled": false,
             "appear in ssr": true
           },
           "fallback": {
-            "reflection": 
-              "level section 3 reflection",
-              "mode": "iterative sampling"
+            "reflection": "level section 3 reflection",
+            "mode": "iterative sampling"
           }
         }
       }
@@ -100,7 +99,7 @@
         },
         "reflections": {
           "screen space": {
-            "enabled": true,
+            "enabled": false,
             "appear in ssr": true
           },
           "fallback": {
