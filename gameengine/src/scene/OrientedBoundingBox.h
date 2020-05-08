@@ -10,7 +10,7 @@
 #include "Rotatable.h"
 #include "Scalable.h"
 
-class OrientedBoundingBox : virtual public Positionable, virtual public Rotatable, virtual public Scalable
+class OrientedBoundingBox : public Positionable, public Rotatable, public Scalable
 {
 private:
 	glm::mat3 m_rotation_matrix = glm::mat3(1.0f);

@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "VisBox.h"
 
-VisBox::VisBox() : Nameable(), Rotatable(), Positionable(), Scalable(), OrientedBoundingBox()
+VisBox::VisBox() : Nameable(), OrientedBoundingBox()
 {
 }
 

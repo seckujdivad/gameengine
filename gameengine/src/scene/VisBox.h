@@ -32,7 +32,7 @@ public:
 	}
 };
 
-class VisBox : virtual public Nameable, virtual public Positionable, virtual public Rotatable, virtual public Scalable, public OrientedBoundingBox
+class VisBox : public Nameable, public OrientedBoundingBox
 {
 private:
 	std::unordered_set<VisBox*, HashPointer<VisBox>> m_pvs;
