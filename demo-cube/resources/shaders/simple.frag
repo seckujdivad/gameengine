@@ -289,7 +289,7 @@ void main()
 	else
 	{
 		bool ssr_reflection_applied = false;
-		if (render_output_valid)
+		if (render_output_valid && mat_ssr_enabled)
 		{
 			if ((length(globalCamSpacePos.xyz) < mat_ssr_max_distance))
 			{
