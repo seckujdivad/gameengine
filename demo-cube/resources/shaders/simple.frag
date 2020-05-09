@@ -282,7 +282,7 @@ void main()
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, globalUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
-	if (reflection_intensity == vec3(0.0f, 0.0f, 0.0f))
+	if (reflection_isdrawing || (reflection_intensity == vec3(0.0f, 0.0f, 0.0f)))
 	{
 		//do nothing - reflections have no effect on this fragment
 	}
@@ -424,7 +424,11 @@ void main()
 					}
 				}
 				
-				if (search_index != -1)
+				if (search_index == -1)
+				{
+					reflection_colour = vec3(1.0f, vec2(0.0f));
+				}
+				else
 				{
 					//search all values and see if you can step on from
 					included_segments[search_index] = true;
@@ -452,10 +456,6 @@ void main()
 					//vec4 reflection_sample = vec4(vec3(length(line_end_pos - globalSceneSpacePos.xyz) / 15).xyz, 0.0f);
 
 					reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
-				}
-				else
-				{
-					reflection_colour = vec3(0.0f);
 				}
 			}
 		}
