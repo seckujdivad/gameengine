@@ -22,6 +22,18 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	glGenTextures(1, &this->m_cubemap_depth);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap_depth);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, this->m_tex_width, this->m_tex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 	glGenTextures(1, &this->m_cubemap_static);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap_static);
 	for (int i = 0; i < 6; i++)
@@ -34,10 +46,23 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+	glGenTextures(1, &this->m_cubemap_static_depth);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap_static_depth);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, this->m_tex_width, this->m_tex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->m_cubemap);
 	glGenFramebuffers(1, &this->m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_cubemap, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_cubemap_depth, 0);
 	//glDrawBuffer(GL_NONE);
 	//glReadBuffer(GL_NONE);
 
@@ -55,7 +80,9 @@ Reflection::Reflection(unsigned int texture_width, unsigned int texture_height, 
 Reflection::~Reflection()
 {
 	glDeleteTextures(1, &this->m_cubemap);
+	glDeleteTextures(1, &this->m_cubemap_depth);
 	glDeleteTextures(1, &this->m_cubemap_static);
+	glDeleteTextures(1, &this->m_cubemap_static_depth);
 	glDeleteFramebuffers(1, &this->m_fbo);
 }
 
@@ -101,6 +128,7 @@ void Reflection::SelectFBO(int face)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, this->m_cubemap, 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, this->m_cubemap_depth, 0);
 }
 
 void Reflection::CopyStaticToDynamic()
@@ -108,12 +136,18 @@ void Reflection::CopyStaticToDynamic()
 	glCopyImageSubData(this->m_cubemap_static, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 		this->m_cubemap, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 		this->m_tex_width, this->m_tex_height, 6);
+	glCopyImageSubData(this->m_cubemap_static_depth, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_cubemap_depth, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_tex_width, this->m_tex_height, 6);
 }
 
 void Reflection::CopyDynamicToStatic()
 {
 	glCopyImageSubData(this->m_cubemap, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 		this->m_cubemap_static, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_tex_width, this->m_tex_height, 6);
+	glCopyImageSubData(this->m_cubemap_depth, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		this->m_cubemap_static_depth, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 		this->m_tex_width, this->m_tex_height, 6);
 }
 

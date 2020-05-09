@@ -16,7 +16,9 @@ class Reflection : public Positionable, public Nameable
 private:
 	GLuint m_fbo = NULL;
 	GLuint m_cubemap = NULL;
+	GLuint m_cubemap_depth = NULL;
 	GLuint m_cubemap_static = NULL;
+	GLuint m_cubemap_static_depth = NULL;
 	unsigned int m_tex_width = 1024;
 	unsigned int m_tex_height = 1024;
 	float m_clip_near = 0.1f;
