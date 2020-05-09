@@ -312,8 +312,6 @@ void Scene::Render(GLuint framebuffer)
 	//get viewport dimensions so it can be reset
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
-
-	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 	
 	//draw shadows
 	this->DrawShadows(1);
@@ -326,6 +324,7 @@ void Scene::Render(GLuint framebuffer)
 
 	glCullFace(GL_BACK);
 	glViewport(viewport_dimensions[0], viewport_dimensions[1], viewport_dimensions[2], viewport_dimensions[3]);
+	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	this->m_active_camera->SetViewportDimensions(viewport_dimensions[2] - viewport_dimensions[0], viewport_dimensions[3] - viewport_dimensions[1]);
@@ -349,8 +348,6 @@ void Scene::Render(GLuint framebuffer)
 
 		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
 		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
-		
-		model->BindVAO();
 
 		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 		this->m_active_camera->SetUniforms(model_shader_program);
@@ -370,6 +367,7 @@ void Scene::Render(GLuint framebuffer)
 			glUniform1i(model_shader_program->GetUniform("render_output_valid"), true);
 		}
 
+		model->BindVAO();
 		model->DrawVBOs();
 	}
 }
@@ -444,20 +442,20 @@ void Scene::DrawReflections(int mode)
 
 	for (size_t i = 0; i < this->reflections.size(); i++)
 	{
-		if ((mode == 0) || ((mode == 1) && this->reflections.at(i)->DynamicNeedsRedrawing(true)))
+		Reflection* reflection = this->reflections.at(i);
+
+		if ((mode == 0) || ((mode == 1) && reflection->DynamicNeedsRedrawing(true)))
 		{
 			if (mode == 1)
 			{
-				this->reflections.at(i)->CopyStaticToDynamic();
+				reflection->CopyStaticToDynamic();
 			}
 
-			std::vector<Model*> models = this->GetVisibleModels(glm::vec3(this->reflections.at(i)->GetPosition(0),
-				this->reflections.at(i)->GetPosition(1),
-				this->reflections.at(i)->GetPosition(2)));
+			std::vector<Model*> models = this->GetVisibleModels(reflection->GetPositionVec());
 
 			for (int face = 0; face < 6; face++)
 			{
-				this->reflections.at(i)->SelectFBO(face);
+				reflection->SelectFBO(face);
 
 				if (mode == 0)
 				{
@@ -471,11 +469,11 @@ void Scene::DrawReflections(int mode)
 					bool draw_model;
 					if (mode == 0)
 					{
-						draw_model = this->reflections.at(i)->ModelIsStatic(model->GetIdentifier());
+						draw_model = reflection->ModelIsStatic(model->GetIdentifier());
 					}
 					else
 					{
-						draw_model = this->reflections.at(i)->ModelIsDynamic(model->GetIdentifier());
+						draw_model = reflection->ModelIsDynamic(model->GetIdentifier());
 					}
 
 					if (draw_model)
@@ -485,14 +483,16 @@ void Scene::DrawReflections(int mode)
 						glUniform3fv(model->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 						
 						model->SetUniforms();
-						this->reflections.at(i)->SetGenerateUniforms(model->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
+						reflection->SetGenerateUniforms(model->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
 
 						for (size_t k = 0; k < this->pointlights.size(); k++)
 						{
 							this->pointlights.at(k)->SetUniforms(model->GetShaderProgram());
 						}
 
-						this->reflections.at(i)->InitialiseViewport();
+						glUniform1i(model->GetShaderProgram()->GetUniform("mat_ssr_enabled"), GL_FALSE);
+
+						reflection->InitialiseViewport();
 						model->BindVAO();
 						model->DrawVBOs();
 					}
@@ -501,11 +501,11 @@ void Scene::DrawReflections(int mode)
 
 			if (mode == 0)
 			{
-				this->reflections.at(i)->CopyDynamicToStatic();
+				reflection->CopyDynamicToStatic();
 			}
 		}
 
-		this->reflections.at(i)->IncrementFrameCounter(1);
+		reflection->IncrementFrameCounter(1);
 	}
 }
 
