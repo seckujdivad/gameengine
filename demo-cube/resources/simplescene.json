@@ -128,7 +128,7 @@
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1.0, 1.0, 1.0 ],
-          "reflection intensity": [ 0.05, 0.05, 0.05 ]
+          "reflection intensity": [ 0.5, 0.5, 0.5 ]
         },
         "phong": {
           "diffuse": [ 0.2, 0.2, 0.2 ],
