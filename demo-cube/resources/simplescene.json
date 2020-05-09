@@ -174,17 +174,7 @@
     "ambient": [ 0.3, 0.3, 0.3 ],
     "point lights": {
       "simple light": {
-        "position": [ 0, -10, 0 ],
-        "intensity": [ 1, 1, 1 ],
-        "shadows": false,
-        "shadow texture": [ 2048, 2048 ],
-        "shadow clips": [ 0.1, 100 ],
-        "dynamic draw": [ "simple cube", "blender suzanne" ],
-        "static draw": [ "level section 1", "level section 2", "level section 3" ],
-        "dynamic refresh rate": 10
-      },
-      "simple light 2": {
-        "position": [ 14, -20, 0 ],
+        "position": [ 10, 0, 0 ],
         "intensity": [ 1, 1, 1 ],
         "shadows": false,
         "shadow texture": [ 2048, 2048 ],
