@@ -31,6 +31,8 @@ private:
 	};
 	std::string m_texture_names[16] = { "" };
 
+	std::map<std::string, std::vector<void*>> m_shader_arrays;
+
 public:
 	ShaderProgram();
 	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines);
@@ -48,4 +50,7 @@ public:
 	void RegisterTexture(std::string name, GLuint texture, GLuint type, int index = -1);
 	void UpdateTexture(std::string name, GLuint texture);
 	void UpdateTexture(int index, GLuint texture);
+
+	int ReserveShaderArrayIndex(std::string array_name, void* object);
+	int GetShaderArrayIndex(std::string array_name, void* object);
 };

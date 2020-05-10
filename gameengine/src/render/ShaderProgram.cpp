@@ -250,3 +250,50 @@ void ShaderProgram::UpdateTexture(int index, GLuint texture)
 {
 	this->m_textures[index] = texture;
 }
+
+int ShaderProgram::ReserveShaderArrayIndex(std::string array_name, void* object)
+{
+	if (this->m_shader_arrays.count(array_name) == 0)
+	{
+		this->m_shader_arrays.insert(std::pair<std::string, std::vector<void*>>(array_name, std::vector<void*>()));
+		this->m_shader_arrays.at(array_name).push_back(object);
+		return 0;
+	}
+	else
+	{
+		std::vector<void*> object_pointers = this->m_shader_arrays.at(array_name);
+		std::vector<void*>::iterator it = std::find(object_pointers.begin(), object_pointers.end(), object);
+
+		if (it == object_pointers.end())
+		{
+			this->m_shader_arrays.at(array_name).push_back(object);
+			return (int)(this->m_shader_arrays.at(array_name).size() - 1);
+		}
+		else
+		{
+			return std::distance(object_pointers.begin(), it);
+		}
+	}
+}
+
+int ShaderProgram::GetShaderArrayIndex(std::string array_name, void* object)
+{
+	if (this->m_shader_arrays.count(array_name) == 0)
+	{
+		throw std::runtime_error("Array name not registered with ShaderProgram::ReserveShaderArrayIndex");
+	}
+	else
+	{
+		std::vector<void*> object_pointers = this->m_shader_arrays.at(array_name);
+		std::vector<void*>::iterator it = std::find(object_pointers.begin(), object_pointers.end(), object);
+
+		if (it == object_pointers.end())
+		{
+			throw std::runtime_error("Pointer not registered with this array with ShaderProgram::ReserveShaderArrayIndex");
+		}
+		else
+		{
+			return std::distance(object_pointers.begin(), it);
+		}
+	}
+}
