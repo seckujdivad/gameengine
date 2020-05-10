@@ -151,13 +151,15 @@ void Reflection::CopyDynamicToStatic()
 		this->m_tex_width, this->m_tex_height, 6);
 }
 
-void Reflection::RegisterUniforms(ShaderProgram* shader_program, int index)
+void Reflection::RegisterUniforms(ShaderProgram* shader_program)
 {
+	int shader_index = shader_program->ReserveShaderArrayIndex("reflections", this);
+
 	shader_program->RegisterUniform("reflection_isdrawing");
 
-	shader_program->RegisterTexture("reflection_cubemaps[" + std::to_string(index) + "]", this->m_cubemap, GL_TEXTURE_CUBE_MAP);
+	shader_program->RegisterTexture("reflection_cubemaps[" + std::to_string(shader_index) + "]", this->m_cubemap, GL_TEXTURE_CUBE_MAP);
 
-	std::string prefix1 = "reflections[" + std::to_string(index) + "].";
+	std::string prefix1 = "reflections[" + std::to_string(shader_index) + "].";
 	std::string prefix2;
 
 	shader_program->RegisterUniform(prefix1 + "position");
@@ -178,13 +180,15 @@ void Reflection::RegisterUniforms(ShaderProgram* shader_program, int index)
 	}
 }
 
-void Reflection::SetUniforms(ShaderProgram* shader_program, int index, int mode)
+void Reflection::SetUniforms(ShaderProgram* shader_program, int mode)
 {
+	int shader_index = shader_program->GetShaderArrayIndex("reflections", this);
+
 	glUniform1i(shader_program->GetUniform("reflection_isdrawing"), GL_FALSE);
 
-	shader_program->UpdateTexture("reflection_cubemaps[" + std::to_string(index) + "]", this->m_cubemap);
+	shader_program->UpdateTexture("reflection_cubemaps[" + std::to_string(shader_index) + "]", this->m_cubemap);
 
-	std::string prefix1 = "reflections[" + std::to_string(index) + "].";
+	std::string prefix1 = "reflections[" + std::to_string(shader_index) + "].";
 	std::string prefix2;
 	glUniform3fv(shader_program->GetUniform(prefix1 + "position"), 1, glm::value_ptr(this->GetPositionVec()));
 	glUniform1f(shader_program->GetUniform(prefix1 + "clip_near"), this->m_clip_near);
@@ -373,4 +377,9 @@ bool Reflection::DynamicNeedsRedrawing(bool reset_if_redraw)
 
 		return result;
 	}
+}
+
+void Reflection::AddPotentialOBBSample(Reflection* reflection)
+{
+	this->m_possible_obb_samples.push_back(reflection);
 }

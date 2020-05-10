@@ -68,7 +68,7 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 
 	for (int i = 0; i < (int)this->m_reflections.size(); i++)
 	{
-		this->m_reflections.at(i)->RegisterUniforms(shader_program, i);
+		this->m_reflections.at(i)->RegisterUniforms(shader_program);
 	}
 }
 
@@ -88,7 +88,7 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 
 	for (int i = 0; i < (int)this->m_reflections.size(); i++)
 	{
-		this->m_reflections.at(i)->SetUniforms(shader_program, i, this->m_reflection_modes.at(i));
+		this->m_reflections.at(i)->SetUniforms(shader_program, this->m_reflection_modes.at(i));
 	}
 }
 

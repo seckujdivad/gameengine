@@ -43,6 +43,8 @@ private:
 	std::vector<std::string> m_models_static;
 	std::vector<std::string> m_models_dynamic;
 
+	std::vector<Reflection*> m_possible_obb_samples;
+
 	void UpdateCameraData();
 
 public:
@@ -63,8 +65,8 @@ public:
 	void CopyStaticToDynamic();
 	void CopyDynamicToStatic();
 
-	void RegisterUniforms(ShaderProgram* shader_program, int index);
-	void SetUniforms(ShaderProgram* shader_program, int index, int mode);
+	void RegisterUniforms(ShaderProgram* shader_program);
+	void SetUniforms(ShaderProgram* shader_program, int mode);
 
 	void AddStaticModel(std::string identifier);
 	void RemoveStaticModel(std::string identifier);
@@ -79,4 +81,6 @@ public:
 
 	void IncrementFrameCounter(int increment = 1);
 	bool DynamicNeedsRedrawing(bool reset_if_redraw = true);
+
+	void AddPotentialOBBSample(Reflection* reflection);
 };
