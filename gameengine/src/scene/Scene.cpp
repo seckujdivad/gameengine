@@ -51,6 +51,7 @@ Scene::~Scene()
 		glDeleteFramebuffers(1, &this->m_skybox_fbo);
 	}
 
+	delete this->m_approximation;
 	delete this->m_skybox_scene;
 }
 
@@ -349,6 +350,8 @@ void Scene::Render(GLuint framebuffer)
 		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
 		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
 
+		this->m_approximation->SetUniforms(model_shader_program);
+
 		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 		this->m_active_camera->SetUniforms(model_shader_program);
 		model->SetUniforms();
@@ -517,6 +520,8 @@ void Scene::PushUniforms()
 		this->models.at(i)->RegisterShadowUniforms();
 
 		this->models.at(i)->GetShaderProgram()->RegisterUniform("light_ambient");
+
+		this->m_approximation->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 
 		for (size_t j = 0; j < this->cameras.size(); j++)
 		{
@@ -749,4 +754,14 @@ ShaderProgram* Scene::GetShaderProgram(ShaderDescription description)
 	ShaderProgram* new_program = new ShaderProgram(description.shaders, description.preprocessor_defines);
 	this->m_shader_programs.push_back(new_program);
 	return new_program;
+}
+
+void Scene::SetApproximation(SceneApproximation* approximation)
+{
+	if (this->m_approximation != nullptr)
+	{
+		delete this->m_approximation;
+	}
+
+	this->m_approximation = approximation;
 }

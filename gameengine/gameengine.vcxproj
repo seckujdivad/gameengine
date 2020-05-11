@@ -191,6 +191,7 @@
     <ClInclude Include="src\scene\Rotatable.h" />
     <ClInclude Include="src\scene\Scalable.h" />
     <ClInclude Include="src\scene\Scene.h" />
+    <ClInclude Include="src\scene\SceneApproximation.h" />
     <ClInclude Include="src\scene\VisBox.h" />
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +212,7 @@
     <ClCompile Include="src\scene\Rotatable.cpp" />
     <ClCompile Include="src\scene\Scalable.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
+    <ClCompile Include="src\scene\SceneApproximation.cpp" />
     <ClCompile Include="src\scene\VisBox.cpp" />
   </ItemGroup>
   <ItemGroup>

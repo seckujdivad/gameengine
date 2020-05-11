@@ -105,6 +105,9 @@
     <ClInclude Include="src\scene\OrientedBoundingBox.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\SceneApproximation.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -159,6 +162,9 @@
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\OrientedBoundingBox.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\SceneApproximation.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>

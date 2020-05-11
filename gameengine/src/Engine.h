@@ -21,6 +21,7 @@
 #include "render/ShaderProgram.h"
 #include "loaders/models/PlyLoader.h"
 #include "scene/VisBox.h"
+#include "scene/SceneApproximation.h"
 
 using nlohmann::json;
 

@@ -113,8 +113,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	//load reflections
 	Reflection* reflection;
 	OrientedBoundingBox obb;
-	int reflection_max_obbs = 1;
-	int obb_count;
 	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
 	{
 		reflection = new Reflection(it.value()["texture"][0].get<int>(),
@@ -130,28 +128,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		reflection->ConfigureIterative(it.value()["corrections"]["iterative sampling"]["iterations"].get<int>());
 
-		obb_count = 0;
-		for (auto it2 = it.value()["corrections"]["oriented bounding box"].begin(); it2 != it.value()["corrections"]["oriented bounding box"].end(); it2++)
-		{
-			obb.SetPosition(glm::vec3(it2.value()["position"][0].get<float>(),
-				it2.value()["position"][1].get<float>(),
-				it2.value()["position"][2].get<float>()));
-			obb.SetRotation(glm::vec3(it2.value()["rotation"][0].get<float>(),
-				it2.value()["rotation"][1].get<float>(),
-				it2.value()["rotation"][2].get<float>()));
-			obb.SetScale(glm::vec3(it2.value()["dimensions"][0].get<float>(),
-				it2.value()["dimensions"][1].get<float>(),
-				it2.value()["dimensions"][2].get<float>()) * 0.5f);
-			reflection->AddOBB(obb);
-
-			obb_count++;
-		}
-
-		if (obb_count > reflection_max_obbs)
-		{
-			reflection_max_obbs = obb_count;
-		}
-
 		for (auto model_it = it.value()["static draw"].begin(); model_it != it.value()["static draw"].end(); model_it++)
 		{
 			reflection->AddStaticModel(model_it.value().get<std::string>());
@@ -164,6 +140,19 @@ Scene* InitialiseScene(std::string path, std::string filename)
 
 		scene->AddReflection(reflection);
 	}
+
+	/*
+	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
+	{
+		reflection = (Reflection*)scene->GetByIdentifier(it.key(), 3);
+		
+		if (it.value()[""])
+		{
+
+		}
+
+		for (auto it2 = it.value()[""])
+	}*/
 
 	//load vis boxes
 	std::map<std::string, VisBox*> visboxes;
@@ -203,6 +192,23 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			it->first->AddPotentiallyVisible(visboxes.at(it->second.at(i)));
 		}
 	}
+
+	//load obb scene approximation
+	SceneApproximation* approximation = new SceneApproximation();
+	for (auto it = config["obb approximation"].begin(); it != config["obb approximation"].end(); it++)
+	{
+		obb.SetPosition(glm::vec3(it.value()["position"][0].get<float>(),
+			it.value()["position"][1].get<float>(),
+			it.value()["position"][2].get<float>()));
+		obb.SetRotation(glm::vec3(it.value()["rotation"][0].get<float>(),
+			it.value()["rotation"][1].get<float>(),
+			it.value()["rotation"][2].get<float>()));
+		obb.SetScale(glm::vec3(it.value()["dimensions"][0].get<float>(),
+			it.value()["dimensions"][1].get<float>(),
+			it.value()["dimensions"][2].get<float>()) * 0.5f);
+		approximation->AddOBB(obb);
+	}
+	scene->SetApproximation(approximation);
 	
 	// create model object library
 	std::map<std::string, Model*> model_lib;
@@ -253,7 +259,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		shader_description.preprocessor_defines = {
 			{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
 			{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)},
-			{"REFLECTION_MAX_OBB_NUM", std::to_string(reflection_max_obbs)},
+			{"APPROXIMATION_OBB_NUM", std::to_string(approximation->NumOBBs())},
 			{"REFLECTION_NUM", std::to_string(num_reflections) }
 		};
 		shader_program = scene->GetShaderProgram(shader_description);

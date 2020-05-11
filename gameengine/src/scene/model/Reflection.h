@@ -31,9 +31,6 @@ private:
 	//iterative parallax correction
 	int m_parallax_iterations = 1;
 
-	//obb parallax correction
-	std::vector<OrientedBoundingBox> m_parallax_obbs;
-
 	glm::vec4 m_transform_translate; //cam pos
 	glm::mat4 m_transform_perspective; //cam perspective
 	std::vector<glm::mat4> m_transform_rotate; //cam rotate
@@ -57,8 +54,6 @@ public:
 	float GetFarClip();
 
 	void ConfigureIterative(int iterations);
-	void AddOBB(OrientedBoundingBox obb);
-	int GetOBBCount();
 
 	void InitialiseViewport();
 	void SelectFBO(int face);

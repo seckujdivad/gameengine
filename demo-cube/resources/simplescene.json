@@ -193,24 +193,8 @@
       "dynamic refresh rate": -1,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
+      "potential obb samples": [ "level section 1 reflection", "level section 3 reflection" ],
       "corrections": {
-        "oriented bounding box": [
-          {
-            "dimensions": [ 30, 10, 10 ],
-            "position": [ 10, 0, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 20, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 0, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          }
-        ],
         "iterative sampling": {
           "iterations": 0
         }
@@ -224,23 +208,6 @@
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
       "corrections": {
-        "oriented bounding box": [
-          {
-            "dimensions": [ 30, 10, 10 ],
-            "position": [ 10, 0, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 20, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 0, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          }
-        ],
         "iterative sampling": {
           "iterations": 0
         }
@@ -254,23 +221,6 @@
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
       "corrections": {
-        "oriented bounding box": [
-          {
-            "dimensions": [ 30, 10, 10 ],
-            "position": [ 10, 0, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 20, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          },
-          {
-            "dimensions": [ 10, 20, 10 ],
-            "position": [ 0, 5, 0 ],
-            "rotation": [ 0, 0, 0 ]
-          }
-        ],
         "iterative sampling": {
           "iterations": 0
         }
@@ -304,5 +254,22 @@
       "dimensions": [ 10, 10, 10 ],
       "pvs": [ "level section 2" ]
     }
-  }
+  },
+  "obb approximation": [
+    {
+      "dimensions": [ 30, 10, 10 ],
+      "position": [ 10, 0, 0 ],
+      "rotation": [ 0, 0, 0 ]
+    },
+    {
+      "dimensions": [ 10, 20, 10 ],
+      "position": [ 20, 5, 0 ],
+      "rotation": [ 0, 0, 0 ]
+    },
+    {
+      "dimensions": [ 10, 20, 10 ],
+      "position": [ 0, 5, 0 ],
+      "rotation": [ 0, 0, 0 ]
+    }
+  ]
 }

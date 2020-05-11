@@ -9,8 +9,8 @@
 #define DATA_TEX_NUM 1
 #endif
 
-#if !defined(REFLECTION_MAX_OBB_NUM)
-#define REFLECTION_MAX_OBB_NUM 1
+#if !defined(APPROXIMATION_OBB_NUM)
+#define APPROXIMATION_OBB_NUM 1
 #endif
 
 #if !defined(REFLECTION_NUM)
@@ -85,14 +85,6 @@ uniform PointLight light_points[POINT_LIGHT_NUM];
 //reflections
 uniform bool reflection_isdrawing;
 
-struct ParallaxOBB
-{
-	vec3 position;
-	vec3 dimensions;
-	mat3 rotation;
-	mat3 rotation_inverse;
-};
-
 uniform struct Reflection
 {
 	vec3 position;
@@ -103,13 +95,20 @@ uniform struct Reflection
 	int mode; //0: iterative, 1: obb
 
 	int iterations;
-
-	ParallaxOBB parallax_obbs[REFLECTION_MAX_OBB_NUM];
-	int num_obbs;
 };
 
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
+
+struct ApproximationOBB
+{
+	vec3 position;
+	vec3 dimensions;
+	mat3 rotation;
+	mat3 rotation_inverse;
+};
+
+uniform ApproximationOBB scene_approximations[APPROXIMATION_OBB_NUM]; 
 
 //skybox
 uniform sampler2D skyboxMaskTexture;
@@ -391,17 +390,17 @@ void main()
 			else if (reflections[reflection_index].mode == 1) //oriented bounding box
 			{
 				vec3 intersections[2];
-				vec3 all_intersections[2 * REFLECTION_MAX_OBB_NUM];
+				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM];
 				float final_length = -1.0f;
 				float current_length;
 				int search_index = -1;
 				vec3 refl_dir = normalize(reflect(-fragtocam, normal));
-				bool included_segments[REFLECTION_MAX_OBB_NUM];
+				bool included_segments[APPROXIMATION_OBB_NUM];
 				bool is_valid;
 
-				for (int i = 0; i < reflections[reflection_index].num_obbs; i++)
+				for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 				{
-					GetFirstOBBIntersection(globalSceneSpacePos.xyz, refl_dir, reflections[reflection_index].parallax_obbs[i].position, reflections[reflection_index].parallax_obbs[i].dimensions, reflections[reflection_index].parallax_obbs[i].rotation, reflections[reflection_index].parallax_obbs[i].rotation_inverse, is_valid, intersections);
+					GetFirstOBBIntersection(globalSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections);
 
 					all_intersections[(i * 2)] = intersections[0];
 					all_intersections[(i * 2) + 1] = intersections[1];
@@ -438,7 +437,7 @@ void main()
 					int current_index = 0;
 					current_length = length(line_end_pos - line_start_pos);
 				
-					while (current_index < reflections[reflection_index].num_obbs)
+					while (current_index < APPROXIMATION_OBB_NUM)
 					{
 						if (!included_segments[current_index] && (length(all_intersections[current_index * 2] - line_start_pos) - 0.1f < current_length) && (length(all_intersections[(current_index * 2) + 1] - line_start_pos) > current_length))
 						{

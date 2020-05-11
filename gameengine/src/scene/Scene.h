@@ -13,6 +13,7 @@
 #include "light/PointLight.h"
 #include "model/Reflection.h"
 #include "VisBox.h"
+#include "SceneApproximation.h"
 
 struct ShaderDescription
 {
@@ -50,6 +51,9 @@ private:
 	//managed shaders
 	std::vector<ShaderDescription> m_shader_descriptions;
 	std::vector<ShaderProgram*> m_shader_programs;
+
+	//approximate scene representation
+	SceneApproximation* m_approximation = nullptr;
 	
 public:
 	Scene(Camera* active_camera);
@@ -109,4 +113,6 @@ public:
 	void SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data);
 
 	ShaderProgram* GetShaderProgram(ShaderDescription description);
+
+	void SetApproximation(SceneApproximation* approximation);
 };

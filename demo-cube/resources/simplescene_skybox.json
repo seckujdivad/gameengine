@@ -121,5 +121,12 @@
     "acceptable depth distance": 0.1,
     "max camera distance": 25,
     "appear in ssr": false
-  }
+  },
+  "obb approximation": [
+    {
+      "dimensions": [ 5, 5, 5 ],
+      "position": [ 0, 0, 0 ],
+      "rotation": [ 0, 0, 0 ]
+    }
+  ]
 }
