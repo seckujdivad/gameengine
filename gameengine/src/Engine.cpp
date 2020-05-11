@@ -141,19 +141,6 @@ Scene* InitialiseScene(std::string path, std::string filename)
 		scene->AddReflection(reflection);
 	}
 
-	/*
-	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
-	{
-		reflection = (Reflection*)scene->GetByIdentifier(it.key(), 3);
-		
-		if (it.value()[""])
-		{
-
-		}
-
-		for (auto it2 = it.value()[""])
-	}*/
-
 	//load vis boxes
 	std::map<std::string, VisBox*> visboxes;
 	std::map<VisBox*, std::vector<std::string>> visbox_pvs;
@@ -260,7 +247,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 			{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
 			{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)},
 			{"APPROXIMATION_OBB_NUM", std::to_string(approximation->NumOBBs())},
-			{"REFLECTION_NUM", std::to_string(num_reflections) }
+			{"REFLECTION_NUM", std::to_string(num_reflections)}
 		};
 		shader_program = scene->GetShaderProgram(shader_description);
 		

@@ -150,7 +150,6 @@ void Reflection::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterTexture("reflection_cubemaps[" + std::to_string(shader_index) + "]", this->m_cubemap, GL_TEXTURE_CUBE_MAP);
 
 	std::string prefix1 = "reflections[" + std::to_string(shader_index) + "].";
-	std::string prefix2;
 
 	shader_program->RegisterUniform(prefix1 + "position");
 	shader_program->RegisterUniform(prefix1 + "clip_near");
@@ -174,7 +173,6 @@ void Reflection::SetUniforms(ShaderProgram* shader_program, int mode)
 	glUniform1f(shader_program->GetUniform(prefix1 + "clip_far"), this->m_clip_far);
 	glUniform1i(shader_program->GetUniform(prefix1 + "iterations"), this->m_parallax_iterations);
 	glUniform1i(shader_program->GetUniform(prefix1 + "mode"), mode);
-
 }
 
 void Reflection::UpdateCameraData()
@@ -346,9 +344,4 @@ bool Reflection::DynamicNeedsRedrawing(bool reset_if_redraw)
 
 		return result;
 	}
-}
-
-void Reflection::AddPotentialOBBSample(Reflection* reflection)
-{
-	this->m_possible_obb_samples.push_back(reflection);
 }

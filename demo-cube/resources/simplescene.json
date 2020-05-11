@@ -193,7 +193,6 @@
       "dynamic refresh rate": -1,
       "clips": [ 0.1, 100 ],
       "texture": [ 1024, 1024 ],
-      "potential obb samples": [ "level section 1 reflection", "level section 3 reflection" ],
       "corrections": {
         "iterative sampling": {
           "iterations": 0

@@ -40,8 +40,6 @@ private:
 	std::vector<std::string> m_models_static;
 	std::vector<std::string> m_models_dynamic;
 
-	std::vector<Reflection*> m_possible_obb_samples;
-
 	void UpdateCameraData();
 
 public:
@@ -76,6 +74,4 @@ public:
 
 	void IncrementFrameCounter(int increment = 1);
 	bool DynamicNeedsRedrawing(bool reset_if_redraw = true);
-
-	void AddPotentialOBBSample(Reflection* reflection);
 };
