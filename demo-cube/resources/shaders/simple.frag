@@ -448,10 +448,23 @@ void main()
 						}
 						current_index++;
 					}
+
+					int final_index = reflection_index;
+					float final_length = length(line_end_pos - reflections[reflection_index].position);
+
+					for (int i = 0; i < REFLECTION_NUM; i++)
+					{
+						current_length = length(line_end_pos - reflections[i].position);
+						if (current_length < final_length)
+						{
+							final_index = i;
+							final_length = current_length;
+						}
+					}
 				
 					//sample using the final values
-					vec3 sample_vector = line_end_pos - reflections[reflection_index].position;
-					vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector).rgba;
+					vec3 sample_vector = line_end_pos - reflections[final_index].position;
+					vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
 					//vec4 reflection_sample = vec4(vec3(length(line_end_pos - globalSceneSpacePos.xyz) / 15).xyz, 0.0f);
 
 					reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;

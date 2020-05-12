@@ -200,7 +200,7 @@
       }
     },
     "level section 1 reflection": {
-      "position": [ 0, 10, 0 ],
+      "position": [ 0, 0, 0 ],
       "dynamic draw": [  ],
       "static draw": [ "level" ],
       "dynamic refresh rate": -1,
@@ -213,7 +213,7 @@
       }
     },
     "level section 3 reflection": {
-      "position": [ 20, 10, 0 ],
+      "position": [ 20, 0, 0 ],
       "dynamic draw": [  ],
       "static draw": [ "level" ],
       "dynamic refresh rate": -1,
