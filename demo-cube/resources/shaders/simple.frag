@@ -465,7 +465,6 @@ void main()
 					//sample using the final values
 					vec3 sample_vector = line_end_pos - reflections[final_index].position;
 					vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
-					//vec4 reflection_sample = vec4(vec3(length(line_end_pos - globalSceneSpacePos.xyz) / 15).xyz, 0.0f);
 
 					reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
 				}
