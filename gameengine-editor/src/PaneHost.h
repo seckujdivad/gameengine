@@ -8,6 +8,7 @@
 #include <filesystem>
 
 #include "scene/Scene.h"
+#include "Engine.h"
 
 #include "Main.h"
 

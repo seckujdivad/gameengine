@@ -40,3 +40,7 @@ wxAuiPaneInfo Pane::GetPaneInfo()
 void Pane::PaneDockStateChanged(wxAuiPaneInfo info)
 {
 }
+
+void Pane::SceneChangedEvent(Scene* scene)
+{
+}

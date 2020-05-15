@@ -35,6 +35,7 @@ void Main::menubar_item_selected(wxCommandEvent& evt)
 	}
 
 	delete file_dialog;
+	evt.Skip();
 }
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
@@ -78,8 +79,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	this->m_panehost = new PaneHost(this);
 	this->m_sizer->Add(this->m_panehost, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 
+	this->m_panehost->AddPane<Viewport>(wxAUI_DOCK_CENTRE);
+
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
+
+	this->SetSize(wxSize(800, 600));
 	
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);

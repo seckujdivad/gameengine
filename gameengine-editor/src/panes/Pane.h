@@ -4,6 +4,8 @@
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 
+#include "scene/Scene.h"
+
 class PaneHost;
 
 class Pane : public wxPanel
@@ -24,6 +26,7 @@ public:
 	wxAuiPaneInfo GetPaneInfo();
 
 	virtual void PaneDockStateChanged(wxAuiPaneInfo info);
+	virtual void SceneChangedEvent(Scene* scene);
 };
 
 #include "../PaneHost.h"

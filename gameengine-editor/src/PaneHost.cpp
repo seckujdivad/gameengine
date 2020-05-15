@@ -72,6 +72,7 @@ PaneHost::PaneHost(Main* parent) : wxPanel(parent)
 PaneHost::~PaneHost()
 {
 	this->m_aui_manager.UnInit();
+	delete this->m_scene;
 }
 
 wxAuiPaneInfo PaneHost::GetPaneInfo(int pane_id)
@@ -108,6 +109,18 @@ void PaneHost::PaneResizeHandler(wxSizeEvent& evt)
 bool PaneHost::LoadScene(std::filesystem::path path)
 {
 	this->m_scene_path = path;
+
+	this->m_scene = InitialiseScene(this->m_scene_path.parent_path().string(), this->m_scene_path.filename().string());
+	this->m_scene->PushUniforms();
+	this->m_scene->DrawShadows(0);
+	this->m_scene->DrawReflections(0);
+	this->m_scene->DrawSkyboxScene();
+
+	for (int i = 0; i < (int)this->m_panes.size(); i++)
+	{
+		this->m_panes.at(i)->SceneChangedEvent(this->m_scene);
+	}
+
 	return false;
 }
 
