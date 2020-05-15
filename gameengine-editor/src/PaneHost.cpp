@@ -104,3 +104,29 @@ void PaneHost::PaneResizeHandler(wxSizeEvent& evt)
 
 	evt.Skip();
 }
+
+bool PaneHost::LoadScene(std::filesystem::path path)
+{
+	this->m_scene_path = path;
+	return false;
+}
+
+bool PaneHost::LoadScene(std::string path)
+{
+	return this->LoadScene(std::filesystem::path(path));
+}
+
+bool PaneHost::LoadScene(wxString path)
+{
+	return this->LoadScene(std::string(path));
+}
+
+std::filesystem::path PaneHost::GetScenePath()
+{
+	return this->m_scene_path;
+}
+
+Scene* PaneHost::GetScene()
+{
+	return this->m_scene;
+}

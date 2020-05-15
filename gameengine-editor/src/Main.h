@@ -19,7 +19,11 @@ private:
 	PaneHost* m_panehost;
 	wxToolBar* m_toolbar;
 
+	wxMenuBar* m_menubar;
+	std::vector<wxMenu*> m_menus;
+
 	void tlbr_btn_AddPane_clicked(wxCommandEvent& evt);
+	void menubar_item_selected(wxCommandEvent& evt);
 
 public:
 	Main();

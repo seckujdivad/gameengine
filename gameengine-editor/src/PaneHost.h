@@ -4,6 +4,11 @@
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 
+#include <string>
+#include <filesystem>
+
+#include "scene/Scene.h"
+
 #include "Main.h"
 
 class Pane;
@@ -24,6 +29,9 @@ private:
 	
 	void AddPane(Pane* pane, int direction, bool docked);
 
+	std::filesystem::path m_scene_path;
+	Scene* m_scene = nullptr;
+
 public:
 	PaneHost(Main* parent);
 	~PaneHost();
@@ -36,6 +44,12 @@ public:
 	wxAuiPaneInfo GetPaneInfo(Pane* pane);
 
 	void PaneResizeHandler(wxSizeEvent& evt);
+
+	bool LoadScene(std::filesystem::path path);
+	bool LoadScene(std::string path);
+	bool LoadScene(wxString path);
+	std::filesystem::path GetScenePath();
+	Scene* GetScene();
 };
 
 template<class T>
