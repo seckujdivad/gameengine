@@ -526,6 +526,11 @@ void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::
 		min_filter = GL_NEAREST;
 	}
 
+	if (!image.IsOk())
+	{
+		throw std::runtime_error("Error while creating image bound to " + shader_name);
+	}
+
 	//send image to GPU
 	shader_program->LoadTexture(shader_name, image.GetData(), image.GetWidth(), image.GetHeight(), -1, min_filter, mag_filter);
 }
