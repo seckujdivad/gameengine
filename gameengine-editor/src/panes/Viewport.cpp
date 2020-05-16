@@ -38,8 +38,11 @@ std::string Viewport::GetDisplayName()
 void Viewport::SceneChangedEvent(Scene* scene)
 {
 	this->m_glcanvas->SetScene(scene);
+	this->m_glcanvas->SetActiveCamera(scene->cameras.at(0));
 
-	this->m_glcanvas->SetMouselook(true, scene->GetActiveCamera());
-	this->m_glcanvas->SetKeyboardMove(true, scene->GetActiveCamera());
+	this->m_glcanvas->SetMouselook(true);
+	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
+
+	this->m_glcanvas->SetSize(this->GetSize());
 }

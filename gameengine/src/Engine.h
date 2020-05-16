@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include <wx/wxprec.h>
+#include <wx/image.h>
 
 #include <string>
 #include <vector>

@@ -9,11 +9,11 @@
 #include "../render/ShaderProgram.h"
 #include "model/Model.h"
 #include "Camera.h"
-#include "../render/EngineCanvas.h"
 #include "light/PointLight.h"
 #include "model/Reflection.h"
 #include "VisBox.h"
 #include "SceneApproximation.h"
+#include "../render/Renderable.h"
 
 struct ShaderDescription
 {
@@ -21,13 +21,9 @@ struct ShaderDescription
 	std::vector<std::tuple<std::string, std::string>> preprocessor_defines;
 };
 
-class Scene
+class Scene : public Nameable
 {
 private:
-	Camera* m_active_camera;
-	
-	std::string m_identifier;
-
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -56,11 +52,8 @@ private:
 	SceneApproximation* m_approximation = nullptr;
 	
 public:
-	Scene(Camera* active_camera);
+	Scene();
 	~Scene();
-
-	void SetIdentifier(std::string identifier);
-	std::string GetIdentifier();
 
 	std::vector<Model*> models;
 	std::vector<Camera*> cameras;
@@ -73,8 +66,6 @@ public:
 
 	void AddCamera(Camera* camera);
 	void RemoveCamera(Camera* camera);
-	void SetActiveCamera(Camera* camera);
-	Camera* GetActiveCamera();
 
 	void AddPointLight(PointLight* pointlight);
 	void RemovePointLight(PointLight* pointlight);
@@ -93,7 +84,7 @@ public:
 	void ClearAllModels(bool destroy = false);
 	void ClearAllCameras(bool destroy = false);
 
-	void Render(GLuint framebuffer = 0); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
+	void Render(GLuint framebuffer, Camera* camera); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
 	void DrawShadows(int mode = 0); //0: static, 1: dynamic
 	void DrawReflections(int mode = 0); //0: static, 1: dynamic
 

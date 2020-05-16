@@ -55,7 +55,7 @@ Scene* InitialiseScene(std::string path, std::string filename)
 	}
 
 	// make scene object
-	Scene* scene = new Scene(main_camera);
+	Scene* scene = new Scene();
 
 	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
 	

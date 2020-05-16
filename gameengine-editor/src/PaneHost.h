@@ -61,4 +61,9 @@ inline void PaneHost::AddPane(int direction, bool docked)
 	Pane* new_pane = (Pane*)new T(this);
 	
 	this->AddPane(new_pane, direction, docked);
+
+	if (this->m_scene != nullptr)
+	{
+		new_pane->SceneChangedEvent(this->m_scene);
+	}
 }

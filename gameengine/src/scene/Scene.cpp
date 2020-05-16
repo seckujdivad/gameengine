@@ -1,11 +1,8 @@
 #include <wx/wxprec.h>
 #include "Scene.h"
 
-Scene::Scene(Camera* active_camera)
+Scene::Scene() : Nameable()
 {
-	this->m_active_camera = active_camera;
-	this->m_identifier = "";
-
 	this->InitialiseSkyboxTexture(1, 1);
 }
 
@@ -163,24 +160,10 @@ void Scene::RemoveCamera(Camera* camera)
 	{
 		throw std::runtime_error("Camera doesn't exist in this scene");
 	}
-	else if (camera == this->m_active_camera)
-	{
-		throw std::runtime_error("Can't remove the active camera");
-	}
 	else
 	{
 		this->cameras.erase(this->cameras.begin() + camera_index);
 	}
-}
-
-void Scene::SetActiveCamera(Camera* camera)
-{
-	this->m_active_camera = camera;
-}
-
-Camera* Scene::GetActiveCamera()
-{
-	return this->m_active_camera;
 }
 
 void Scene::AddPointLight(PointLight* pointlight)
@@ -308,7 +291,7 @@ void Scene::ClearAllCameras(bool destroy)
 	this->cameras.clear();
 }
 
-void Scene::Render(GLuint framebuffer)
+void Scene::Render(GLuint framebuffer, Camera* camera)
 {
 	//get viewport dimensions so it can be reset
 	GLint viewport_dimensions[4];
@@ -328,12 +311,12 @@ void Scene::Render(GLuint framebuffer)
 	glClearColor(this->m_clear_colour.r, this->m_clear_colour.g, this->m_clear_colour.b, this->m_clear_colour.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	this->m_active_camera->SetViewportDimensions(viewport_dimensions[2] - viewport_dimensions[0], viewport_dimensions[3] - viewport_dimensions[1]);
+	camera->SetViewportDimensions(viewport_dimensions[2] - viewport_dimensions[0], viewport_dimensions[3] - viewport_dimensions[1]);
 
 	//draw scene
-	std::vector<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(this->m_active_camera->GetPosition(0),
-		this->m_active_camera->GetPosition(1),
-		this->m_active_camera->GetPosition(2)));
+	std::vector<Model*> models_to_draw = this->GetVisibleModels(glm::vec3(camera->GetPosition(0),
+		camera->GetPosition(1),
+		camera->GetPosition(2)));
 
 	ShaderProgram* model_shader_program = nullptr;
 
@@ -353,7 +336,7 @@ void Scene::Render(GLuint framebuffer)
 		this->m_approximation->SetUniforms(model_shader_program);
 
 		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
-		this->m_active_camera->SetUniforms(model_shader_program);
+		camera->SetUniforms(model_shader_program);
 		model->SetUniforms();
 
 		for (size_t j = 0; j < this->pointlights.size(); j++)
@@ -536,16 +519,6 @@ void Scene::PushUniforms()
 	}
 }
 
-void Scene::SetIdentifier(std::string identifier)
-{
-	this->m_identifier = identifier;
-}
-
-std::string Scene::GetIdentifier()
-{
-	return this->m_identifier;
-}
-
 void Scene::SetAmbientLight(glm::vec3 light_intensity)
 {
 	this->m_light_ambient = light_intensity;
@@ -612,7 +585,7 @@ void Scene::DrawSkyboxScene()
 		glBindFramebuffer(GL_FRAMEBUFFER, this->m_skybox_fbo);
 		glViewport(0, 0, this->m_skybox_texture_dimensions[0], this->m_skybox_texture_dimensions[1]);
 
-		Camera* scene_camera = this->m_skybox_scene->GetActiveCamera();
+		Camera* scene_camera = this->m_skybox_scene->cameras.at(0);
 
 		int rotation_change[3] = { 0, 0, 0 };
 
@@ -663,7 +636,7 @@ void Scene::DrawSkyboxScene()
 				scene_camera->SetRotation(j, scene_camera->GetRotation(j) + rotation_change[j]);
 			}
 
-			this->m_skybox_scene->Render(this->m_skybox_fbo);
+			this->m_skybox_scene->Render(this->m_skybox_fbo, scene_camera);
 
 			for (int j = 0; j < 3; j++)
 			{

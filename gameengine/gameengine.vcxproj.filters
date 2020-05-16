@@ -108,6 +108,9 @@
     <ClInclude Include="src\scene\SceneApproximation.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\Renderable.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -166,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\SceneApproximation.cpp">
       <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\Renderable.cpp">
+      <Filter>Source Files\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
