@@ -15,6 +15,7 @@ class Main : public wxFrame
 {
 private:
 	wxGridBagSizer* m_sizer;
+	Engine* m_engine;
 	EngineCanvas* m_glcanvas;
 	wxButton* m_btn_render;
 	wxListBox* m_lb_models;

@@ -47,9 +47,10 @@ private:
 	void Clicked(wxMouseEvent& evt);
 
 	void PostRenderEvent();
+	void RenderInitialisationEvent();
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context);
 	~EngineCanvas();
 
 	void SetMouselook(bool enable);
@@ -59,6 +60,8 @@ public:
 	void SetVerticalSync(bool enabled);
 
 	std::tuple<int, int> GetOutputSize();
+
+	void MakeOpenGLFocus();
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

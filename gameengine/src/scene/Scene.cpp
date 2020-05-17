@@ -558,7 +558,22 @@ void Scene::InitialiseSkyboxTexture(unsigned int texture_width, unsigned int tex
 	GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE)
 	{
-		throw std::runtime_error("Framebuffer error, status " + std::to_string(framebuffer_status));
+		std::string status = "unknown status";
+
+		if (framebuffer_status == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)
+		{
+			status = "incomplete attachment";
+		}
+		else if(framebuffer_status == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT)
+		{
+			status = "missing attachment";
+		}
+		else if(framebuffer_status == GL_FRAMEBUFFER_UNSUPPORTED)
+		{
+			status = "unsupported";
+		}
+
+		throw std::runtime_error("Framebuffer error, status " + std::to_string(framebuffer_status) + " (" + status + ")");
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

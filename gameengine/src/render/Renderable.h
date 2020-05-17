@@ -36,7 +36,9 @@ protected:
 
 	void SetFramebuffer(GLuint fbo);
 
-	virtual void PostRenderEvent();
+	virtual void RenderInitialisationEvent(); //happens before rendering
+	virtual void PreRenderEvent(); //happens just before rendering, or just after when continuous draw is true
+	virtual void PostRenderEvent(); //happens just after rendering, or just bore when continuous draw is true
 
 public:
 	Renderable();

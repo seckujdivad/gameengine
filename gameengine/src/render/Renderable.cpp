@@ -5,6 +5,14 @@ void Renderable::SetFramebuffer(GLuint fbo)
 	this->m_fbo = fbo;
 }
 
+void Renderable::RenderInitialisationEvent()
+{
+}
+
+void Renderable::PreRenderEvent()
+{
+}
+
 void Renderable::PostRenderEvent()
 {
 
@@ -60,6 +68,10 @@ void Renderable::Render(bool continuous_draw)
 		{
 			glFlush();
 			this->PostRenderEvent();
+		}
+		else
+		{
+			this->PreRenderEvent();
 		}
 
 		this->m_scene->SetReceivedOutputTextures(this->m_postprocessor_colour_texture_read, this->m_postprocessor_depth_texture_read, this->m_postprocessor_data_textures_read);
@@ -133,7 +145,11 @@ void Renderable::Render(bool continuous_draw)
 			}
 		}
 
-		if (!continuous_draw)
+		if (continuous_draw)
+		{
+			this->PreRenderEvent();
+		}
+		else
 		{
 			glFlush();
 			this->PostRenderEvent();

@@ -534,3 +534,47 @@ void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::
 	//send image to GPU
 	shader_program->LoadTexture(shader_name, image.GetData(), image.GetWidth(), image.GetHeight(), -1, min_filter, mag_filter);
 }
+
+Engine::Engine(wxWindow* parent)
+{
+	this->m_parent = parent;
+	
+	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
+
+	wxGLCanvas* temp_canvas = new wxGLCanvas(this->m_parent, this->m_canvas_args, wxID_ANY);
+	wxGLContextAttrs ctx_attrs;
+	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
+	this->m_glcontext = new wxGLContext(temp_canvas, NULL, &ctx_attrs);
+
+	temp_canvas->SetCurrent(*this->m_glcontext);
+
+	std::remove(ENGINECANVAS_LOG_PATH);
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
+	{
+		throw std::runtime_error("Couldn't initialise glew");
+	}
+
+	glLoadIdentity();
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+	glDebugMessageCallback(MessageCallback, 0);
+
+	delete temp_canvas;
+}
+
+Engine::~Engine()
+{
+	
+}
+
+EngineCanvas* Engine::GenerateNewCanvas(wxWindowID id)
+{
+	return new EngineCanvas(this->m_parent, id, this->m_canvas_args, this->m_glcontext);
+}

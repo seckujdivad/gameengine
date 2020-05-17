@@ -23,8 +23,23 @@
 #include "loaders/models/PlyLoader.h"
 #include "scene/VisBox.h"
 #include "scene/SceneApproximation.h"
+#include "render/EngineCanvas.h"
 
 using nlohmann::json;
+
+class Engine
+{
+private:
+	wxGLContext* m_glcontext;
+	wxWindow* m_parent;
+	wxGLAttributes m_canvas_args;
+
+public:
+	Engine(wxWindow* parent);
+	~Engine();
+
+	EngineCanvas* GenerateNewCanvas(wxWindowID id = wxID_ANY);
+};
 
 Scene* InitialiseScene(std::string path, std::string filename);
 

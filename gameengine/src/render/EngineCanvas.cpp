@@ -1,28 +1,12 @@
 #include <wx/wxprec.h>
 #include "EngineCanvas.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args) : wxGLCanvas(parent, args, id), Renderable()
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context) : wxGLCanvas(parent, args, id), Renderable()
 {
-	wxGLContextAttrs ctx_attrs;
-	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
-	this->m_glcontext = new wxGLContext(this, NULL, &ctx_attrs);
+	this->m_glcontext = context;
 	this->SetCurrent(*this->m_glcontext);
 
-	std::remove(ENGINECANVAS_LOG_PATH);
-	
-	glewExperimental = GL_TRUE;
-	glewInit();
-	glLoadIdentity();
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-	this->SetVerticalSync(false);
-
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-	glDebugMessageCallback(MessageCallback, 0);
+	//this->SetVerticalSync(false);
 
 	this->SetFramebuffer(0);
 
@@ -168,6 +152,11 @@ void EngineCanvas::PostRenderEvent()
 	this->SwapBuffers();
 }
 
+void EngineCanvas::RenderInitialisationEvent()
+{
+	this->MakeOpenGLFocus();
+}
+
 void EngineCanvas::SetMouselookActive(bool enable)
 {
 	if (enable)
@@ -221,6 +210,11 @@ void EngineCanvas::SetVerticalSync(bool enabled)
 std::tuple<int, int> EngineCanvas::GetOutputSize()
 {
 	return std::tuple<int, int>(this->GetSize().x, this->GetSize().y);
+}
+
+void EngineCanvas::MakeOpenGLFocus()
+{
+	this->SetCurrent(*this->m_glcontext);
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
