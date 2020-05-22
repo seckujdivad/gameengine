@@ -64,6 +64,8 @@ void Renderable::Render(bool continuous_draw)
 {
 	if (this->m_scene != nullptr)
 	{
+		this->RenderInitialisationEvent();
+
 		if (continuous_draw)
 		{
 			glFlush();
@@ -81,6 +83,7 @@ void Renderable::Render(bool continuous_draw)
 
 		if (this->m_postprocessor == nullptr)
 		{
+			glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 			glViewport(0, 0, tex_size[0], tex_size[1]);
 			this->m_scene->Render(this->m_fbo, this->m_active_camera);
 		}

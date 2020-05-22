@@ -46,6 +46,7 @@ private:
 	void KeyDown(wxKeyEvent& evt);
 	void Clicked(wxMouseEvent& evt);
 
+	void PreRenderEvent();
 	void PostRenderEvent();
 	void RenderInitialisationEvent();
 

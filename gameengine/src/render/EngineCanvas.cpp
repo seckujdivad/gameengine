@@ -4,7 +4,7 @@
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context) : wxGLCanvas(parent, args, id), Renderable()
 {
 	this->m_glcontext = context;
-	this->SetCurrent(*this->m_glcontext);
+	this->MakeOpenGLFocus();
 
 	//this->SetVerticalSync(false);
 
@@ -27,7 +27,6 @@ EngineCanvas::~EngineCanvas()
 {
 	this->m_timer_mainloop->Stop();
 	delete this->m_timer_mainloop;
-	wxDELETE(this->m_glcontext);
 }
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
@@ -145,6 +144,11 @@ void EngineCanvas::Clicked(wxMouseEvent& evt)
 	}
 
 	evt.Skip();
+}
+
+void EngineCanvas::PreRenderEvent()
+{
+	glViewport(0, 0, this->GetSize().x, this->GetSize().y);
 }
 
 void EngineCanvas::PostRenderEvent()
