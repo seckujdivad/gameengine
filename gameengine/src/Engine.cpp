@@ -571,10 +571,22 @@ Engine::Engine(wxWindow* parent)
 
 Engine::~Engine()
 {
-	
+	delete this->m_glcontext;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(wxWindowID id)
+EngineCanvas* Engine::GenerateNewCanvas(wxWindowID id, wxWindow* parent)
 {
-	return new EngineCanvas(this->m_parent, id, this->m_canvas_args, this->m_glcontext);
+	wxWindow* canvas_parent;
+	if (parent == nullptr)
+	{
+		canvas_parent = this->m_parent;
+	}
+	else
+	{
+		canvas_parent = parent;
+	}
+
+	EngineCanvas* canvas = new EngineCanvas(canvas_parent, id, this->m_canvas_args, this->m_glcontext);
+	canvas->MakeOpenGLFocus();
+	return canvas;
 }

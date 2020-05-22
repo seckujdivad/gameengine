@@ -38,7 +38,7 @@ public:
 	Engine(wxWindow* parent);
 	~Engine();
 
-	EngineCanvas* GenerateNewCanvas(wxWindowID id = wxID_ANY);
+	EngineCanvas* GenerateNewCanvas(wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 };
 
 Scene* InitialiseScene(std::string path, std::string filename);
