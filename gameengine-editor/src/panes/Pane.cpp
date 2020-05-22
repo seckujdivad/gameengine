@@ -37,6 +37,11 @@ wxAuiPaneInfo Pane::GetPaneInfo()
 	return this->m_parent->GetPaneInfo((Pane*)this);
 }
 
+PaneHost* Pane::GetPaneHost()
+{
+	return this->m_parent;
+}
+
 void Pane::PaneDockStateChanged(wxAuiPaneInfo info)
 {
 }

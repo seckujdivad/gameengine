@@ -4,6 +4,8 @@
 #include <wx/wx.h>
 #include <wx/gbsizer.h>
 
+#include <cstdlib>
+
 #include "render/EngineCanvas.h"
 
 #include "Pane.h"
@@ -17,6 +19,8 @@ private:
 	wxGridBagSizer* m_sizer;
 
 	EngineCanvas* m_glcanvas;
+
+	void Resized(wxSizeEvent& evt);
 
 public:
 	Viewport(PaneHost* parent);

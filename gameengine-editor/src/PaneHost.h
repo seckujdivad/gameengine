@@ -32,6 +32,7 @@ private:
 
 	std::filesystem::path m_scene_path;
 	Scene* m_scene = nullptr;
+	Engine* m_engine;
 
 public:
 	PaneHost(Main* parent);
@@ -45,6 +46,8 @@ public:
 	wxAuiPaneInfo GetPaneInfo(Pane* pane);
 
 	void PaneResizeHandler(wxSizeEvent& evt);
+
+	Engine* GetEngine();
 
 	bool LoadScene(std::filesystem::path path);
 	bool LoadScene(std::string path);

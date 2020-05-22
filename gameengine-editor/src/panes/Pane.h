@@ -24,6 +24,7 @@ public:
 	int GetPaneID();
 
 	wxAuiPaneInfo GetPaneInfo();
+	PaneHost* GetPaneHost();
 
 	virtual void PaneDockStateChanged(wxAuiPaneInfo info);
 	virtual void SceneChangedEvent(Scene* scene);

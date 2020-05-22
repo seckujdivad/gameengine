@@ -41,6 +41,7 @@ void PaneHost::AddPane(Pane* pane, int direction, bool docked)
 
 	wxSize best_size = pane->GetBestSize();
 	info = info.MinSize(best_size);
+	info = info.BestSize(best_size);
 	info = info.FloatingSize(wxSize(best_size.x, best_size.y + 30)); //the header is included in this size. it appears to be 30px high on windows
 
 	this->m_panes_docked.push_back(docked);
@@ -65,14 +66,16 @@ PaneHost::PaneHost(Main* parent) : wxPanel(parent)
 	this->SetMinSize(wxSize(100, 100));
 
 	this->m_aui_manager.SetManagedWindow(this);
-
 	this->m_aui_manager.Update();
+
+	this->m_engine = new Engine(this);
 }
 
 PaneHost::~PaneHost()
 {
 	this->m_aui_manager.UnInit();
 	delete this->m_scene;
+	delete this->m_engine;
 }
 
 wxAuiPaneInfo PaneHost::GetPaneInfo(int pane_id)
@@ -104,6 +107,11 @@ void PaneHost::PaneResizeHandler(wxSizeEvent& evt)
 	}
 
 	evt.Skip();
+}
+
+Engine* PaneHost::GetEngine()
+{
+	return this->m_engine;
 }
 
 bool PaneHost::LoadScene(std::filesystem::path path)
