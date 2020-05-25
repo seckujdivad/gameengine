@@ -1,1 +1,2 @@
-#include <wx/msw/wx.rc>
+#include <gameengine/resource.rc>
+#include <gameengine/shaders.rc>

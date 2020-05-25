@@ -1,0 +1,4 @@
+#include "resource.h"
+
+RCID_TF_POSTPROCESS_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess.frag"
+RCID_TF_POSTPROCESS_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess.vert"

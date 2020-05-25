@@ -50,9 +50,11 @@ private:
 
 	//approximate scene representation
 	SceneApproximation* m_approximation = nullptr;
+
+	int m_mode = 0;
 	
 public:
-	Scene();
+	Scene(int mode = 0);
 	~Scene();
 
 	std::vector<Model*> models;

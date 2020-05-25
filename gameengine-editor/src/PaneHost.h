@@ -9,6 +9,7 @@
 
 #include "scene/Scene.h"
 #include "Engine.h"
+#include "Resource.h"
 
 #include "Main.h"
 

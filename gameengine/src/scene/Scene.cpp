@@ -1,8 +1,10 @@
 #include <wx/wxprec.h>
 #include "Scene.h"
 
-Scene::Scene() : Nameable()
+Scene::Scene(int mode) : Nameable()
 {
+	this->m_mode = mode;
+
 	this->InitialiseSkyboxTexture(1, 1);
 }
 

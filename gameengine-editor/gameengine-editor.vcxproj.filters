@@ -19,9 +19,6 @@
     <Filter Include="Source Files\panes">
       <UniqueIdentifier>{baff7059-f951-4e95-82d9-a1b886f59194}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\shaders">
-      <UniqueIdentifier>{ebd12ad7-d7f2-4b1e-b22f-339738ba7fba}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">
@@ -62,14 +59,6 @@
     <ClCompile Include="src\panes\Lights.cpp">
       <Filter>Source Files\panes</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\shaders\postprocess.frag">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="resources\shaders\postprocess.vert">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">

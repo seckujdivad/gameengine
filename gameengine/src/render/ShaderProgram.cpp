@@ -6,7 +6,7 @@ ShaderProgram::ShaderProgram()
 	this->m_program_id = NULL;
 }
 
-ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines)
+ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines, bool strings_are_paths)
 {
 	this->m_program_id = glCreateProgram();
 	if (this->m_program_id == NULL)
@@ -17,7 +17,7 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	std::vector<GLuint> shader_ids;
 	for (size_t i = 0; i < shaders.size(); i++)
 	{
-		shader_ids.push_back(this->LoadShader(std::get<0>(shaders.at(i)), std::get<1>(shaders.at(i)), preprocessor_defines));
+		shader_ids.push_back(this->LoadShader(std::get<0>(shaders.at(i)), std::get<1>(shaders.at(i)), preprocessor_defines, strings_are_paths));
 	}
 
 	//link shaders
@@ -57,33 +57,40 @@ ShaderProgram::~ShaderProgram()
 	}
 }
 
-GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std::tuple<std::string, std::string>> preprocessor_defines)
+GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std::tuple<std::string, std::string>> preprocessor_defines, bool string_is_path)
 {
 	std::string shader_file_contents;
 	std::ifstream shader_file;
 	std::string line;
 	std::string line0;
 
-	//load shader from file
-	shader_file_contents = "";
-	shader_file.open(path);
-	if (shader_file.is_open())
+	if (string_is_path)
 	{
-		while (std::getline(shader_file, line))
+		//load shader from file
+		shader_file_contents = "";
+		shader_file.open(path);
+		if (shader_file.is_open())
 		{
-			if (line0 == "")
+			while (std::getline(shader_file, line))
 			{
-				line0 = line;
+				if (line0 == "")
+				{
+					line0 = line;
+				}
+				else
+				{
+					shader_file_contents = shader_file_contents + line + "\n";
+				}
 			}
-			else
-			{
-				shader_file_contents = shader_file_contents + line + "\n";
-			}
+		}
+		else
+		{
+			throw std::runtime_error("Couldn't open shader file at \"" + path + "\"");
 		}
 	}
 	else
 	{
-		throw std::runtime_error("Couldn't open shader file at \"" + path + "\"");
+		shader_file_contents = path;
 	}
 
 	//add preprocessor defines

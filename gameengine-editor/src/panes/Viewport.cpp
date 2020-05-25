@@ -22,10 +22,11 @@ Viewport::Viewport(PaneHost* parent) : Pane(parent)
 
 	this->m_glcanvas->SetPostProcessorShaderProgram(new ShaderProgram(
 		{
-			{ "resources/shaders/postprocess.vert", GL_VERTEX_SHADER },
-			{ "resources/shaders/postprocess.frag", GL_FRAGMENT_SHADER }
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER }
 		},
-		{}));
+		{},
+		false));
 
 	this->Bind(wxEVT_SIZE, &Viewport::Resized, this);
 

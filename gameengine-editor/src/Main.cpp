@@ -48,7 +48,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	this->m_toolbar = this->CreateToolBar(wxTB_FLAT | wxTB_HORIZONTAL);
 	
 	std::vector<std::string> panes = {
-		"Viewport",
 		"Lights"
 	};
 

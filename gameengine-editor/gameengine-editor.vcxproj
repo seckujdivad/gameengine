@@ -95,7 +95,12 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -111,7 +116,12 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -131,7 +141,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -151,7 +166,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
     </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -173,10 +193,6 @@
     <ProjectReference Include="..\gameengine\gameengine.vcxproj">
       <Project>{4f4b007f-ee21-46cf-b8de-2447b8b8015a}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\shaders\postprocess.frag" />
-    <None Include="resources\shaders\postprocess.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

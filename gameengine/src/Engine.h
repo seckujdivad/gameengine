@@ -41,7 +41,7 @@ public:
 	EngineCanvas* GenerateNewCanvas(wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 };
 
-Scene* InitialiseScene(std::string path, std::string filename);
+Scene* InitialiseScene(std::string path, std::string filename, int mode = 0); //mode: 0 = normal, 1 = editor
 
 std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, nlohmann::json config, nlohmann::basic_json<> shader_config);
 
