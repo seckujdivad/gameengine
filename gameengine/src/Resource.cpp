@@ -8,7 +8,7 @@ Resource::Resource(int resource_id, int resource_type)
 	if (this->m_resource == nullptr)
 	{
 		int last_err_code = GetLastError();
-		throw std::runtime_error("Couldn't locate resource ID " + std::to_string(resource_id) + " (type ID " + std::to_string(resource_type) + ", error code " + std::to_string(last_err_code) + ")");
+		throw std::runtime_error("Couldn't locate resource ID " + std::to_string(resource_id) + " (type ID " + std::to_string(resource_type) + ", error code " + std::to_string(last_err_code) + "). Make sure the appropriate resource files are included in this application's resource file");
 	}
 
 	this->m_parameters.size_bytes = SizeofResource(nullptr, this->m_resource);

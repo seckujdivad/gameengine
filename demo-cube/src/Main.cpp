@@ -84,10 +84,11 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	this->m_glcanvas->SetPostProcessorShaderProgram(new ShaderProgram(
 		{
-			{ "resources/shaders/postprocess.vert", GL_VERTEX_SHADER },
-			{ "resources/shaders/postprocess.frag", GL_FRAGMENT_SHADER }
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER }
 		},
-		{}));
+		{},
+		false));
 	this->m_glcanvas->SetScene(this->m_scene);
 	this->m_glcanvas->SetActiveCamera(this->m_scene->cameras.at(0));
 

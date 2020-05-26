@@ -10,6 +10,7 @@
 #include "GLComponents.h"
 #include "render/EngineCanvas.h"
 #include "Engine.h"
+#include "Resource.h"
 
 class Main : public wxFrame
 {
