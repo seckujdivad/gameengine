@@ -24,6 +24,7 @@
 #include "scene/VisBox.h"
 #include "scene/SceneApproximation.h"
 #include "render/EngineCanvas.h"
+#include "Resource.h"
 
 using nlohmann::json;
 

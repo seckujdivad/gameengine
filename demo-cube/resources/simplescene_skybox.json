@@ -20,15 +20,6 @@
       "scale": [ 1, 1, 1 ],
       "vis box": "main",
       "shader": {
-        "render": {
-          "vertex": "simple",
-          "fragment": "simple"
-        },
-        "shadow": {
-          "vertex": "simple shadow",
-          "fragment": "simple shadow",
-          "geometry": "simple shadow"
-        },
         "textures": {
           "colour": "textures/sky.jpg",
           "reflection intensity": [ 0, 0, 0 ]
@@ -54,19 +45,6 @@
       "rotation": [ 0, 0, 0 ],
       "clips": [ 0.1, 100 ],
       "fov": 60
-    }
-  },
-  "shaders": {
-    "fragment": {
-      "simple": "shaders/simple.frag",
-      "simple shadow": "shaders/simple_shadow.frag"
-    },
-    "vertex": {
-      "simple": "shaders/simple.vert",
-      "simple shadow": "shaders/simple_shadow.vert"
-    },
-    "geometry": {
-      "simple shadow": "shaders/simple_shadow.geom"
     }
   },
   "lighting": {

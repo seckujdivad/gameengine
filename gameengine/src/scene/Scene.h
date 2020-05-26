@@ -19,6 +19,7 @@ struct ShaderDescription
 {
 	std::vector<std::tuple<std::string, GLenum>> shaders;
 	std::vector<std::tuple<std::string, std::string>> preprocessor_defines;
+	bool shader_strings_are_paths = true;
 };
 
 class Scene : public Nameable

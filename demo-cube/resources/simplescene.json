@@ -35,15 +35,6 @@
       "scale": [ 1, 1, 1 ],
       "vis box": "level section 3",
       "shader": {
-        "render": {
-          "vertex": "simple",
-          "fragment": "simple"
-        },
-        "shadow": {
-          "vertex": "simple shadow",
-          "fragment": "simple shadow",
-          "geometry": "simple shadow"
-        },
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1, 1, 1 ],
@@ -74,15 +65,6 @@
       "scale": [ 1, 1, 1 ],
       "vis box": "level section 2",
       "shader": {
-        "render": {
-          "vertex": "simple",
-          "fragment": "simple"
-        },
-        "shadow": {
-          "vertex": "simple shadow",
-          "fragment": "simple shadow",
-          "geometry": "simple shadow"
-        },
         "textures": {
           "colour": {
             "path": "textures/unnamed.jpg",
@@ -116,15 +98,6 @@
       "scale": [ 5, 5, 5 ],
       "invert normals": true,
       "shader": {
-        "render": {
-          "vertex": "simple",
-          "fragment": "simple"
-        },
-        "shadow": {
-          "vertex": "simple shadow",
-          "fragment": "simple shadow",
-          "geometry": "simple shadow"
-        },
         "textures": {
           "colour": [ 1, 1, 1 ],
           "specular": [ 1.0, 1.0, 1.0 ],

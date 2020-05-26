@@ -735,13 +735,15 @@ ShaderProgram* Scene::GetShaderProgram(ShaderDescription description)
 {
 	for (int i = 0; i < (int)this->m_shader_descriptions.size(); i++)
 	{
-		if ((description.shaders == this->m_shader_descriptions.at(i).shaders) && (description.preprocessor_defines == this->m_shader_descriptions.at(i).preprocessor_defines))
+		if ((description.shaders == this->m_shader_descriptions.at(i).shaders)
+			&& (description.preprocessor_defines == this->m_shader_descriptions.at(i).preprocessor_defines)
+			&& (description.shader_strings_are_paths == this->m_shader_descriptions.at(i).shader_strings_are_paths))
 		{
 			return this->m_shader_programs.at(i);
 		}
 	}
 
-	ShaderProgram* new_program = new ShaderProgram(description.shaders, description.preprocessor_defines);
+	ShaderProgram* new_program = new ShaderProgram(description.shaders, description.preprocessor_defines, description.shader_strings_are_paths);
 	this->m_shader_programs.push_back(new_program);
 	return new_program;
 }

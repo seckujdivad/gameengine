@@ -242,7 +242,20 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 		}
 
 		//load shader
-		shader_description.shaders = GetShaders(path, config, it.value()["shader"]["render"]);
+		shader_description.shader_strings_are_paths = it.value()["shader"]["render"].is_object();
+
+		if (shader_description.shader_strings_are_paths)
+		{
+			shader_description.shaders = GetShaders(path, config, it.value()["shader"]["render"]);
+		}
+		else
+		{
+			shader_description.shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+			};
+		}
+		
 		shader_description.preprocessor_defines = {
 			{"POINT_LIGHT_NUM", std::to_string(num_point_lights)},
 			{"DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)},
@@ -351,7 +364,21 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 		model->SetShaderProgram(shader_program);
 
 		//load shadow shader
-		shader_program = new ShaderProgram(GetShaders(path, config, it.value()["shader"]["shadow"]), {});
+		std::vector<std::tuple<std::string, GLenum>> shaders;
+		if (it.value()["shader"]["shadow"].is_object())
+		{
+			shaders = GetShaders(path, config, it.value()["shader"]["shadow"]);
+		}
+		else
+		{
+			shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_VERTSHADER), GL_VERTEX_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_GEOMSHADER), GL_GEOMETRY_SHADER }
+			};
+		}
+
+		shader_program = new ShaderProgram(shaders, {}, it.value()["shader"]["shadow"].is_object());
 		model->SetShadowShaderProgram(shader_program);
 
 		//flip normals if required
@@ -415,7 +442,6 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 	std::vector<std::tuple<std::string, GLenum>> output = {};
 
 	int shader_type;
-	int j = (int)shader_config.size();
 	for (auto it = shader_config.begin(); it != shader_config.end(); it++)
 	{
 		if (it.key() == "vertex")
@@ -434,7 +460,7 @@ std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, n
 		{
 			throw std::runtime_error("Can't find shader type " + it.value().get<std::string>());
 		}
-		output.push_back({base_path + "/" + config["shaders"][it.key()][shader_config[it.key()].get<std::string>()].get<std::string>(), shader_type});
+		output.push_back({ base_path + "/" + config["shaders"][it.key()][shader_config[it.key()].get<std::string>()].get<std::string>(), shader_type });
 	}
 
 	return output;

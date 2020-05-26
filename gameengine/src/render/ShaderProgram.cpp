@@ -90,7 +90,10 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	}
 	else
 	{
-		shader_file_contents = path;
+		size_t newline_pivot = path.find('\n');
+		line0 = path.substr(0, newline_pivot);
+		shader_file_contents = path.substr(newline_pivot);
+
 	}
 
 	//add preprocessor defines
