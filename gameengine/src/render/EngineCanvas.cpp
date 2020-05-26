@@ -47,66 +47,69 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		this->SetKeyboardMoveActive(false);
 	}
 
-	//get mouse info
-	wxMouseState mouse_state = wxGetMouseState();
-	int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
-	int mouse_position[2];
-	mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
-	mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
-
-	//check mouse delta and apply
-	if (this->m_mouselook_active)
+	if (this->m_scene != nullptr)
 	{
-		int mousedelta[2];
-		mousedelta[0] = mouse_position[0] - screen_centre[0];
-		mousedelta[1] = mouse_position[1] - screen_centre[1];
+		//get mouse info
+		wxMouseState mouse_state = wxGetMouseState();
+		int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
+		int mouse_position[2];
+		mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+		mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
 
-		float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
-		float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
-
-		float fov = this->GetActiveCamera()->GetFOV();
-
-		float rotation_z = fov_fraction_x * fov;
-		float rotation_x = fov_fraction_y * fov;
-
-		this->GetActiveCamera()->SetRotation(0, this->GetActiveCamera()->GetRotation(0) - rotation_x);
-		this->GetActiveCamera()->SetRotation(2, this->GetActiveCamera()->GetRotation(2) - rotation_z);
-
-		this->WarpPointer(screen_centre[0], screen_centre[1]);
-	}
-
-	//poll keyboard movement keys
-	if (this->m_keyboard_move_active)
-	{
-		float move_increment = this->m_keyboard_move_increment;
-		if (wxGetKeyState(WXK_SPACE))
+		//check mouse delta and apply
+		if (this->m_mouselook_active)
 		{
-			move_increment = move_increment * 5;
+			int mousedelta[2];
+			mousedelta[0] = mouse_position[0] - screen_centre[0];
+			mousedelta[1] = mouse_position[1] - screen_centre[1];
+
+			float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+			float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
+
+			float fov = this->GetActiveCamera()->GetFOV();
+
+			float rotation_z = fov_fraction_x * fov;
+			float rotation_x = fov_fraction_y * fov;
+
+			this->GetActiveCamera()->SetRotation(0, this->GetActiveCamera()->GetRotation(0) - rotation_x);
+			this->GetActiveCamera()->SetRotation(2, this->GetActiveCamera()->GetRotation(2) - rotation_z);
+
+			this->WarpPointer(screen_centre[0], screen_centre[1]);
 		}
 
-		if (wxGetKeyState(wxKeyCode('W')))
+		//poll keyboard movement keys
+		if (this->m_keyboard_move_active)
 		{
-			this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, move_increment);
-		}
-		if (wxGetKeyState(wxKeyCode('S')))
-		{
-			this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
-		}
-		if (wxGetKeyState(wxKeyCode('D')))
-		{
-			this->GetActiveCamera()->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
-		}
-		if (wxGetKeyState(wxKeyCode('A')))
-		{
-			this->GetActiveCamera()->MoveLocally(move_increment, 0.0f, 0.0f);
-		}
-		if (wxGetKeyState(WXK_CONTROL))
-		{
-			this->GetActiveCamera()->MoveLocally(0.0f, move_increment, 0.0f);
-		}
-		if (wxGetKeyState(WXK_SHIFT))
-		{
-			this->GetActiveCamera()->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
+			float move_increment = this->m_keyboard_move_increment;
+			if (wxGetKeyState(WXK_SPACE))
+			{
+				move_increment = move_increment * 5;
+			}
+
+			if (wxGetKeyState(wxKeyCode('W')))
+			{
+				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, move_increment);
+			}
+			if (wxGetKeyState(wxKeyCode('S')))
+			{
+				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
+			}
+			if (wxGetKeyState(wxKeyCode('D')))
+			{
+				this->GetActiveCamera()->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
+			}
+			if (wxGetKeyState(wxKeyCode('A')))
+			{
+				this->GetActiveCamera()->MoveLocally(move_increment, 0.0f, 0.0f);
+			}
+			if (wxGetKeyState(WXK_CONTROL))
+			{
+				this->GetActiveCamera()->MoveLocally(0.0f, move_increment, 0.0f);
+			}
+			if (wxGetKeyState(WXK_SHIFT))
+			{
+				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
+			}
 		}
 	}
 
@@ -137,12 +140,15 @@ void EngineCanvas::KeyDown(wxKeyEvent& evt)
 
 void EngineCanvas::Clicked(wxMouseEvent& evt)
 {
-	if (!this->m_mouselook_active)
+	if (this->m_scene != nullptr)
 	{
-		this->SetMouselookActive(true);
-		this->SetKeyboardMoveActive(true);
+		if (!this->m_mouselook_active)
+		{
+			this->SetMouselookActive(true);
+			this->SetKeyboardMoveActive(true);
+		}
 	}
-
+	
 	evt.Skip();
 }
 
