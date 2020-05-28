@@ -20,8 +20,6 @@ private:
 
 	EngineCanvas* m_glcanvas;
 
-	void Resized(wxSizeEvent& evt);
-
 public:
 	Viewport(PaneHost* parent);
 

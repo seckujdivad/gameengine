@@ -1,12 +1,6 @@
 #include <wx/wxprec.h>
 #include "Viewport.h"
 
-void Viewport::Resized(wxSizeEvent& evt)
-{
-	this->m_glcanvas->SetMinSize(this->GetSize());
-	evt.Skip();
-}
-
 Viewport::Viewport(PaneHost* parent) : Pane(parent)
 {
 	//this->SetMinSize(wxSize(100, 100));
@@ -28,7 +22,8 @@ Viewport::Viewport(PaneHost* parent) : Pane(parent)
 		{},
 		false));
 
-	this->Bind(wxEVT_SIZE, &Viewport::Resized, this);
+	this->m_sizer->AddGrowableRow(0);
+	this->m_sizer->AddGrowableCol(0);
 
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
