@@ -339,6 +339,15 @@ void Scene::Render(GLuint framebuffer, Camera* camera)
 		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
 		glUniform1i(model_shader_program->GetUniform("shade_mode"), this->m_mode);
 
+		if (this->m_mode1_selected_model == model)
+		{
+			glUniform3fv(model_shader_program->GetUniform("mode1_colour"), 1, glm::value_ptr(glm::vec3(1.0f, 0.7f, 0.0f)));
+		}
+		else
+		{
+			glUniform3fv(model_shader_program->GetUniform("mode1_colour"), 1, glm::value_ptr(glm::vec3(0.0f)));
+		}
+
 		this->m_approximation->SetUniforms(model_shader_program);
 
 		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
@@ -507,6 +516,7 @@ void Scene::PushUniforms()
 	{
 		this->m_shader_programs.at(i)->RegisterUniform("light_ambient");
 		this->m_shader_programs.at(i)->RegisterUniform("shade_mode");
+		this->m_shader_programs.at(i)->RegisterUniform("mode1_colour");
 	}
 
 	for (size_t i = 0; i < this->models.size(); i++)
@@ -775,4 +785,9 @@ void Scene::SetApproximation(SceneApproximation* approximation)
 	}
 
 	this->m_approximation = approximation;
+}
+
+void Scene::SetMode1SelectedModel(Model* model)
+{
+	this->m_mode1_selected_model = model;
 }

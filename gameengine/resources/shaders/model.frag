@@ -124,6 +124,9 @@ uniform sampler2D render_output_data[DATA_TEX_NUM];
 uniform int render_output_x;
 uniform int render_output_y;
 
+//shade mode 1
+uniform vec3 mode1_colour;
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (!light_points[lightindex].shadows_enabled)
@@ -496,7 +499,7 @@ void shade_mode0()
 
 void shade_mode1()
 {
-	frag_out.rgb = vec3(0.0f);
+	frag_out.rgb = mode1_colour;
 }
 
 void main()

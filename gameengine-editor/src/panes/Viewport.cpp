@@ -49,4 +49,6 @@ void Viewport::SceneChangedEvent(Scene* scene)
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
+
+	scene->SetMode1SelectedModel(scene->models.at(0));
 }

@@ -53,6 +53,9 @@ private:
 	SceneApproximation* m_approximation = nullptr;
 
 	int m_mode = 0;
+
+	//mode 1
+	Model* m_mode1_selected_model = nullptr;
 	
 public:
 	Scene(int mode = 0);
@@ -109,4 +112,7 @@ public:
 	ShaderProgram* GetShaderProgram(ShaderDescription description);
 
 	void SetApproximation(SceneApproximation* approximation);
+
+	//mode1
+	void SetMode1SelectedModel(Model* model);
 };
