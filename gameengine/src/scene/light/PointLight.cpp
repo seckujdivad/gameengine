@@ -130,7 +130,7 @@ void PointLight::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform(prefix + "shadow_far_plane");
 }
 
-void PointLight::SetUniforms(ShaderProgram* shader_program)
+void PointLight::SetUniforms(ShaderProgram* shader_program, int mode)
 {
 	this->UpdateTransforms();
 

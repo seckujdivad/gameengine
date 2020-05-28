@@ -62,7 +62,7 @@ public:
 	void SetShadowUniforms(ShaderProgram* shader_program);
 
 	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program);
+	void SetUniforms(ShaderProgram* shader_program, int mode);
 
 	void AddStaticModel(std::string identifier);
 	void RemoveStaticModel(std::string identifier);

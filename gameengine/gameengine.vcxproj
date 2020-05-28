@@ -229,6 +229,11 @@
     <ResourceCompile Include="shaders.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\model.frag" />
+    <None Include="resources\shaders\model.vert" />
+    <None Include="resources\shaders\model_shadow.frag" />
+    <None Include="resources\shaders\model_shadow.geom" />
+    <None Include="resources\shaders\model_shadow.vert" />
     <None Include="resources\shaders\postprocess.frag" />
     <None Include="resources\shaders\postprocess.vert" />
   </ItemGroup>

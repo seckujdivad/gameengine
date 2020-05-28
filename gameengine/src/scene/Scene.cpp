@@ -334,16 +334,17 @@ void Scene::Render(GLuint framebuffer, Camera* camera)
 
 		glUniform1i(model_shader_program->GetUniform("render_output_x"), viewport_dimensions[2] - viewport_dimensions[0]);
 		glUniform1i(model_shader_program->GetUniform("render_output_y"), viewport_dimensions[3] - viewport_dimensions[1]);
+		glUniform1i(model_shader_program->GetUniform("shade_mode"), this->m_mode);
 
 		this->m_approximation->SetUniforms(model_shader_program);
 
 		glUniform3fv(model_shader_program->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 		camera->SetUniforms(model_shader_program);
-		model->SetUniforms();
+		model->SetUniforms(this->m_mode);
 
 		for (size_t j = 0; j < this->pointlights.size(); j++)
 		{
-			this->pointlights.at(j)->SetUniforms(model_shader_program);
+			this->pointlights.at(j)->SetUniforms(model_shader_program, this->m_mode);
 		}
 
 		if (this->m_output_colour == NULL)
@@ -406,7 +407,7 @@ void Scene::DrawShadows(int mode) //0: static, 1: dynamic
 					{
 						model->GetShadowShaderProgram()->Select();
 						model->BindVAO();
-						model->SetShadowUniforms();
+						model->SetShadowUniforms(this->m_mode);
 						this->pointlights.at(i)->SetShadowUniforms(model->GetShadowShaderProgram());
 						model->DrawVBOs();
 					}
@@ -470,12 +471,12 @@ void Scene::DrawReflections(int mode)
 
 						glUniform3fv(model->GetShaderProgram()->GetUniform("light_ambient"), 1, glm::value_ptr(this->m_light_ambient));
 						
-						model->SetUniforms();
-						reflection->SetGenerateUniforms(model->GetShaderProgram(), face); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
+						model->SetUniforms(this->m_mode);
+						reflection->SetGenerateUniforms(model->GetShaderProgram(), face, this->m_mode); //overwrite some uniforms - this call MUST come after Model::SetUniforms as it calls Reflection::SetUniforms (which sets different uniform values to Reflection::SetGenerateUniforms)
 
 						for (size_t k = 0; k < this->pointlights.size(); k++)
 						{
-							this->pointlights.at(k)->SetUniforms(model->GetShaderProgram());
+							this->pointlights.at(k)->SetUniforms(model->GetShaderProgram(), this->m_mode);
 						}
 
 						glUniform1i(model->GetShaderProgram()->GetUniform("mat_ssr_enabled"), GL_FALSE);
@@ -499,12 +500,16 @@ void Scene::DrawReflections(int mode)
 
 void Scene::PushUniforms()
 {
+	for (size_t i = 0; i < this->m_shader_programs.size(); i++)
+	{
+		this->m_shader_programs.at(i)->RegisterUniform("light_ambient");
+		this->m_shader_programs.at(i)->RegisterUniform("shade_mode");
+	}
+
 	for (size_t i = 0; i < this->models.size(); i++)
 	{
 		this->models.at(i)->RegisterUniforms();
 		this->models.at(i)->RegisterShadowUniforms();
-
-		this->models.at(i)->GetShaderProgram()->RegisterUniform("light_ambient");
 
 		this->m_approximation->RegisterUniforms(this->models.at(i)->GetShaderProgram());
 

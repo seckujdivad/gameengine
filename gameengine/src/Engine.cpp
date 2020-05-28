@@ -55,7 +55,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	}
 
 	// make scene object
-	Scene* scene = new Scene();
+	Scene* scene = new Scene(mode);
 
 	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
 	
@@ -420,7 +420,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	//make skybox scene (if specified)
 	if (config["metadata"]["skybox scene"].is_object())
 	{
-		Scene* skybox_scene = InitialiseScene(path, config["metadata"]["skybox scene"]["file"].get<std::string>());
+		Scene* skybox_scene = InitialiseScene(path, config["metadata"]["skybox scene"]["file"].get<std::string>(), mode);
 		scene->SetSkyboxScene(skybox_scene);
 		scene->InitialiseSkyboxTexture(config["metadata"]["skybox scene"]["texture"][0].get<unsigned int>(),
 			config["metadata"]["skybox scene"]["texture"][1].get<unsigned int>());

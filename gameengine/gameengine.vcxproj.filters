@@ -201,5 +201,20 @@
     <None Include="resources\shaders\postprocess.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="resources\shaders\model.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_shadow.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_shadow.geom">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_shadow.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

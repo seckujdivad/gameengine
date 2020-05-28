@@ -47,7 +47,7 @@ public:
 	std::vector<Reflection*> GetReflections();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program);
+	void SetUniforms(ShaderProgram* shader_program, int mode);
 
 	void EnableSSR(bool enable);
 	bool SSREnabled();

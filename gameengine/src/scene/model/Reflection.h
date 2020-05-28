@@ -59,7 +59,7 @@ public:
 	void CopyDynamicToStatic();
 
 	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program, int mode);
+	void SetUniforms(ShaderProgram* shader_program, int sample_mode, int mode);
 
 	void AddStaticModel(std::string identifier);
 	void RemoveStaticModel(std::string identifier);
@@ -70,7 +70,7 @@ public:
 	bool ModelIsDynamic(std::string identifier);
 
 	void RegisterGenerateUniforms(ShaderProgram* shader_program);
-	void SetGenerateUniforms(ShaderProgram* shader_program, int face);
+	void SetGenerateUniforms(ShaderProgram* shader_program, int face, int mode);
 
 	void IncrementFrameCounter(int increment = 1);
 	bool DynamicNeedsRedrawing(bool reset_if_redraw = true);

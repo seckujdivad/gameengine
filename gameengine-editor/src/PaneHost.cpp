@@ -118,7 +118,7 @@ bool PaneHost::LoadScene(std::filesystem::path path)
 {
 	this->m_scene_path = path;
 
-	this->m_scene = InitialiseScene(this->m_scene_path.parent_path().string(), this->m_scene_path.filename().string());
+	this->m_scene = InitialiseScene(this->m_scene_path.parent_path().string(), this->m_scene_path.filename().string(), 1);
 	this->m_scene->PushUniforms();
 	this->m_scene->DrawShadows(0);
 	this->m_scene->DrawReflections(0);

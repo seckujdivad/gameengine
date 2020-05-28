@@ -158,7 +158,7 @@ void Reflection::RegisterUniforms(ShaderProgram* shader_program)
 	shader_program->RegisterUniform(prefix1 + "mode");
 }
 
-void Reflection::SetUniforms(ShaderProgram* shader_program, int mode)
+void Reflection::SetUniforms(ShaderProgram* shader_program, int sample_mode, int mode)
 {
 	int shader_index = shader_program->GetShaderArrayIndex("reflections", this);
 
@@ -172,7 +172,7 @@ void Reflection::SetUniforms(ShaderProgram* shader_program, int mode)
 	glUniform1f(shader_program->GetUniform(prefix1 + "clip_near"), this->m_clip_near);
 	glUniform1f(shader_program->GetUniform(prefix1 + "clip_far"), this->m_clip_far);
 	glUniform1i(shader_program->GetUniform(prefix1 + "iterations"), this->m_parallax_iterations);
-	glUniform1i(shader_program->GetUniform(prefix1 + "mode"), mode);
+	glUniform1i(shader_program->GetUniform(prefix1 + "mode"), sample_mode);
 }
 
 void Reflection::UpdateCameraData()
@@ -307,7 +307,7 @@ void Reflection::RegisterGenerateUniforms(ShaderProgram* shader_program)
 	//no need to register uniforms as the camera will register those for us
 }
 
-void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face)
+void Reflection::SetGenerateUniforms(ShaderProgram* shader_program, int face, int mode)
 {
 	this->UpdateCameraData();
 

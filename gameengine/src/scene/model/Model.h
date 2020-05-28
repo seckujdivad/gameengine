@@ -77,10 +77,10 @@ public:
 	void GenVertexBuffer(GLuint triangle_mode);
 
 	void RegisterUniforms();
-	void SetUniforms();
+	void SetUniforms(int mode);
 
 	void RegisterShadowUniforms();
-	void SetShadowUniforms();
+	void SetShadowUniforms(int mode);
 
 	void SetShaderProgram(ShaderProgram* shader_program);
 	ShaderProgram* GetShaderProgram();

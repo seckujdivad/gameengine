@@ -33,6 +33,8 @@ in vec4 globalCamSpaceNormal;
 
 in mat3 globalNormalTBN;
 
+uniform int shade_mode;
+
 //model
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
@@ -206,7 +208,7 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	}
 }
 
-void main()
+void shade_mode0()
 {
 	for (int i = 0; i < DATA_TEX_NUM; i++)
 	{
@@ -490,4 +492,21 @@ void main()
 	
 	//output whether or not to draw reflections on certain fragments in the next frame
 	data_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
+}
+
+void shade_mode1()
+{
+	frag_out.rgb = vec3(0.0f, 1.0f, 1.0f);
+}
+
+void main()
+{
+	if (shade_mode == 1)
+	{
+		shade_mode1();
+	}
+	else
+	{
+		shade_mode0();
+	}
 }

@@ -72,7 +72,7 @@ void Material::RegisterUniforms(ShaderProgram* shader_program)
 	}
 }
 
-void Material::SetUniforms(ShaderProgram* shader_program)
+void Material::SetUniforms(ShaderProgram* shader_program, int mode)
 {
 	glUniform3fv(shader_program->GetUniform("mat_diffuse"), 1, glm::value_ptr(this->m_diffuse));
 	glUniform3fv(shader_program->GetUniform("mat_specular"), 1, glm::value_ptr(this->m_specular));
@@ -88,7 +88,7 @@ void Material::SetUniforms(ShaderProgram* shader_program)
 
 	for (int i = 0; i < (int)this->m_reflections.size(); i++)
 	{
-		this->m_reflections.at(i)->SetUniforms(shader_program, this->m_reflection_modes.at(i));
+		this->m_reflections.at(i)->SetUniforms(shader_program, this->m_reflection_modes.at(i), mode);
 	}
 }
 
