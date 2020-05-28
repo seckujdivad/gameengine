@@ -299,11 +299,14 @@ void Scene::Render(GLuint framebuffer, Camera* camera)
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 	
-	//draw shadows
-	this->DrawShadows(1);
+	if (this->m_mode == 0)
+	{
+		//draw shadows
+		this->DrawShadows(1);
 
-	//draw reflections
-	this->DrawReflections(1);
+		//draw reflections
+		this->DrawReflections(1);
+	}
 
 	//prepare for camera draw
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -683,39 +686,50 @@ glm::vec4 Scene::GetClearColour()
 
 std::vector<Model*> Scene::GetVisibleModels(glm::vec3 position)
 {
-	std::unordered_set<Model*, HashPointer<Model>> visible_models;
-	std::unordered_set<VisBox*, HashPointer<VisBox>> enclosed_visboxes;
-
-	for (size_t i = 0; i < this->visboxes.size(); i++)
+	if (this->m_mode == 0)
 	{
-		if (this->visboxes.at(i)->PointInBounds(position))
+		std::unordered_set<Model*, HashPointer<Model>> visible_models;
+		std::unordered_set<VisBox*, HashPointer<VisBox>> enclosed_visboxes;
+
+		for (size_t i = 0; i < this->visboxes.size(); i++)
 		{
-			enclosed_visboxes.insert(this->visboxes.at(i));
+			if (this->visboxes.at(i)->PointInBounds(position))
+			{
+				enclosed_visboxes.insert(this->visboxes.at(i));
+			}
 		}
+
+		if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
+		{
+			for (size_t i = 0; i < this->models.size(); i++)
+			{
+				visible_models.insert(this->models.at(i));
+			}
+		}
+		else
+		{
+			for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+			{
+				std::unordered_set<Model*, HashPointer<Model>> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+				visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
+			}
+		}
+
+		std::vector<Model*> output;
+		output.assign(visible_models.begin(), visible_models.end());
+
+		std::sort(output.begin(), output.end(), [position](Model* a, Model* b) mutable { return glm::length(a->GetPositionVec() - position) < glm::length(b->GetPositionVec() - position); }); //true means a should be moved forward and drawn earlier
+
+		return output;
 	}
-
-	if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
+	else if (this->m_mode == 1)
 	{
-		for (size_t i = 0; i < this->models.size(); i++)
-		{
-			visible_models.insert(this->models.at(i));
-		}
+		return this->models;
 	}
 	else
 	{
-		for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
-		{
-			std::unordered_set<Model*, HashPointer<Model>> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
-			visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
-		}
+		throw std::runtime_error("Unsupported shading mode " + std::to_string(this->m_mode));
 	}
-
-	std::vector<Model*> output;
-	output.assign(visible_models.begin(), visible_models.end());
-
-	std::sort(output.begin(), output.end(), [position](Model* a, Model* b) mutable { return glm::length(a->GetPositionVec() - position) < glm::length(b->GetPositionVec() - position); }); //true means a should be moved forward and drawn earlier
-
-	return output;
 }
 
 void Scene::SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data)
