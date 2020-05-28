@@ -10,6 +10,7 @@
 #include "scene/Scene.h"
 #include "Engine.h"
 #include "Resource.h"
+#include "scene/model/Model.h"
 
 #include "Main.h"
 
@@ -34,6 +35,7 @@ private:
 	std::filesystem::path m_scene_path;
 	Scene* m_scene = nullptr;
 	Engine* m_engine;
+	Model* m_selected_model = nullptr;
 
 public:
 	PaneHost(Main* parent);
@@ -55,6 +57,10 @@ public:
 	bool LoadScene(wxString path);
 	std::filesystem::path GetScenePath();
 	Scene* GetScene();
+
+	void SetSelectedModel(Model* model);
+	void SetSelectedModel(int index);
+	Model* GetSelectedModel();
 };
 
 template<class T>

@@ -28,6 +28,7 @@ public:
 
 	virtual void PaneDockStateChanged(wxAuiPaneInfo info);
 	virtual void SceneChangedEvent(Scene* scene);
+	virtual void ModelSelectionChangedEvent(Model* model);
 };
 
 #include "../PaneHost.h"

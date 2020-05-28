@@ -57,6 +57,11 @@ void PaneHost::AddPane(Pane* pane, int direction, bool docked)
 	this->m_aui_manager.AddPane(pane, info);
 
 	this->m_aui_manager.Update();
+
+	if (this->m_scene != nullptr)
+	{
+		pane->SceneChangedEvent(this->m_scene);
+	}
 }
 
 PaneHost::PaneHost(Main* parent) : wxPanel(parent)
@@ -150,4 +155,25 @@ std::filesystem::path PaneHost::GetScenePath()
 Scene* PaneHost::GetScene()
 {
 	return this->m_scene;
+}
+
+void PaneHost::SetSelectedModel(Model* model)
+{
+	this->m_selected_model = model;
+	this->m_scene->SetMode1SelectedModel(model);
+
+	for (size_t i = 0; i < this->m_panes.size(); i++)
+	{
+		this->m_panes.at(i)->ModelSelectionChangedEvent(model);
+	}
+}
+
+void PaneHost::SetSelectedModel(int index)
+{
+	this->SetSelectedModel(this->m_scene->models.at(index));
+}
+
+Model* PaneHost::GetSelectedModel()
+{
+	return this->m_selected_model;
 }

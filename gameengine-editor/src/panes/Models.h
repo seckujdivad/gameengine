@@ -2,6 +2,10 @@
 
 #include <wx/wx.h>
 #include <wx/gbsizer.h>
+#include <wx/listbox.h>
+#include <wx/button.h>
+#include <wx/string.h>
+#include <wx/textctrl.h>
 
 #include "Pane.h"
 #include "../PaneHost.h"
@@ -12,6 +16,10 @@ private:
 	wxGridBagSizer* m_sizer;
 
 	wxListBox* m_lb_models;
+	wxButton* m_btn_mdl_new;
+	wxTextCtrl* m_txt_mdl_name;
+
+	void event_lb_models_clicked(wxCommandEvent& evt);
 
 public:
 	Models(PaneHost* parent);
