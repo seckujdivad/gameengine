@@ -21,17 +21,17 @@
 layout(location = 0) out vec4 frag_out;
 layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
 
-in vec4 globalMdlSpacePos;
-in vec4 globalSceneSpacePos;
-in vec4 globalCamSpacePos;
+in vec4 geomMdlSpacePos;
+in vec4 geomSceneSpacePos;
+in vec4 geomCamSpacePos;
 
-in vec2 globalUV;
+in vec2 geomUV;
 
-in vec4 globalMdlSpaceNormal;
-in vec4 globalSceneSpaceNormal;
-in vec4 globalCamSpaceNormal;
+in vec4 geomMdlSpaceNormal;
+in vec4 geomSceneSpaceNormal;
+in vec4 geomCamSpaceNormal;
 
-in mat3 globalNormalTBN;
+in mat3 geomNormalTBN;
 
 uniform int shade_mode;
 
@@ -216,25 +216,25 @@ void shade_mode0()
 	}
 
 	//get base colour
-	frag_out = texture(colourTexture, globalUV);
+	frag_out = texture(colourTexture, geomUV);
 
 	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
 	frag_intensity = frag_intensity + light_ambient;
 
 	//calculate local mapped normal
-	vec3 sample_normal = texture(normalTexture, globalUV).rgb;
+	vec3 sample_normal = texture(normalTexture, geomUV).rgb;
 	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
-	vec3 normal = normalize(globalNormalTBN * sample_normal);
+	vec3 normal = normalize(geomNormalTBN * sample_normal);
 
 	//sample specular map
-	vec3 sample_specular = texture(specularTexture, globalUV).rgb * mat_specular;
+	vec3 sample_specular = texture(specularTexture, geomUV).rgb * mat_specular;
 
 	//vars for loop
 	float diffuse_intensity;
 	float specular_intensity;
 	vec3 fragtolight;
-	vec3 fragtocam = normalize(0 - vec3(cam_translate) - globalSceneSpacePos.xyz); //get direction from the fragment to the camera
+	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos.xyz); //get direction from the fragment to the camera
 
 	//phong
 	//vec3 perfect_reflection;
@@ -253,7 +253,7 @@ void shade_mode0()
 			//calculate light
 			light_change = vec3(0.0f);
 
-			fragtolight = light_points[i].position - globalSceneSpacePos.xyz; //get direction from the fragment to the light source
+			fragtolight = light_points[i].position - geomSceneSpacePos.xyz; //get direction from the fragment to the light source
 
 			if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
 			{
@@ -269,7 +269,7 @@ void shade_mode0()
 				light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
 		
 				//get shadow intensity multiplier
-				shadow_intensity = GetShadowIntensity(globalSceneSpacePos.xyz, i);
+				shadow_intensity = GetShadowIntensity(geomSceneSpacePos.xyz, i);
 
 				//apply light to fragment
 				frag_intensity = frag_intensity + (light_change * shadow_intensity);
@@ -281,7 +281,7 @@ void shade_mode0()
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
 
 	//reflections
-	vec3 reflection_intensity = texture(reflectionIntensityTexture, globalUV).rgb;
+	vec3 reflection_intensity = texture(reflectionIntensityTexture, geomUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	if (reflection_isdrawing || (reflection_intensity == vec3(0.0f, 0.0f, 0.0f)))
 	{
@@ -292,10 +292,10 @@ void shade_mode0()
 		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)
 		{
-			if ((length(globalCamSpacePos.xyz) < mat_ssr_max_distance))
+			if ((length(geomCamSpacePos.xyz) < mat_ssr_max_distance))
 			{
 				vec3 direction = normalize(reflect(-fragtocam, normal));
-				vec3 start_pos = globalSceneSpacePos.xyz;
+				vec3 start_pos = geomSceneSpacePos.xyz;
 				vec3 end_pos = start_pos + (direction * mat_ssr_max_cast_distance);
 				start_pos = start_pos + (direction * ((mat_ssr_depth_acceptance * 1.5f) / dot(direction, normal)));
 
@@ -357,7 +357,7 @@ void shade_mode0()
 			int reflection_index;
 			for (int i = 0; i < REFLECTION_NUM; i++)
 			{
-				current_distance = length(reflections[i].position - globalSceneSpacePos.xyz);
+				current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
 
 				if ((refl_distance == 0.0f) || (current_distance < refl_distance))
 				{
@@ -371,7 +371,7 @@ void shade_mode0()
 				vec3 sample_vector = reflect(-fragtocam, normal);
 				float depth_sample;
 				float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
-				vec3 offset = globalSceneSpacePos.xyz - reflections[reflection_index].position;
+				vec3 offset = geomSceneSpacePos.xyz - reflections[reflection_index].position;
 
 				for (int i = 0; i < reflections[reflection_index].iterations; i++)
 				{
@@ -402,7 +402,7 @@ void shade_mode0()
 
 				for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 				{
-					GetFirstOBBIntersection(globalSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections);
+					GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections);
 
 					all_intersections[(i * 2)] = intersections[0];
 					all_intersections[(i * 2) + 1] = intersections[1];
@@ -415,7 +415,7 @@ void shade_mode0()
 					{
 						included_segments[i] = false;
 
-						current_length = length(intersections[1] - globalSceneSpacePos.xyz);
+						current_length = length(intersections[1] - geomSceneSpacePos.xyz);
 
 						if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
 						{
@@ -477,11 +477,11 @@ void shade_mode0()
 	frag_out += vec4(reflection_intensity * reflection_colour, 0.0f);
 
 	//apply skybox
-	vec3 skybox_intensity = texture(skyboxMaskTexture, globalUV).rgb;
+	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
 	if (skybox_intensity != vec3(0.0f, 0.0f, 0.0f))
 	{
 		frag_out = vec4(1 - skybox_intensity, 1.0f) * frag_out;
-		frag_out += vec4(skybox_intensity * texture(skyboxTexture, globalSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
+		frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
 	}
 
 	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
@@ -496,7 +496,7 @@ void shade_mode0()
 
 void shade_mode1()
 {
-	frag_out.rgb = vec3(0.0f, 1.0f, 1.0f);
+	frag_out.rgb = vec3(0.0f);
 }
 
 void main()

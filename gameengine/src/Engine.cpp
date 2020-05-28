@@ -254,6 +254,15 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 			};
+
+			if (mode == 0)
+			{
+				shader_description.shaders.push_back({ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE0), GL_GEOMETRY_SHADER });
+			}
+			else if (mode == 1)
+			{
+				shader_description.shaders.push_back({ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE1), GL_GEOMETRY_SHADER });
+			}
 		}
 		
 		shader_description.preprocessor_defines = {
