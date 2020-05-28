@@ -9,6 +9,7 @@
 #include "PaneHost.h"
 #include "panes/Viewport.h"
 #include "panes/Lights.h"
+#include "panes/Models.h"
 
 class PaneHost;
 

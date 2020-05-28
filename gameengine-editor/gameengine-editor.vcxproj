@@ -178,6 +178,7 @@
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\PaneHost.h" />
     <ClInclude Include="src\panes\Lights.h" />
+    <ClInclude Include="src\panes\Models.h" />
     <ClInclude Include="src\panes\Pane.h" />
     <ClInclude Include="src\panes\Viewport.h" />
   </ItemGroup>
@@ -186,6 +187,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\PaneHost.cpp" />
     <ClCompile Include="src\panes\Lights.cpp" />
+    <ClCompile Include="src\panes\Models.cpp" />
     <ClCompile Include="src\panes\Pane.cpp" />
     <ClCompile Include="src\panes\Viewport.cpp" />
   </ItemGroup>
