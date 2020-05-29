@@ -102,9 +102,72 @@ void FileManager::WriteChanges()
 			config = items.at(0);
 		}
 
+		std::string output_preprocess = config.dump(2);
+		std::string output_postprocess;
+		char output_char;
+		std::stack<int> state;
+
+		int IN_STR = 0;
+		int IN_LIST = 1;
+		int IN_OBJ = 2;
+
+		bool allow_char = true;
+		int num_spaces = 0;
+
+		for (size_t i = 0; i < output_preprocess.size(); i++)
+		{
+			output_char = output_preprocess.at(i);
+			allow_char = true;
+
+			if ((state.size() > 0) && (state.top() == IN_STR))
+			{
+				if (output_char == '"')
+				{
+					state.pop();
+				}
+			}
+			else if (output_char == '"')
+			{
+				state.push(IN_STR);
+			}
+			else if (output_char == '[')
+			{
+				state.push(IN_LIST);
+			}
+			else if (output_char == '{')
+			{
+				state.push(IN_OBJ);
+			}
+			else if ((output_char == ']') || (output_char == '}'))
+			{
+				state.pop();
+			}
+			else if ((state.size() > 0) && (state.top() == IN_LIST) && ((output_char == '\n') || (output_char == '\r') || (output_char == ' ')))
+			{
+				allow_char = false;
+				if (output_char == ' ')
+				{
+					if (num_spaces == 0)
+					{
+						allow_char = true;
+					}
+					num_spaces++;
+				}
+			}
+			else
+			{
+				num_spaces = 0;
+			}
+			
+			if (allow_char)
+			{
+				output_postprocess.push_back(output_char);
+			}
+		}
+
 		std::ofstream output_file;
 		output_file.open(this->m_file_path, std::ios::trunc);
-		output_file << config.dump(2);
+		output_file << output_postprocess;
 		output_file.close();
 
 		this->ClearChanges();

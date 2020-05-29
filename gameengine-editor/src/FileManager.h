@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <stack>
 
 const int FC_MODE_INSERT = 1;
 const int FC_MODE_RENAME = 2;
