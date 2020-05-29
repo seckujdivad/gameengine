@@ -74,6 +74,7 @@ PaneHost::PaneHost(Main* parent) : wxPanel(parent)
 	this->m_aui_manager.Update();
 
 	this->m_engine = new Engine(this);
+	this->m_file_manager = new FileManager();
 }
 
 PaneHost::~PaneHost()
@@ -81,6 +82,7 @@ PaneHost::~PaneHost()
 	this->m_aui_manager.UnInit();
 	delete this->m_scene;
 	delete this->m_engine;
+	delete this->m_file_manager;
 }
 
 wxAuiPaneInfo PaneHost::GetPaneInfo(int pane_id)
@@ -122,6 +124,8 @@ Engine* PaneHost::GetEngine()
 bool PaneHost::LoadScene(std::filesystem::path path)
 {
 	this->m_scene_path = path;
+
+	this->m_file_manager->SetPath(path.string());
 
 	this->m_scene = InitialiseScene(this->m_scene_path.parent_path().string(), this->m_scene_path.filename().string(), 1);
 	this->m_scene->PushUniforms();
@@ -176,4 +180,9 @@ void PaneHost::SetSelectedModel(int index)
 Model* PaneHost::GetSelectedModel()
 {
 	return this->m_selected_model;
+}
+
+FileManager* PaneHost::GetFileManager()
+{
+	return this->m_file_manager;
 }

@@ -20,6 +20,7 @@ private:
 	wxTextCtrl* m_txt_mdl_name;
 
 	void event_lb_models_clicked(wxCommandEvent& evt);
+	void event_txt_mdl_name_updated(wxCommandEvent& evt);
 
 public:
 	Models(PaneHost* parent);

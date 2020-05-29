@@ -13,6 +13,7 @@
 #include "scene/model/Model.h"
 
 #include "Main.h"
+#include "FileManager.h"
 
 class Pane;
 class Main;
@@ -36,6 +37,8 @@ private:
 	Scene* m_scene = nullptr;
 	Engine* m_engine;
 	Model* m_selected_model = nullptr;
+
+	FileManager* m_file_manager = nullptr;
 
 public:
 	PaneHost(Main* parent);
@@ -61,6 +64,8 @@ public:
 	void SetSelectedModel(Model* model);
 	void SetSelectedModel(int index);
 	Model* GetSelectedModel();
+
+	FileManager* GetFileManager();
 };
 
 template<class T>
