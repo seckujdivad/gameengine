@@ -90,6 +90,18 @@ void FileManager::WriteChanges()
 					throw std::runtime_error("Rename mode is only valid when data is a string");
 				}
 			}
+			else if (change.mode == FC_MODE_ARRAY_REMOVE)
+			{
+				nlohmann::json::iterator it = items.at(items.size() - 1)[change.key_path.at(change.key_path.size() - 1)].find(change.data);
+				while (it != items.at(items.size() - 1)[change.key_path.at(change.key_path.size() - 1)].end())
+				{
+					items.at(items.size() - 1)[change.key_path.at(change.key_path.size() - 1)].erase(it);
+				}
+			}
+			else if (change.mode == FC_MODE_ARRAY_APPEND)
+			{
+				items.at(items.size() - 1)[change.key_path.at(change.key_path.size() - 1)].push_back(change.data);
+			}
 			else
 			{
 				throw std::runtime_error("Unknown file change mode " + change.mode);
