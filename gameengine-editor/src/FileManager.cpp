@@ -112,7 +112,7 @@ void FileManager::WriteChanges()
 		int IN_OBJ = 2;
 
 		bool allow_char = true;
-		int num_spaces = 0;
+		int num_spaces = 1;
 
 		for (size_t i = 0; i < output_preprocess.size(); i++)
 		{
@@ -154,7 +154,7 @@ void FileManager::WriteChanges()
 					num_spaces++;
 				}
 			}
-			else
+			else if ((state.size() > 0) && (state.top() == IN_LIST) && (output_char == ','))
 			{
 				num_spaces = 0;
 			}
