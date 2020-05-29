@@ -1,247 +1,239 @@
 {
+  "cameras": {
+    "main": {
+      "clips": [0.1, 50],
+      "fov": 60,
+      "position": [0, 0, 0],
+      "rotation": [90, 0, -90]
+    }
+  },
+  "layout": {
+    "blender suzanne": {
+      "model": "suzanne",
+      "position": [-2, -2, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
+      "shader": {
+        "phong": {
+          "diffuse": [0.2, 0.2, 0.2],
+          "specular": [0.1, 0.1, 0.1],
+          "specular highlight": 32
+        },
+        "reflections": {
+          "fallback": {
+            "mode": "iterative sampling",
+            "reflection": "level section 2 reflection"
+          },
+          "screen space": {
+            "appear in ssr": true,
+            "enabled": false
+          }
+        },
+        "textures": {
+          "colour": {
+            "magnify filter": "nearest",
+            "path": "textures/unnamed.jpg",
+            "shrink filter": "nearest"
+          },
+          "reflection intensity": [0.4, 0.4, 0.4],
+          "specular": "textures/SuzanneSpecularMap.png"
+        }
+      },
+      "vis box": "level section 2"
+    },
+    "level": {
+      "invert normals": true,
+      "model": "level",
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": [5, 5, 5],
+      "shader": {
+        "phong": {
+          "diffuse": [0.2, 0.2, 0.2],
+          "specular": [0.2, 0.2, 0.2],
+          "specular highlight": 32
+        },
+        "reflections": {
+          "fallback": {
+            "mode": "oriented bounding box",
+            "reflection": ["level section 1 reflection", "level section 2 reflection", "level section 3 reflection"]
+          },
+          "screen space": true
+        },
+        "textures": {
+          "colour": [1, 1, 1],
+          "reflection intensity": [0.5, 0.5, 0.5],
+          "specular": [1.0, 1.0, 1.0]
+        }
+      }
+    },
+    "simple cube": {
+      "model": "cube",
+      "position": [20, 8, -3],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1],
+      "shader": {
+        "phong": {
+          "diffuse": [0.2, 0.2, 0.2],
+          "specular": [0.2, 0.2, 0.2],
+          "specular highlight": 32
+        },
+        "reflections": {
+          "fallback": {
+            "mode": "iterative sampling",
+            "reflection": "level section 3 reflection"
+          },
+          "screen space": {
+            "appear in ssr": true,
+            "enabled": false
+          }
+        },
+        "textures": {
+          "colour": [1, 1, 1],
+          "normal": "textures/cube_normals.png",
+          "reflection intensity": [0.1, 0.1, 0.1],
+          "specular": [1, 1, 1]
+        }
+      },
+      "vis box": "level section 3"
+    }
+  },
+  "lighting": {
+    "ambient": [0.3, 0.3, 0.3],
+    "point lights": {
+      "simple light": {
+        "dynamic draw": ["simple cube", "blender suzanne"],
+        "dynamic refresh rate": 10,
+        "intensity": [1, 1, 1],
+        "position": [10, 0, 0],
+        "shadow clips": [0.1, 100],
+        "shadow texture": [2048, 2048],
+        "shadows": false,
+        "static draw": ["level section 1", "level section 2", "level section 3"]
+      }
+    }
+  },
   "metadata": {
-    "name": "Simple Scene",
     "default camera": "main",
+    "name": "Simple Scene",
     "skybox scene": {
       "file": "simplescene_skybox.json",
-      "texture": [ 2048, 2048 ]
+      "texture": [2048, 2048]
     }
   },
   "models": {
     "cube": {
-      "type": "ply",
       "geometry": "models/cube.ply",
+      "merge distance": 0.01,
       "merge geometry": true,
-      "merge distance": 0.01
+      "type": "ply"
+    },
+    "level": {
+      "geometry": "models/level.ply",
+      "merge distance": 0.01,
+      "merge geometry": true,
+      "type": "ply"
     },
     "suzanne": {
-      "type": "ply",
       "geometry": "models/suzanne.ply",
+      "merge distance": 0.01,
       "merge geometry": true,
-      "merge distance": 0.01
-    },
-    "level": {
-      "type": "ply",
-      "geometry": "models/level.ply",
-      "merge geometry": true,
-      "merge distance": 0.01
+      "type": "ply"
     }
   },
-  "layout": {
-    "simple cube": {
-      "model": "cube",
-      "position": [ 20, 8, -3 ],
-      "rotation": [ 0, 0, 0 ],
-      "scale": [ 1, 1, 1 ],
-      "vis box": "level section 3",
-      "shader": {
-        "textures": {
-          "colour": [ 1, 1, 1 ],
-          "specular": [ 1, 1, 1 ],
-          "normal": "textures/cube_normals.png",
-          "reflection intensity": [ 0.1, 0.1, 0.1 ]
-        },
-        "phong": {
-          "diffuse": [ 0.2, 0.2, 0.2 ],
-          "specular": [ 0.2, 0.2, 0.2 ],
-          "specular highlight": 32
-        },
-        "reflections": {
-          "screen space": {
-            "enabled": false,
-            "appear in ssr": true
-          },
-          "fallback": {
-            "reflection": "level section 3 reflection",
-            "mode": "iterative sampling"
-          }
+  "obb approximation": [{
+      "dimensions": [30, 10, 10],
+      "position": [10, 0, 0],
+      "rotation": [0, 0, 0]
+    }, {
+      "dimensions": [10, 20, 10],
+      "position": [20, 5, 0],
+      "rotation": [0, 0, 0]
+    }, {
+      "dimensions": [10, 20, 10],
+      "position": [0, 5, 0],
+      "rotation": [0, 0, 0]
+    }],
+  "reflections": {
+    "level section 1 reflection": {
+      "clips": [0.1, 100],
+      "corrections": {
+        "iterative sampling": {
+          "iterations": 0
         }
-      }
+      },
+      "dynamic draw": [],
+      "dynamic refresh rate": -1,
+      "position": [0, 0, 0],
+      "static draw": ["level"],
+      "texture": [1024, 1024]
     },
-    "blender suzanne": {
-      "model": "suzanne",
-      "position": [ -2, -2, 0 ],
-      "rotation": [ 0, 0, 0 ],
-      "scale": [ 1, 1, 1 ],
-      "vis box": "level section 2",
-      "shader": {
-        "textures": {
-          "colour": {
-            "path": "textures/unnamed.jpg",
-            "magnify filter": "nearest",
-            "shrink filter": "nearest"
-          },
-          "specular": "textures/SuzanneSpecularMap.png",
-          "reflection intensity": [ 0.4, 0.4, 0.4 ]
-        },
-        "phong": {
-          "diffuse": [ 0.2, 0.2, 0.2 ],
-          "specular": [ 0.1, 0.1, 0.1 ],
-          "specular highlight": 32
-        },
-        "reflections": {
-          "screen space": {
-            "enabled": false,
-            "appear in ssr": true
-          },
-          "fallback": {
-            "reflection": "level section 2 reflection",
-            "mode": "iterative sampling"
-          }
+    "level section 2 reflection": {
+      "clips": [0.1, 100],
+      "corrections": {
+        "iterative sampling": {
+          "iterations": 0
         }
-      }
+      },
+      "dynamic draw": [],
+      "dynamic refresh rate": -1,
+      "position": [10, 0, 0],
+      "static draw": ["level"],
+      "texture": [1024, 1024]
     },
-    "level": {
-      "model": "level",
-      "position": [ 0, 0, 0 ],
-      "rotation": [ 0, 0, 0 ],
-      "scale": [ 5, 5, 5 ],
-      "invert normals": true,
-      "shader": {
-        "textures": {
-          "colour": [ 1, 1, 1 ],
-          "specular": [ 1.0, 1.0, 1.0 ],
-          "reflection intensity": [ 0.5, 0.5, 0.5 ]
-        },
-        "phong": {
-          "diffuse": [ 0.2, 0.2, 0.2 ],
-          "specular": [ 0.2, 0.2, 0.2 ],
-          "specular highlight": 32
-        },
-        "reflections": {
-          "screen space": true,
-          "fallback": {
-            "reflection": [
-              "level section 1 reflection",
-              "level section 2 reflection",
-              "level section 3 reflection"
-            ],
-            "mode": "oriented bounding box"
-          }
+    "level section 3 reflection": {
+      "clips": [0.1, 100],
+      "corrections": {
+        "iterative sampling": {
+          "iterations": 0
         }
-      }
+      },
+      "dynamic draw": [],
+      "dynamic refresh rate": -1,
+      "position": [20, 0, 0],
+      "static draw": ["level"],
+      "texture": [1024, 1024]
     }
   },
-  "cameras": {
-    "main": {
-      "position": [ 0, 0, 0 ],
-      "rotation": [ 90, 0, -90 ],
-      "clips": [ 0.1, 50 ],
-      "fov": 60
-    }
+  "screen space reflection defaults": {
+    "acceptable depth distance": 0.02,
+    "appear in ssr": false,
+    "distance limit": 5,
+    "max camera distance": 25,
+    "refinements": 2,
+    "resolution": 1
   },
   "shaders": {
     "fragment": {
       "simple": "shaders/simple.frag",
       "simple shadow": "shaders/simple_shadow.frag"
     },
+    "geometry": {
+      "simple shadow": "shaders/simple_shadow.geom"
+    },
     "vertex": {
       "simple": "shaders/simple.vert",
       "simple shadow": "shaders/simple_shadow.vert"
-    },
-    "geometry": {
-      "simple shadow": "shaders/simple_shadow.geom"
     }
-  },
-  "lighting": {
-    "ambient": [ 0.3, 0.3, 0.3 ],
-    "point lights": {
-      "simple light": {
-        "position": [ 10, 0, 0 ],
-        "intensity": [ 1, 1, 1 ],
-        "shadows": false,
-        "shadow texture": [ 2048, 2048 ],
-        "shadow clips": [ 0.1, 100 ],
-        "dynamic draw": [ "simple cube", "blender suzanne" ],
-        "static draw": [ "level section 1", "level section 2", "level section 3" ],
-        "dynamic refresh rate": 10
-      }
-    }
-  },
-  "reflections": {
-    "level section 2 reflection": {
-      "position": [ 10, 0, 0 ],
-      "dynamic draw": [  ],
-      "static draw": [ "level" ],
-      "dynamic refresh rate": -1,
-      "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ],
-      "corrections": {
-        "iterative sampling": {
-          "iterations": 0
-        }
-      }
-    },
-    "level section 1 reflection": {
-      "position": [ 0, 0, 0 ],
-      "dynamic draw": [  ],
-      "static draw": [ "level" ],
-      "dynamic refresh rate": -1,
-      "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ],
-      "corrections": {
-        "iterative sampling": {
-          "iterations": 0
-        }
-      }
-    },
-    "level section 3 reflection": {
-      "position": [ 20, 0, 0 ],
-      "dynamic draw": [  ],
-      "static draw": [ "level" ],
-      "dynamic refresh rate": -1,
-      "clips": [ 0.1, 100 ],
-      "texture": [ 1024, 1024 ],
-      "corrections": {
-        "iterative sampling": {
-          "iterations": 0
-        }
-      }
-    }
-  },
-  "screen space reflection defaults": {
-    "refinements": 2,
-    "resolution": 1,
-    "distance limit": 5,
-    "acceptable depth distance": 0.02,
-    "max camera distance": 25,
-    "appear in ssr": false
   },
   "vis boxes": {
     "level section 1": {
-      "position": [ 0, 10, 0 ],
-      "rotation": [ 0, 0, 0 ],
-      "dimensions": [ 10, 10, 10 ],
-      "pvs": [ "level section 2" ]
+      "dimensions": [10, 10, 10],
+      "position": [0, 10, 0],
+      "pvs": ["level section 2"],
+      "rotation": [0, 0, 0]
     },
     "level section 2": {
-      "position": [ 10, 0, 0 ],
-      "rotation": [ 0, 0, 0 ],
-      "dimensions": [ 30, 10, 10 ],
-      "pvs": [ "level section 1", "level section 3" ]
+      "dimensions": [30, 10, 10],
+      "position": [10, 0, 0],
+      "pvs": ["level section 1", "level section 3"],
+      "rotation": [0, 0, 0]
     },
     "level section 3": {
-      "position": [ 20, 10, 0 ],
-      "rotation": [ 0, 0, 0 ],
-      "dimensions": [ 10, 10, 10 ],
-      "pvs": [ "level section 2" ]
+      "dimensions": [10, 10, 10],
+      "position": [20, 10, 0],
+      "pvs": ["level section 2"],
+      "rotation": [0, 0, 0]
     }
-  },
-  "obb approximation": [
-    {
-      "dimensions": [ 30, 10, 10 ],
-      "position": [ 10, 0, 0 ],
-      "rotation": [ 0, 0, 0 ]
-    },
-    {
-      "dimensions": [ 10, 20, 10 ],
-      "position": [ 20, 5, 0 ],
-      "rotation": [ 0, 0, 0 ]
-    },
-    {
-      "dimensions": [ 10, 20, 10 ],
-      "position": [ 0, 5, 0 ],
-      "rotation": [ 0, 0, 0 ]
-    }
-  ]
+  }
 }
