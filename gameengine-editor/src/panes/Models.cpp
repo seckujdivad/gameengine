@@ -18,18 +18,21 @@ void Models::event_txt_mdl_name_updated(wxCommandEvent& evt)
 	{
 		std::string new_mdl_name = this->m_txt_mdl_name->GetValue();
 
-		FileChange change;
-		change.data = new_mdl_name;
-		change.key_path = { "layout", this->GetPaneHost()->GetSelectedModel()->GetIdentifier() };
-		change.mode = FC_MODE_RENAME;
-		this->GetPaneHost()->GetFileManager()->QueueChange(change);
+		if (new_mdl_name != this->GetPaneHost()->GetSelectedModel()->GetIdentifier())
+		{
+			FileChange change;
+			change.data = new_mdl_name;
+			change.key_path = { "layout", this->GetPaneHost()->GetSelectedModel()->GetIdentifier() };
+			change.mode = FC_MODE_RENAME;
+			this->GetPaneHost()->GetFileManager()->QueueChange(change);
 
-		this->GetPaneHost()->GetSelectedModel()->SetIdentifier(new_mdl_name);
+			this->GetPaneHost()->GetSelectedModel()->SetIdentifier(new_mdl_name);
 
-		int selection_index = this->m_lb_models->GetSelection();
-		this->m_lb_models->Delete(selection_index);
-		this->m_lb_models->Insert(new_mdl_name, selection_index);
-		this->m_lb_models->SetSelection(selection_index);
+			int selection_index = this->m_lb_models->GetSelection();
+			this->m_lb_models->Delete(selection_index);
+			this->m_lb_models->Insert(new_mdl_name, selection_index);
+			this->m_lb_models->SetSelection(selection_index);
+		}
 	}
 	evt.Skip();
 }
