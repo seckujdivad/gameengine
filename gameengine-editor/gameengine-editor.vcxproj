@@ -175,6 +175,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\FileManager.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\PaneHost.h" />
     <ClInclude Include="src\panes\Lights.h" />
@@ -184,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\FileManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\PaneHost.cpp" />
     <ClCompile Include="src\panes\Lights.cpp" />
