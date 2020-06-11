@@ -163,12 +163,15 @@ Scene* PaneHost::GetScene()
 
 void PaneHost::SetSelectedModel(Model* model)
 {
+	Model* old_model = this->m_selected_model;
+
 	this->m_selected_model = model;
 	this->m_scene->SetMode1SelectedModel(model);
 
+	if (model != old_model)
 	for (size_t i = 0; i < this->m_panes.size(); i++)
 	{
-		this->m_panes.at(i)->ModelSelectionChangedEvent(model);
+		this->m_panes.at(i)->ModelSelectionChangedEvent(model, old_model);
 	}
 }
 

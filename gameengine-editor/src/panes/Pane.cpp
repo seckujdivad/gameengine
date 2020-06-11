@@ -50,7 +50,6 @@ void Pane::SceneChangedEvent(Scene* scene)
 {
 }
 
-void Pane::ModelSelectionChangedEvent(Model* model)
+void Pane::ModelSelectionChangedEvent(Model* new_model, Model* old_model)
 {
-
 }
