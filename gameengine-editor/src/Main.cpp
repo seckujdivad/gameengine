@@ -24,22 +24,29 @@ void Main::menubar_item_selected(wxCommandEvent& evt)
 {
 	std::string selection_name = ((wxMenu*)evt.GetEventObject())->FindItem(evt.GetId(), nullptr)->GetName();
 
+	if (selection_name == "Open")
+	{
 #ifdef _DEBUG
-	wxString default_dir = "../demo-cube/resources/";
+		wxString default_dir = "../demo-cube/resources/";
 #else
-	wxString default_dir = wxEmptyString;
+		wxString default_dir = wxEmptyString;
 #endif
 
-	wxFileDialog* file_dialog = new wxFileDialog(this, "Select scene", wxEmptyString, default_dir, "*.json");
-	int result = file_dialog->ShowModal();
+		wxFileDialog* file_dialog = new wxFileDialog(this, "Select scene", wxEmptyString, default_dir, "*.json");
+		int result = file_dialog->ShowModal();
 
-	if (result == wxID_OK)
-	{
-		this->m_panehost->LoadScene(file_dialog->GetPath());
+		if (result == wxID_OK)
+		{
+			this->m_panehost->LoadScene(file_dialog->GetPath());
+		}
+
+		delete file_dialog;
+		evt.Skip();
 	}
-
-	delete file_dialog;
-	evt.Skip();
+	else if (selection_name == "Save")
+	{
+		this->m_panehost->GetFileManager()->WriteData();
+	}
 }
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
@@ -70,13 +77,17 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	this->m_menubar = new wxMenuBar();
 
 	wxMenu* menu;
-
 	menu = new wxMenu();
+
 	wxMenuItem* item = menu->Append(wxID_OPEN, "Open");
+	this->Bind(wxEVT_MENU, &Main::menubar_item_selected, this, item->GetId());
+
+	item = menu->Append(wxID_SAVE, "Save");
+	this->Bind(wxEVT_MENU, &Main::menubar_item_selected, this, item->GetId());
+
 	this->m_menubar->Append(menu, "File");
 	this->m_menus.push_back(menu);
-
-	this->Bind(wxEVT_MENU, &Main::menubar_item_selected, this, item->GetId());
+	
 	this->SetMenuBar(this->m_menubar);
 	
 	//create pane host
