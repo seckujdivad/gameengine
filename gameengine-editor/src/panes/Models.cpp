@@ -20,11 +20,9 @@ void Models::event_txt_mdl_name_updated(wxCommandEvent& evt)
 
 		if (new_mdl_name != this->GetPaneHost()->GetSelectedModel()->GetIdentifier())
 		{
-			FileChange change;
-			change.data = new_mdl_name;
-			change.key_path = { "layout", this->GetPaneHost()->GetSelectedModel()->GetIdentifier() };
-			change.mode = FC_MODE_RENAME;
-			this->GetPaneHost()->GetFileManager()->QueueChange(change);
+			nlohmann::json& data = this->GetPaneHost()->GetFileManager()->GetData();
+			data["layout"][new_mdl_name] = data["layout"][this->GetPaneHost()->GetSelectedModel()->GetIdentifier()];
+			data["layout"].erase(this->GetPaneHost()->GetSelectedModel()->GetIdentifier());
 
 			this->GetPaneHost()->GetSelectedModel()->SetIdentifier(new_mdl_name);
 
