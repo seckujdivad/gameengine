@@ -18,7 +18,7 @@ void PointLight::UpdateTransforms()
 	}
 }
 
-PointLight::PointLight(int light_index, int refresh_frames) : Positionable(), Nameable()
+PointLight::PointLight(EventManager* evtman, int light_index, int refresh_frames) : Positionable(evtman), Nameable(evtman), EventEmitter(evtman)
 {
 	this->m_light_index = light_index;
 	this->m_refresh_frames = refresh_frames;

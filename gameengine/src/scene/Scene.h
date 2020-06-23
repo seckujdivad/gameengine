@@ -14,6 +14,7 @@
 #include "VisBox.h"
 #include "SceneApproximation.h"
 #include "../render/Renderable.h"
+#include "../EventEmitter.h"
 
 struct ShaderDescription
 {
@@ -22,7 +23,7 @@ struct ShaderDescription
 	bool shader_strings_are_paths = true;
 };
 
-class Scene : public Nameable
+class Scene : public Nameable, virtual public EventEmitter
 {
 private:
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -58,7 +59,7 @@ private:
 	Model* m_mode1_selected_model = nullptr;
 	
 public:
-	Scene(int mode = 0);
+	Scene(EventManager* evtman, int mode = 0);
 	~Scene();
 
 	std::vector<Model*> models;

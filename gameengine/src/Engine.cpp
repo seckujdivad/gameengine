@@ -24,13 +24,16 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	json config = json::parse(contents);
 
 	//create scene
+	// create event manager
+	EventManager* evtman = new EventManager();
+
 	// make cameras
 	std::vector<Camera*> cameras;
 	Camera* camera;
 	Camera* main_camera = nullptr;
 	for (auto it = config["cameras"].begin(); it != config["cameras"].end(); it++)
 	{
-		camera = new Camera();
+		camera = new Camera(evtman);
 		camera->SetIdentifier(it.key());
 		camera->SetPosition(it.value()["position"][0].get<GLfloat>(), it.value()["position"][1].get<GLfloat>(), it.value()["position"][2].get<GLfloat>());
 		camera->SetRotation(it.value()["rotation"][0].get<GLfloat>(), it.value()["rotation"][1].get<GLfloat>(), it.value()["rotation"][2].get<GLfloat>());
@@ -55,7 +58,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	}
 
 	// make scene object
-	Scene* scene = new Scene(mode);
+	Scene* scene = new Scene(evtman, mode);
 
 	scene->SetIdentifier(config["metadata"]["name"].get<std::string>());
 	
@@ -71,7 +74,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	int num_point_lights = 0;
 	for (auto it = config["lighting"]["point lights"].begin(); it != config["lighting"]["point lights"].end(); it++)
 	{
-		PointLight* pointlight = new PointLight(num_point_lights, it.value()["dynamic refresh rate"].get<int>());
+		PointLight* pointlight = new PointLight(evtman, num_point_lights, it.value()["dynamic refresh rate"].get<int>());
 		pointlight->SetIdentifier(it.key());
 		pointlight->SetIntensity(glm::vec3(it.value()["intensity"][0].get<float>(),
 			it.value()["intensity"][1].get<float>(),
@@ -112,10 +115,10 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 
 	//load reflections
 	Reflection* reflection;
-	OrientedBoundingBox obb;
 	for (auto it = config["reflections"].begin(); it != config["reflections"].end(); it++)
 	{
-		reflection = new Reflection(it.value()["texture"][0].get<int>(),
+		reflection = new Reflection(evtman,
+			it.value()["texture"][0].get<int>(),
 			it.value()["texture"][1].get<int>(),
 			it.value()["clips"][0].get<float>(),
 			it.value()["clips"][1].get<float>(),
@@ -146,7 +149,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 	std::map<VisBox*, std::vector<std::string>> visbox_pvs;
 	for (auto it = config["vis boxes"].begin(); it != config["vis boxes"].end(); it++)
 	{
-		VisBox* visbox = new VisBox();
+		VisBox* visbox = new VisBox(evtman);
 
 		visbox->SetIdentifier(it.key());
 		visbox->SetPosition(it.value()["position"][0].get<float>(),
@@ -182,6 +185,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 
 	//load obb scene approximation
 	SceneApproximation* approximation = new SceneApproximation();
+	OrientedBoundingBox obb = OrientedBoundingBox(evtman);
 	for (auto it = config["obb approximation"].begin(); it != config["obb approximation"].end(); it++)
 	{
 		obb.SetPosition(glm::vec3(it.value()["position"][0].get<float>(),
@@ -206,7 +210,7 @@ Scene* InitialiseScene(std::string path, std::string filename, int mode)
 		{
 			std::string full_path = path + "/";
 			full_path = full_path + it.value()["geometry"].get<std::string>();
-			model = ModelFromPly(full_path);
+			model = ModelFromPly(full_path, evtman);
 		}
 
 		if (it.value()["merge geometry"].get<bool>())

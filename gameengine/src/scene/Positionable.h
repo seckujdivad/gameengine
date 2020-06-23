@@ -8,7 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-class Positionable
+#include "../EventEmitter.h"
+#include "../EventManager.h"
+
+class Positionable : public virtual EventEmitter
 {
 private:
 	std::array<GLfloat, 3> m_position = { 0.0f, 0.0f, 0.0f };
@@ -16,7 +19,7 @@ private:
 	bool m_repositioned = true;
 
 public:
-	Positionable();
+	Positionable(EventManager* evtman);
 	Positionable(const Positionable& copyfrom);
 	Positionable& operator=(Positionable& copyfrom);
 	~Positionable();

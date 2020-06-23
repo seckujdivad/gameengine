@@ -1,6 +1,6 @@
 #include "OrientedBoundingBox.h"
 
-OrientedBoundingBox::OrientedBoundingBox() : Positionable(), Rotatable(), Scalable()
+OrientedBoundingBox::OrientedBoundingBox(EventManager* evtman) : Positionable(evtman), Rotatable(evtman), Scalable(evtman), EventEmitter(evtman)
 {
 }
 

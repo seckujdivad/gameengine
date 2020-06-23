@@ -5,13 +5,16 @@
 
 #include <string>
 
-class Nameable
+#include "../EventEmitter.h"
+#include "../EventManager.h"
+
+class Nameable : public virtual EventEmitter
 {
 private:
 	std::string m_identifier = "";
 
 public:
-	Nameable();
+	Nameable(EventManager* evtman);
 	Nameable(const Nameable& copyfrom);
 	Nameable& operator=(Nameable& copyfrom);
 	~Nameable();

@@ -6,11 +6,16 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <vector>
+#include <string>
+
 #include "../Positionable.h"
 #include "../Nameable.h"
 #include "../../render/ShaderProgram.h"
+#include "../../EventManager.h"
+#include "../../EventEmitter.h"
 
-class PointLight : public Positionable, public Nameable
+class PointLight : public Positionable, public Nameable, public virtual EventEmitter
 {
 private:
 	glm::vec3 m_intensity;
@@ -39,7 +44,7 @@ private:
 	void UpdateTransforms();
 
 public:
-	PointLight(int light_index, int refresh_frames);
+	PointLight(EventManager* evtman, int light_index, int refresh_frames);
 	~PointLight();
 
 	void SetIntensity(glm::vec3 intensity);

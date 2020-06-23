@@ -14,11 +14,11 @@ bool Scalable::CheckIfRescaled(bool reset)
 	}
 }
 
-Scalable::Scalable()
+Scalable::Scalable(EventManager* evtman) : EventEmitter(evtman)
 {
 }
 
-Scalable::Scalable(const Scalable& copyfrom)
+Scalable::Scalable(const Scalable& copyfrom) : EventEmitter(copyfrom)
 {
 	this->m_scale = copyfrom.m_scale;
 }

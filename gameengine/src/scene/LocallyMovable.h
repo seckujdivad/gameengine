@@ -8,12 +8,13 @@
 
 #include "Positionable.h"
 #include "Rotatable.h"
+#include "../EventManager.h"
 
 class LocallyMovable : public Positionable, public Rotatable
 {
 private:
 public:
-	LocallyMovable();
+	LocallyMovable(EventManager* evtman);
 
 	void MoveLocally(float x, float y, float z);
 };

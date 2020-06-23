@@ -20,8 +20,10 @@
 #include "../Nameable.h"
 #include "../../render/ShaderProgram.h"
 #include "Material.h"
+#include "../../EventManager.h"
+#include "../../EventEmitter.h"
 
-class Model : public Positionable, public Rotatable, public Scalable, public Nameable
+class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public virtual EventEmitter
 {
 private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
@@ -44,7 +46,7 @@ private:
 	Material m_material;
 
 public:
-	Model();
+	Model(EventManager* evtman);
 	Model(Model& copy_from);
 	~Model();
 

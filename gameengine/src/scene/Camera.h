@@ -12,8 +12,10 @@
 #include "LocallyMovable.h"
 #include "Nameable.h"
 #include "../render/ShaderProgram.h"
+#include "../EventManager.h"
+#include "../EventEmitter.h"
 
-class Camera : public LocallyMovable, public Nameable
+class Camera : public LocallyMovable, public Nameable, public virtual EventEmitter
 {
 private:
 	std::string m_identifier;
@@ -32,7 +34,7 @@ private:
 	bool m_persp_transforms_need_update = true;
 
 public:
-	Camera();
+	Camera(EventManager* evtman);
 	~Camera();
 
 	void SetFOV(GLfloat fov);

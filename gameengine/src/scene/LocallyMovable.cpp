@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "LocallyMovable.h"
 
-LocallyMovable::LocallyMovable() : Positionable(), Rotatable()
+LocallyMovable::LocallyMovable(EventManager* evtman) : Positionable(evtman), Rotatable(evtman), EventEmitter(evtman)
 {
 
 }

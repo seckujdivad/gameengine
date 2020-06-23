@@ -6,12 +6,17 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <vector>
+#include <string>
+
 #include "../Positionable.h"
 #include "../Nameable.h"
 #include "../../render/ShaderProgram.h"
 #include "../OrientedBoundingBox.h"
+#include "../../EventManager.h"
+#include "../../EventEmitter.h"
 
-class Reflection : public Positionable, public Nameable
+class Reflection : public Positionable, public Nameable, public virtual EventEmitter
 {
 private:
 	GLuint m_fbo = NULL;
@@ -43,7 +48,7 @@ private:
 	void UpdateCameraData();
 
 public:
-	Reflection(unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, int refresh_frames);
+	Reflection(EventManager* evtman, unsigned int texture_width, unsigned int texture_height, float near_plane, float far_plane, int refresh_frames);
 	~Reflection();
 
 	void SetNearClip(float near_clip);

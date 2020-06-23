@@ -14,6 +14,8 @@
 #include "Scalable.h"
 #include "model/Model.h"
 #include "OrientedBoundingBox.h"
+#include "../EventEmitter.h"
+#include "../EventManager.h"
 
 template <typename T>
 class HashPointer : public std::hash<T*>
@@ -32,14 +34,14 @@ public:
 	}
 };
 
-class VisBox : public Nameable, public OrientedBoundingBox
+class VisBox : public Nameable, public OrientedBoundingBox, public virtual EventEmitter
 {
 private:
 	std::unordered_set<VisBox*, HashPointer<VisBox>> m_pvs;
 	std::unordered_set<Model*, HashPointer<Model>> m_members;
 	
 public:
-	VisBox();
+	VisBox(EventManager* evtman);
 	~VisBox();
 
 	std::unordered_set<Model*, HashPointer<Model>> GetPotentiallyVisibleModels();

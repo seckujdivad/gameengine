@@ -8,7 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-class Rotatable
+#include "../EventEmitter.h"
+#include "../EventManager.h"
+
+class Rotatable : public virtual EventEmitter
 {
 private:
 	std::array<GLfloat, 3> m_rotation = { 0.0f, 0.0f, 0.0f };
@@ -16,7 +19,7 @@ private:
 	bool m_rotated = true;
 
 public:
-	Rotatable();
+	Rotatable(EventManager* evtman);
 	Rotatable(const Rotatable& copyfrom);
 	Rotatable& operator=(Rotatable& copyfrom);
 	~Rotatable();

@@ -1,11 +1,11 @@
 #include <wx/wxprec.h>
 #include "Nameable.h"
 
-Nameable::Nameable()
+Nameable::Nameable(EventManager* evtman) : EventEmitter(evtman)
 {
 }
 
-Nameable::Nameable(const Nameable& copyfrom)
+Nameable::Nameable(const Nameable& copyfrom) : EventEmitter(copyfrom)
 {
 	this->m_identifier = copyfrom.m_identifier;
 }

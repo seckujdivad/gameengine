@@ -9,15 +9,17 @@
 #include "Positionable.h"
 #include "Rotatable.h"
 #include "Scalable.h"
+#include "../EventEmitter.h"
+#include "../EventManager.h"
 
-class OrientedBoundingBox : public Positionable, public Rotatable, public Scalable
+class OrientedBoundingBox : public Positionable, public Rotatable, public Scalable, public virtual EventEmitter
 {
 private:
 	glm::mat3 m_rotation_matrix = glm::mat3(1.0f);
 	glm::mat3 m_rotation_inverse_matrix = glm::mat3(1.0f);
 
 public:
-	OrientedBoundingBox();
+	OrientedBoundingBox(EventManager* evtman);
 
 	bool PointInBounds(glm::vec3 point);
 	bool PointInBounds(float x, float y, float z);

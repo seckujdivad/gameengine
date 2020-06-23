@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "PlyLoader.h"
 
-Model* ModelFromPly(std::string path)
+Model* ModelFromPly(std::string path, EventManager* model_evtman)
 {
 	//ply files could (in theory) contain pretty much any kind of data
 	//I have restricted this parser to work with Blender-style properties
@@ -29,7 +29,7 @@ Model* ModelFromPly(std::string path)
 
 	std::map<std::string, PlyValueList> values;
 
-	Model* result = new Model();
+	Model* result = new Model(model_evtman);
 
 	file.open(path);
 	if (file.is_open())

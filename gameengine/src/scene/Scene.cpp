@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Scene.h"
 
-Scene::Scene(int mode) : Nameable()
+Scene::Scene(EventManager* evtman, int mode) : Nameable(evtman), EventEmitter(evtman)
 {
 	this->m_mode = mode;
 
@@ -52,6 +52,7 @@ Scene::~Scene()
 
 	delete this->m_approximation;
 	delete this->m_skybox_scene;
+	delete this->GetEventManager();
 }
 
 int Scene::GetModelIndex(Model* model)

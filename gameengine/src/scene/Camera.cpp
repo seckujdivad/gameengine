@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Camera.h"
 
-Camera::Camera() : LocallyMovable(), Nameable()
+Camera::Camera(EventManager* evtman) : LocallyMovable(evtman), Nameable(evtman), EventEmitter(evtman)
 {
 	this->m_fov = (GLfloat)45;
 }

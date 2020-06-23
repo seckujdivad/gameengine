@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "VisBox.h"
 
-VisBox::VisBox() : Nameable(), OrientedBoundingBox()
+VisBox::VisBox(EventManager* evtman) : Nameable(evtman), OrientedBoundingBox(evtman), EventEmitter(evtman)
 {
 }
 

@@ -8,7 +8,10 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-class Scalable
+#include "../EventEmitter.h"
+#include "../EventManager.h"
+
+class Scalable : public virtual EventEmitter
 {
 private:
 	std::array<GLfloat, 3> m_scale = { 0.0f, 0.0f, 0.0f };
@@ -16,7 +19,7 @@ private:
 	bool m_rescaled = true;
 	
 public:
-	Scalable();
+	Scalable(EventManager* evtman);
 	Scalable(const Scalable& copyfrom);
 	Scalable& operator=(Scalable& copyfrom);
 	~Scalable();

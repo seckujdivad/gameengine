@@ -14,11 +14,11 @@ bool Positionable::CheckIfRepositioned(bool reset)
 	}
 }
 
-Positionable::Positionable()
+Positionable::Positionable(EventManager* evtman) : EventEmitter(evtman)
 {
 }
 
-Positionable::Positionable(const Positionable& copyfrom)
+Positionable::Positionable(const Positionable& copyfrom) : EventEmitter(copyfrom)
 {
 	this->m_position = copyfrom.m_position;
 }

@@ -14,11 +14,11 @@ bool Rotatable::CheckIfRotated(bool reset)
 	}
 }
 
-Rotatable::Rotatable()
+Rotatable::Rotatable(EventManager* evtman) : EventEmitter(evtman)
 {
 }
 
-Rotatable::Rotatable(const Rotatable& copyfrom)
+Rotatable::Rotatable(const Rotatable& copyfrom) : EventEmitter(copyfrom)
 {
 	this->m_rotation = copyfrom.m_rotation;
 }
