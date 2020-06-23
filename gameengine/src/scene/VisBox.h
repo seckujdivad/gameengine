@@ -34,7 +34,7 @@ public:
 	}
 };
 
-class VisBox : public Nameable, public OrientedBoundingBox, public virtual EventEmitter
+class VisBox : public OrientedBoundingBox, public virtual EventEmitter
 {
 private:
 	std::unordered_set<VisBox*, HashPointer<VisBox>> m_pvs;
@@ -50,4 +50,8 @@ public:
 	void RemoveMemberModel(Model* model);
 	
 	void AddPotentiallyVisible(VisBox* visbox);
+
+#pragma warning(disable: 4250)
+	using Nameable::GetIdentifier;
 };
+#pragma warning(default: 4250)

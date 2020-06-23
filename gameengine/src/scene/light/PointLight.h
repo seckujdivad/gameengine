@@ -79,4 +79,8 @@ public:
 
 	void IncrementFrameCounter(int increment = 1);
 	bool DynamicNeedsRedrawing(bool reset_if_redraw = true);
+
+#pragma warning(disable: 4250)
+	using Nameable::GetIdentifier;
 };
+#pragma warning(default: 4250)

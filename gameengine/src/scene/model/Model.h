@@ -23,7 +23,7 @@
 #include "../../EventManager.h"
 #include "../../EventEmitter.h"
 
-class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public virtual EventEmitter
+class Model : public Positionable, public Rotatable, public Scalable, public virtual EventEmitter, public Nameable
 {
 private:
 	std::vector<std::vector<GLfloat>*> m_vertices;
@@ -94,4 +94,8 @@ public:
 	void SetMaterial(Material material);
 
 	void InvertNormals();
+
+#pragma warning(disable: 4250)
+	using Nameable::GetIdentifier;
 };
+#pragma warning(default: 4250)

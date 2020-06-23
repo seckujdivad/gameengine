@@ -22,6 +22,8 @@ Nameable::~Nameable()
 
 void Nameable::SetIdentifier(std::string identifier)
 {
+	this->EmitEvent("renamed", nlohmann::json::array({this->m_identifier, identifier}));
+
 	this->m_identifier = identifier;
 }
 

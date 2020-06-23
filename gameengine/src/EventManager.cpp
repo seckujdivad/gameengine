@@ -16,15 +16,15 @@ void EventManager::SubscribeToEvent(EventSubscription subscription)
 	}
 }
 
-void EventManager::EmitEvent(std::string event_type, std::vector<void*> additional_data, std::vector<std::size_t> sizes)
+void EventManager::EmitEvent(Event evt)
 {
-	auto pair = this->m_event_subscriptions.find(event_type);
+	auto pair = this->m_event_subscriptions.find(evt.type);
 	if (pair != this->m_event_subscriptions.end())
 	{
 		std::vector<EventSubscription> subscriptions = pair->second;
 		for (auto it = subscriptions.begin(); it != subscriptions.end(); it++)
 		{
-			it->function(additional_data, sizes);
+			it->function(evt);
 		}
 	}
 }

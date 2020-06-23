@@ -9,10 +9,11 @@
 #include "Positionable.h"
 #include "Rotatable.h"
 #include "Scalable.h"
+#include "Nameable.h"
 #include "../EventEmitter.h"
 #include "../EventManager.h"
 
-class OrientedBoundingBox : public Positionable, public Rotatable, public Scalable, public virtual EventEmitter
+class OrientedBoundingBox : public Nameable, public Positionable, public Rotatable, public Scalable, public virtual EventEmitter
 {
 private:
 	glm::mat3 m_rotation_matrix = glm::mat3(1.0f);
@@ -27,4 +28,8 @@ public:
 	glm::vec3 GetDimensionsVec();
 	glm::mat3 GetRotationMatrix();
 	glm::mat3 GetInverseRotationMatrix();
+
+#pragma warning(disable: 4250)
+	using Nameable::GetIdentifier;
 };
+#pragma warning(default: 4250)

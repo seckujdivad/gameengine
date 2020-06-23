@@ -20,5 +20,5 @@ public:
 	~Nameable();
 
 	void SetIdentifier(std::string identifier);
-	std::string GetIdentifier();
+	virtual std::string GetIdentifier();
 };

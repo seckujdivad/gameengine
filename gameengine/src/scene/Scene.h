@@ -116,4 +116,8 @@ public:
 
 	//mode1
 	void SetMode1SelectedModel(Model* model);
+
+#pragma warning(disable: 4250)
+	using Nameable::GetIdentifier;
 };
+#pragma warning(default: 4250)

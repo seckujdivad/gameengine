@@ -9,8 +9,9 @@
 #include "Positionable.h"
 #include "Rotatable.h"
 #include "../EventManager.h"
+#include "../EventEmitter.h"
 
-class LocallyMovable : public Positionable, public Rotatable
+class LocallyMovable : public Positionable, public Rotatable, public virtual EventEmitter
 {
 private:
 public:
