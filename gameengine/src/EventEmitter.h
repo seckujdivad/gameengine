@@ -11,9 +11,7 @@ private:
 	EventManager* m_evtman;
 
 protected:
-	EventManager* GetEventManager();
 	void EmitEvent(std::string type, nlohmann::json data = nlohmann::json());
-
 	std::string GetClassName();
 
 public:
@@ -21,4 +19,6 @@ public:
 	EventEmitter(const EventEmitter& copyfrom);
 
 	virtual std::string GetIdentifier() = 0;
+
+	EventManager* GetEventManager();
 };

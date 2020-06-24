@@ -6,6 +6,7 @@
 
 #include <string>
 #include <filesystem>
+#include <vector>
 
 #include "scene/Scene.h"
 #include "Engine.h"

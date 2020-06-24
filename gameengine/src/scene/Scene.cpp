@@ -790,5 +790,20 @@ void Scene::SetApproximation(SceneApproximation* approximation)
 
 void Scene::SetMode1SelectedModel(Model* model)
 {
-	this->m_mode1_selected_model = model;
+	if (model != this->m_mode1_selected_model)
+	{
+		if (this->m_mode1_selected_model == nullptr)
+		{
+			this->EmitEvent("first mode1 model selected", nlohmann::json::array({model->GetIdentifier()}));
+		}
+		else
+		{
+			this->EmitEvent("new mode1 model selected", nlohmann::json::array({
+				this->m_mode1_selected_model->GetIdentifier(),
+				model->GetIdentifier()
+				}));
+		}
+
+		this->m_mode1_selected_model = model;
+	}
 }

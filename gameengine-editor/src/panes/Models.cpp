@@ -35,6 +35,10 @@ void Models::event_txt_mdl_name_updated(wxCommandEvent& evt)
 	evt.Skip();
 }
 
+void Models::UpdateModelName(Model* model, std::string name)
+{
+}
+
 Models::Models(PaneHost* parent) : Pane(parent)
 {
 	this->m_sizer = new wxGridBagSizer(0, 0);
@@ -77,4 +81,25 @@ void Models::SceneChangedEvent(Scene* scene)
 	
 	this->m_lb_models->Clear();
 	this->m_lb_models->Insert(names, 0);
+
+	EventSubscription subscription;
+	subscription.type = "new mode1 model selected";
+	subscription.function = [this](Event evt) { this->ModelSelectionUpdated(
+		(Model*)this->GetPaneHost()->GetScene()->GetByIdentifier(evt.data[1].get<std::string>(), 0),
+		(Model*)this->GetPaneHost()->GetScene()->GetByIdentifier(evt.data[0].get<std::string>(), 0)); };
+	this->GetPaneHost()->GetScene()->GetEventManager()->SubscribeToEvent(subscription);
+
+	subscription.type = "first mode1 model selected";
+	subscription.function = [this](Event evt) { this->ModelSelectionUpdated(
+		(Model*)this->GetPaneHost()->GetScene()->GetByIdentifier(evt.data[0].get<std::string>(), 0),
+		nullptr); };
+	this->GetPaneHost()->GetScene()->GetEventManager()->SubscribeToEvent(subscription);
+}
+
+void Models::ModelSelectionUpdated(Model* new_model, Model* old_model)
+{
+	this->UpdateModelName(old_model, this->m_txt_mdl_name->GetValue());
+	std::vector<Model*> models = this->GetPaneHost()->GetScene()->models;
+	this->m_lb_models->SetSelection(std::distance(models.begin(), std::find(models.begin(), models.end(), new_model)));
+	this->m_txt_mdl_name->SetValue(new_model->GetIdentifier());
 }

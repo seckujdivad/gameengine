@@ -49,7 +49,3 @@ void Pane::PaneDockStateChanged(wxAuiPaneInfo info)
 void Pane::SceneChangedEvent(Scene* scene)
 {
 }
-
-void Pane::ModelSelectionChangedEvent(Model* new_model, Model* old_model)
-{
-}

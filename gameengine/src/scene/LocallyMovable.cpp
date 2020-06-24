@@ -8,7 +8,6 @@ LocallyMovable::LocallyMovable(EventManager* evtman) : Positionable(evtman), Rot
 
 void LocallyMovable::MoveLocally(float x, float y, float z)
 {
-
 	glm::vec4 translation = glm::vec4(0.0f - x, 0.0f - y, 0.0f - z, 1.0f);
 
 	glm::mat4 rotation = glm::mat4(1.0f);

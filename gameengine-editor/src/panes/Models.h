@@ -22,6 +22,9 @@ private:
 	void event_lb_models_clicked(wxCommandEvent& evt);
 	void event_txt_mdl_name_updated(wxCommandEvent& evt);
 
+	void UpdateModelName(Model* model, std::string name);
+	void ModelSelectionUpdated(Model* new_model, Model* old_model);
+
 public:
 	Models(PaneHost* parent);
 	~Models();
