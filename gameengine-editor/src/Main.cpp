@@ -16,6 +16,10 @@ void Main::tlbr_btn_AddPane_clicked(wxCommandEvent& evt)
 	{
 		this->m_panehost->AddPane<Models>(wxAUI_DOCK_BOTTOM);
 	}
+	else if (button->GetLabelText() == "Cameras")
+	{
+		this->m_panehost->AddPane<Cameras>(wxAUI_DOCK_BOTTOM);
+	}
 
 	//evt.Skip(); //don't skip as it seems to call this function again (maybe it's the toolbar doing it?)
 }
@@ -60,7 +64,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 	
 	std::vector<std::string> panes = {
 		"Lights",
-		"Models"
+		"Models",
+		"Cameras"
 	};
 
 	wxButton* button;

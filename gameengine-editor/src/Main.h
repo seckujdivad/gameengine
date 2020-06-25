@@ -4,12 +4,14 @@
 #include <wx/wx.h>
 #include <wx/gbsizer.h>
 
+#include <vector>
 #include <string>
 
 #include "PaneHost.h"
 #include "panes/Viewport.h"
 #include "panes/Lights.h"
 #include "panes/Models.h"
+#include "panes/Cameras.h"
 
 class PaneHost;
 

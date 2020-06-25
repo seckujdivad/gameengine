@@ -45,6 +45,9 @@
     <ClInclude Include="src\FileManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\panes\Cameras.h">
+      <Filter>Header Files\panes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp">
@@ -70,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="src\FileManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\panes\Cameras.cpp">
+      <Filter>Source Files\panes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
