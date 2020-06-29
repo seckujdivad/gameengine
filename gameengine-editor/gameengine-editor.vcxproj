@@ -183,6 +183,7 @@
     <ClInclude Include="src\panes\Models.h" />
     <ClInclude Include="src\panes\Pane.h" />
     <ClInclude Include="src\panes\Viewport.h" />
+    <ClInclude Include="src\VectorCtrl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\panes\Models.cpp" />
     <ClCompile Include="src\panes\Pane.cpp" />
     <ClCompile Include="src\panes\Viewport.cpp" />
+    <ClCompile Include="src\VectorCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\gameengine\gameengine.vcxproj">
