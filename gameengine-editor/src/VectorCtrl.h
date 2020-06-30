@@ -3,7 +3,7 @@
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinctrl.h>
-#include <wx/sizer.h>
+#include <wx/gbsizer.h>
 #include <wx/event.h>
 
 #include <glm/glm.hpp>
@@ -35,7 +35,7 @@ Exposes functionality from https://docs.wxwidgets.org/3.0/classwx_spin_ctrl_doub
 class VectorCtrl : public wxPanel
 {
 private:
-	wxBoxSizer* m_sizer;
+	wxGridBagSizer* m_sizer;
 
 	std::vector<wxSpinCtrlDouble*> m_spndbl_fields;
 

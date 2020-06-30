@@ -4,7 +4,7 @@ wxDEFINE_EVENT(EVT_VCTRCTRL_CHANGED, VectorCtrlEvent);
 
 void VectorCtrl::evt_OnValuesChanged(wxSpinDoubleEvent& evt)
 {
-	VectorCtrlEvent event(EVT_VCTRCTRL_CHANGED, GetId(), this->GetValues());
+	VectorCtrlEvent event = VectorCtrlEvent(EVT_VCTRCTRL_CHANGED, GetId(), this->GetValues());
 	event.SetEventObject(this);
 	ProcessWindowEvent(event);
 
@@ -18,7 +18,7 @@ VectorCtrl::VectorCtrl(wxWindow* parent, wxWindowID winid, int num_fields, int o
 		throw std::runtime_error("Can't have less than one field in the vector");
 	}
 
-	this->m_sizer = new wxBoxSizer(orient);
+	this->m_sizer = new wxGridBagSizer(0, 0);
 
 	wxSpinCtrlDouble* spndbl;
 	for (int i = 0; i < num_fields; i++)
@@ -26,8 +26,26 @@ VectorCtrl::VectorCtrl(wxWindow* parent, wxWindowID winid, int num_fields, int o
 		spndbl = new wxSpinCtrlDouble(this, wxID_ANY);
 		spndbl->Bind(wxEVT_SPINCTRLDOUBLE, &VectorCtrl::evt_OnValuesChanged, this);
 
-		this->m_sizer->Add(spndbl, wxEXPAND | wxALL);
+		this->m_sizer->Add(spndbl, wxGBPosition(orient == wxVERTICAL ? i : 0, orient == wxHORIZONTAL ? i : 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
 		this->m_spndbl_fields.push_back(spndbl);
+
+		if (orient == wxVERTICAL)
+		{
+			this->m_sizer->AddGrowableRow(i);
+		}
+		else if(orient == wxHORIZONTAL)
+		{
+			this->m_sizer->AddGrowableCol(i);
+		}
+	}
+
+	if (orient == wxVERTICAL)
+	{
+		this->m_sizer->AddGrowableCol(0);
+	}
+	else if (orient == wxHORIZONTAL)
+	{
+		this->m_sizer->AddGrowableRow(0);
 	}
 
 	this->SetSizer(this->m_sizer);
