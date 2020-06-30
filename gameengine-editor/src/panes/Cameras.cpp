@@ -31,6 +31,24 @@ void Cameras::evt_SelectionChanged(wxCommandEvent& evt)
 
 void Cameras::evt_NameChanged(wxCommandEvent& evt)
 {
+	int index = this->m_lb_cameras->GetSelection();
+	if (index != -1)
+	{
+		std::string key = this->m_camera_names.at(index);
+		if (key != this->m_txt_name->GetValue())
+		{
+			nlohmann::json& config = this->GetPaneHost()->GetFileManager()->GetData();
+			config["cameras"][this->m_txt_name->GetValue()] = config["cameras"][key];
+			config["cameras"].erase(key);
+		}
+
+		this->m_camera_names.at(index) = this->m_txt_name->GetValue();
+
+		this->m_lb_cameras->Delete(index);
+		this->m_lb_cameras->Insert(this->m_txt_name->GetValue(), index);
+		this->m_lb_cameras->SetSelection(index);
+	}
+
 	evt.Skip();
 }
 
