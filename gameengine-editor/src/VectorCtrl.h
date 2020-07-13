@@ -6,10 +6,21 @@
 #include <wx/gbsizer.h>
 #include <wx/event.h>
 
-#include <glm/glm.hpp>
-
 #include <vector>
 #include <stdexcept>
+
+struct VectorCtrlConfig
+{
+	long int style = wxSP_ARROW_KEYS;
+	int orient = wxHORIZONTAL;
+	int num_fields = 3;
+	double min = -10000.0;
+	double max = 10000.0;
+	double initial = 0.0;
+	double inc = 1.0; //increment
+	bool can_be_min = true;
+	bool can_be_max = true;
+};
 
 class VectorCtrlEvent : public wxEvent
 {
@@ -41,18 +52,21 @@ private:
 
 	void evt_OnValuesChanged(wxSpinDoubleEvent& evt);
 
+	bool m_can_be_min;
+	bool m_can_be_max;
+
 public:
 	VectorCtrl(
 		wxWindow* parent,
 		wxWindowID winid = wxID_ANY,
-		int num_fields = 3,
-		int orient = wxHORIZONTAL,
+		VectorCtrlConfig config = {},
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+		long int style = wxTAB_TRAVERSAL | wxNO_BORDER,
 		const wxString& name = "VectorCtrl"
 		);
 
+	//analagous to wxSpinCtrlDouble methods logically modified to operate over multiple wxSpinCtrlDoubles
 	std::vector<int> GetDigits();
 	double GetIncrement();
 	double GetMax();
@@ -64,4 +78,11 @@ public:
 	void SetRange(double minVal, double maxVal);
 	void SetValues(std::vector<double> values);
 	void SetValues(double value);
+
+	//extended functionality
+	void SetMax(double max_value);
+	void SetMin(double min_value);
+
+	void ValuesCanBeMin(bool can_be_min);
+	void ValuesCanBeMax(bool can_be_max);
 };
