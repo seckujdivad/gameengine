@@ -58,5 +58,5 @@ public:
 
 	std::string GetDisplayName();
 	void SceneChangedEvent(Scene* scene);
-	virtual void DoWriteToFileEvent(nlohmann::json& data);
+	void DoWriteToFileEvent(nlohmann::json& data);
 };
