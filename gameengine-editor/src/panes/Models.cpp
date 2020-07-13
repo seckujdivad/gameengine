@@ -96,6 +96,10 @@ void Models::SceneChangedEvent(Scene* scene)
 	this->GetPaneHost()->GetScene()->GetEventManager()->SubscribeToEvent(subscription);
 }
 
+void Models::DoWriteToFileEvent(nlohmann::json& data)
+{
+}
+
 void Models::ModelSelectionUpdated(Model* new_model, Model* old_model)
 {
 	this->UpdateModelName(old_model, this->m_txt_mdl_name->GetValue());

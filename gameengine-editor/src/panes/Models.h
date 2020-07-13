@@ -7,6 +7,8 @@
 #include <wx/string.h>
 #include <wx/textctrl.h>
 
+#include <nlohmann/json.hpp>
+
 #include "Pane.h"
 #include "../PaneHost.h"
 
@@ -31,5 +33,6 @@ public:
 
 	std::string GetDisplayName();
 
-	void SceneChangedEvent(Scene* scene);
+	void SceneChangedEvent(Scene* scene) override;
+	void DoWriteToFileEvent(nlohmann::json& data) override;
 };
