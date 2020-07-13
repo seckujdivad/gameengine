@@ -18,8 +18,3 @@ bool App::OnInit()
 
 	return true;
 }
-
-int App::OnExit()
-{
-	return 0;
-}

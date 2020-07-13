@@ -49,3 +49,7 @@ void Pane::PaneDockStateChanged(wxAuiPaneInfo info)
 void Pane::SceneChangedEvent(Scene* scene)
 {
 }
+
+void Pane::DoWriteToFileEvent(nlohmann::json& data)
+{
+}

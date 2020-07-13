@@ -12,3 +12,9 @@ bool App::OnInit()
 
 	return true;
 }
+
+
+int App::OnExit()
+{
+	return this->m_frame_main->OnExit();
+}

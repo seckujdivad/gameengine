@@ -16,6 +16,8 @@ private:
 	nlohmann::json m_contents;
 	bool m_file_loaded = false;
 
+	static nlohmann::json ReadJSONFile(std::string path);
+
 public:
 	FileManager();
 	~FileManager();
@@ -25,4 +27,6 @@ public:
 	void SetPath(std::string path);
 	void WriteData();
 	void LoadData();
+
+	bool HasUnwrittenChanges();
 };

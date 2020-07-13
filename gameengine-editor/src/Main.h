@@ -31,4 +31,6 @@ private:
 public:
 	Main();
 	~Main();
+
+	int OnExit();
 };

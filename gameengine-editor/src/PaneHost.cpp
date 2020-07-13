@@ -28,10 +28,10 @@ int PaneHost::GetPaneIndex(int pane_id)
 
 void PaneHost::AddPane(Pane* pane, int direction, bool docked)
 {
-	pane->SetPaneID(m_pane_id_counter);
+	pane->SetPaneID(this->m_pane_id_counter);
 	pane->Bind(wxEVT_SIZE, &PaneHost::PaneResizeHandler, this);
 
-	m_pane_id_counter++;
+	this->m_pane_id_counter++;
 	this->m_panes.push_back(pane);
 
 	wxAuiPaneInfo info;
@@ -80,6 +80,16 @@ PaneHost::PaneHost(Main* parent) : wxPanel(parent)
 
 PaneHost::~PaneHost()
 {
+	if (this->m_file_manager->HasUnwrittenChanges())
+	{
+		wxMessageDialog dialog = wxMessageDialog(this, "File not saved", "This scene has unsaved changes. Write to disk?", wxYES_NO);
+		int result = dialog.ShowModal();
+		if (result == wxID_YES)
+		{
+			this->m_file_manager->WriteData();
+		}
+	}
+
 	this->m_aui_manager.UnInit();
 	delete this->m_scene;
 	delete this->m_engine;

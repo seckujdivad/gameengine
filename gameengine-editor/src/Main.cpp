@@ -113,5 +113,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Level Editor")
 
 Main::~Main()
 {
-	
+}
+
+int Main::OnExit()
+{
+	return 0;
 }

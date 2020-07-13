@@ -1,5 +1,28 @@
 #include "FileManager.h"
 
+nlohmann::json FileManager::ReadJSONFile(std::string path)
+{
+	std::ifstream file;
+	file.open(path);
+
+	std::string file_contents;
+	if (file.is_open())
+	{
+		std::string line;
+		while (std::getline(file, line))
+		{
+			file_contents = file_contents + line + '\n';
+		}
+	}
+	else
+	{
+		throw std::runtime_error("Can't open file " + path);
+	}
+	file.close();
+
+	return nlohmann::json::parse(file_contents);
+}
+
 FileManager::FileManager()
 {
 	
@@ -103,26 +126,26 @@ void FileManager::LoadData()
 {
 	if (this->m_file_path != "")
 	{
-		std::ifstream file;
-		file.open(this->m_file_path);
-
-		std::string file_contents;
-		if (file.is_open())
+		try
 		{
-			std::string line;
-			while (std::getline(file, line))
-			{
-				file_contents = file_contents + line + '\n';
-			}
+			this->m_contents = this->ReadJSONFile(this->m_file_path);
+			this->m_file_loaded = true;
 		}
-		else
+		catch (std::runtime_error exception) //rethrow exception, this is so that file_loaded will not be changed on failure
 		{
-			throw std::runtime_error("Can't open file " + this->m_file_path);
+			throw std::runtime_error(exception.what());
 		}
-		file.close();
-
-		this->m_contents = nlohmann::json::parse(file_contents);
 	}
+}
 
-	this->m_file_loaded = true;
+bool FileManager::HasUnwrittenChanges()
+{
+	if (this->m_file_loaded)
+	{
+		return this->m_contents != this->ReadJSONFile(this->m_file_path);
+	}
+	else
+	{
+		return false;
+	}
 }

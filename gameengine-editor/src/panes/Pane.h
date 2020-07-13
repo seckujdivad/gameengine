@@ -2,7 +2,12 @@
 
 #include <wx/wxprec.h>
 #include <wx/wx.h>
+#include <wx/panel.h>
 #include <wx/aui/aui.h>
+
+#include <string>
+
+#include <nlohmann/json.hpp>
 
 #include "scene/Scene.h"
 
@@ -28,6 +33,7 @@ public:
 
 	virtual void PaneDockStateChanged(wxAuiPaneInfo info);
 	virtual void SceneChangedEvent(Scene* scene);
+	virtual void DoWriteToFileEvent(nlohmann::json& data);
 };
 
 #include "../PaneHost.h"

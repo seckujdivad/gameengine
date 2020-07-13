@@ -3,6 +3,7 @@
 #include <wx/wxprec.h>
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
+#include <wx/msgdlg.h>
 
 #include <string>
 #include <filesystem>

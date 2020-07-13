@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 
@@ -49,9 +51,12 @@ private:
 
 	std::vector<std::string> m_camera_names;
 
+	int m_prev_selection_index = -1;
+
 public:
 	Cameras(PaneHost* parent);
 
 	std::string GetDisplayName();
 	void SceneChangedEvent(Scene* scene);
+	virtual void DoWriteToFileEvent(nlohmann::json& data);
 };
