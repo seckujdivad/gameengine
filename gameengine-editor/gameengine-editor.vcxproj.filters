@@ -51,6 +51,9 @@
     <ClInclude Include="src\VectorCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\panes\LoadedModels.h">
+      <Filter>Header Files\panes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp">
@@ -82,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="src\VectorCtrl.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\panes\LoadedModels.cpp">
+      <Filter>Source Files\panes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@
 
 #include "Pane.h"
 #include "../PaneHost.h"
+#include "../VectorCtrl.h"
 
 class Models : public Pane
 {
@@ -31,7 +32,7 @@ public:
 	Models(PaneHost* parent);
 	~Models();
 
-	std::string GetDisplayName();
+	std::string GetDisplayName() override;
 
 	void SceneChangedEvent(Scene* scene) override;
 	void DoWriteToFileEvent(nlohmann::json& data) override;

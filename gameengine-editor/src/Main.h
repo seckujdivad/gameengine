@@ -12,6 +12,7 @@
 #include "panes/Lights.h"
 #include "panes/Models.h"
 #include "panes/Cameras.h"
+#include "panes/LoadedModels.h"
 
 class PaneHost;
 
