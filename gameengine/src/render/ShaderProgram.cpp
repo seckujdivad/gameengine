@@ -134,16 +134,20 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
-	else
+	else if (this->m_uniforms.find(name) == this->m_uniforms.end())
 	{
 		glUseProgram(this->m_program_id);
 		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;
 	}
+	else
+	{
+		return this->m_uniforms.at(name);
+	}
 }
 
-void ShaderProgram::Select()
+void ShaderProgram::Select(int texture_group_id)
 {
 	if (this->m_program_id == NULL)
 	{
@@ -153,12 +157,14 @@ void ShaderProgram::Select()
 	{
 		glUseProgram(this->m_program_id);
 
-		for (int i = 0; i < 16; i++)
+		if (texture_group_id != NULL)
 		{
-			if (this->m_textures[i] != -1)
+			std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
+			for (int i = 0; i < textures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
-				glBindTexture(this->m_texture_types[i], this->m_textures[i]);
+				glBindTexture(textures.at(i).type, textures.at(i).id);
+				glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
 			}
 		}
 	}
@@ -176,23 +182,11 @@ GLuint ShaderProgram::GetUniform(std::string name)
 	}
 }
 
-GLuint ShaderProgram::GetProgramID()
-{
-	if (this->m_program_id == NULL)
-	{
-		throw std::runtime_error("ShaderProgram has not been initialised");
-	}
-	else
-	{
-		return this->m_program_id;
-	}
-}
-
-void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width, int height, int index, GLuint min_filter, GLuint mag_filter)
+LoadedTexture ShaderProgram::LoadTexture(int texture_group_id, std::string registered_uniform, unsigned char* data, int width, int height, int index, GLuint min_filter, GLuint mag_filter)
 {
 	this->Select();
 
-	unsigned int texture;
+	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -207,58 +201,52 @@ void ShaderProgram::LoadTexture(std::string name, unsigned char* data, int width
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	this->RegisterTexture(name, texture, GL_TEXTURE_2D, index);
+	LoadedTexture texture_data;
+	texture_data.id = texture;
+	texture_data.type = GL_TEXTURE_2D;
+	texture_data.uniform_name = registered_uniform;
+
+	this->SetTexture(texture_group_id, texture_data);
 }
 
-void ShaderProgram::RegisterTexture(std::string name, GLuint texture, GLuint type, int index)
+void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 {
-	this->Select();
-
-	if (index == -1)
+	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
 	{
-		for (int i = 0; (i < 16) && (index == -1); i++)
+		this->m_textures.insert({ texture_group_id, std::vector<LoadedTexture>({texture}) });
+	}
+	else
+	{
+		bool found_match = false;
+		std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
+		for (int i = 0; (i < textures.size()) && !found_match; i++)
 		{
-			if (this->m_textures[i] == -1)
+			if (textures.at(i).uniform_name == texture.uniform_name)
 			{
-				index = i;
+				found_match = true;
+				textures.at(i) = texture;
 			}
 		}
 
-		if (index == -1)
+		if (!found_match)
 		{
-			throw std::runtime_error("Can't allocate a texture, all slots used");
+			textures.push_back(texture);
 		}
-	}
-	else if ((index < 0 or index > 15))
-	{
-		throw std::runtime_error("Invalid texture index " + std::to_string(index));
-	}
 
-	GLuint uniform_id = this->RegisterUniform(name);
-	glUniform1i(uniform_id, index);
-
-	this->m_textures[index] = texture;
-	this->m_texture_types[index] = type;
-	this->m_texture_names[index] = name;
-}
-
-void ShaderProgram::UpdateTexture(std::string name, GLuint texture)
-{
-	for (int i = 0; i < 16; i++)
-	{
-		if (this->m_textures[i] != -1)
-		{
-			if (this->m_texture_names[i] == name)
-			{
-				this->UpdateTexture(i, texture);
-			}
-		}
+		this->m_textures.at(texture_group_id) = textures;
 	}
 }
 
-void ShaderProgram::UpdateTexture(int index, GLuint texture)
+GLuint ShaderProgram::GetProgramID()
 {
-	this->m_textures[index] = texture;
+	if (this->m_program_id == NULL)
+	{
+		throw std::runtime_error("ShaderProgram has not been initialised");
+	}
+	else
+	{
+		return this->m_program_id;
+	}
 }
 
 int ShaderProgram::ReserveShaderArrayIndex(std::string array_name, void* object)
