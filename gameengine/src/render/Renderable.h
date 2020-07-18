@@ -38,29 +38,12 @@ private:
 
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, std::string>> m_shader_defines = {};
-	std::string m_shader_fragment;
-	std::string m_shader_vertex;
+	std::vector<std::tuple<std::string, GLenum>> m_shaders;
 
 	std::map<int, LoadedTexture> m_textures;
 
 	void RenderScene();
 	void RecompileShader();
-
-	//post processing
-	int m_old_size[2] = { 1, 1 };
-
-	ShaderProgram* m_postprocessor = nullptr;
-	GLuint m_postprocessor_fbo = NULL;
-	GLuint m_postprocessor_vao = NULL;
-	GLuint m_postprocessor_vbo = NULL;
-
-	GLuint m_postprocessor_depth_texture_write = NULL;
-	GLuint m_postprocessor_colour_texture_write = NULL;
-	std::vector<GLuint> m_postprocessor_data_textures_write;
-
-	GLuint m_postprocessor_depth_texture_read = NULL;
-	GLuint m_postprocessor_colour_texture_read = NULL;
-	std::vector<GLuint> m_postprocessor_data_textures_read;
 
 protected:
 	void SetFramebuffer(GLuint fbo);
@@ -70,7 +53,7 @@ protected:
 	virtual void PostRenderEvent(); //happens just after rendering, or just before when continuous draw is true
 
 public:
-	Renderable(Scene* scene, std::string vert_shader, std::string frag_shader);
+	Renderable(Scene* scene, std::vector<std::tuple<std::string, GLenum>> shaders);
 	~Renderable();
 
 	Scene* GetScene();
@@ -81,10 +64,6 @@ public:
 
 	virtual std::tuple<int, int> GetOutputSize();
 
-	void SetPostProcessorShaderProgram(ShaderProgram* postprocessor);
-
 	void SetRenderMode(RenderMode mode);
 	RenderMode GetRenderMode();
-
-	void SetShaderPreprocessorDefine(std::string name, std::string value);
 };
