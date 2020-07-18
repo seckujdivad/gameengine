@@ -186,6 +186,7 @@
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
     <ClInclude Include="src\render\Renderable.h" />
+    <ClInclude Include="src\render\RenderTexture.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\scene\Camera.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
+    <ClCompile Include="src\render\RenderTexture.cpp" />
     <ClCompile Include="src\render\ShaderProgram.cpp" />
     <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\scene\Camera.cpp" />

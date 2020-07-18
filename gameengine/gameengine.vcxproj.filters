@@ -126,6 +126,9 @@
     <ClInclude Include="src\EventEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\RenderTexture.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="src\EventEmitter.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\RenderTexture.cpp">
+      <Filter>Source Files\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
