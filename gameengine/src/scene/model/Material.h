@@ -6,6 +6,9 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <vector>
+#include <tuple>
+
 #include "../../render/ShaderProgram.h"
 #include "Reflection.h"
 
@@ -19,38 +22,14 @@ struct MaterialSSRConfig
 	int refinements = 1;
 };
 
-class Material
+struct Material
 {
-private:
-	glm::vec3 m_diffuse = glm::vec3(0.0f);
-	glm::vec3 m_specular = glm::vec3(0.0f);
-	float m_specular_highlight = 2.0f;
+	glm::vec3 diffuse = glm::vec3(0.0f);
+	glm::vec3 specular = glm::vec3(0.0f);
+	float specular_highlight = 2.0f;
 
-	bool m_ssr_enabled = false;
-	MaterialSSRConfig m_ssr_config;
+	bool ssr_enabled;
+	MaterialSSRConfig ssr;
 
-	std::vector<Reflection*> m_reflections;
-	std::vector<int> m_reflection_modes;
-
-public:
-	Material();
-	~Material();
-
-	void SetDiffuse(glm::vec3 diffuse);
-	glm::vec3 GetDiffuse();
-	void SetSpecular(glm::vec3 specular);
-	glm::vec3 GetSpecular();
-	void SetSpecularHighlight(float intensity);
-	float GetSpecularHighlight();
-
-	void AddReflection(Reflection* reflection, int mode);
-	std::vector<Reflection*> GetReflections();
-
-	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program, int mode);
-
-	void EnableSSR(bool enable);
-	bool SSREnabled();
-	void SetSSRConfig(MaterialSSRConfig config);
-	MaterialSSRConfig GetSSRConfig();
+	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;
 };
