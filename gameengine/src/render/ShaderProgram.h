@@ -13,8 +13,8 @@ const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
 struct LoadedTexture
 {
-	GLuint id;
-	GLenum type;
+	GLuint id = NULL;
+	GLenum type = NULL;
 	std::string uniform_name;
 };
 
