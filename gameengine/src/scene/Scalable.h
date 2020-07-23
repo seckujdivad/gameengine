@@ -3,34 +3,24 @@
 #include <wx/wxprec.h>
 #include "../GLComponents.h"
 
-#include <array>
-
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "../EventEmitter.h"
-#include "../EventManager.h"
-
-class Scalable : public virtual EventEmitter
+class Scalable
 {
 private:
-	std::array<GLfloat, 3> m_scale = { 0.0f, 0.0f, 0.0f };
+	glm::dvec3 m_scale = glm::dvec3(0.0);
 
 	bool m_rescaled = true;
 	
 public:
-	Scalable(EventManager* evtman);
-	Scalable(const Scalable& copyfrom);
-	Scalable& operator=(Scalable& copyfrom);
-	~Scalable();
+	Scalable();
 
-	void SetScale(GLfloat x, GLfloat y, GLfloat z);
-	void SetScale(std::array<GLfloat, 3> scale);
-	void SetScale(int index, GLfloat value);
-	void SetScale(glm::vec3 scale);
-	std::array<GLfloat, 3> GetScale();
-	GLfloat GetScale(int index);
-	glm::vec3 GetScaleVec();
+	void SetScale(double x, double y, double z);
+	void SetScale(int index, double value);
+	void SetScale(glm::dvec3 scale);
+	double GetScale(int index);
+	glm::dvec3 GetScale();
 
 	bool CheckIfRescaled(bool reset = true);
 };

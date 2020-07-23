@@ -26,7 +26,6 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 		glAttachShader(this->m_program_id, shader_ids.at(i));
 	}
 	glLinkProgram(this->m_program_id);
-	//glUseProgram(this->m_program_id);
 
 	//clean up shaders as they have already been linked
 	for (size_t i = 0; i < shader_ids.size(); i++)
@@ -207,6 +206,8 @@ LoadedTexture ShaderProgram::LoadTexture(int texture_group_id, std::string regis
 	texture_data.uniform_name = registered_uniform;
 
 	this->SetTexture(texture_group_id, texture_data);
+
+	return texture_data;
 }
 
 void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)

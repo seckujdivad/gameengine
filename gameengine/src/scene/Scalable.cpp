@@ -14,85 +14,65 @@ bool Scalable::CheckIfRescaled(bool reset)
 	}
 }
 
-Scalable::Scalable(EventManager* evtman) : EventEmitter(evtman)
+Scalable::Scalable()
 {
 }
 
-Scalable::Scalable(const Scalable& copyfrom) : EventEmitter(copyfrom)
+void Scalable::SetScale(double x, double y, double z)
 {
-	this->m_scale = copyfrom.m_scale;
-}
-
-Scalable& Scalable::operator=(Scalable& copyfrom)
-{
-	this->m_scale = copyfrom.GetScale();
-	
-	return *this;
-}
-
-Scalable::~Scalable()
-{
-	
-}
-
-void Scalable::SetScale(GLfloat x, GLfloat y, GLfloat z)
-{
-	this->EmitEvent("scaled", nlohmann::json::array({
-		nlohmann::json::array({ this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2) }),
-		nlohmann::json::array({ x, y, z })
-		}));
-
-	this->m_scale = { x, y, z };
+	this->m_scale = glm::dvec3(x, y, z);
 	this->m_rescaled = true;
 }
 
-void Scalable::SetScale(std::array<GLfloat, 3> scale)
+void Scalable::SetScale(int index, double value)
 {
-	this->EmitEvent("scaled", nlohmann::json::array({
-		nlohmann::json::array({ this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2) }),
-		nlohmann::json::array({ scale.at(0), scale.at(1), scale.at(2) })
-		}));
+	if (index == 0)
+	{
+		this->m_scale.x = value;
+	}
+	if (index == 1)
+	{
+		this->m_scale.y = value;
+	}
+	if (index == 2)
+	{
+		this->m_scale.z = value;
+	}
+	else
+	{
+		throw std::runtime_error("Index must be 0, 1 or 2");
+	}
 
+	this->m_rescaled = true;
+}
+
+void Scalable::SetScale(glm::dvec3 scale)
+{
 	this->m_scale = scale;
-	this->m_rescaled = true;
 }
 
-void Scalable::SetScale(int index, GLfloat value)
-{
-	std::array<GLfloat, 3> old_scale = this->m_scale;
-
-	this->m_scale.at(index) = value;
-	this->m_rescaled = true;
-
-	this->EmitEvent("scaled", nlohmann::json::array({
-		nlohmann::json::array({ old_scale.at(0), old_scale.at(1), old_scale.at(2) }),
-		nlohmann::json::array({ this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2) })
-		}));
-}
-
-void Scalable::SetScale(glm::vec3 scale)
-{
-	this->EmitEvent("rotated", nlohmann::json::array({
-		nlohmann::json::array({ this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2) }),
-		nlohmann::json::array({ scale.x, scale.y, scale.z })
-		}));
-
-	this->m_scale.at(0) = scale.x;
-	this->m_scale.at(1) = scale.y;
-	this->m_scale.at(2) = scale.z;
-}
-
-std::array<GLfloat, 3> Scalable::GetScale()
+glm::dvec3 Scalable::GetScale()
 {
 	return this->m_scale;
 }
 
-glm::vec3 Scalable::GetScaleVec()
+double Scalable::GetScale(int index)
 {
-	return glm::vec3(this->m_scale.at(0), this->m_scale.at(1), this->m_scale.at(2));
-}
-
-GLfloat Scalable::GetScale(int index)
-{
-	return this->m_scale.at(index);
+	if (index == 0)
+	{
+		return this->m_scale.x;
+	}
+	if (index == 1)
+	{
+		return this->m_scale.y;
+	}
+	if (index == 2)
+	{
+		return this->m_scale.z;
+	}
+	else
+	{
+		throw std::runtime_error("Index must be 0, 1 or 2");
+		return 0;
+	}
 }

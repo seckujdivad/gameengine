@@ -46,12 +46,11 @@ private:
 	void KeyDown(wxKeyEvent& evt);
 	void Clicked(wxMouseEvent& evt);
 
-	void PreRenderEvent();
-	void PostRenderEvent();
-	void RenderInitialisationEvent();
+	void PreRenderEvent() override;
+	void PostRenderEvent() override;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders);
 	~EngineCanvas();
 
 	void SetMouselook(bool enable);

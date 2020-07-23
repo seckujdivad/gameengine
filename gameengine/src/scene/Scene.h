@@ -5,8 +5,8 @@
 
 #include <vector>
 #include <unordered_set>
+#include <string>
 
-#include "../render/ShaderProgram.h"
 #include "model/Model.h"
 #include "Camera.h"
 #include "light/PointLight.h"
@@ -14,110 +14,69 @@
 #include "VisBox.h"
 #include "SceneApproximation.h"
 #include "../render/Renderable.h"
-#include "../EventEmitter.h"
 
-struct ShaderDescription
-{
-	std::vector<std::tuple<std::string, GLenum>> shaders;
-	std::vector<std::tuple<std::string, std::string>> preprocessor_defines;
-	bool shader_strings_are_paths = true;
-};
+typedef unsigned int TextureReference;
 
-class Scene : public Nameable, virtual public EventEmitter
+class Scene : public Nameable
 {
 private:
+	//misc rendering attributes
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-
 	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
 	Scene* m_skybox_scene = nullptr;
-	GLuint m_skybox_texture = NULL;
-	unsigned int m_skybox_texture_dimensions[2] = { 1, 1 };
-	GLuint m_skybox_fbo = NULL;
 
-	//received render outputs
-	GLuint m_output_colour = NULL;
-	GLuint m_output_depth = NULL;
-	std::vector<GLuint> m_output_data;
+	//scene components - all are managed by the scene
+	std::vector<Model*> m_models;
+	std::vector<PointLight*> m_pointlights;
+	std::vector<Reflection*> m_reflections;
+	std::vector<VisBox*> m_visboxes;
 
-	int GetModelIndex(Model* model);
-	int GetCameraIndex(Camera* camera);
-	int GetPointLightIndex(PointLight* pointlight);
-	int GetReflectionIndex(Reflection* reflection);
-	int GetVisBoxIndex(VisBox* visbox);
+	bool m_manage_children = true;
 
-	//managed shaders
-	std::vector<ShaderDescription> m_shader_descriptions;
-	std::vector<ShaderProgram*> m_shader_programs;
+	//manage (int) references - references are unique on a scene level, not any higher
+	ModelReference m_reference_model = 0;
+	CubemapReference m_reference_cubemap = 0;
+	TextureReference m_reference_texture = 0;
 
-	//approximate scene representation
-	SceneApproximation* m_approximation = nullptr;
-
-	int m_mode = 0;
-
-	//mode 1
-	Model* m_mode1_selected_model = nullptr;
-	
 public:
-	Scene(EventManager* evtman, int mode = 0);
+	Scene();
 	~Scene();
 
-	std::vector<Model*> models;
-	std::vector<Camera*> cameras;
-	std::vector<PointLight*> pointlights;
-	std::vector<Reflection*> reflections;
-	std::vector<VisBox*> visboxes;
+	void ManageChildren(bool manage);
+	bool ChildrenAreManaged();
 
-	void AddModel(Model* model);
-	void RemoveModel(Model* model);
+	void Add(Model* model);
+	void Remove(Model* model);
+	void RemoveModel(ModelReference reference);
+	Model* GetModel(ModelReference reference);
+	std::vector<Model*> GetModels();
+	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode);
 
-	void AddCamera(Camera* camera);
-	void RemoveCamera(Camera* camera);
+	void Add(PointLight* pointlight);
+	void Remove(PointLight* pointlight);
+	std::vector<PointLight*> GetPointLights();
 
-	void AddPointLight(PointLight* pointlight);
-	void RemovePointLight(PointLight* pointlight);
+	void Add(Reflection* reflection);
+	void Remove(Reflection* reflection);
+	std::vector<Reflection*> GetReflections();
 
-	void AddReflection(Reflection* reflection);
-	void RemoveReflection(Reflection* reflection);
+	void Add(VisBox* visbox);
+	void Remove(VisBox* visbox);
+	std::vector<VisBox*> GetVisBoxes();
 
-	void AddVisBox(VisBox* visbox);
-	void RemoveVisBox(VisBox* visbox);
-	
-	Nameable* GetByIdentifier(std::string identifier, int type); //types: 0 - model, 1 - camera, 2 - point light, 3 - reflection, 4 - vis box
+	void RemoveCubemap(CubemapReference reference);
+	Cubemap* GetCubemap(CubemapReference reference);
 
-	size_t NumModels();
-	size_t NumCameras();
-
-	void ClearAllModels(bool destroy = false);
-	void ClearAllCameras(bool destroy = false);
-
-	void Render(GLuint framebuffer, Camera* camera); //You must set the viewport dimensions before calling. Defaults to the default framebuffer
-	void DrawShadows(int mode = 0); //0: static, 1: dynamic
-	void DrawReflections(int mode = 0); //0: static, 1: dynamic
-
-	void PushUniforms();
-
-	void SetAmbientLight(glm::vec3 light_intensity);
-
-	void InitialiseSkyboxTexture(unsigned int texture_width, unsigned int texture_height);
 	void SetSkyboxScene(Scene* scene);
-	void DrawSkyboxScene();
+	Scene* GetSkyboxScene();
 
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour();
 
-	std::vector<Model*> GetVisibleModels(glm::vec3 position);
+	void SetAmbientLight(glm::vec3 colour);
+	glm::vec3 GetAmbientLight();
 
-	void SetReceivedOutputTextures(GLuint colour, GLuint depth, std::vector<GLuint> data);
-
-	ShaderProgram* GetShaderProgram(ShaderDescription description);
-
-	void SetApproximation(SceneApproximation* approximation);
-
-	//mode1
-	void SetMode1SelectedModel(Model* model);
-
-#pragma warning(disable: 4250)
-	using Nameable::GetIdentifier;
+	ModelReference GetNewModelReference();
+	CubemapReference GetNewCubemapReference();
+	TextureReference GetNewTextureReference();
 };
-#pragma warning(default: 4250)

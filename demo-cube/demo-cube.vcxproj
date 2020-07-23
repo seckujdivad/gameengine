@@ -202,23 +202,6 @@
     <None Include="resources\models\suzanne.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="resources\shaders\postprocess.frag" />
-    <None Include="resources\shaders\postprocess.vert" />
-    <None Include="resources\shaders\simple.frag">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="resources\shaders\simple.vert">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="resources\shaders\simple_shadow.frag">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="resources\shaders\simple_shadow.geom">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="resources\shaders\simple_shadow.vert">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
     <None Include="resources\simplescene.json">
       <DeploymentContent>true</DeploymentContent>
     </None>

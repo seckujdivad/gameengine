@@ -2,32 +2,36 @@
 
 void Renderable::RenderScene()
 {
-	//set preprocessor defines
-
-	if (this->m_rendermode == RenderMode::Normal)
+	Scene* scene = this->m_engine->GetScene();
+	if (scene != nullptr)
 	{
-		//draw shadows and reflections (if required)
+		//set preprocessor defines
+
+		if (this->m_rendermode == RenderMode::Normal)
+		{
+			//draw shadows and reflections (if required)
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
+		glCullFace(GL_BACK);
+		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
+		glClearColor(
+			scene->GetClearColour().r,
+			scene->GetClearColour().g,
+			scene->GetClearColour().b,
+			scene->GetClearColour().a
+		);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//load camera data into shader program
+
+		std::vector<Model*> models_to_draw = scene->GetVisibleModels(this->m_camera->GetPosition(), this->m_rendermode);
+
+		//iterate through models
+		// load model data into shader program
+		// load model textures into shader program
+		// draw model
 	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-	glCullFace(GL_BACK);
-	glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
-	glClearColor(
-		this->m_scene->GetClearColour().r,
-		this->m_scene->GetClearColour().g,
-		this->m_scene->GetClearColour().b,
-		this->m_scene->GetClearColour().a
-	);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//load camera data into shader program
-
-	std::vector<Model*> models_to_draw = this->m_scene->GetVisibleModels(this->m_active_camera->GetPositionVec());
-
-	//iterate through models
-	// load model data into shader program
-	// load model textures into shader program
-	// draw model
 }
 
 void Renderable::RecompileShader()
@@ -43,11 +47,7 @@ void Renderable::RecompileShader()
 		false
 	);
 
-	std::vector<std::string> uniform_names = {
-
-	};
-
-	for (std::vector<std::string>::iterator it = uniform_names.begin(); it != uniform_names.end(); it++)
+	for (std::vector<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
 	{
 		this->m_shader_program->RegisterUniform(*it);
 	}
@@ -56,10 +56,6 @@ void Renderable::RecompileShader()
 void Renderable::SetFramebuffer(GLuint fbo)
 {
 	this->m_fbo = fbo;
-}
-
-void Renderable::RenderInitialisationEvent()
-{
 }
 
 void Renderable::PreRenderEvent()
@@ -71,9 +67,9 @@ void Renderable::PostRenderEvent()
 
 }
 
-Renderable::Renderable(Scene* scene, std::vector<std::tuple<std::string, GLenum>> shaders)
+Renderable::Renderable(Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders)
 {
-	this->m_scene = scene;
+	this->m_engine = engine;
 	this->m_shaders = shaders;
 
 	this->RecompileShader();
@@ -84,36 +80,30 @@ Renderable::~Renderable()
 	delete this->m_shader_program;
 }
 
-Scene* Renderable::GetScene()
+void Renderable::SetCamera(Camera* camera)
 {
-	return this->m_scene;
+	this->m_camera = camera;
 }
 
-void Renderable::SetActiveCamera(Camera* camera)
+Camera* Renderable::GetCamera()
 {
-	this->m_active_camera = camera;
+	return this->m_camera;
 }
 
-Camera* Renderable::GetActiveCamera()
+Engine* Renderable::GetEngine()
 {
-	return this->m_active_camera;
+	return this->m_engine;
 }
 
 void Renderable::Render(bool continuous_draw)
 {
-	if (this->m_scene != nullptr)
+	if (this->m_engine->GetScene() != nullptr)
 	{
-		this->RenderInitialisationEvent();
-
 		if (continuous_draw)
 		{
-			glFlush();
 			this->PostRenderEvent();
 		}
-		else
-		{
-			this->PreRenderEvent();
-		}
+		this->PreRenderEvent();
 
 		std::tuple<int, int> sizes = this->GetOutputSize();
 
@@ -121,13 +111,8 @@ void Renderable::Render(bool continuous_draw)
 		glViewport(0, 0, std::get<0>(sizes), std::get<0>(sizes));
 		this->RenderScene();
 
-		if (continuous_draw)
+		if (!continuous_draw)
 		{
-			this->PreRenderEvent();
-		}
-		else
-		{
-			glFlush();
 			this->PostRenderEvent();
 		}
 	}

@@ -16,17 +16,12 @@
 #endif
 
 #include "GLComponents.h"
-#include "scene/Scene.h"
-#include "scene/model/Model.h"
-#include "scene/Camera.h"
-#include "render/ShaderProgram.h"
-#include "loaders/models/PlyLoader.h"
-#include "scene/VisBox.h"
-#include "scene/SceneApproximation.h"
 #include "render/EngineCanvas.h"
 #include "Resource.h"
-
-using nlohmann::json;
+#include "scene/Referenceable.h"
+#include "render/RenderTexture.h"
+#include "render/ShaderProgram.h"
+#include "scene/Scene.h"
 
 class Engine
 {
@@ -35,15 +30,26 @@ private:
 	wxWindow* m_parent;
 	wxGLAttributes m_canvas_args;
 
+	Scene* m_scene = nullptr;
+
+	std::map<TextureReference, LoadedTexture> m_textures_static;
+	std::map<RenderTextureReference, RenderTexture*> m_textures_rendered;
+	std::map<CubemapReference, RenderTexture*> m_textures_cubemap;
+
+	std::vector<EngineCanvas*> m_render_outputs;
+
+	void LoadTexture(LocalTexture texture, std::string uniform_name);
+
 public:
 	Engine(wxWindow* parent);
 	~Engine();
 
-	EngineCanvas* GenerateNewCanvas(wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvas* GenerateNewCanvas(std::vector<std::tuple<std::string, GLenum>> shaders, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+
+	void Render();
+
+	void SetScene(Scene* scene);
+	Scene* GetScene();
+
+	LoadedTexture GetTexture(TextureReference reference);
 };
-
-Scene* InitialiseScene(std::string path, std::string filename, int mode = 0); //mode: 0 = normal, 1 = editor
-
-std::vector<std::tuple<std::string, GLenum>> GetShaders(std::string base_path, nlohmann::json config, nlohmann::basic_json<> shader_config);
-
-void CreateTexture(ShaderProgram* shader_program, std::string shader_name, std::string base_path, json image_specifier, float default_r = 1.0f, float default_g = 1.0f, float default_b = 1.0f);

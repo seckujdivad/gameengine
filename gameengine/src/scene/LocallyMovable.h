@@ -8,14 +8,13 @@
 
 #include "Positionable.h"
 #include "Rotatable.h"
-#include "../EventManager.h"
-#include "../EventEmitter.h"
 
-class LocallyMovable : public Positionable, public Rotatable, public virtual EventEmitter
+class LocallyMovable : public Positionable, public Rotatable
 {
 private:
 public:
-	LocallyMovable(EventManager* evtman);
+	LocallyMovable();
 
-	void MoveLocally(float x, float y, float z);
+	void MoveLocally(double x, double y, double z);
+	void MoveLocally(glm::dvec3 vec);
 };

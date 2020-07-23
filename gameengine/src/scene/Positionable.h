@@ -3,34 +3,24 @@
 #include <wx/wxprec.h>
 #include "../GLComponents.h"
 
-#include <array>
-
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "../EventEmitter.h"
-#include "../EventManager.h"
-
-class Positionable : public virtual EventEmitter
+class Positionable
 {
 private:
-	std::array<GLfloat, 3> m_position = { 0.0f, 0.0f, 0.0f };
+	glm::dvec3 m_position = glm::dvec3(0.0);
 
 	bool m_repositioned = true;
 
 public:
-	Positionable(EventManager* evtman);
-	Positionable(const Positionable& copyfrom);
-	Positionable& operator=(Positionable& copyfrom);
-	~Positionable();
+	Positionable();
 
-	void SetPosition(GLfloat x, GLfloat y, GLfloat z);
-	void SetPosition(std::array<GLfloat, 3> point);
-	void SetPosition(int index, GLfloat value);
-	void SetPosition(glm::vec3 position);
-	std::array<GLfloat, 3> GetPosition();
-	GLfloat GetPosition(int index);
-	glm::vec3 GetPositionVec();
+	void SetPosition(double x, double y, double z);
+	void SetPosition(int index, double value);
+	void SetPosition(glm::dvec3 position);
+	glm::dvec3 GetPosition();
+	double GetPosition(int index);
 
 	bool CheckIfRepositioned(bool reset = true);
 };

@@ -12,9 +12,9 @@ const int ENGINECANVAS_NUM_DATA_TEX = 1;
 #include <map>
 
 #include "../scene/Camera.h"
-#include "../scene/Scene.h"
 #include "../Resource.h"
 #include "ShaderProgram.h"
+#include "../Engine.h"
 
 class Scene;
 class Camera;
@@ -33,12 +33,13 @@ private:
 	//scene rendering
 	RenderMode m_rendermode = RenderMode::Normal;
 
-	Camera* m_active_camera = nullptr;
-	Scene* m_scene = nullptr;
+	Camera* m_camera = nullptr;
+	Engine* m_engine = nullptr;
 
 	ShaderProgram* m_shader_program = nullptr;
-	std::vector<std::tuple<std::string, std::string>> m_shader_defines = {};
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
+	std::vector<std::tuple<std::string, std::string>> m_shader_defines = {};
+	std::vector<std::string> m_shader_uniform_names;
 
 	std::map<int, LoadedTexture> m_textures;
 
@@ -48,22 +49,21 @@ private:
 protected:
 	void SetFramebuffer(GLuint fbo);
 
-	virtual void RenderInitialisationEvent(); //happens before rendering
-	virtual void PreRenderEvent(); //happens just before rendering, or just after when continuous draw is true
-	virtual void PostRenderEvent(); //happens just after rendering, or just before when continuous draw is true
+	virtual void PreRenderEvent(); //happens just before rendering
+	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 public:
-	Renderable(Scene* scene, std::vector<std::tuple<std::string, GLenum>> shaders);
+	Renderable(Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders);
 	~Renderable();
+	
+	void SetCamera(Camera* camera);
+	Camera* GetCamera();
 
-	Scene* GetScene();
-	void SetActiveCamera(Camera* camera);
-	Camera* GetActiveCamera();
-
-	void Render(bool continuous_draw = false);
-
-	virtual std::tuple<int, int> GetOutputSize();
+	Engine* GetEngine();
 
 	void SetRenderMode(RenderMode mode);
 	RenderMode GetRenderMode();
+
+	virtual void Render(bool continuous_draw = false);
+	virtual std::tuple<int, int> GetOutputSize();
 };

@@ -1,19 +1,15 @@
 #include <wx/wxprec.h>
 #include "Model.h"
 
-Model::Model(EventManager* evtman, ModelGeometry geometry) : Positionable(evtman), Rotatable(evtman), Nameable(evtman), Scalable(evtman), EventEmitter(evtman)
+Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : Positionable(), Rotatable(), Nameable(), Scalable(), Referenceable<ModelReference>(reference)
 {
 	this->m_geometry = geometry;
-}
+	this->m_scene = scene;
 
-Model::Model(Model& copy_from) : Positionable(copy_from), Rotatable(copy_from), Nameable(copy_from), Scalable(copy_from), EventEmitter(copy_from)
-{
-	this->m_geometry = copy_from.m_geometry;
-	this->m_material = copy_from.m_material;
-}
-
-Model::~Model()
-{
+	this->m_texture_colour = LocalTexture(scene->GetNewTextureReference());
+	this->m_texture_reflection = LocalTexture(scene->GetNewTextureReference());
+	this->m_texture_specular = LocalTexture(scene->GetNewTextureReference());
+	this->m_texture_normal = LocalTexture(scene->GetNewTextureReference());
 }
 
 std::vector<std::vector<double>> Model::GetTriFans()
@@ -112,12 +108,7 @@ std::vector<double> Model::GetTriangles()
 	return triangles;
 }
 
-void Model::SetMaterial(Material material)
-{
-	this->m_material = material;
-}
-
-Material Model::GetMaterial()
+Material& Model::GetMaterial()
 {
 	return this->m_material;
 }
@@ -125,6 +116,26 @@ Material Model::GetMaterial()
 ModelGeometry Model::GetGeometry()
 {
 	return this->m_geometry;
+}
+
+LocalTexture& Model::GetColourTexture()
+{
+	return this->m_texture_colour;
+}
+
+LocalTexture& Model::GetReflectionTexture()
+{
+	return this->m_texture_reflection;
+}
+
+LocalTexture& Model::GetSpecularTexture()
+{
+	return this->m_texture_specular;
+}
+
+LocalTexture& Model::GetNormalTexture()
+{
+	return this->m_texture_normal;
 }
 
 void MergeVertices(ModelGeometry& geometry, double threshold)

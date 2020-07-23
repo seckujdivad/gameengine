@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "EngineCanvas.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context) : wxGLCanvas(parent, args, id), Renderable()
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders) : wxGLCanvas(parent, args, id), Renderable(engine, shaders)
 {
 	this->m_glcontext = context;
 	this->MakeOpenGLFocus();
@@ -47,7 +47,7 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		this->SetKeyboardMoveActive(false);
 	}
 
-	if (this->m_scene != nullptr)
+	if (this->GetCamera() != nullptr)
 	{
 		//get mouse info
 		wxMouseState mouse_state = wxGetMouseState();
@@ -66,13 +66,13 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 			float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
 			float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
 
-			float fov = this->GetActiveCamera()->GetFOV();
+			float fov = this->GetCamera()->GetFOV();
 
 			float rotation_z = fov_fraction_x * fov;
 			float rotation_x = fov_fraction_y * fov;
 
-			this->GetActiveCamera()->SetRotation(0, this->GetActiveCamera()->GetRotation(0) - rotation_x);
-			this->GetActiveCamera()->SetRotation(2, this->GetActiveCamera()->GetRotation(2) - rotation_z);
+			this->GetCamera()->SetRotation(0, this->GetCamera()->GetRotation(0) - rotation_x);
+			this->GetCamera()->SetRotation(2, this->GetCamera()->GetRotation(2) - rotation_z);
 
 			this->WarpPointer(screen_centre[0], screen_centre[1]);
 		}
@@ -88,27 +88,27 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 
 			if (wxGetKeyState(wxKeyCode('W')))
 			{
-				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, move_increment);
+				this->GetCamera()->MoveLocally(0.0f, 0.0f, move_increment);
 			}
 			if (wxGetKeyState(wxKeyCode('S')))
 			{
-				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
+				this->GetCamera()->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
 			}
 			if (wxGetKeyState(wxKeyCode('D')))
 			{
-				this->GetActiveCamera()->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
+				this->GetCamera()->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
 			}
 			if (wxGetKeyState(wxKeyCode('A')))
 			{
-				this->GetActiveCamera()->MoveLocally(move_increment, 0.0f, 0.0f);
+				this->GetCamera()->MoveLocally(move_increment, 0.0f, 0.0f);
 			}
 			if (wxGetKeyState(WXK_CONTROL))
 			{
-				this->GetActiveCamera()->MoveLocally(0.0f, move_increment, 0.0f);
+				this->GetCamera()->MoveLocally(0.0f, move_increment, 0.0f);
 			}
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				this->GetActiveCamera()->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
+				this->GetCamera()->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ void EngineCanvas::KeyDown(wxKeyEvent& evt)
 
 void EngineCanvas::Clicked(wxMouseEvent& evt)
 {
-	if (this->m_scene != nullptr)
+	if (this->GetCamera() != nullptr)
 	{
 		if (!this->m_mouselook_active)
 		{
@@ -152,17 +152,12 @@ void EngineCanvas::Clicked(wxMouseEvent& evt)
 	evt.Skip();
 }
 
-void EngineCanvas::PreRenderEvent()
-{
-	glViewport(0, 0, this->GetSize().x, this->GetSize().y);
-}
-
 void EngineCanvas::PostRenderEvent()
 {
 	this->SwapBuffers();
 }
 
-void EngineCanvas::RenderInitialisationEvent()
+void EngineCanvas::PreRenderEvent()
 {
 	this->MakeOpenGLFocus();
 }

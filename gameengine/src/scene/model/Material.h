@@ -28,7 +28,7 @@ struct Material
 	glm::vec3 specular = glm::vec3(0.0f);
 	float specular_highlight = 2.0f;
 
-	bool ssr_enabled;
+	bool ssr_enabled = true;
 	MaterialSSRConfig ssr;
 
 	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;

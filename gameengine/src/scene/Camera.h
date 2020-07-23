@@ -6,50 +6,31 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include <array>
-#include <string>
+#include <tuple>
 
 #include "LocallyMovable.h"
 #include "Nameable.h"
-#include "../render/ShaderProgram.h"
 #include "../EventManager.h"
 #include "../EventEmitter.h"
 
 class Camera : public LocallyMovable, public Nameable, public virtual EventEmitter
 {
 private:
-	std::string m_identifier;
-	GLfloat m_fov = 45.0f;
-
-	GLfloat m_clip_near = 0.1f;
-	GLfloat m_clip_far = 100.0f;
-
-	int m_window_dimensions[2] = { 1, 1 };
-
-	glm::mat4 m_view_rotate_matrix = glm::mat4(1.0f);
-	glm::vec4 m_view_translate_vector = glm::vec4(0.0f);
-	glm::mat4 m_perspective_matrix = glm::mat4(1.0f);
-	glm::mat4 m_transform_matrix = glm::mat4(1.0f);
-	glm::mat4 m_transform_inverse_matrix = glm::mat4(1.0f);
-	bool m_persp_transforms_need_update = true;
+	double m_fov = 45.0;
+	std::tuple<double, double> m_clips = { 0.1, 100.0 };
+	std::tuple<int, int> m_viewport_dimensions = { 1, 1 };
 
 public:
 	Camera(EventManager* evtman);
-	~Camera();
 
-	void SetFOV(GLfloat fov);
-	GLfloat GetFOV();
+	void SetFOV(double fov);
+	double GetFOV();
 
-	void SetNearClip(GLfloat nearclip);
-	GLfloat GetNearClip();
+	void SetClips(std::tuple<double, double> clips);
+	std::tuple<double, double> GetClips();
 
-	void SetFarClip(GLfloat farclip);
-	GLfloat GetFarClip();
-
-	void SetViewportDimensions(int width, int height);
-
-	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program);
+	void SetViewportDimensions(std::tuple<int, int> dimensions);
+	std::tuple<int, int> GetViewportDimensions();
 
 #pragma warning(disable: 4250)
 	using Nameable::GetIdentifier;

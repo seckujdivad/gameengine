@@ -8,8 +8,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
-#include <array>
 #include <tuple>
 #include <string>
 #include <cmath>
@@ -18,10 +16,9 @@
 #include "../Rotatable.h"
 #include "../Scalable.h"
 #include "../Nameable.h"
-#include "../../render/ShaderProgram.h"
 #include "Material.h"
-#include "../../EventManager.h"
-#include "../../EventEmitter.h"
+#include "../Referenceable.h"
+#include "../LocalTexture.h"
 
 struct Face
 {
@@ -39,28 +36,33 @@ struct ModelGeometry
 void MergeVertices(ModelGeometry& geometry, double threshold = 0.0);
 void InvertNormals(ModelGeometry& geometry);
 
-class Model : public Positionable, public Rotatable, public Scalable, public virtual EventEmitter, public Nameable
+class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>
 {
 private:
-	ModelGeometry m_geometry;
+	Scene* m_scene;
 
+	ModelGeometry m_geometry;
 	Material m_material;
 
+	//textures - all need to be replaced before they can be used
+	LocalTexture m_texture_colour = LocalTexture(0);
+	LocalTexture m_texture_reflection = LocalTexture(0);
+	LocalTexture m_texture_specular = LocalTexture(0);
+	LocalTexture m_texture_normal = LocalTexture(0);
+
 public:
-	Model(EventManager* evtman, ModelGeometry geometry);
-	Model(Model& copy_from);
-	~Model();
+	Model(ModelReference reference, ModelGeometry geometry, Scene* scene);
 
 	std::vector<std::vector<double>> GetTriFans(); //not implemented
 	std::vector<std::vector<double>> GetTriStrips(); //not implemented
 	std::vector<double> GetTriangles();
 
-	void SetMaterial(Material material);
-	Material GetMaterial();
+	Material& GetMaterial();
 
 	ModelGeometry GetGeometry();
 
-#pragma warning(disable: 4250)
-	using Nameable::GetIdentifier;
+	LocalTexture& GetColourTexture();
+	LocalTexture& GetReflectionTexture();
+	LocalTexture& GetSpecularTexture();
+	LocalTexture& GetNormalTexture();
 };
-#pragma warning(default: 4250)

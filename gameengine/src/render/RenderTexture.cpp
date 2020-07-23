@@ -1,37 +1,48 @@
 #include "RenderTexture.h"
 
-void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, int num_data_tex)
+void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {
-	glGenTextures(1, &texture_group.colour);
-	glBindTexture(GL_TEXTURE_2D, texture_group.colour);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glGenTextures(1, &texture);
+	glBindTexture(type, texture);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, filtering);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, filtering);
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	glGenTextures(1, &texture_group.depth);
-	glBindTexture(GL_TEXTURE_2D, texture_group.depth);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	if (type == GL_TEXTURE_2D)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, std::get<0>(dimensions), std::get<1>(dimensions), 0, internal_format, format, NULL);
+	}
+	else if (type == GL_TEXTURE_CUBE_MAP)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, std::get<0>(dimensions), std::get<1>(dimensions), 0, internal_format, format, NULL);
+		}
+	}
+	else
+	{
+		throw std::runtime_error("Unknown texture type " + std::to_string(type));
+	}
+}
+
+void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, int num_data_tex, GLenum type, bool do_create)
+{
+	texture_group.dimensions = this->m_dimensions;
+
+	this->CreateTextureData(texture_group.colour, type, GL_RGBA, GL_UNSIGNED_BYTE, this->m_dimensions, GL_LINEAR, do_create);
+	this->CreateTextureData(texture_group.depth, type, GL_DEPTH_COMPONENT, GL_FLOAT, this->m_dimensions, GL_NEAREST, do_create);
+
+	if (do_create)
+	{
+		texture_group.data.clear();
+	}
 
 	for (int i = 0; i < num_data_tex; i++)
 	{
 		GLuint texture_id;
-		glGenTextures(1, &texture_id);
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
+		this->CreateTextureData(texture_id, type, GL_RGBA, GL_UNSIGNED_BYTE, this->m_dimensions, GL_NEAREST, do_create);
 		texture_group.data.push_back(texture_id);
 	}
 }
@@ -39,19 +50,7 @@ void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, in
 void RenderTexture::ResizeTextureGroup(RenderTextureGroup& texture_group)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-	
-	glBindTexture(GL_TEXTURE_2D, texture_group.colour);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-	glBindTexture(GL_TEXTURE_2D, texture_group.depth);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-	for (int i = 0; i < (int)texture_group.data.size(); i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, texture_group.data.at(i));
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	}
-
+	this->InitialiseTextureGroup(texture_group, texture_group.data.size(), false);
 	glViewport(0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions));
 }
 
@@ -68,24 +67,25 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(Scene* scene, std::vector<std::tuple<std::string, GLenum>> shaders, int num_data_tex, bool simultaneous_read_write) : Renderable(scene, shaders)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders, int num_data_tex, GLenum type, bool simultaneous_read_write) : Renderable(engine, shaders), Referenceable<RenderTextureReference>(reference)
 {
 	this->m_simultaneous_read_write = simultaneous_read_write;
 	this->m_num_data_tex = num_data_tex;
+	this->m_type = type;
 
-	this->InitialiseTextureGroup(this->m_texture_write, num_data_tex);
+	this->InitialiseTextureGroup(this->m_texture_write, num_data_tex, this->m_type);
 	if (simultaneous_read_write)
 	{
-		this->InitialiseTextureGroup(this->m_texture_read, num_data_tex);
+		this->InitialiseTextureGroup(this->m_texture_read, num_data_tex, this->m_type);
 	}
 
 	glGenFramebuffers(1, &this->m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->m_texture_write.colour, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->m_texture_write.depth, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth, 0);
 	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, GL_TEXTURE_2D, this->m_texture_write.data.at(i), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.type, this->m_texture_write.data.at(i), 0);
 	}
 
 	this->SetFramebuffer(this->m_fbo);
