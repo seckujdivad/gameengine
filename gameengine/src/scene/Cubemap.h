@@ -6,6 +6,13 @@
 #include "Referenceable.h"
 #include "Positionable.h"
 
+enum class CubemapType
+{
+	None,
+	Reflection,
+	Pointlight
+};
+
 class Cubemap : public Positionable, public Referenceable<CubemapReference>
 {
 private:

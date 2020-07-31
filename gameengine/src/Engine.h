@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -33,6 +34,8 @@ private:
 	Scene* m_scene = nullptr;
 
 	std::map<TextureReference, LoadedTexture> m_textures_static;
+	std::vector<RenderTexture*> m_texures_rendered;
+
 	std::map<RenderTextureReference, RenderTexture*> m_textures_rendered;
 	std::map<CubemapReference, RenderTexture*> m_textures_cubemap;
 

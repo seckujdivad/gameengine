@@ -1,10 +1,10 @@
 #pragma once
 
-typedef unsigned int ModelReference;
-typedef unsigned int CameraReference;
-typedef unsigned int TextureReference;
-typedef unsigned int RenderTextureReference;
-typedef unsigned int CubemapReference;
+typedef int ModelReference;
+typedef int CameraReference;
+typedef int TextureReference;
+typedef int RenderTextureReference;
+typedef int CubemapReference;
 
 template<class ReferenceType>
 class Referenceable

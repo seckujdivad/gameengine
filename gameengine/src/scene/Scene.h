@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_set>
 #include <string>
+#include <tuple>
 
 #include "model/Model.h"
 #include "Camera.h"
@@ -65,7 +66,8 @@ public:
 	std::vector<VisBox*> GetVisBoxes();
 
 	void RemoveCubemap(CubemapReference reference);
-	Cubemap* GetCubemap(CubemapReference reference);
+	std::tuple<Cubemap*, CubemapType> GetCubemap(CubemapReference reference);
+	std::vector<CubemapReference> GetCubemaps();
 
 	void SetSkyboxScene(Scene* scene);
 	Scene* GetSkyboxScene();

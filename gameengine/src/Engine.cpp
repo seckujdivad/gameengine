@@ -119,12 +119,91 @@ void Engine::Render()
 		}
 
 		//load unloaded dynamic textures
+		// cubemaps
+		std::vector<std::tuple<CubemapReference, CubemapType>> existing_cubemaps;
+		std::vector<std::tuple<CubemapReference, CubemapType>> required_cubemaps;
+		{
+			for (auto it = this->m_textures_cubemap.begin(); it != this->m_textures_cubemap.end(); it++)
+			{
+				existing_cubemaps.push_back(it->first);
+			}
+
+			required_cubemaps = this->m_scene->GetCubemaps();
+
+			std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
+			std::sort(required_cubemaps.begin(), required_cubemaps.end());
+
+			enum class State
+			{
+				Both,
+				Added,
+				Removed
+			};
+
+			std::vector<std::tuple<CubemapReference, CubemapType>> cubemaps_to_add;
+			std::vector<std::tuple<CubemapReference, CubemapType>> cubemaps_to_remove;
+
+			int i = 0;
+			int j = 0;
+			while ((i < existing_cubemaps.size()) || (j < required_cubemaps.size()))
+			{
+				State state;
+				if (i == existing_cubemaps.size())
+				{
+					state = State::Added;
+				}
+				else if (j == required_cubemaps.size())
+				{
+					state = State::Removed;
+				}
+				else if (existing_cubemaps.at(i) == required_cubemaps.at(j))
+				{
+					state = State::Both;
+				}
+				else if (existing_cubemaps.at(i) < required_cubemaps.at(j))
+				{
+					state = State::Removed;
+				}
+				else
+				{
+					state = State::Added;
+				}
+
+				if (state == State::Added)
+				{
+					cubemaps_to_add.push_back(required_cubemaps.at(j));
+					j++;
+				}
+				else if (state == State::Removed)
+				{
+					cubemaps_to_remove.push_back(existing_cubemaps.at(i));
+					i++;
+				}
+				else if (state == State::Both)
+				{
+					i++;
+					j++;
+				}
+			}
+
+			for (auto it = cubemaps_to_remove.begin(); it != cubemaps_to_remove.end(); i++)
+			{
+				delete this->m_textures_cubemap.at(std::get<0>(*it));
+				this->m_textures_cubemap.erase(std::get<0>(*it));
+			}
+
+			for (auto it = cubemaps_to_add.begin(); it != cubemaps_to_add.end(); i++)
+			{
+
+
+				this->m_textures_cubemap.insert({ *it, new RenderTexture(-1, this) });
+			}
+		}
 
 		//rerender dynamic textures if required
-		for (auto it = this->m_textures_rendered.begin(); it != this->m_textures_rendered.end(); it++)
-		{
-			it->second->Render();
-		}
+		// for each renderable in the scene
+		//   if redraw logic == true (possibly found by checking a RenderController-derived class)
+		//     redraw (defer this to the RenderController-derived class - it should give specific inputs to the RenderTexture and be responsible for calling render)
 
 		//rerender engine canvasses
 		for (int i = 0; i < this->m_render_outputs.size(); i++)

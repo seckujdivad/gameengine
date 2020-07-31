@@ -300,13 +300,13 @@ void Scene::RemoveCubemap(CubemapReference reference)
 	}
 }
 
-Cubemap* Scene::GetCubemap(CubemapReference reference)
+std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(CubemapReference reference)
 {
 	for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
 	{
 		if ((*it)->GetReference() == reference)
 		{
-			return *it;
+			return { *it, CubemapType::Reflection };
 		}
 	}
 
@@ -314,9 +314,25 @@ Cubemap* Scene::GetCubemap(CubemapReference reference)
 	{
 		if ((*it)->GetReference() == reference)
 		{
-			return *it;
+			return { *it, CubemapType::Pointlight };
 		}
 	}
 
-	return nullptr;
+	return { nullptr, CubemapType::None };
+}
+
+std::vector<CubemapReference> Scene::GetCubemaps()
+{
+	std::vector<CubemapReference> references;
+	for (auto it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+	{
+		references.push_back((*it)->GetReference());
+	}
+
+	for (auto it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
+	{
+		references.push_back((*it)->GetReference());
+	}
+
+	return references;
 }
