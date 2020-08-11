@@ -10,18 +10,18 @@
 
 #include "LocallyMovable.h"
 #include "Nameable.h"
-#include "../EventManager.h"
-#include "../EventEmitter.h"
 
-class Camera : public LocallyMovable, public Nameable, public virtual EventEmitter
+class Camera : public LocallyMovable, public Nameable
 {
 private:
 	double m_fov = 45.0;
 	std::tuple<double, double> m_clips = { 0.1, 100.0 };
 	std::tuple<int, int> m_viewport_dimensions = { 1, 1 };
 
+	RenderTextureReference m_output_texture = -1;
+
 public:
-	Camera(EventManager* evtman);
+	Camera();
 
 	void SetFOV(double fov);
 	double GetFOV();
@@ -32,7 +32,9 @@ public:
 	void SetViewportDimensions(std::tuple<int, int> dimensions);
 	std::tuple<int, int> GetViewportDimensions();
 
-#pragma warning(disable: 4250)
-	using Nameable::GetIdentifier;
+	glm::dmat4 GetPerspectiveMatrix();
+	glm::dmat4 GetCombinedMatrix();
+
+	void SetOutputTexture(RenderTextureReference texture);
+	RenderTextureReference GetOutputTexture();
 };
-#pragma warning(default: 4250)

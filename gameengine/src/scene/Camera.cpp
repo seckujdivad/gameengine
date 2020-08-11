@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "Camera.h"
 
-Camera::Camera(EventManager* evtman) : LocallyMovable(evtman), Nameable(evtman), EventEmitter(evtman)
+Camera::Camera() : LocallyMovable(), Nameable()
 {
 	this->m_fov = (GLfloat)45;
 }
@@ -34,4 +34,16 @@ void Camera::SetViewportDimensions(std::tuple<int, int> dimensions)
 std::tuple<int, int> Camera::GetViewportDimensions()
 {
 	return this->m_viewport_dimensions;
+}
+
+glm::dmat4 Camera::GetPerspectiveMatrix()
+{
+	return glm::perspective(glm::radians(this->m_fov), (double)std::get<0>(this->m_viewport_dimensions) / (double)std::get<1>(this->m_viewport_dimensions), std::get<0>(this->m_clips), std::get<1>(this->m_clips));
+}
+
+glm::dmat4 Camera::GetCombinedMatrix()
+{
+	glm::dmat4 matrix = glm::dmat4(1.0);
+	matrix = glm::translate(matrix, 0.0 - this->GetPosition());
+	matrix = this->GetPerspectiveMatrix() * this->GetRotationMatrix() * matrix;
 }

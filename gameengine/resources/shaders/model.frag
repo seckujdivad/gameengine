@@ -85,7 +85,6 @@ struct PointLight
 uniform PointLight light_points[POINT_LIGHT_NUM];
 
 //reflections
-uniform bool reflection_isdrawing;
 
 uniform struct Reflection
 {
@@ -101,6 +100,8 @@ uniform struct Reflection
 
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
+uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
+uniform samplerCube reflection_data_cubemaps[REFLECTION_NUM * DATA_TEX_NUM];
 
 struct ApproximationOBB
 {
@@ -286,7 +287,7 @@ void shade_mode0()
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, geomUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
-	if (reflection_isdrawing || (reflection_intensity == vec3(0.0f, 0.0f, 0.0f)))
+	if (reflection_intensity == vec3(0.0f, 0.0f, 0.0f))
 	{
 		//do nothing - reflections have no effect on this fragment
 	}
@@ -378,7 +379,7 @@ void shade_mode0()
 
 				for (int i = 0; i < reflections[reflection_index].iterations; i++)
 				{
-					depth_sample = texture(reflection_cubemaps[reflection_index], sample_vector).a;
+					depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
 					if (depth_sample == 1.0f)
 					{
 						i = reflections[reflection_index].iterations; //exit loop
@@ -390,7 +391,7 @@ void shade_mode0()
 					}
 				}
 
-				reflection_colour = (texture(reflection_cubemaps[reflection_index], sample_vector).a == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
+				reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
 			}
 			else if (reflections[reflection_index].mode == 1) //oriented bounding box
 			{
@@ -471,7 +472,7 @@ void shade_mode0()
 					vec3 sample_vector = line_end_pos - reflections[final_index].position;
 					vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
 
-					reflection_colour = (reflection_sample.a == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
+					reflection_colour = texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
 				}
 			}
 		}
@@ -486,15 +487,20 @@ void shade_mode0()
 		frag_out = vec4(1 - skybox_intensity, 1.0f) * frag_out;
 		frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
 	}
-
-	//if the shader is drawing a reflection cubemap, store the depth in the alpha channel
-	if (reflection_isdrawing)
-	{
-		frag_out.a = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
-	}
 	
+	//texture usage:
+	// colour: all 4 channels assigned, alpha is currently ignored
+	// depth: left to opengl
+	// data:
+	//    0:
+	//      r: 1 or 0: whether or not fragment should be shown in screen space reflections
+	//      g: pseudo-depth - fragment depth except if the fragment is part of the skybox, in which case the depth is 1 (as far away as possible)
+
 	//output whether or not to draw reflections on certain fragments in the next frame
 	data_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
+
+	//store the pseudo-depth (depth accounting for skyboxes)
+	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
 }
 
 void shade_mode1()

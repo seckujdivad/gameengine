@@ -1,16 +1,16 @@
 #include "OrientedBoundingBox.h"
 
-OrientedBoundingBox::OrientedBoundingBox(EventManager* evtman) : Nameable(evtman), Positionable(evtman), Rotatable(evtman), Scalable(evtman), EventEmitter(evtman)
+OrientedBoundingBox::OrientedBoundingBox() : Nameable(), Positionable(), Rotatable(), Scalable()
 {
 }
 
-bool OrientedBoundingBox::PointInBounds(glm::vec3 point)
+bool OrientedBoundingBox::PointInBounds(glm::dvec3 point)
 {
-	glm::vec3 obb_position = this->GetInverseRotationMatrix() * (point - this->GetPositionVec() + (0.5f * this->GetRotationMatrix() * this->GetDimensionsVec()));
+	glm::vec3 obb_position = this->GetInverseRotationMatrix() * (point - this->GetPosition() + (0.5 * this->GetRotationMatrix() * this->GetDimensionsVec()));
 
 	for (int i = 0; i < 3; i++)
 	{
-		if ((0.0f > obb_position[i]) || (this->GetDimensionsVec()[i] < obb_position[i]))
+		if ((0.0 > obb_position[i]) || (this->GetDimensionsVec()[i] < obb_position[i]))
 		{
 			return false;
 		}
@@ -18,39 +18,39 @@ bool OrientedBoundingBox::PointInBounds(glm::vec3 point)
 	return true;
 }
 
-bool OrientedBoundingBox::PointInBounds(float x, float y, float z)
+bool OrientedBoundingBox::PointInBounds(double x, double y, double z)
 {
-	return this->PointInBounds(glm::vec3(x, y, z));
+	return this->PointInBounds(glm::dvec3(x, y, z));
 }
 
-glm::vec3 OrientedBoundingBox::GetDimensionsVec()
+glm::dvec3 OrientedBoundingBox::GetDimensionsVec()
 {
-	return glm::vec3(this->GetScaleVec() * 2.0f);
+	return glm::vec3(this->GetScale() * 2.0);
 }
 
-glm::mat3 OrientedBoundingBox::GetRotationMatrix()
+glm::dmat3 OrientedBoundingBox::GetRotationMatrix()
 {
 	if (this->CheckIfRotated(true))
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::dmat4 matrix = glm::dmat4(1.0);
+		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(0)), glm::dvec3(1.0, 0.0f, 0.0));
+		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(1)), glm::dvec3(0.0, 1.0f, 0.0));
+		matrix = glm::rotate(matrix, glm::radians(this->GetRotation(2)), glm::dvec3(0.0, 0.0f, 1.0));
 
-		this->m_rotation_matrix = glm::mat3(matrix);
+		this->m_rotation_matrix = glm::dmat3(matrix);
 
-		glm::mat4 inverse_matrix = glm::mat4(1.0f);
-		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0f - this->GetRotation(0)), glm::vec3(1.0f, 0.0f, 0.0f));
-		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0f - this->GetRotation(1)), glm::vec3(0.0f, 1.0f, 0.0f));
-		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0f - this->GetRotation(2)), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::dmat4 inverse_matrix = glm::dmat4(1.0);
+		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0 - this->GetRotation(0)), glm::dvec3(1.0, 0.0, 0.0));
+		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0 - this->GetRotation(1)), glm::dvec3(0.0, 1.0, 0.0));
+		inverse_matrix = glm::rotate(inverse_matrix, glm::radians(0.0 - this->GetRotation(2)), glm::dvec3(0.0, 0.0, 1.0));
 
-		this->m_rotation_inverse_matrix = glm::mat3(inverse_matrix);
+		this->m_rotation_inverse_matrix = glm::dmat3(inverse_matrix);
 	}
 	
 	return this->m_rotation_matrix;
 }
 
-glm::mat3 OrientedBoundingBox::GetInverseRotationMatrix()
+glm::dmat3 OrientedBoundingBox::GetInverseRotationMatrix()
 {
 	this->GetRotationMatrix();
 

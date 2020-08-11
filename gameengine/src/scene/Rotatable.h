@@ -22,5 +22,8 @@ public:
 	double GetRotation(int index);
 	glm::dvec3 GetRotation();
 
+	glm::dmat4 GetRotationMatrix();
+	glm::dmat4 GetRotationMatrixInverse();
+
 	bool CheckIfRotated(bool reset = true);
 };

@@ -56,6 +56,20 @@ glm::dvec3 Scalable::GetScale()
 	return this->m_scale;
 }
 
+glm::dmat4 Scalable::GetScaleMatrix()
+{
+	glm::dmat4 matrix = glm::dmat4(1.0);
+	matrix = glm::scale(matrix, this->GetScale());
+	return matrix;
+}
+
+glm::dmat4 Scalable::GetScaleMatrixInverse()
+{
+	glm::dmat4 matrix = glm::dmat4(1.0);
+	matrix = glm::scale(matrix, 1.0 / this->GetScale());
+	return matrix;
+}
+
 double Scalable::GetScale(int index)
 {
 	if (index == 0)

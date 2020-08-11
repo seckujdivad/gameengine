@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "PointLight.h"
 
-PointLight::PointLight(CubemapReference reference) : Nameable(), Cubemap(reference)
+PointLight::PointLight(RenderTextureReference reference) : Nameable(), Cubemap(reference)
 {
 	this->m_intensity = glm::vec3(0.0f);
 }

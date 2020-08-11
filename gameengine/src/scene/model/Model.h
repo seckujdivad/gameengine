@@ -51,7 +51,7 @@ private:
 	LocalTexture m_texture_normal = LocalTexture(0);
 
 public:
-	Model(ModelReference reference, ModelGeometry geometry, Scene* scene);
+	Model(ModelReference reference, ModelGeometry geometry, Scene* scene = nullptr);
 
 	std::vector<std::vector<double>> GetTriFans(); //not implemented
 	std::vector<std::vector<double>> GetTriStrips(); //not implemented

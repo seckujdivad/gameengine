@@ -50,7 +50,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode);
 	~EngineCanvas();
 
 	void SetMouselook(bool enable);

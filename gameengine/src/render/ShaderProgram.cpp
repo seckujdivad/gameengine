@@ -156,7 +156,7 @@ void ShaderProgram::Select(int texture_group_id)
 	{
 		glUseProgram(this->m_program_id);
 
-		if (texture_group_id != NULL)
+		if (texture_group_id != -1)
 		{
 			std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
 			for (int i = 0; i < textures.size(); i++)

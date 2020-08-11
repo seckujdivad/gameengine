@@ -1,17 +1,81 @@
 #include "Renderable.h"
 
-void Renderable::RenderScene()
+void Renderable::RenderScene(std::vector<Model*> models)
 {
 	Scene* scene = this->m_engine->GetScene();
 	if (scene != nullptr)
 	{
-		//set preprocessor defines
-
-		if (this->m_rendermode == RenderMode::Normal)
+		bool dealloc_models = false;
+		//resolve models
+		if ((models.size() == 1) && (models.at(0) == nullptr)) //default state
 		{
-			//draw shadows and reflections (if required)
+			if ((this->GetRenderMode() == RenderMode::Normal) || (this->GetRenderMode() == RenderMode::Shadow) || (this->GetRenderMode() == RenderMode::Wireframe))
+			{
+				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->m_rendermode);
+			}
+			else if (this->GetRenderMode() == RenderMode::Wireframe)
+			{
+				models.clear();
+
+				ModelGeometry geom;
+				geom.vertices = {
+					glm::dvec3(0.0, 0.0, 0.0),
+					glm::dvec3(0.0, 1.0, 0.0),
+					glm::dvec3(1.0, 1.0, 0.0),
+					glm::dvec3(1.0, 0.0, 0.0)
+				};
+
+				geom.faces = {
+					Face(),
+					Face()
+				};
+
+				geom.faces.at(0).vertices = { 0, 1, 2 };
+				geom.faces.at(0).uv = {
+					glm::dvec2(0.0, 0.0),
+					glm::dvec2(0.0, 1.0),
+					glm::dvec2(1.0, 1.0)
+				};
+				geom.faces.at(0).normal = glm::dvec3(0.0, 0.0, -1.0);
+
+				geom.faces.at(1).vertices = { 0, 3, 2 };
+				geom.faces.at(1).uv = {
+					glm::dvec2(0.0, 0.0),
+					glm::dvec2(0.1, 0.0),
+					glm::dvec2(1.0, 1.0)
+				};
+				geom.faces.at(1).normal = glm::dvec3(0.0, 0.0, -1.0);
+
+				models.push_back(new Model(-1, geom));
+
+				dealloc_models = true;
+			}
 		}
 
+		//set preprocessor defines and recompile if any have changed
+		bool recompile_required = false;
+
+		if (this->GetRenderMode() == RenderMode::Normal)
+		{
+			//point lights
+			recompile_required = this->SetShaderDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
+
+			//data textures
+			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(1)) ? true : recompile_required;
+
+			//OBB approximations
+			recompile_required = this->SetShaderDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) ? true : recompile_required;
+
+			//reflections
+			recompile_required = this->SetShaderDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) ? true : recompile_required;
+		}
+
+		if (recompile_required)
+		{
+			this->RecompileShader();
+		}
+
+		//prepare viewport
 		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 		glCullFace(GL_BACK);
 		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
@@ -23,14 +87,98 @@ void Renderable::RenderScene()
 		);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//load camera data into shader program
+		//load "constant" uniforms (uniforms constant between models like camera data) into program
+		if (this->GetRenderMode() == RenderMode::Postprocess)
+		{
+			LoadedTexture texture;
+			texture.id = this->m_rendermode_data_postprocess.texture.colour;
+			texture.type = GL_TEXTURE_2D;
+			texture.uniform_name = "render_output";
 
-		std::vector<Model*> models_to_draw = scene->GetVisibleModels(this->m_camera->GetPosition(), this->m_rendermode);
+			this->m_shader_program->SetTexture(0, texture);
+		}
+		else if (this->GetRenderMode() == RenderMode::Shadow)
+		{
+			glm::vec3 translate = this->GetCamera()->GetPosition();
+			glm::mat4 projection = this->GetCamera()->GetPerspectiveMatrix();
+
+			std::vector<glm::mat4> transforms;
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+			for (int i = 0; i < transforms.size(); i++)
+			{
+				this->SetShaderUniform("light_transform[" + std::to_string(i) + "]", transforms.at(i));
+			}
+
+			this->SetShaderUniform("light_position", this->GetCamera()->GetPosition());
+			this->SetShaderUniform("light_far_plane", std::get<1>(this->GetCamera()->GetClips()));
+			this->SetShaderUniform("light_near_plane", std::get<0>(this->GetCamera()->GetClips()));
+		}
+		else //normal or wireframe
+		{
+			// camera
+			this->SetShaderUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
+			this->SetShaderUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
+			this->SetShaderUniform("cam_persp", this->GetCamera()->GetPerspectiveMatrix());
+			this->SetShaderUniform("cam_clip_near", std::get<0>(this->GetCamera()->GetClips()));
+			this->SetShaderUniform("cam_clip_far", std::get<1>(this->GetCamera()->GetClips()));
+			this->SetShaderUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
+			this->SetShaderUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
+
+			//shading mode
+			this->SetShaderUniform("shade_mode", this->GetRenderMode() == RenderMode::Wireframe ? 1 : 0);
+
+			// ambient light
+			this->SetShaderUniform("light_ambient", scene->GetAmbientLight());
+		}
+
+		//draw scene geometry
+		Model* model;
+		for (int i = 0; i < (int)models.size(); i++)
+		{
+			model = models.at(i);
+
+			//select shader (and texture group)
+			if (this->GetRenderMode() == RenderMode::Postprocess)
+			{
+				this->m_shader_program->Select(0);
+			}
+			else
+			{
+				this->m_shader_program->Select((int)model->GetReference());
+			}
+
+			if (this->GetRenderMode() == RenderMode::Postprocess)
+			{
+				//postprocessing is done in one draw call
+			}
+			else if (this->GetRenderMode() == RenderMode::Shadow)
+			{
+
+			}
+			else
+			{
+
+			}
+		}
 
 		//iterate through models
 		// load model data into shader program
 		// load model textures into shader program
 		// draw model
+
+		if (dealloc_models)
+		{
+			for (int i = 0; i < (int)models.size(); i++)
+			{
+				delete models.at(i);
+			}
+		}
 	}
 }
 
@@ -41,9 +189,15 @@ void Renderable::RecompileShader()
 		delete this->m_shader_program;
 	}
 
+	std::vector<std::tuple<std::string, std::string>> shader_defines;
+	for (std::map<std::string, std::string>::iterator it = this->m_shader_defines.begin(); it != this->m_shader_defines.end(); it++)
+	{
+		shader_defines.push_back({ it->first, it->second });
+	}
+
 	this->m_shader_program = new ShaderProgram(
 		this->m_shaders,
-		this->m_shader_defines,
+		shader_defines,
 		false
 	);
 
@@ -58,19 +212,245 @@ void Renderable::SetFramebuffer(GLuint fbo)
 	this->m_fbo = fbo;
 }
 
+bool Renderable::SetShaderDefine(std::string key, std::string value)
+{
+	std::map<std::string, std::string>::iterator it = this->m_shader_defines.find(key);
+	if (it == this->m_shader_defines.end())
+	{
+		this->m_shader_defines.insert(key, value);
+		return true;
+	}
+	else if (it->second != value)
+	{
+		this->m_shader_defines.at("POINT_LIGHT_NUM") = value;
+		return true;
+	}
+	return false;
+}
+
+void Renderable::AddShaderUniformName(std::string name)
+{
+	if (std::find(this->m_shader_uniform_names.begin(), this->m_shader_uniform_names.end(), name) == this->m_shader_uniform_names.end())
+	{
+		this->m_shader_uniform_names.push_back(name);
+
+		if (this->m_shader_program == nullptr)
+		{
+			this->m_shader_program->RegisterUniform(name);
+		}
+	}
+}
+
+void Renderable::AddShaderUniformNames(std::vector<std::string> names)
+{
+	for (int i = 0; i < (int)names.size(); i++)
+	{
+		this->AddShaderUniformName(names.at(i));
+	}
+}
+
+void Renderable::SetShaderUniform(std::string name, bool value)
+{
+	glUniform1i(this->m_shader_program->GetUniform(name), value);
+}
+
+void Renderable::SetShaderUniform(std::string name, int value)
+{
+	glUniform1i(this->m_shader_program->GetUniform(name), value);
+}
+
+void Renderable::SetShaderUniform(std::string name, float value)
+{
+	glUniform1f(this->m_shader_program->GetUniform(name), value);
+}
+
+void Renderable::SetShaderUniform(std::string name, double value, bool demote)
+{
+	if (demote)
+	{
+		this->SetShaderUniform(name, (float)value);
+	}
+	else
+	{
+		glUniform1d(this->m_shader_program->GetUniform(name), value);
+	}
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::vec3 vec)
+{
+	glUniform3fv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::dvec3 vec, bool demote)
+{
+	if (demote)
+	{
+		this->SetShaderUniform(name, glm::vec3(vec));
+	}
+	else
+	{
+		glUniform3dv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
+	}
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::vec4 vec)
+{
+	glUniform4fv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::dvec4 vec, bool demote)
+{
+	if (demote)
+	{
+		this->SetShaderUniform(name, glm::vec4(vec));
+	}
+	else
+	{
+		glUniform4dv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
+	}
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::mat4 mat)
+{
+	glUniformMatrix4fv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::dmat4 mat, bool demote)
+{
+	if (demote)
+	{
+		this->SetShaderUniform(name, glm::mat4(mat));
+	}
+	else
+	{
+		glUniformMatrix4dv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
+	}
+}
+
+void Renderable::ConfigureShader(RenderMode mode)
+{
+	if (mode != this->m_rendermode)
+	{
+		this->m_rendermode = mode;
+
+		if (mode == RenderMode::Normal)
+		{
+			this->m_shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE0), GL_GEOMETRY_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+			};
+		}
+		else if (mode == RenderMode::Wireframe)
+		{
+			this->m_shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE1), GL_GEOMETRY_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+			};
+		}
+		else if (mode == RenderMode::Shadow)
+		{
+			this->m_shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_GEOMSHADER), GL_GEOMETRY_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+			};
+		}
+		else if (mode == RenderMode::Postprocess)
+		{
+			this->m_shaders = {
+				{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
+			};
+		}
+
+		if ((mode == RenderMode::Normal) || (mode == RenderMode::Wireframe))
+		{
+			this->AddShaderUniformNames({
+				//vertex
+				"mdl_translate",
+				"mdl_rotate",
+				"mdl_scale",
+				"cam_translate",
+				"cam_rotate",
+				"cam_persp",
+				"cam_clip_near",
+				"cam_clip_far",
+				"cam_transform",
+				"cam_transform_inverse",
+				//fragment
+				"shade_mode",
+				"mat_diffuse",
+				"mat_specular",
+				"mat_specular_highlight",
+				"mat_ssr_enabled",
+				"mat_ssr_resolution",
+				"mat_ssr_max_distance",
+				"mat_ssr_max_cast_distance",
+				"mat_ssr_depth_acceptance",
+				"mat_ssr_show_this",
+				"mat_ssr_refinements",
+				"colourTexture",
+				"normalTexture",
+				"specularTexture",
+				"reflectionIntensityTexture",
+				"light_ambient",
+				"skyboxMaskTexture",
+				"skyboxTexture",
+				"render_output_valid",
+				"render_output_colour",
+				"render_output_depth",
+				"render_output_x",
+				"render_output_y"
+				"mode1_colour"
+				});
+		}
+		else if (mode == RenderMode::Postprocess)
+		{
+			this->AddShaderUniformNames({
+				//fragment
+				"render_output"
+				});
+		}
+		else if (mode == RenderMode::Shadow)
+		{
+			this->AddShaderUniformNames({
+				//vertex
+				"mdl_translate",
+				"mdl_rotate",
+				"mdl_scale",
+				//geometry
+				"light_transform[0]",
+				"light_transform[1]",
+				"light_transform[2]",
+				"light_transform[3]",
+				"light_transform[4]",
+				"light_transform[5]",
+				//fragment
+				"light_position",
+				"light_far_plane",
+				"light_near_plane"
+				});
+		}
+
+		this->RecompileShader();
+	}
+}
+
 void Renderable::PreRenderEvent()
 {
 }
 
 void Renderable::PostRenderEvent()
 {
-
 }
 
-Renderable::Renderable(Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders)
+Renderable::Renderable(Engine* engine, RenderMode mode)
 {
 	this->m_engine = engine;
-	this->m_shaders = shaders;
+
+	this->ConfigureShader(mode);
 
 	this->RecompileShader();
 }
@@ -95,7 +475,31 @@ Engine* Renderable::GetEngine()
 	return this->m_engine;
 }
 
-void Renderable::Render(bool continuous_draw)
+void Renderable::SetRenderMode(NormalRenderModeData data)
+{
+	this->ConfigureShader(RenderMode::Normal);
+	this->m_rendermode_data_normal = data;
+}
+
+void Renderable::SetRenderMode(WireframeRenderModeData data)
+{
+	this->ConfigureShader(RenderMode::Wireframe);
+	this->m_rendermode_data_wireframe = data;
+}
+
+void Renderable::SetRenderMode(ShadowRenderModeData data)
+{
+	this->ConfigureShader(RenderMode::Shadow);
+	this->m_rendermode_data_shadow = data;
+}
+
+void Renderable::SetRenderMode(PostProcessRenderModeData data)
+{
+	this->ConfigureShader(RenderMode::Postprocess);
+	this->m_rendermode_data_postprocess = data;
+}
+
+void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 {
 	if (this->m_engine->GetScene() != nullptr)
 	{
@@ -109,7 +513,7 @@ void Renderable::Render(bool continuous_draw)
 
 		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 		glViewport(0, 0, std::get<0>(sizes), std::get<0>(sizes));
-		this->RenderScene();
+		this->RenderScene(models);
 
 		if (!continuous_draw)
 		{
@@ -121,12 +525,6 @@ void Renderable::Render(bool continuous_draw)
 std::tuple<int, int> Renderable::GetOutputSize()
 {
 	throw std::logic_error("Method must be overridden");
-}
-
-
-void Renderable::SetRenderMode(RenderMode mode)
-{
-	this->m_rendermode = mode;
 }
 
 RenderMode Renderable::GetRenderMode()

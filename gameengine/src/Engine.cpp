@@ -26,7 +26,7 @@ void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 	this->m_textures_static.insert({ texture.GetReference(), texture_data });
 }
 
-Engine::Engine(wxWindow* parent)
+Engine::Engine(wxWindow* parent, Scene* scene)
 {
 	this->m_parent = parent;
 	
@@ -64,21 +64,19 @@ Engine::~Engine()
 	delete this->m_glcontext;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(std::vector<std::tuple<std::string, GLenum>> shaders, wxWindowID id, wxWindow* parent)
+EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
 {
-	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, shaders);
+	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, RenderMode::Postprocess);
 	canvas->MakeOpenGLFocus();
-	this->m_render_outputs.push_back(canvas);
+
+	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
+	this->m_render_controllers.push_back(controller);
+
 	return canvas;
 }
 
 void Engine::Render()
 {
-	if (this->m_render_outputs.size() != 0)
-	{
-		this->m_render_outputs.at(0)->MakeOpenGLFocus();
-	}
-
 	if (this->m_scene != nullptr)
 	{
 		//load unloaded static textures
@@ -118,17 +116,31 @@ void Engine::Render()
 			}
 		}
 
-		//load unloaded dynamic textures
-		// cubemaps
-		std::vector<std::tuple<CubemapReference, CubemapType>> existing_cubemaps;
-		std::vector<std::tuple<CubemapReference, CubemapType>> required_cubemaps;
+		//load required cubemaps and unload unused ones
+		std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_add;
+		std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_remove;
 		{
-			for (auto it = this->m_textures_cubemap.begin(); it != this->m_textures_cubemap.end(); it++)
+			//perform diff for cubemap controllers
+			std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
+			std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
+
+			for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
 			{
-				existing_cubemaps.push_back(it->first);
+				if (this->m_render_controllers.at(i)->GetType() == RenderControllerType::Reflection)
+				{
+					existing_cubemaps.push_back({ this->m_render_controllers.at(i)->GetReference(), CubemapType::Reflection });
+				}
+				else if (this->m_render_controllers.at(i)->GetType() == RenderControllerType::Shadow)
+				{
+					existing_cubemaps.push_back({ this->m_render_controllers.at(i)->GetReference(), CubemapType::Pointlight });
+				}
 			}
 
-			required_cubemaps = this->m_scene->GetCubemaps();
+			std::vector<std::tuple<Cubemap*, CubemapType>> required_cubemap_ptrs = this->m_scene->GetCubemaps();
+			for (int i = 0; i < (int)required_cubemap_ptrs.size(); i++)
+			{
+				required_cubemaps.push_back({ std::get<0>(required_cubemap_ptrs.at(i))->GetReference(), std::get<1>(required_cubemap_ptrs.at(i)) });
+			}
 
 			std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
 			std::sort(required_cubemaps.begin(), required_cubemaps.end());
@@ -140,8 +152,7 @@ void Engine::Render()
 				Removed
 			};
 
-			std::vector<std::tuple<CubemapReference, CubemapType>> cubemaps_to_add;
-			std::vector<std::tuple<CubemapReference, CubemapType>> cubemaps_to_remove;
+			
 
 			int i = 0;
 			int j = 0;
@@ -185,60 +196,53 @@ void Engine::Render()
 					j++;
 				}
 			}
+		}
 
-			for (auto it = cubemaps_to_remove.begin(); it != cubemaps_to_remove.end(); i++)
+		//remove old cubemap controllers
+		{
+			std::vector<int> cubemap_indices;
+			for (int i = 0; i < (int)cubemaps_to_remove.size(); i++)
 			{
-				delete this->m_textures_cubemap.at(std::get<0>(*it));
-				this->m_textures_cubemap.erase(std::get<0>(*it));
+				for (int j = 0; j < (int)this->m_render_controllers.size(); j++)
+				{
+					if (this->m_render_controllers.at(j)->GetReference() == std::get<0>(cubemaps_to_remove.at(i)))
+					{
+						cubemap_indices.push_back(j);
+					}
+				}
 			}
 
-			for (auto it = cubemaps_to_add.begin(); it != cubemaps_to_add.end(); i++)
+			std::sort(cubemap_indices.begin(), cubemap_indices.end(), [](int first, int second) {return first > second; }); //order high-low
+
+			for (int i = 0; i < (int)cubemap_indices.size(); i++)
 			{
-
-
-				this->m_textures_cubemap.insert({ *it, new RenderTexture(-1, this) });
+				delete this->m_render_controllers.at(i);
+				this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
 			}
 		}
 
-		//rerender dynamic textures if required
-		// for each renderable in the scene
-		//   if redraw logic == true (possibly found by checking a RenderController-derived class)
-		//     redraw (defer this to the RenderController-derived class - it should give specific inputs to the RenderTexture and be responsible for calling render)
-
-		//rerender engine canvasses
-		for (int i = 0; i < this->m_render_outputs.size(); i++)
+		//create new cubemap controllers
+		for (int i = 0; i < (int)cubemaps_to_add.size(); i++)
 		{
-			this->m_render_outputs.at(i)->Render();
+			if (std::get<1>(cubemaps_to_add.at(i)) == CubemapType::Reflection)
+			{
+				
+			}
+			else if (std::get<1>(cubemaps_to_add.at(i)) == CubemapType::Pointlight)
+			{
+				this->m_render_controllers.push_back(new ShadowController(this, std::get<0>(cubemaps_to_add.at(i))));
+			}
+		}
+
+		//tell controllers to redraw themselves (if required)
+		std::sort(this->m_render_controllers.begin(), this->m_render_controllers.end(), [](RenderController* first, RenderController* second) {return first->GetRenderGroup() < second->GetRenderGroup();}); //lower render groups are rendered first
+
+		for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+		{
+			this->m_render_controllers.at(i)->Render();
 		}
 
 		glFlush();
-	}
-}
-
-void Engine::SetScene(Scene* scene)
-{
-	if (this->m_scene != scene)
-	{
-		this->m_scene = scene;
-
-		//dealloc old scene textures
-		for (auto it = this->m_textures_rendered.begin(); it != this->m_textures_rendered.end(); it++)
-		{
-			delete it->second;
-		}
-		this->m_textures_rendered.clear();
-
-		for (auto it = this->m_textures_static.begin(); it != this->m_textures_static.end(); it++)
-		{
-			glDeleteTextures(1, &it->second.id);
-		}
-		this->m_textures_static.clear();
-
-		for (auto it = this->m_textures_cubemap.begin(); it != this->m_textures_cubemap.end(); it++)
-		{
-			delete it->second;
-		}
-		this->m_textures_cubemap.clear();
 	}
 }
 
@@ -249,5 +253,21 @@ Scene* Engine::GetScene()
 
 LoadedTexture Engine::GetTexture(TextureReference reference)
 {
-	return LoadedTexture();
+	return this->m_textures_static.at(reference);
+}
+
+RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference)
+{
+	for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+	{
+		if (this->m_render_controllers.at(i)->GetReference() == reference)
+		{
+			return this->m_render_controllers.at(i)->GetRenderTexture();
+		}
+	}
+
+	RenderTextureGroup result;
+	result.dimensions = { -1, -1 };
+
+	return result;
 }

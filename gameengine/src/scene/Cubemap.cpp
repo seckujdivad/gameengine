@@ -1,6 +1,6 @@
 #include "Cubemap.h"
 
-Cubemap::Cubemap(CubemapReference reference) : Positionable(), Referenceable<CubemapReference>(reference)
+Cubemap::Cubemap(RenderTextureReference reference) : Positionable(), Referenceable<RenderTextureReference>(reference)
 {
 }
 

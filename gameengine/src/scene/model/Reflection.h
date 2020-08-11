@@ -26,7 +26,7 @@ private:
 	int m_parallax_iterations = 1;
 
 public:
-	Reflection(CubemapReference reference);
+	Reflection(RenderTextureReference reference);
 
 	//iterative mode only
 	void SetIterations(int iterations);

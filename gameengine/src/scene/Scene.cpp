@@ -105,9 +105,9 @@ ModelReference Scene::GetNewModelReference()
 	return this->m_reference_model++;
 }
 
-CubemapReference Scene::GetNewCubemapReference()
+RenderTextureReference Scene::GetNewRenderTextureReference()
 {
-	return this->m_reference_cubemap++;
+	return this->m_reference_render_texture++;
 }
 
 TextureReference Scene::GetNewTextureReference()
@@ -173,7 +173,7 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode
 
 		return output;
 	}
-	else if (mode == RenderMode::Editor)
+	else if (mode == RenderMode::Wireframe)
 	{
 		return this->m_models;
 	}
@@ -255,7 +255,7 @@ std::vector<VisBox*> Scene::GetVisBoxes()
 	return this->m_visboxes;
 }
 
-void Scene::RemoveCubemap(CubemapReference reference)
+void Scene::RemoveCubemap(RenderTextureReference reference)
 {
 	{
 		std::vector<Reflection*>::iterator result = this->m_reflections.end();
@@ -300,7 +300,7 @@ void Scene::RemoveCubemap(CubemapReference reference)
 	}
 }
 
-std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(CubemapReference reference)
+std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference reference)
 {
 	for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
 	{
@@ -321,18 +321,33 @@ std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(CubemapReference reference)
 	return { nullptr, CubemapType::None };
 }
 
-std::vector<CubemapReference> Scene::GetCubemaps()
+std::vector<std::tuple<Cubemap*, CubemapType>> Scene::GetCubemaps()
 {
-	std::vector<CubemapReference> references;
+	std::vector<std::tuple<Cubemap*, CubemapType>> cubemaps;
 	for (auto it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
 	{
-		references.push_back((*it)->GetReference());
+		cubemaps.push_back({ *it, CubemapType::Reflection });
 	}
 
 	for (auto it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
 	{
-		references.push_back((*it)->GetReference());
+		cubemaps.push_back({ *it, CubemapType::Pointlight });
 	}
 
-	return references;
+	return cubemaps;
+}
+
+void Scene::Add(OrientedBoundingBox obb)
+{
+	this->m_approximations.push_back(obb);
+}
+
+void Scene::Remove(OrientedBoundingBox obb)
+{
+	this->m_approximations.erase(std::find(this->m_approximations.begin(), this->m_approximations.end(), obb));
+}
+
+std::vector<OrientedBoundingBox> Scene::GetOBBApproximations()
+{
+	return this->m_approximations;
 }

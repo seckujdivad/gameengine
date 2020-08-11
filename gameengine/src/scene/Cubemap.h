@@ -13,7 +13,7 @@ enum class CubemapType
 	Pointlight
 };
 
-class Cubemap : public Positionable, public Referenceable<CubemapReference>
+class Cubemap : public Positionable, public Referenceable<RenderTextureReference>
 {
 private:
 	std::tuple<int, int> m_texture_dimensions = { 1, 1 };
@@ -26,7 +26,7 @@ private:
 	std::vector<ModelReference> m_models_dynamic;
 
 public:
-	Cubemap(CubemapReference reference);
+	Cubemap(RenderTextureReference reference);
 
 	void SetClips(std::tuple<double, double> clips);
 	std::tuple<double, double> GetClips();

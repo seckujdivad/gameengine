@@ -6,10 +6,20 @@ Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : P
 	this->m_geometry = geometry;
 	this->m_scene = scene;
 
-	this->m_texture_colour = LocalTexture(scene->GetNewTextureReference());
-	this->m_texture_reflection = LocalTexture(scene->GetNewTextureReference());
-	this->m_texture_specular = LocalTexture(scene->GetNewTextureReference());
-	this->m_texture_normal = LocalTexture(scene->GetNewTextureReference());
+	if (scene == nullptr)
+	{
+		this->m_texture_colour = LocalTexture(-1);
+		this->m_texture_reflection = LocalTexture(-1);
+		this->m_texture_specular = LocalTexture(-1);
+		this->m_texture_normal = LocalTexture(-1);
+	}
+	else
+	{
+		this->m_texture_colour = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_reflection = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_specular = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_normal = LocalTexture(scene->GetNewTextureReference());
+	}
 }
 
 std::vector<std::vector<double>> Model::GetTriFans()

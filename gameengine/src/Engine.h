@@ -23,6 +23,9 @@
 #include "render/RenderTexture.h"
 #include "render/ShaderProgram.h"
 #include "scene/Scene.h"
+#include "render/controllers/RenderController.h"
+#include "render/controllers/EngineCanvasController.h"
+#include "render/controllers/ShadowController.h"
 
 class Engine
 {
@@ -34,25 +37,23 @@ private:
 	Scene* m_scene = nullptr;
 
 	std::map<TextureReference, LoadedTexture> m_textures_static;
-	std::vector<RenderTexture*> m_texures_rendered;
 
-	std::map<RenderTextureReference, RenderTexture*> m_textures_rendered;
-	std::map<CubemapReference, RenderTexture*> m_textures_cubemap;
-
-	std::vector<EngineCanvas*> m_render_outputs;
+	std::vector<RenderController*> m_render_controllers;
 
 	void LoadTexture(LocalTexture texture, std::string uniform_name);
 
 public:
-	Engine(wxWindow* parent);
+	Engine(wxWindow* parent, Scene* scene);
+	Engine(const Engine&) = delete;
+	Engine& operator=(const Engine&) = delete;
 	~Engine();
 
-	EngineCanvas* GenerateNewCanvas(std::vector<std::tuple<std::string, GLenum>> shaders, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvas* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
 
-	void SetScene(Scene* scene);
 	Scene* GetScene();
 
 	LoadedTexture GetTexture(TextureReference reference);
+	RenderTextureGroup GetRenderTexture(RenderTextureReference reference);
 };

@@ -22,7 +22,29 @@ class Camera;
 enum class RenderMode
 {
 	Normal,
-	Editor
+	Wireframe,
+	Shadow,
+	Postprocess
+};
+
+struct NormalRenderModeData
+{
+
+};
+
+struct WireframeRenderModeData
+{
+
+};
+
+struct ShadowRenderModeData
+{
+
+};
+
+struct PostProcessRenderModeData
+{
+	RenderTextureGroup texture;
 };
 
 class Renderable
@@ -33,27 +55,51 @@ private:
 	//scene rendering
 	RenderMode m_rendermode = RenderMode::Normal;
 
+	NormalRenderModeData m_rendermode_data_normal;
+	WireframeRenderModeData m_rendermode_data_wireframe;
+	ShadowRenderModeData m_rendermode_data_shadow;
+	PostProcessRenderModeData m_rendermode_data_postprocess;
+
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
 
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
-	std::vector<std::tuple<std::string, std::string>> m_shader_defines = {};
+	std::map<std::string, std::string> m_shader_defines;
 	std::vector<std::string> m_shader_uniform_names;
 
 	std::map<int, LoadedTexture> m_textures;
 
-	void RenderScene();
+	void RenderScene(std::vector<Model*> models = { nullptr });
 	void RecompileShader();
 
 protected:
 	void SetFramebuffer(GLuint fbo);
 
+	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
+	void AddShaderUniformName(std::string name);
+	void AddShaderUniformNames(std::vector<std::string> names);
+
+	void SetShaderUniform(std::string name, bool value);
+	void SetShaderUniform(std::string name, int value);
+	void SetShaderUniform(std::string name, float value);
+	void SetShaderUniform(std::string name, double value, bool demote = true);
+	void SetShaderUniform(std::string name, glm::vec3 vec);
+	void SetShaderUniform(std::string name, glm::dvec3 vec, bool demote = true);
+	void SetShaderUniform(std::string name, glm::vec4 vec);
+	void SetShaderUniform(std::string name, glm::dvec4 vec, bool demote = true);
+	void SetShaderUniform(std::string name, glm::mat4 mat);
+	void SetShaderUniform(std::string name, glm::dmat4 mat, bool demote = true);
+
+	void ConfigureShader(RenderMode mode);
+
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 public:
-	Renderable(Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders);
+	Renderable(Engine* engine, RenderMode mode);
+	Renderable(const Renderable& copy_from) = delete;
+	Renderable& operator=(const Renderable& copy_from) = delete;
 	~Renderable();
 	
 	void SetCamera(Camera* camera);
@@ -61,9 +107,12 @@ public:
 
 	Engine* GetEngine();
 
-	void SetRenderMode(RenderMode mode);
+	void SetRenderMode(NormalRenderModeData data);
+	void SetRenderMode(WireframeRenderModeData data);
+	void SetRenderMode(ShadowRenderModeData data);
+	void SetRenderMode(PostProcessRenderModeData data);
 	RenderMode GetRenderMode();
 
-	virtual void Render(bool continuous_draw = false);
+	virtual void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
 	virtual std::tuple<int, int> GetOutputSize();
 };

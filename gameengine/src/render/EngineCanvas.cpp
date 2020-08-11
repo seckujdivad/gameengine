@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "EngineCanvas.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders) : wxGLCanvas(parent, args, id), Renderable(engine, shaders)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode) : wxGLCanvas(parent, args, id), Renderable(engine, mode)
 {
 	this->m_glcontext = context;
 	this->MakeOpenGLFocus();

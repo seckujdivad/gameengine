@@ -62,6 +62,24 @@ glm::dvec3 Rotatable::GetRotation()
 	return this->m_rotation;
 }
 
+glm::dmat4 Rotatable::GetRotationMatrix()
+{
+	glm::dmat4 matrix = glm::dmat4(1.0);
+	matrix = glm::rotate(matrix, glm::radians(this->GetRotation(0)), glm::dvec3(1.0, 0.0, 0.0));
+	matrix = glm::rotate(matrix, glm::radians(this->GetRotation(1)), glm::dvec3(0.0, 1.0, 0.0));
+	matrix = glm::rotate(matrix, glm::radians(this->GetRotation(2)), glm::dvec3(0.0, 0.0, 1.0));
+	return matrix;
+}
+
+glm::dmat4 Rotatable::GetRotationMatrixInverse()
+{
+	glm::dmat4 matrix = glm::dmat4(1.0);
+	matrix = glm::rotate(matrix, glm::radians(0 - this->GetRotation(0)), glm::dvec3(1.0, 0.0, 0.0));
+	matrix = glm::rotate(matrix, glm::radians(0 - this->GetRotation(1)), glm::dvec3(0.0, 1.0, 0.0));
+	matrix = glm::rotate(matrix, glm::radians(0 - this->GetRotation(2)), glm::dvec3(0.0, 0.0, 1.0));
+	return matrix;
+}
+
 double Rotatable::GetRotation(int index)
 {
 	if (index == 0)

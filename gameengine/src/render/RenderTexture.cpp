@@ -67,7 +67,7 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, std::vector<std::tuple<std::string, GLenum>> shaders, int num_data_tex, GLenum type, bool simultaneous_read_write) : Renderable(engine, shaders), Referenceable<RenderTextureReference>(reference)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, int num_data_tex, GLenum type, bool simultaneous_read_write) : Renderable(engine, mode), Referenceable<RenderTextureReference>(reference)
 {
 	this->m_simultaneous_read_write = simultaneous_read_write;
 	this->m_num_data_tex = num_data_tex;

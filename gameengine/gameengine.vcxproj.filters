@@ -52,6 +52,12 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{344fe20f-5908-49e8-9c6e-944a36b7bb88}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\controllers">
+      <UniqueIdentifier>{5997af45-546f-47cb-b050-0be7d4b92cb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\controllers">
+      <UniqueIdentifier>{2ab107a9-80dd-456f-aa56-781c53613d42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\EngineCanvas.h">
@@ -138,6 +144,18 @@
     <ClInclude Include="src\scene\LocalTexture.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\controllers\RenderController.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\controllers\EngineCanvasController.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\controllers\ReflectionController.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\controllers\ShadowController.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -220,6 +238,18 @@
     </ClCompile>
     <ClCompile Include="src\scene\LocalTexture.cpp">
       <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\controllers\RenderController.cpp">
+      <Filter>Source Files\render\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\controllers\EngineCanvasController.cpp">
+      <Filter>Source Files\render\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\controllers\ReflectionController.cpp">
+      <Filter>Source Files\render\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\controllers\ShadowController.cpp">
+      <Filter>Source Files\render\controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

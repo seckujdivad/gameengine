@@ -38,7 +38,7 @@ public:
 	ShaderProgram(const ShaderProgram& ) = delete; //This is a deliberate overload to throw an error. Copying of this object is not supported
 	~ShaderProgram();
 
-	void Select(int texture_group_id = NULL);
+	void Select(int texture_group_id = -1);
 
 	GLuint GetProgramID();
 

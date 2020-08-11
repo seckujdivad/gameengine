@@ -19,7 +19,7 @@ private:
 	double m_shadow_bias = -0.05f;
 
 public:
-	PointLight(CubemapReference reference);
+	PointLight(RenderTextureReference reference);
 
 	void SetIntensity(glm::vec3 intensity);
 	glm::vec3 GetIntensity();

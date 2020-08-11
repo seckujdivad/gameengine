@@ -184,8 +184,12 @@
     <ClInclude Include="src\EventManager.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
+    <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
+    <ClInclude Include="src\render\controllers\ReflectionController.h" />
+    <ClInclude Include="src\render\controllers\ShadowController.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
     <ClInclude Include="src\render\Renderable.h" />
+    <ClInclude Include="src\render\controllers\RenderController.h" />
     <ClInclude Include="src\render\RenderTexture.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\Resource.h" />
@@ -213,6 +217,10 @@
     <ClCompile Include="src\EventManager.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
+    <ClCompile Include="src\render\controllers\EngineCanvasController.cpp" />
+    <ClCompile Include="src\render\controllers\ReflectionController.cpp" />
+    <ClCompile Include="src\render\controllers\RenderController.cpp" />
+    <ClCompile Include="src\render\controllers\ShadowController.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\RenderTexture.cpp" />

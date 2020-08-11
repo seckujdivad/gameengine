@@ -15,8 +15,5 @@ public:
 
 	void AddOBB(OrientedBoundingBox obb);
 
-	void RegisterUniforms(ShaderProgram* shader_program);
-	void SetUniforms(ShaderProgram* shader_program);
-
 	int NumOBBs();
 };

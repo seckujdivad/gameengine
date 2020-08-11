@@ -22,5 +22,8 @@ public:
 	double GetScale(int index);
 	glm::dvec3 GetScale();
 
+	glm::dmat4 GetScaleMatrix();
+	glm::dmat4 GetScaleMatrixInverse();
+
 	bool CheckIfRescaled(bool reset = true);
 };

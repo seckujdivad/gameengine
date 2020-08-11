@@ -13,7 +13,7 @@
 #include "light/PointLight.h"
 #include "model/Reflection.h"
 #include "VisBox.h"
-#include "SceneApproximation.h"
+#include "OrientedBoundingBox.h"
 #include "../render/Renderable.h"
 
 typedef unsigned int TextureReference;
@@ -31,16 +31,19 @@ private:
 	std::vector<PointLight*> m_pointlights;
 	std::vector<Reflection*> m_reflections;
 	std::vector<VisBox*> m_visboxes;
+	std::vector<OrientedBoundingBox> m_approximations;
 
 	bool m_manage_children = true;
 
 	//manage (int) references - references are unique on a scene level, not any higher
 	ModelReference m_reference_model = 0;
-	CubemapReference m_reference_cubemap = 0;
+	RenderTextureReference m_reference_render_texture = 0;
 	TextureReference m_reference_texture = 0;
 
 public:
 	Scene();
+	Scene(const Scene&) = delete;
+	Scene& operator=(const Scene&) = delete;
 	~Scene();
 
 	void ManageChildren(bool manage);
@@ -65,9 +68,13 @@ public:
 	void Remove(VisBox* visbox);
 	std::vector<VisBox*> GetVisBoxes();
 
-	void RemoveCubemap(CubemapReference reference);
-	std::tuple<Cubemap*, CubemapType> GetCubemap(CubemapReference reference);
-	std::vector<CubemapReference> GetCubemaps();
+	void RemoveCubemap(RenderTextureReference reference);
+	std::tuple<Cubemap*, CubemapType> GetCubemap(RenderTextureReference reference);
+	std::vector<std::tuple<Cubemap*, CubemapType>> GetCubemaps();
+
+	void Add(OrientedBoundingBox obb);
+	void Remove(OrientedBoundingBox obb);
+	std::vector<OrientedBoundingBox> GetOBBApproximations();
 
 	void SetSkyboxScene(Scene* scene);
 	Scene* GetSkyboxScene();
@@ -79,6 +86,6 @@ public:
 	glm::vec3 GetAmbientLight();
 
 	ModelReference GetNewModelReference();
-	CubemapReference GetNewCubemapReference();
+	RenderTextureReference GetNewRenderTextureReference();
 	TextureReference GetNewTextureReference();
 };
