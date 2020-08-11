@@ -43,6 +43,8 @@ private:
 
 public:
 	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, int num_data_tex, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false);
+	RenderTexture(const RenderTexture&) = delete;
+	RenderTexture& operator=(const RenderTexture&) = delete;
 	~RenderTexture();
 
 	std::tuple<int, int> GetOutputSize() override;
