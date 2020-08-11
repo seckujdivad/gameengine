@@ -6,19 +6,28 @@ LocalTexture::LocalTexture(TextureReference reference) : Referenceable<TextureRe
 
 LocalTexture::LocalTexture(const LocalTexture& copy_from) : Referenceable<TextureReference>(copy_from)
 {
+	*this = copy_from;
+}
+
+LocalTexture& LocalTexture::operator=(const LocalTexture& copy_from)
+{
 	this->m_type = copy_from.m_type;
 
 	this->m_dimensions = copy_from.m_dimensions;
 	if (copy_from.m_full_data != nullptr)
 	{
+		this->m_full_data = (unsigned char*)malloc(sizeof(unsigned char) * std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions));
 		memcpy(this->m_full_data, copy_from.m_full_data, sizeof(unsigned char) * std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions));
 	}
 
 	this->m_vec_colour = copy_from.m_vec_colour;
 	if (copy_from.m_vec_data != nullptr)
 	{
+		this->m_vec_data = (unsigned char*)malloc(sizeof(unsigned char) * 3);
 		memcpy(this->m_vec_data, copy_from.m_vec_data, sizeof(unsigned char) * 3);
 	}
+
+	return *this;
 }
 
 LocalTexture::~LocalTexture()
