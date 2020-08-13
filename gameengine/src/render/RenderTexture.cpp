@@ -49,7 +49,7 @@ void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, in
 
 void RenderTexture::ResizeTextureGroup(RenderTextureGroup& texture_group)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->GetFramebuffer());
 	this->InitialiseTextureGroup(texture_group, texture_group.data.size(), false);
 	glViewport(0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions));
 }
@@ -67,33 +67,44 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, int num_data_tex, GLenum type, bool simultaneous_read_write) : Renderable(engine, mode), Referenceable<RenderTextureReference>(reference)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write) : Renderable(engine, mode), Referenceable<RenderTextureReference>(reference)
 {
 	this->m_simultaneous_read_write = simultaneous_read_write;
-	this->m_num_data_tex = num_data_tex;
+	this->m_info = info;
 	this->m_type = type;
 
-	this->InitialiseTextureGroup(this->m_texture_write, num_data_tex, this->m_type);
+	this->InitialiseTextureGroup(this->m_texture_write, ENGINECANVAS_NUM_DATA_TEX, this->m_type);
 	if (simultaneous_read_write)
 	{
-		this->InitialiseTextureGroup(this->m_texture_read, num_data_tex, this->m_type);
+		this->InitialiseTextureGroup(this->m_texture_read, ENGINECANVAS_NUM_DATA_TEX, this->m_type);
 	}
 
-	glGenFramebuffers(1, &this->m_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth, 0);
+	GLuint fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	if (info.colour)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour, 0);
+	}
+
+	if (info.depth)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth, 0);
+	}
+
 	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
 	{
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.type, this->m_texture_write.data.at(i), 0);
 	}
 
-	this->SetFramebuffer(this->m_fbo);
+	this->SetFramebuffer(fbo);
 }
 
 RenderTexture::~RenderTexture()
 {
-	glDeleteFramebuffers(1, &this->m_fbo);
+	GLuint fbo = this->GetFramebuffer();
+	glDeleteFramebuffers(1, &fbo);
 
 	std::vector<GLuint> textures;
 	
@@ -140,4 +151,9 @@ RenderTextureGroup RenderTexture::GetOutputTextures()
 	{
 		return this->m_texture_write;
 	}
+}
+
+RenderTextureInfo RenderTexture::GetTextureInfo()
+{
+	return this->m_info;
 }

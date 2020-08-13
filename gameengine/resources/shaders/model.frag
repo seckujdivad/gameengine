@@ -89,7 +89,6 @@ uniform PointLight light_points[POINT_LIGHT_NUM];
 uniform struct Reflection
 {
 	vec3 position;
-	bool isdrawing;
 	float clip_near;
 	float clip_far;
 
@@ -103,6 +102,7 @@ uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_data_cubemaps[REFLECTION_NUM * DATA_TEX_NUM];
 
+//scene approximation
 struct ApproximationOBB
 {
 	vec3 position;
@@ -472,7 +472,7 @@ void shade_mode0()
 					vec3 sample_vector = line_end_pos - reflections[final_index].position;
 					vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
 
-					reflection_colour = texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
+					reflection_colour = (texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
 				}
 			}
 		}

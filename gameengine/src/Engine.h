@@ -26,9 +26,19 @@
 #include "render/controllers/RenderController.h"
 #include "render/controllers/EngineCanvasController.h"
 #include "render/controllers/ShadowController.h"
+#include "render/controllers/SkyboxController.h"
+#include "render/controllers/ReflectionController.h"
 
 class Engine
 {
+public:
+	struct LoadedGeometry
+	{
+		ModelGeometry geometry;
+		GLuint vbo;
+		int num_vertices;
+	};
+
 private:
 	wxGLContext* m_glcontext;
 	wxWindow* m_parent;
@@ -40,7 +50,12 @@ private:
 
 	std::vector<RenderController*> m_render_controllers;
 
-	void LoadTexture(LocalTexture texture, std::string uniform_name);
+	//loaded geometry
+	GLuint m_vao;
+	std::map<ModelReference, Engine::LoadedGeometry> m_model_geometry_vbos;
+	std::map<Model*, Engine::LoadedGeometry> m_temporary_vbos;
+
+	Engine::LoadedGeometry LoadGeometry(const ModelGeometry& geometry);
 
 public:
 	Engine(wxWindow* parent, Scene* scene);
@@ -54,6 +69,10 @@ public:
 
 	Scene* GetScene();
 
+	void LoadTexture(LocalTexture texture, std::string uniform_name);
 	LoadedTexture GetTexture(TextureReference reference);
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference);
+
+	Engine::LoadedGeometry BindVBO(Model* model);
+	void ReleaseVBO(Model* model);
 };

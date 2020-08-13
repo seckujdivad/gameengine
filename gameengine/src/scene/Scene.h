@@ -24,7 +24,10 @@ private:
 	//misc rendering attributes
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//skybox
 	Scene* m_skybox_scene = nullptr;
+	RenderTextureReference m_skybox_texture;
 
 	//scene components - all are managed by the scene
 	std::vector<Model*> m_models;
@@ -78,6 +81,8 @@ public:
 
 	void SetSkyboxScene(Scene* scene);
 	Scene* GetSkyboxScene();
+
+	RenderTextureReference GetSkyboxTextureReference();
 
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour();

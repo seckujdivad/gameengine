@@ -156,9 +156,19 @@ void ShaderProgram::Select(int texture_group_id)
 	{
 		glUseProgram(this->m_program_id);
 
-		if (texture_group_id != -1)
+		std::vector<int> targeted_groups;
+		if (texture_group_id == -1)
 		{
-			std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
+
+		}
+		else
+		{
+			targeted_groups.push_back(texture_group_id);
+		}
+
+		for (std::vector<int>::iterator it = targeted_groups.begin(); it != targeted_groups.end(); it++)
+		{
+			std::vector<LoadedTexture> textures = this->m_textures.at(*it);
 			for (int i = 0; i < textures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));

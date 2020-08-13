@@ -33,8 +33,17 @@ struct ModelGeometry
 	std::vector<glm::dvec3> vertices;
 };
 
+bool operator==(const ModelGeometry& first, const ModelGeometry& second);
+bool operator!=(const ModelGeometry& first, const ModelGeometry& second);
+bool operator==(const Face& first, const Face& second);
+bool operator!=(const Face& first, const Face& second);
+
 void MergeVertices(ModelGeometry& geometry, double threshold = 0.0);
 void InvertNormals(ModelGeometry& geometry);
+
+std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geometry = false);
+
+std::vector<GLfloat> DoubleToSinglePrecision(std::vector<double> vec); //utility method for changing the precision of GetTriangles before feeding to the GPU
 
 class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>
 {
@@ -49,13 +58,17 @@ private:
 	LocalTexture m_texture_reflection = LocalTexture(0);
 	LocalTexture m_texture_specular = LocalTexture(0);
 	LocalTexture m_texture_normal = LocalTexture(0);
+	LocalTexture m_texture_skybox_mask = LocalTexture(0);
+
+	//wireframe colour
+	glm::vec3 m_wireframe_colour = glm::vec3(0.0f);
 
 public:
 	Model(ModelReference reference, ModelGeometry geometry, Scene* scene = nullptr);
 
 	std::vector<std::vector<double>> GetTriFans(); //not implemented
 	std::vector<std::vector<double>> GetTriStrips(); //not implemented
-	std::vector<double> GetTriangles();
+	std::vector<double> GetTriangles(bool only_geometry = false);
 
 	Material& GetMaterial();
 
@@ -65,4 +78,12 @@ public:
 	LocalTexture& GetReflectionTexture();
 	LocalTexture& GetSpecularTexture();
 	LocalTexture& GetNormalTexture();
+	LocalTexture& GetSkyboxMaskTexture();
+
+	void SetWireframeColour(glm::vec3 colour);
+	void SetWireframeColourSelected();
+	void SetWireframeColourUnselected();
+	glm::vec3 GetWireframeColour();
+
+	static constexpr int GetValuesPerVert();
 };

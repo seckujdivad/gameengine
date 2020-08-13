@@ -118,11 +118,17 @@ TextureReference Scene::GetNewTextureReference()
 void Scene::SetSkyboxScene(Scene* scene)
 {
 	this->m_skybox_scene = scene;
+	this->m_skybox_texture = this->GetNewRenderTextureReference();
 }
 
 Scene* Scene::GetSkyboxScene()
 {
 	return this->m_skybox_scene;
+}
+
+RenderTextureReference Scene::GetSkyboxTextureReference()
+{
+	return this->m_skybox_texture;
 }
 
 void Scene::SetClearColour(glm::vec4 colour)

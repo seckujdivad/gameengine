@@ -12,7 +12,6 @@ ReferenceType Referenceable<ReferenceType>::GetReference()
 	return this->m_reference;
 }
 
-template class Referenceable<ModelReference>;
-template class Referenceable<CameraReference>;
-template class Referenceable<CubemapReference>;
+template class Referenceable<ModelReference>;;
 template class Referenceable<TextureReference>;
+template class Referenceable<RenderTextureReference>;

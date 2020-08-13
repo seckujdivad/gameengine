@@ -187,6 +187,7 @@
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
     <ClInclude Include="src\render\controllers\ReflectionController.h" />
     <ClInclude Include="src\render\controllers\ShadowController.h" />
+    <ClInclude Include="src\render\controllers\SkyboxController.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="src\render\controllers\ReflectionController.cpp" />
     <ClCompile Include="src\render\controllers\RenderController.cpp" />
     <ClCompile Include="src\render\controllers\ShadowController.cpp" />
+    <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
     <ClCompile Include="src\render\EngineCanvas.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\RenderTexture.cpp" />

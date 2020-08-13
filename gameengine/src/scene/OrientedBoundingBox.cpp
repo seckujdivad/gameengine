@@ -25,7 +25,7 @@ bool OrientedBoundingBox::PointInBounds(double x, double y, double z)
 
 glm::dvec3 OrientedBoundingBox::GetDimensionsVec()
 {
-	return glm::vec3(this->GetScale() * 2.0);
+	return this->GetScale() * 2.0;
 }
 
 glm::dmat3 OrientedBoundingBox::GetRotationMatrix()

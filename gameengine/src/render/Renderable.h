@@ -29,7 +29,7 @@ enum class RenderMode
 
 struct NormalRenderModeData
 {
-
+	RenderTextureGroup previous_frame;
 };
 
 struct WireframeRenderModeData
@@ -51,6 +51,8 @@ class Renderable
 {
 private:
 	GLuint m_fbo = -1;
+	bool m_fbo_contains_render = false;
+	GLuint m_fbo_target_type = GL_TEXTURE_2D;
 
 	//scene rendering
 	RenderMode m_rendermode = RenderMode::Normal;
@@ -62,6 +64,9 @@ private:
 
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
+
+	GLuint m_vao;
+	std::map<ModelReference, GLuint> m_vbos;
 
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
@@ -75,6 +80,8 @@ private:
 
 protected:
 	void SetFramebuffer(GLuint fbo);
+	GLuint GetFramebuffer();
+	void SetTargetType(GLuint target_type);
 
 	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
 	void AddShaderUniformName(std::string name);
@@ -92,6 +99,8 @@ protected:
 	void SetShaderUniform(std::string name, glm::dmat4 mat, bool demote = true);
 
 	void ConfigureShader(RenderMode mode);
+
+	bool FramebufferContainsRenderOutput();
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true

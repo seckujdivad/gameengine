@@ -61,7 +61,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			recompile_required = this->SetShaderDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
 
 			//data textures
-			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(1)) ? true : recompile_required;
+			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)) ? true : recompile_required;
 
 			//OBB approximations
 			recompile_required = this->SetShaderDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) ? true : recompile_required;
@@ -75,19 +75,29 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			this->RecompileShader();
 		}
 
-		//prepare viewport
-		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-		glCullFace(GL_BACK);
-		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
-		glClearColor(
-			scene->GetClearColour().r,
-			scene->GetClearColour().g,
-			scene->GetClearColour().b,
-			scene->GetClearColour().a
-		);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		this->m_shader_program->Select();
 
 		//load "constant" uniforms (uniforms constant between models like camera data) into program
+		// cubemap uniforms
+		{
+			std::vector<glm::mat4> transforms;
+			glm::vec3 translate = glm::vec3(0.0f);
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+			for (int i = 0; i < transforms.size(); i++)
+			{
+				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
+			}
+
+			this->SetShaderUniform("is_cubemap", this->m_fbo_target_type == GL_TEXTURE_CUBE_MAP);
+		}
+
+		//specialised uniforms
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
 			LoadedTexture texture;
@@ -112,8 +122,10 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			for (int i = 0; i < transforms.size(); i++)
 			{
-				this->SetShaderUniform("light_transform[" + std::to_string(i) + "]", transforms.at(i));
+				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 			}
+
+			this->SetShaderUniform("is_cubemap", true);
 
 			this->SetShaderUniform("light_position", this->GetCamera()->GetPosition());
 			this->SetShaderUniform("light_far_plane", std::get<1>(this->GetCamera()->GetClips()));
@@ -135,6 +147,124 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			// ambient light
 			this->SetShaderUniform("light_ambient", scene->GetAmbientLight());
+
+			//point lights
+			std::vector<PointLight*> point_lights = this->GetEngine()->GetScene()->GetPointLights();
+			for (int i = 0; i < (int)point_lights.size(); i++)
+			{
+				PointLight* point_light = point_lights.at(i);
+				std::string root_name = "light_points[" + std::to_string(i) + "].";
+
+				this->AddShaderUniformName(root_name + "position");
+				this->SetShaderUniform(root_name + "position", point_light->GetPosition());
+
+				this->AddShaderUniformName(root_name + "intensity");
+				this->SetShaderUniform(root_name + "intensity", point_light->GetIntensity());
+
+				this->AddShaderUniformName(root_name + "shadows_enabled");
+				this->SetShaderUniform(root_name + "shadows_enabled", point_light->GetShadowsEnabled());
+
+				this->AddShaderUniformName(root_name + "shadow_far_plane");
+				this->SetShaderUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));
+
+				this->AddShaderUniformName(root_name + "shadow_bias");
+				this->SetShaderUniform(root_name + "shadow_bias", point_light->GetShadowBias());
+
+				this->AddShaderUniformName(root_name + "shadow_cubemap");
+				RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
+				LoadedTexture loaded_texture;
+				loaded_texture.id = texture.colour;
+				loaded_texture.type = texture.type;
+				loaded_texture.uniform_name = root_name + "shadow_cubemap";
+
+				this->m_shader_program->SetTexture(-1, loaded_texture);
+			}
+
+			//scene approximation
+			std::vector<OrientedBoundingBox> scene_approximations = this->GetEngine()->GetScene()->GetOBBApproximations();
+			for (int i = 0; i < scene_approximations.size(); i++)
+			{
+				OrientedBoundingBox obb = scene_approximations.at(i);
+				std::string prefix = "scene_approximations[" + std::to_string(i) + "].";
+
+				this->AddShaderUniformName(prefix + "position");
+				this->SetShaderUniform(prefix + "position", obb.GetPosition());
+				
+				this->AddShaderUniformName(prefix + "dimensions");
+				this->SetShaderUniform(prefix + "dimensions", obb.GetDimensionsVec());
+
+				this->AddShaderUniformName(prefix + "rotation");
+				this->SetShaderUniform(prefix + "rotation", obb.GetRotationMatrix());
+
+				this->AddShaderUniformName(prefix + "rotation_inverse");
+				this->SetShaderUniform(prefix + "rotation_inverse", obb.GetInverseRotationMatrix());
+			}
+
+			//skybox cubemap
+			{
+				RenderTextureGroup render_texture = this->GetEngine()->GetRenderTexture(this->GetEngine()->GetScene()->GetSkyboxTextureReference());
+				LoadedTexture loaded_texture;
+				loaded_texture.id = render_texture.colour;
+				loaded_texture.type = render_texture.type;
+				loaded_texture.uniform_name = "skyboxTexture";
+				this->m_shader_program->SetTexture(-1, loaded_texture);
+			}
+
+			//previous render result
+			{
+				this->SetShaderUniform("render_output_valid", this->FramebufferContainsRenderOutput());
+				this->SetShaderUniform("render_output_x", std::get<0>(this->GetOutputSize()));
+				this->SetShaderUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+
+				//load textures from the previous frame (if in normal rendering mode)
+				if (this->GetRenderMode() == RenderMode::Normal)
+				{
+					LoadedTexture texture;
+					texture.type = this->m_rendermode_data_normal.previous_frame.type;
+					
+					texture.id = this->m_rendermode_data_normal.previous_frame.colour;
+					texture.uniform_name = "render_output_colour";
+					this->m_shader_program->SetTexture(-1, texture);
+
+					texture.id = this->m_rendermode_data_normal.previous_frame.depth;
+					texture.uniform_name = "render_output_depth";
+					this->m_shader_program->SetTexture(-1, texture);
+
+					for (int i = 0; i < (int)this->m_rendermode_data_normal.previous_frame.data.size(); i++)
+					{
+						texture.id = this->m_rendermode_data_normal.previous_frame.data.at(i);
+						texture.uniform_name = "render_output_data[" + std::to_string(i) + "]";
+						this->m_shader_program->SetTexture(-1, texture);
+					}
+				}
+			}
+		}
+
+		//prepare viewport
+		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
+		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
+		glClearColor(
+			scene->GetClearColour().r,
+			scene->GetClearColour().g,
+			scene->GetClearColour().b,
+			scene->GetClearColour().a
+		);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		switch (this->GetRenderMode())
+		{
+		case RenderMode::Normal:
+			glCullFace(GL_BACK);
+			break;
+		case RenderMode::Postprocess:
+			glCullFace(GL_NONE);
+			break;
+		case RenderMode::Wireframe:
+			glCullFace(GL_NONE);
+			break;
+		case RenderMode::Shadow:
+			glCullFace(GL_FRONT);
+			break;
 		}
 
 		//draw scene geometry
@@ -153,17 +283,121 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->m_shader_program->Select((int)model->GetReference());
 			}
 
-			if (this->GetRenderMode() == RenderMode::Postprocess)
+			//set uniforms
+			if (this->GetRenderMode() != RenderMode::Postprocess) //postprocessing is done in one draw call
 			{
-				//postprocessing is done in one draw call
-			}
-			else if (this->GetRenderMode() == RenderMode::Shadow)
-			{
+				this->SetShaderUniform("mdl_translate", glm::vec4(model->GetPosition(), 0.0f));
+				this->SetShaderUniform("mdl_rotate", model->GetRotationMatrix());
+				this->SetShaderUniform("mdl_scale", model->GetScaleMatrix());
 
-			}
-			else
-			{
+				if (this->GetRenderMode() != RenderMode::Shadow) //standard render modes
+				{
+					Material& material = model->GetMaterial();
+					//material
+					this->SetShaderUniform("mat_diffuse", material.diffuse);
+					this->SetShaderUniform("mat_specular", material.specular);
+					this->SetShaderUniform("mat_specular_highlight", material.specular_highlight);
 
+					//screen space reflections
+					this->SetShaderUniform("mat_ssr_enabled", material.ssr_enabled);
+					this->SetShaderUniform("mat_ssr_resolution", material.ssr.resolution);
+					this->SetShaderUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
+					this->SetShaderUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
+					this->SetShaderUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);
+					this->SetShaderUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
+					this->SetShaderUniform("mat_ssr_refinements", material.ssr.refinements);
+
+					//textures
+					LoadedTexture texture;
+
+					texture = this->GetEngine()->GetTexture(model->GetColourTexture().GetReference());
+					texture.uniform_name = "colourTexture";
+					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetNormalTexture().GetReference());
+					texture.uniform_name = "normalTexture";
+					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference());
+					texture.uniform_name = "specularTexture";
+					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetReflectionTexture().GetReference());
+					texture.uniform_name = "reflectionIntensityTexture";
+					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference());
+					texture.uniform_name = "skyboxMaskTexture";
+					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+					//reflections
+					std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
+					for (int i = 0; i < reflections.size(); i++)
+					{
+						Reflection* reflection = std::get<0>(reflections.at(i));
+						ReflectionMode reflection_mode = std::get<1>(reflections.at(i));
+
+						std::string prefix = "reflections[" + std::to_string(i) + "].";
+
+						this->AddShaderUniformName(prefix + "position");
+						this->SetShaderUniform(prefix + "position", reflection->GetPosition());
+
+						this->AddShaderUniformName(prefix + "clip_near");
+						this->SetShaderUniform(prefix + "clip_near", std::get<0>(reflection->GetClips()));
+						
+						this->AddShaderUniformName(prefix + "clip_far");
+						this->SetShaderUniform(prefix + "clip_far", std::get<1>(reflection->GetClips()));
+
+						this->AddShaderUniformName(prefix + "mode");
+						this->SetShaderUniform(prefix + "mode", reflection_mode == ReflectionMode::Iterative ? 0 : 1);
+
+						this->AddShaderUniformName(prefix + "iterations");
+						this->SetShaderUniform(prefix + "iterations", reflection->GetIterations());
+
+						this->AddShaderUniformNames({
+							"reflection_cubemaps[" + std::to_string(i) + "]",
+							"reflection_depth_cubemaps[" + std::to_string(i) + "]"
+							});
+						for (int j = 0; j < ENGINECANVAS_NUM_DATA_TEX; j++)
+						{
+							this->AddShaderUniformName("reflection_data_cubemaps[" + std::to_string((i * ENGINECANVAS_NUM_DATA_TEX) + j) + "]");
+						}
+						
+						RenderTextureGroup reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
+
+						LoadedTexture texture;
+						texture.type = reflection_output.type;
+
+						texture.id = reflection_output.colour;
+						texture.uniform_name = "reflection_cubemaps[" + std::to_string(i) + "]";
+						this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+						texture.id = reflection_output.depth;
+						texture.uniform_name = "reflection_depth_cubemaps[" + std::to_string(i) + "]";
+						this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+
+						for (int j = 0; j < ENGINECANVAS_NUM_DATA_TEX; j++)
+						{
+							texture.id = reflection_output.data.at(j);
+							texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * ENGINECANVAS_NUM_DATA_TEX) + j) + "]";
+							this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+						}
+					}
+
+					//shade mode 1 (wireframe)
+					this->SetShaderUniform("mode1_colour", model->GetWireframeColour());
+				}
+			}
+
+			//load geometry
+			Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVBO(model);
+
+			//draw geometry
+			glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
+
+			if (dealloc_models) //release geometry as the models are temporary
+			{
+				this->GetEngine()->ReleaseVBO(model);
 			}
 		}
 
@@ -171,6 +405,8 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		// load model data into shader program
 		// load model textures into shader program
 		// draw model
+
+		this->m_fbo_contains_render = true;
 
 		if (dealloc_models)
 		{
@@ -210,6 +446,17 @@ void Renderable::RecompileShader()
 void Renderable::SetFramebuffer(GLuint fbo)
 {
 	this->m_fbo = fbo;
+	this->m_fbo_contains_render = false;
+}
+
+GLuint Renderable::GetFramebuffer()
+{
+	return this->m_fbo;
+}
+
+void Renderable::SetTargetType(GLuint target_type)
+{
+	this->m_fbo_target_type = target_type;
 }
 
 bool Renderable::SetShaderDefine(std::string key, std::string value)
@@ -332,6 +579,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 	if (mode != this->m_rendermode)
 	{
 		this->m_rendermode = mode;
+		this->m_fbo_contains_render = false;
 
 		if (mode == RenderMode::Normal)
 		{
@@ -364,6 +612,16 @@ void Renderable::ConfigureShader(RenderMode mode)
 				{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
 			};
 		}
+
+		this->AddShaderUniformNames({
+			"cubemap_transform[0]",
+			"cubemap_transform[1]",
+			"cubemap_transform[2]",
+			"cubemap_transform[3]",
+			"cubemap_transform[4]",
+			"cubemap_transform[5]",
+			"is_cubemap"
+			});
 
 		if ((mode == RenderMode::Normal) || (mode == RenderMode::Wireframe))
 		{
@@ -405,6 +663,11 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"render_output_y"
 				"mode1_colour"
 				});
+
+			for (int i = 0; i < ENGINECANVAS_NUM_DATA_TEX; i++)
+			{
+				this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
+			}
 		}
 		else if (mode == RenderMode::Postprocess)
 		{
@@ -420,13 +683,6 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"mdl_translate",
 				"mdl_rotate",
 				"mdl_scale",
-				//geometry
-				"light_transform[0]",
-				"light_transform[1]",
-				"light_transform[2]",
-				"light_transform[3]",
-				"light_transform[4]",
-				"light_transform[5]",
 				//fragment
 				"light_position",
 				"light_far_plane",
@@ -436,6 +692,11 @@ void Renderable::ConfigureShader(RenderMode mode)
 
 		this->RecompileShader();
 	}
+}
+
+bool Renderable::FramebufferContainsRenderOutput()
+{
+	return this->m_fbo_contains_render;
 }
 
 void Renderable::PreRenderEvent()

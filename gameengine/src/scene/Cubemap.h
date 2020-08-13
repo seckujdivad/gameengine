@@ -10,7 +10,8 @@ enum class CubemapType
 {
 	None,
 	Reflection,
-	Pointlight
+	Pointlight,
+	Skybox
 };
 
 class Cubemap : public Positionable, public Referenceable<RenderTextureReference>

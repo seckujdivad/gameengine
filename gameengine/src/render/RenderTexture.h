@@ -20,11 +20,17 @@ struct RenderTextureGroup
 	std::tuple<int, int> dimensions;
 };
 
+struct RenderTextureInfo
+{
+	bool colour;
+	bool depth;
+};
+
 class RenderTexture : public Renderable, public Referenceable<RenderTextureReference>
 {
 private:
-	GLuint m_fbo;
 	GLenum m_type;
+	RenderTextureInfo m_info;
 
 	bool m_simultaneous_read_write;
 	RenderTextureGroup m_texture_write;
@@ -42,7 +48,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, int num_data_tex, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false);
+	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false);
 	RenderTexture(const RenderTexture&) = delete;
 	RenderTexture& operator=(const RenderTexture&) = delete;
 	~RenderTexture();
@@ -51,4 +57,5 @@ public:
 	void SetOutputSize(std::tuple<int, int> dimensions);
 
 	RenderTextureGroup GetOutputTextures();
+	RenderTextureInfo GetTextureInfo();
 };

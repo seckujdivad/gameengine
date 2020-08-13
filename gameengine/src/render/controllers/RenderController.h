@@ -9,7 +9,8 @@ enum class RenderControllerType //runtime type determination is essential
 {
 	EngineCanvas,
 	Reflection,
-	Shadow
+	Shadow,
+	Skybox
 };
 
 class RenderController : public Referenceable<RenderTextureReference>
