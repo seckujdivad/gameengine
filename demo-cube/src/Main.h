@@ -11,6 +11,7 @@
 #include "render/EngineCanvas.h"
 #include "Engine.h"
 #include "Resource.h"
+#include "loaders/SceneLoader.h"
 
 class Main : public wxFrame
 {
@@ -27,7 +28,7 @@ private:
 	//model attributes
 	std::vector<wxSlider*> m_mdl_sliders;
 	std::map<int, std::string> m_mdl_slider_lookup;
-	int m_model_selection_index;
+	Model* m_model_selected = nullptr;
 
 	Scene* m_scene;
 

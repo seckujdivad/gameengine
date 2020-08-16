@@ -12,10 +12,22 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	this->m_engine = new Engine(this);
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas();
+	this->m_scene = SceneFromJSON(this->m_scene_path, this->m_scene_filename);
+	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
+	this->m_engine = new Engine(this, this->m_scene);
+
+	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Postprocess);
+	this->m_glcanvas->SetMouselook(true);
+	this->m_glcanvas->SetKeyboardMove(true);
+	this->m_glcanvas->SetRenderLoop(true);
+
 	this->m_glcanvas->MakeOpenGLFocus();
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
+
+	for (auto& model : this->m_scene->GetModels())
+	{
+		this->m_lb_models->Append(model->GetIdentifier());
+	}
 
 	//create rest of ui
 
@@ -75,40 +87,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_lb_models->Bind(wxEVT_LISTBOX, &Main::lb_models_OnSelection, this);
 	this->m_sizer->Add(this->m_lb_models, wxGBPosition(1, 0), wxGBSpan((int)attr_names.size() - 1, 1), wxEXPAND | wxALL);
 
-	this->m_model_selection_index = -1;
-
-	//load scene
-	std::string scene_path = "resources";
-	this->m_glcanvas->MakeOpenGLFocus();
-	this->m_scene = InitialiseScene(this->m_scene_path, this->m_scene_filename);
-
-	this->m_glcanvas->SetPostProcessorShaderProgram(new ShaderProgram(
-		{
-			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER }
-		},
-		{},
-		false));
-	this->m_glcanvas->SetScene(this->m_scene);
-	this->m_glcanvas->SetActiveCamera(this->m_scene->cameras.at(0));
-
-	this->m_scene->PushUniforms();
-	this->m_scene->DrawShadows(0);
-	this->m_scene->DrawReflections(0);
-	this->m_scene->DrawSkyboxScene();
-
-	this->m_glcanvas->SetMouselook(true);
-	this->m_glcanvas->SetKeyboardMove(true);
-	this->m_glcanvas->SetRenderLoop(true);
-
-	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
-
-	//load model names
-	for (size_t i = 0; i < this->m_scene->models.size(); i++)
-	{
-		this->m_lb_models->Append(this->m_scene->models.at(i)->GetIdentifier());
-	}
-
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
@@ -133,46 +111,46 @@ void Main::btn_render_OnClick(wxCommandEvent& evt)
 
 void Main::sld_OnChange(wxCommandEvent& evt)
 {
-	if (this->m_model_selection_index != -1)
+	if (this->m_model_selected != nullptr)
 	{
 		std::string slider_name = this->m_mdl_slider_lookup.at(evt.GetId());
 		wxSlider* slider = (wxSlider*)evt.GetEventObject();
 
 		if (slider_name == "Rotate X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(0, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetRotation(0, slider->GetValue());
 		}
 		else if (slider_name == "Rotate Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(1, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetRotation(1, slider->GetValue());
 		}
 		else if (slider_name == "Rotate Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetRotation(2, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetRotation(2, slider->GetValue());
 		}
 		else if (slider_name == "Translate X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(0, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetPosition(0, slider->GetValue());
 		}
 		else if (slider_name == "Translate Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(1, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetPosition(1, slider->GetValue());
 		}
 		else if (slider_name == "Translate Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetPosition(2, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetPosition(2, slider->GetValue());
 		}
 		else if (slider_name == "Scale X")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(0, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetScale(0, slider->GetValue());
 		}
 		else if (slider_name == "Scale Y")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(1, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetScale(1, slider->GetValue());
 		}
 		else if (slider_name == "Scale Z")
 		{
-			this->m_scene->models.at(this->m_model_selection_index)->SetScale(2, (GLfloat)slider->GetValue());
+			this->m_model_selected->SetScale(2, slider->GetValue());
 		}
 
 		this->m_glcanvas->Render();
@@ -183,10 +161,12 @@ void Main::sld_OnChange(wxCommandEvent& evt)
 
 void Main::lb_models_OnSelection(wxCommandEvent& evt)
 {
-	this->m_model_selection_index = this->m_lb_models->GetSelection();
+	int selection_index = this->m_lb_models->GetSelection();
 
-	if (this->m_model_selection_index != -1)
+	if (selection_index != -1)
 	{
+		this->m_model_selected = this->m_scene->GetModels().at(selection_index);
+
 		wxSlider* slider;
 		for (size_t i = 0; i < this->m_mdl_sliders.size(); i++)
 		{
@@ -195,39 +175,39 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 
 			if (slider_name == "Rotate X")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(0));
+				slider->SetValue((int)this->m_model_selected->GetRotation(0));
 			}
 			else if (slider_name == "Rotate Y")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(1));
+				slider->SetValue((int)this->m_model_selected->GetRotation(1));
 			}
 			else if (slider_name == "Rotate Z")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetRotation(2));
+				slider->SetValue((int)this->m_model_selected->GetRotation(2));
 			}
 			else if (slider_name == "Translate X")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(0));
+				slider->SetValue((int)this->m_model_selected->GetPosition(0));
 			}
 			else if (slider_name == "Translate Y")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(1));
+				slider->SetValue((int)this->m_model_selected->GetPosition(1));
 			}
 			else if (slider_name == "Translate Z")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetPosition(2));
+				slider->SetValue((int)this->m_model_selected->GetPosition(2));
 			}
 			else if (slider_name == "Scale X")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(0));
+				slider->SetValue((int)this->m_model_selected->GetScale(0));
 			}
 			else if (slider_name == "Scale Y")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(1));
+				slider->SetValue((int)this->m_model_selected->GetScale(1));
 			}
 			else if (slider_name == "Scale Z")
 			{
-				slider->SetValue((int)this->m_scene->models.at(this->m_model_selection_index)->GetScale(2));
+				slider->SetValue((int)this->m_model_selected->GetScale(2));
 			}
 		}
 	}
