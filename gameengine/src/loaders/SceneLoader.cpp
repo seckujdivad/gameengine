@@ -12,7 +12,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		std::filesystem::path json_path = root_path;
 		json_path += file_name;
 
-		file_stream.open(json_path);
+		file_stream.open(root_path / file_name);
 		if (file_stream.is_open())
 		{
 			while (std::getline(file_stream, line_contents))
@@ -22,7 +22,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		}
 		else
 		{
-			throw std::invalid_argument("Can't open file at " + root_path.string());
+			throw std::invalid_argument("Can't open file at " + (root_path / file_name).string());
 		}
 
 		scene_data = nlohmann::json::parse(file_contents);
@@ -34,14 +34,11 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	{
 		for (auto it = scene_data["models"]["ply"].begin(); it != scene_data["models"]["ply"].end(); it++)
 		{
-			std::filesystem::path path = root_path;
-			path += it.key();
-
-			ModelGeometry model_geometry = ModelFromPly(path.string());
+			ModelGeometry model_geometry = ModelFromPly((root_path / it.key()).string());
 
 			if (it.value()["merge geometry"].is_object())
 			{
-				if (it.value()["merge geometry"]["enable"].is_boolean() && it.value()["merge geometry"].is_number())
+				if (it.value()["merge geometry"]["enable"].is_boolean() && it.value()["merge geometry"]["distance"].is_number())
 				{
 					if (it.value()["merge geometry"]["enable"].get<bool>())
 					{
@@ -374,7 +371,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	//load reflection ptrs into all models that require them for reflections
 	if (scene_data["layout"].is_array())
 	{
-		for (int i = 0; i < scene_data["layout"].size(); i++)
+		for (int i = 0; i < (int)scene_data["layout"].size(); i++)
 		{
 			auto& el = scene_data["layout"][i];
 			if (el["reflections"]["alternative"].is_object())
@@ -493,8 +490,7 @@ LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, Te
 	if (data.is_string())
 	{
 		wxImage image;
-		std::filesystem::path img_path = root_path;
-		img_path += data.get<std::string>();
+		std::filesystem::path img_path = root_path / data.get<std::string>();
 		image.LoadFile(img_path.string());
 
 		if (!image.IsOk())
@@ -613,7 +609,7 @@ void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
 		{
 			if (el2.value().is_string())
 			{
-				Model* model = scene->GetModel(data.get<std::string>());
+				Model* model = scene->GetModel(el2.value().get<std::string>());
 				if (model == nullptr)
 				{
 					throw std::runtime_error("Cubemap dynamic draw target '" + el2.value().get<std::string>() + "' does not exist");
@@ -646,7 +642,8 @@ void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
 template<unsigned int dimensions>
 dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
 {
-	static_assert((dimensions > 0) && (dimensions =< 4));
+	static_assert(dimensions > 0, "Dimensions must be greater than zero");
+	static_assert(dimensions < 5, "Dimensions must be 4 or below");
 
 	if (data.is_array())
 	{
@@ -669,8 +666,8 @@ dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
 					values.push_back(el.value().get<double>());
 				}
 
-				dvec<dimensions> result;
-				for (int i = 0; i < std::min(values.size(), dimensions); i++)
+				dvec<dimensions> result = default_value;
+				for (int i = 0; i < (int)std::min(values.size(), dimensions); i++)
 				{
 					result[i] = values.at(i);
 				}
@@ -693,23 +690,11 @@ dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
 	}
 	else
 	{
-		throw std::runtime_error("Unknown type for vector");
+		return default_value;
 	}
 }
 
-//temporary macro to make bulk instantiation easier
-#ifdef SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE
-
-#error SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE is a reserved macro
-
-#else
-
-#define SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE(NUM_DIMENSIONS) template<>\
-dvec<NUM_DIMENSIONS> GetVector<NUM_DIMENSIONS>(nlohmann::json data, dvec<NUM_DIMENSIONS> default_value);
-SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE(1);
-SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE(2);
-SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE(3);
-SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE(4);
-
-#undef SCENELOADER_INSTANTIATE_GETVECTOR_TEMPLATE
-#endif
+template dvec<1> GetVector<1>(nlohmann::json, dvec<1>);
+template dvec<2> GetVector<2>(nlohmann::json, dvec<2>);
+template dvec<3> GetVector<3>(nlohmann::json, dvec<3>);
+template dvec<4> GetVector<4>(nlohmann::json, dvec<4>);

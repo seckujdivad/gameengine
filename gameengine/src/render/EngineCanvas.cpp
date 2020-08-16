@@ -20,7 +20,6 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
 	this->Bind(wxEVT_KEY_DOWN, &EngineCanvas::KeyDown, this);
 	this->Bind(wxEVT_LEFT_DOWN, &EngineCanvas::Clicked, this);
-	this->Render(this->m_loop_render);
 }
 
 EngineCanvas::~EngineCanvas()
@@ -31,7 +30,7 @@ EngineCanvas::~EngineCanvas()
 
 void EngineCanvas::Paint(wxPaintEvent& evt)
 {
-	this->Render(this->m_loop_render);
+	this->GetEngine()->Render();
 	evt.Skip();
 }
 
@@ -47,7 +46,7 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		this->SetKeyboardMoveActive(false);
 	}
 
-	if (this->GetCamera() != nullptr)
+	if (this->GetControlledCamera() != nullptr)
 	{
 		//get mouse info
 		wxMouseState mouse_state = wxGetMouseState();
@@ -66,13 +65,13 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 			float fov_fraction_x = ((float)mousedelta[0] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
 			float fov_fraction_y = ((float)mousedelta[1] * this->m_mouselook_multiplier) / (float)this->GetSize().x;
 
-			float fov = this->GetCamera()->GetFOV();
+			float fov = (float)this->GetControlledCamera()->GetFOV();
 
 			float rotation_z = fov_fraction_x * fov;
 			float rotation_x = fov_fraction_y * fov;
 
-			this->GetCamera()->SetRotation(0, this->GetCamera()->GetRotation(0) - rotation_x);
-			this->GetCamera()->SetRotation(2, this->GetCamera()->GetRotation(2) - rotation_z);
+			this->GetControlledCamera()->SetRotation(0, this->GetControlledCamera()->GetRotation(0) - rotation_x);
+			this->GetControlledCamera()->SetRotation(2, this->GetControlledCamera()->GetRotation(2) - rotation_z);
 
 			this->WarpPointer(screen_centre[0], screen_centre[1]);
 		}
@@ -80,35 +79,35 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		//poll keyboard movement keys
 		if (this->m_keyboard_move_active)
 		{
-			float move_increment = this->m_keyboard_move_increment;
+			double move_increment = this->m_keyboard_move_increment;
 			if (wxGetKeyState(WXK_SPACE))
 			{
-				move_increment = move_increment * 5;
+				move_increment = move_increment * 5.0;
 			}
 
 			if (wxGetKeyState(wxKeyCode('W')))
 			{
-				this->GetCamera()->MoveLocally(0.0f, 0.0f, move_increment);
+				this->GetControlledCamera()->MoveLocally(0.0, 0.0, move_increment);
 			}
 			if (wxGetKeyState(wxKeyCode('S')))
 			{
-				this->GetCamera()->MoveLocally(0.0f, 0.0f, 0.0f - move_increment);
+				this->GetControlledCamera()->MoveLocally(0.0, 0.0, 0.0 - move_increment);
 			}
 			if (wxGetKeyState(wxKeyCode('D')))
 			{
-				this->GetCamera()->MoveLocally(0.0f - move_increment, 0.0f, 0.0f);
+				this->GetControlledCamera()->MoveLocally(0.0 - move_increment, 0.0, 0.0);
 			}
 			if (wxGetKeyState(wxKeyCode('A')))
 			{
-				this->GetCamera()->MoveLocally(move_increment, 0.0f, 0.0f);
+				this->GetControlledCamera()->MoveLocally(move_increment, 0.0, 0.0);
 			}
 			if (wxGetKeyState(WXK_CONTROL))
 			{
-				this->GetCamera()->MoveLocally(0.0f, move_increment, 0.0f);
+				this->GetControlledCamera()->MoveLocally(0.0, move_increment, 0.0);
 			}
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				this->GetCamera()->MoveLocally(0.0f, 0.0f - move_increment, 0.0f);
+				this->GetControlledCamera()->MoveLocally(0.0, 0.0 - move_increment, 0.0);
 			}
 		}
 	}
@@ -122,7 +121,7 @@ void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 {
 	if (this->m_loop_render)
 	{
-		this->Render(true);
+		this->GetEngine()->Render();
 		evt.RequestMore();
 	}
 }
@@ -140,7 +139,7 @@ void EngineCanvas::KeyDown(wxKeyEvent& evt)
 
 void EngineCanvas::Clicked(wxMouseEvent& evt)
 {
-	if (this->GetCamera() != nullptr)
+	if (this->GetControlledCamera() != nullptr)
 	{
 		if (!this->m_mouselook_active)
 		{
@@ -220,6 +219,16 @@ std::tuple<int, int> EngineCanvas::GetOutputSize()
 void EngineCanvas::MakeOpenGLFocus()
 {
 	this->SetCurrent(*this->m_glcontext);
+}
+
+void EngineCanvas::SetControlledCamera(Camera* camera)
+{
+	this->m_camera_controlled = camera;
+}
+
+Camera* EngineCanvas::GetControlledCamera()
+{
+	return this->m_camera_controlled;
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

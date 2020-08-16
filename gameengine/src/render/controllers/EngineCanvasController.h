@@ -4,6 +4,10 @@
 #include "../EngineCanvas.h"
 #include "RenderController.h"
 
+class EngineCanvas;
+class RenderTexture;
+class Engine;
+
 class EngineCanvasController : public RenderController
 {
 private:
@@ -20,4 +24,6 @@ public:
 	RenderTextureGroup GetRenderTexture() override;
 	double GetRenderGroup() override;
 	RenderControllerType GetType() override;
+
+	EngineCanvas* GetEngineCanvas();
 };

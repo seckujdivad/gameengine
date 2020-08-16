@@ -11,21 +11,16 @@ const int ENGINECANVAS_NUM_DATA_TEX = 1;
 #include <tuple>
 #include <map>
 
-#include "../scene/Camera.h"
+#include "RenderMode.h"
 #include "../Resource.h"
+#include "../scene/model/Model.h"
+#include "../scene/Camera.h"
+#include "RenderTextureData.h"
 #include "ShaderProgram.h"
-#include "../Engine.h"
 
-class Scene;
+class Engine;
+class Model;
 class Camera;
-
-enum class RenderMode
-{
-	Normal,
-	Wireframe,
-	Shadow,
-	Postprocess
-};
 
 struct NormalRenderModeData
 {
@@ -125,3 +120,5 @@ public:
 	virtual void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
 	virtual std::tuple<int, int> GetOutputSize();
 };
+
+#include "../Engine.h"

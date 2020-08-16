@@ -27,3 +27,6 @@ public:
 	glm::dmat3 GetRotationMatrix();
 	glm::dmat3 GetInverseRotationMatrix();
 };
+
+bool operator==(const OrientedBoundingBox& first, const OrientedBoundingBox& second);
+bool operator!=(const OrientedBoundingBox& first, const OrientedBoundingBox& second);

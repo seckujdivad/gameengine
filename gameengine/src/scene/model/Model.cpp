@@ -92,11 +92,6 @@ glm::vec3 Model::GetWireframeColour()
 	return this->m_wireframe_colour;
 }
 
-constexpr int Model::GetValuesPerVert()
-{
-	return 14;
-}
-
 bool operator==(const ModelGeometry& first, const ModelGeometry& second)
 {
 	//faces
@@ -105,7 +100,7 @@ bool operator==(const ModelGeometry& first, const ModelGeometry& second)
 		return false;
 	}
 
-	for (int i = 0; i < first.faces.size(); i++)
+	for (int i = 0; i < (int)first.faces.size(); i++)
 	{
 		if (first.faces.at(i) != second.faces.at(i))
 		{
@@ -119,7 +114,7 @@ bool operator==(const ModelGeometry& first, const ModelGeometry& second)
 		return false;
 	}
 
-	for (int i = 0; i < first.vertices.size(); i++)
+	for (int i = 0; i < (int)first.vertices.size(); i++)
 	{
 		if (first.vertices.at(i) != second.vertices.at(i))
 		{
@@ -255,24 +250,24 @@ std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geomet
 		const Face& face = geometry.faces.at(i);
 		if (face.vertices.size() > 2) //lines aren't faces, don't draw them
 		{
-			std::vector<std::array<int, 3>> tri_indices;
-			for (int j = 0; j < face.vertices.size(); j++)
+			std::vector<glm::ivec3> tri_indices;
+			for (int j = 0; j < (int)face.vertices.size(); j++)
 			{
-				tri_indices.push_back(std::array<int, 3>({ 0, j, j + 1 }));
+				tri_indices.push_back(glm::ivec3(0, j, j + 1));
 			}
 
-			for (int j = 0; j < tri_indices.size(); j++)
+			for (int j = 0; j < (int)tri_indices.size(); j++)
 			{
-				std::array<int, 3>& indices = tri_indices.at(j);
+				glm::ivec3& indices = tri_indices.at(j);
 				std::array<glm::dvec3, 3> tri_vecs = {
-					geometry.vertices.at(face.vertices.at(indices.at(0))),
-					geometry.vertices.at(face.vertices.at(indices.at(1))),
-					geometry.vertices.at(face.vertices.at(indices.at(2)))
+					geometry.vertices.at(face.vertices.at(indices[0])),
+					geometry.vertices.at(face.vertices.at(indices[1])),
+					geometry.vertices.at(face.vertices.at(indices[2]))
 				};
 				std::array<glm::dvec2, 3> tri_uvs = {
-					face.uv.at(indices.at(0)),
-					face.uv.at(indices.at(1)),
-					face.uv.at(indices.at(2))
+					face.uv.at(indices[0]),
+					face.uv.at(indices[1]),
+					face.uv.at(indices[2])
 				};
 
 				//calculate ccw normal
@@ -304,7 +299,7 @@ std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geomet
 				bitangent.z = (edgeuv1.x * edge2.z) - (edgeuv2.x * edge1.z);
 
 				//push data to gl-ready vector
-				for (int k = 0; k < tri_vecs.size(); k++)
+				for (int k = 0; k < (int)tri_vecs.size(); k++)
 				{
 					triangles.push_back(tri_vecs.at(k).x);
 					triangles.push_back(tri_vecs.at(k).z);
@@ -337,11 +332,13 @@ std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geomet
 
 std::vector<GLfloat> DoubleToSinglePrecision(std::vector<double> vec)
 {
-	std::vector<float> result;
+	std::vector<GLfloat> result;
 	result.reserve(vec.size());
 
 	for (int i = 0; i < (int)vec.size(); i++)
 	{
-		result.push_back((float)vec.at(i));
+		result.push_back((GLfloat)vec.at(i));
 	}
+
+	return result;
 }

@@ -4,7 +4,11 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 {
     this->m_canvas = canvas;
 
-    this->m_texture = new RenderTexture(reference, engine, mode, 1, GL_TEXTURE_2D, true);
+    RenderTextureInfo info;
+    info.colour = true;
+    info.depth = true;
+
+    this->m_texture = new RenderTexture(reference, engine, mode, info, GL_TEXTURE_2D, true);
 }
 
 EngineCanvasController::~EngineCanvasController()
@@ -14,6 +18,7 @@ EngineCanvasController::~EngineCanvasController()
 
 void EngineCanvasController::Render()
 {
+    this->m_texture->SetCamera(this->m_canvas->GetControlledCamera());
     this->m_texture->Render();
     this->m_canvas->Render();
 }
@@ -31,4 +36,9 @@ double EngineCanvasController::GetRenderGroup()
 RenderControllerType EngineCanvasController::GetType()
 {
     return RenderControllerType::EngineCanvas;
+}
+
+EngineCanvas* EngineCanvasController::GetEngineCanvas()
+{
+    return this->m_canvas;
 }

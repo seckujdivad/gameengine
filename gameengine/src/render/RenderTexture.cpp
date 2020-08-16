@@ -30,6 +30,7 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, int num_data_tex, GLenum type, bool do_create)
 {
 	texture_group.dimensions = this->m_dimensions;
+	texture_group.type = type;
 
 	this->CreateTextureData(texture_group.colour, type, GL_RGBA, GL_UNSIGNED_BYTE, this->m_dimensions, GL_LINEAR, do_create);
 	this->CreateTextureData(texture_group.depth, type, GL_DEPTH_COMPONENT, GL_FLOAT, this->m_dimensions, GL_NEAREST, do_create);
@@ -67,35 +68,56 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write) : Renderable(engine, mode), Referenceable<RenderTextureReference>(reference)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write)
+	:
+	Renderable(engine, mode),
+	Referenceable<RenderTextureReference>(reference),
+	m_dimensions(1, 1),
+	m_simultaneous_read_write(simultaneous_read_write),
+	m_info(info),
+	m_type(type)
 {
-	this->m_simultaneous_read_write = simultaneous_read_write;
-	this->m_info = info;
-	this->m_type = type;
-
 	this->InitialiseTextureGroup(this->m_texture_write, ENGINECANVAS_NUM_DATA_TEX, this->m_type);
 	if (simultaneous_read_write)
 	{
 		this->InitialiseTextureGroup(this->m_texture_read, ENGINECANVAS_NUM_DATA_TEX, this->m_type);
 	}
 
+	this->GetEngine()->MakeContextCurrent();
+
 	GLuint fbo;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
+	auto GenerateFramebufferTexture = [](GLenum attachment, GLenum textarget, GLuint& texture) {
+		if (textarget == GL_TEXTURE_2D)
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textarget, texture, 0);
+		}
+		else if (textarget == GL_TEXTURE_CUBE_MAP)
+		{
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture, 0);
+		}
+	};
+
 	if (info.colour)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour, 0);
+		GenerateFramebufferTexture(GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour);
 	}
 
 	if (info.depth)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth, 0);
+		GenerateFramebufferTexture(GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth);
 	}
 
 	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.type, this->m_texture_write.data.at(i), 0);
+		GenerateFramebufferTexture(GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.type, this->m_texture_write.data.at(i));
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("Framebuffer is not complete: " + std::to_string((int)glGetError()) + std::string(" - ") + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 	}
 
 	this->SetFramebuffer(fbo);

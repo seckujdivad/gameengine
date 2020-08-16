@@ -16,8 +16,8 @@ LocalTexture& LocalTexture::operator=(const LocalTexture& copy_from)
 	this->m_dimensions = copy_from.m_dimensions;
 	if (copy_from.m_full_data != nullptr)
 	{
-		this->m_full_data = new unsigned char[std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions)];
-		std::memcpy(this->m_full_data, copy_from.m_full_data, sizeof(unsigned char) * std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions));
+		this->m_full_data = new unsigned char[std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions) * 3];
+		std::memcpy(this->m_full_data, copy_from.m_full_data, sizeof(unsigned char) * std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions) * 3);
 	}
 
 	this->m_vec_colour = copy_from.m_vec_colour;
@@ -74,7 +74,7 @@ void LocalTexture::SetFullTexture(unsigned char* data, std::tuple<int, int> dime
 
 	if (copy)
 	{
-		int num_chars = std::get<0>(dimensions) * std::get<1>(dimensions);
+		int num_chars = std::get<0>(dimensions) * std::get<1>(dimensions) * 3;
 		this->m_full_data = new unsigned char[num_chars];
 		std::memcpy(this->m_full_data, data, num_chars * sizeof(unsigned char));
 	}

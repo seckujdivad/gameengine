@@ -8,12 +8,10 @@
 
 #include <unordered_set>
 
-#include "Nameable.h"
-#include "Positionable.h"
-#include "Rotatable.h"
-#include "Scalable.h"
 #include "model/Model.h"
 #include "OrientedBoundingBox.h"
+
+class Model;
 
 template <typename T>
 class HashPointer : public std::hash<T*>

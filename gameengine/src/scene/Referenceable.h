@@ -11,7 +11,13 @@ private:
 	ReferenceType m_reference;
 
 public:
-	Referenceable(ReferenceType reference);
+	Referenceable(ReferenceType reference)
+	{
+		this->m_reference = reference;
+	};
 
-	ReferenceType GetReference();
+	ReferenceType GetReference() const
+	{
+		return this->m_reference;
+	}
 };

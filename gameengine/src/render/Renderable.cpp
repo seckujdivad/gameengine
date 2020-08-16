@@ -89,7 +89,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
-			for (int i = 0; i < transforms.size(); i++)
+			for (int i = 0; i < (int)transforms.size(); i++)
 			{
 				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 			}
@@ -120,7 +120,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
-			for (int i = 0; i < transforms.size(); i++)
+			for (int i = 0; i < (int)transforms.size(); i++)
 			{
 				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 			}
@@ -182,7 +182,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			//scene approximation
 			std::vector<OrientedBoundingBox> scene_approximations = this->GetEngine()->GetScene()->GetOBBApproximations();
-			for (int i = 0; i < scene_approximations.size(); i++)
+			for (int i = 0; i < (int)scene_approximations.size(); i++)
 			{
 				OrientedBoundingBox obb = scene_approximations.at(i);
 				std::string prefix = "scene_approximations[" + std::to_string(i) + "].";
@@ -332,7 +332,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					//reflections
 					std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
-					for (int i = 0; i < reflections.size(); i++)
+					for (int i = 0; i < (int)reflections.size(); i++)
 					{
 						Reflection* reflection = std::get<0>(reflections.at(i));
 						ReflectionMode reflection_mode = std::get<1>(reflections.at(i));
@@ -464,7 +464,7 @@ bool Renderable::SetShaderDefine(std::string key, std::string value)
 	std::map<std::string, std::string>::iterator it = this->m_shader_defines.find(key);
 	if (it == this->m_shader_defines.end())
 	{
-		this->m_shader_defines.insert(key, value);
+		this->m_shader_defines.insert(std::pair(key, value));
 		return true;
 	}
 	else if (it->second != value)
@@ -481,7 +481,7 @@ void Renderable::AddShaderUniformName(std::string name)
 	{
 		this->m_shader_uniform_names.push_back(name);
 
-		if (this->m_shader_program == nullptr)
+		if (this->m_shader_program != nullptr)
 		{
 			this->m_shader_program->RegisterUniform(name);
 		}
@@ -707,13 +707,17 @@ void Renderable::PostRenderEvent()
 {
 }
 
-Renderable::Renderable(Engine* engine, RenderMode mode)
+Renderable::Renderable(Engine* engine, RenderMode mode) : m_engine(engine)
 {
-	this->m_engine = engine;
+	this->m_engine->MakeContextCurrent();
+
+	this->m_shaders = {
+		{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
+		{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
+	};
+	this->RecompileShader();
 
 	this->ConfigureShader(mode);
-
-	this->RecompileShader();
 }
 
 Renderable::~Renderable()

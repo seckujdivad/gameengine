@@ -56,3 +56,33 @@ glm::dmat3 OrientedBoundingBox::GetInverseRotationMatrix()
 
 	return this->m_rotation_inverse_matrix;
 }
+
+bool operator==(const OrientedBoundingBox& first, const OrientedBoundingBox& second)
+{
+	if (first.GetIdentifier() != second.GetIdentifier())
+	{
+		return false;
+	}
+
+	if (first.GetPosition() != second.GetPosition())
+	{
+		return false;
+	}
+
+	if (first.GetRotation() != second.GetRotation())
+	{
+		return false;
+	}
+
+	if (first.GetScale() != second.GetScale())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const OrientedBoundingBox& first, const OrientedBoundingBox& second)
+{
+	return !(first == second);
+}

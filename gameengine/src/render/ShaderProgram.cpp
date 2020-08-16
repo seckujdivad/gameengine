@@ -169,7 +169,7 @@ void ShaderProgram::Select(int texture_group_id)
 		for (std::vector<int>::iterator it = targeted_groups.begin(); it != targeted_groups.end(); it++)
 		{
 			std::vector<LoadedTexture> textures = this->m_textures.at(*it);
-			for (int i = 0; i < textures.size(); i++)
+			for (int i = 0; i < (int)textures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
 				glBindTexture(textures.at(i).type, textures.at(i).id);
@@ -230,7 +230,7 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 	{
 		bool found_match = false;
 		std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
-		for (int i = 0; (i < textures.size()) && !found_match; i++)
+		for (int i = 0; (i < (int)textures.size()) && !found_match; i++)
 		{
 			if (textures.at(i).uniform_name == texture.uniform_name)
 			{

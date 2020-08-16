@@ -57,18 +57,16 @@ Engine::LoadedGeometry Engine::LoadGeometry(const ModelGeometry& geometry)
 	return loaded_geometry;
 }
 
-Engine::Engine(wxWindow* parent, Scene* scene)
+Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent)
 {
-	this->m_parent = parent;
-	
 	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
-	wxGLCanvas* temp_canvas = new wxGLCanvas(this->m_parent, this->m_canvas_args, wxID_ANY);
+	this->m_glcontext_canvas = new wxGLCanvas(this->m_parent, this->m_canvas_args, wxID_ANY);
 	wxGLContextAttrs ctx_attrs;
 	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
-	this->m_glcontext = new wxGLContext(temp_canvas, NULL, &ctx_attrs);
+	this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
 
-	temp_canvas->SetCurrent(*this->m_glcontext);
+	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
 
 	std::remove(ENGINECANVAS_LOG_PATH);
 
@@ -87,8 +85,6 @@ Engine::Engine(wxWindow* parent, Scene* scene)
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	delete temp_canvas;
-
 	glGenVertexArrays(1, &this->m_vao);
 }
 
@@ -96,7 +92,7 @@ Engine::~Engine()
 {
 	glDeleteVertexArrays(1, &this->m_vao);
 
-	for (int i = 0; i < this->m_render_controllers.size(); i++)
+	for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
 	{
 		delete this->m_render_controllers.at(i);
 	}
@@ -337,14 +333,10 @@ void Engine::Render()
 			}
 			
 			std::vector<Model*> to_add;
-			for (int i = 0; i < (int)this->GetScene()->GetModels().size(); i++)
+			for (Model* model : this->GetScene()->GetModels())
 			{
-				auto geometry_result = std::find(this->m_model_geometry_vbos.begin(), this->m_model_geometry_vbos.end(), this->GetScene()->GetModels().at(i)->GetReference());
-
-				if (geometry_result == this->m_model_geometry_vbos.end())
-				{
-					to_add.push_back(this->GetScene()->GetModels().at(i));
-				}
+				auto geometry_result = this->m_model_geometry_vbos.at(model->GetReference());
+				to_add.push_back(model);
 			}
 
 			for (int i = 0; i < (int)to_add.size(); i++)
@@ -425,4 +417,43 @@ void Engine::ReleaseVBO(Model* model)
 		glDeleteBuffers(1, &this->m_temporary_vbos.at(model).vbo);
 		this->m_temporary_vbos.erase(model);
 	}
+}
+
+void Engine::MakeContextCurrent()
+{
+	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+
+	for (RenderController*& controller : this->m_render_controllers)
+	{
+		if (controller->GetType() == RenderControllerType::EngineCanvas)
+		{
+			EngineCanvasController* canvas_controller = dynamic_cast<EngineCanvasController*>(controller);
+			canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
+		}
+	}
+}
+
+bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
+{
+	if (first.geometry != second.geometry)
+	{
+		return false;
+	}
+
+	if (first.num_vertices != second.num_vertices)
+	{
+		return false;
+	}
+
+	if (first.vbo != second.vbo)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
+{
+	return !(first == second);
 }

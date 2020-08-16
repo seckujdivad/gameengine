@@ -2,7 +2,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include <wx/wxprec.h>
 #include <wx/image.h>
 
 #include <string>
@@ -17,17 +16,22 @@
 #endif
 
 #include "GLComponents.h"
-#include "render/EngineCanvas.h"
 #include "Resource.h"
+
+#include "scene/Scene.h"
 #include "scene/Referenceable.h"
+
+#include "render/Renderable.h"
+#include "render/EngineCanvas.h"
 #include "render/RenderTexture.h"
 #include "render/ShaderProgram.h"
-#include "scene/Scene.h"
-#include "render/controllers/RenderController.h"
-#include "render/controllers/EngineCanvasController.h"
-#include "render/controllers/ShadowController.h"
-#include "render/controllers/SkyboxController.h"
-#include "render/controllers/ReflectionController.h"
+
+class RenderController;
+class EngineCanvasController;
+class ReflectionController;
+class ShadowController;
+class SkyboxController;
+class EngineCanvas;
 
 class Engine
 {
@@ -43,6 +47,7 @@ private:
 	wxGLContext* m_glcontext;
 	wxWindow* m_parent;
 	wxGLAttributes m_canvas_args;
+	wxGLCanvas* m_glcontext_canvas;
 
 	Scene* m_scene = nullptr;
 
@@ -75,4 +80,15 @@ public:
 
 	Engine::LoadedGeometry BindVBO(Model* model);
 	void ReleaseVBO(Model* model);
+
+	void MakeContextCurrent();
 };
+
+bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
+bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
+
+#include "render/controllers/RenderController.h"
+#include "render/controllers/EngineCanvasController.h"
+#include "render/controllers/ShadowController.h"
+#include "render/controllers/SkyboxController.h"
+#include "render/controllers/ReflectionController.h"

@@ -9,8 +9,6 @@
 #include "../GLComponents.h"
 #include <glm/glm.hpp>
 
-#include "RenderTexture.h"
-
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
 struct LoadedTexture

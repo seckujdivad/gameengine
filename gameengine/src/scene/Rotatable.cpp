@@ -52,17 +52,12 @@ void Rotatable::SetRotation(int index, double value)
 	this->m_rotated = true;
 }
 
-void Rotatable::SetRotation(glm::dvec3 rotation)
-{
-	this->m_rotation = rotation;
-}
-
-glm::dvec3 Rotatable::GetRotation()
+glm::dvec3 Rotatable::GetRotation() const
 {
 	return this->m_rotation;
 }
 
-glm::dmat4 Rotatable::GetRotationMatrix()
+glm::dmat4 Rotatable::GetRotationMatrix() const
 {
 	glm::dmat4 matrix = glm::dmat4(1.0);
 	matrix = glm::rotate(matrix, glm::radians(this->GetRotation(0)), glm::dvec3(1.0, 0.0, 0.0));
@@ -71,7 +66,7 @@ glm::dmat4 Rotatable::GetRotationMatrix()
 	return matrix;
 }
 
-glm::dmat4 Rotatable::GetRotationMatrixInverse()
+glm::dmat4 Rotatable::GetRotationMatrixInverse() const
 {
 	glm::dmat4 matrix = glm::dmat4(1.0);
 	matrix = glm::rotate(matrix, glm::radians(0 - this->GetRotation(0)), glm::dvec3(1.0, 0.0, 0.0));
@@ -80,7 +75,7 @@ glm::dmat4 Rotatable::GetRotationMatrixInverse()
 	return matrix;
 }
 
-double Rotatable::GetRotation(int index)
+double Rotatable::GetRotation(int index) const
 {
 	if (index == 0)
 	{

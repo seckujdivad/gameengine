@@ -9,22 +9,9 @@
 #include "Renderable.h"
 #include "../scene/Referenceable.h"
 #include "../Engine.h"
+#include "RenderTextureData.h"
 
-struct RenderTextureGroup
-{
-	GLenum type = GL_TEXTURE_2D;
-	GLuint colour = NULL;
-	GLuint depth = NULL;
-	std::vector<GLuint> data;
-
-	std::tuple<int, int> dimensions;
-};
-
-struct RenderTextureInfo
-{
-	bool colour;
-	bool depth;
-};
+class Engine;
 
 class RenderTexture : public Renderable, public Referenceable<RenderTextureReference>
 {

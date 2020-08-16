@@ -1,4 +1,3 @@
-#include <wx/wxprec.h>
 #include "PointLight.h"
 
 PointLight::PointLight(RenderTextureReference reference) : Nameable(), Cubemap(reference)

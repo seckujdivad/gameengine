@@ -14,8 +14,13 @@
 #include "model/Reflection.h"
 #include "VisBox.h"
 #include "OrientedBoundingBox.h"
-#include "../render/Renderable.h"
 #include "Referenceable.h"
+#include "../render/RenderMode.h"
+
+class Model;
+class PointLight;
+class Reflection;
+class VisBox;
 
 class Scene : public Nameable
 {

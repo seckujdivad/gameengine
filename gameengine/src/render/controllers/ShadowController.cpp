@@ -2,7 +2,11 @@
 
 ShadowController::ShadowController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 {
-	this->m_texture = new RenderTexture(reference, engine, RenderMode::Shadow, 0, GL_TEXTURE_CUBE_MAP, false);
+	RenderTextureInfo info;
+	info.colour = false;
+	info.depth = true;
+
+	this->m_texture = new RenderTexture(reference, engine, RenderMode::Shadow, info, GL_TEXTURE_CUBE_MAP, false);
 
 	std::tuple<Cubemap*, CubemapType> cubemap_data = this->m_engine->GetScene()->GetCubemap(reference);
 	Cubemap* cubemap = std::get<0>(cubemap_data);

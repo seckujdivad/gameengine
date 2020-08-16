@@ -51,26 +51,26 @@ void Scalable::SetScale(glm::dvec3 scale)
 	this->m_scale = scale;
 }
 
-glm::dvec3 Scalable::GetScale()
+glm::dvec3 Scalable::GetScale() const
 {
 	return this->m_scale;
 }
 
-glm::dmat4 Scalable::GetScaleMatrix()
+glm::dmat4 Scalable::GetScaleMatrix() const
 {
 	glm::dmat4 matrix = glm::dmat4(1.0);
 	matrix = glm::scale(matrix, this->GetScale());
 	return matrix;
 }
 
-glm::dmat4 Scalable::GetScaleMatrixInverse()
+glm::dmat4 Scalable::GetScaleMatrixInverse() const
 {
 	glm::dmat4 matrix = glm::dmat4(1.0);
 	matrix = glm::scale(matrix, 1.0 / this->GetScale());
 	return matrix;
 }
 
-double Scalable::GetScale(int index)
+double Scalable::GetScale(int index) const
 {
 	if (index == 0)
 	{

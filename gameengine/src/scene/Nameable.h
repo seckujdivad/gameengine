@@ -1,8 +1,5 @@
 #pragma once
 
-#include <wx/wxprec.h>
-#include "../GLComponents.h"
-
 #include <string>
 
 class Nameable
@@ -14,5 +11,5 @@ public:
 	Nameable();
 
 	void SetIdentifier(std::string identifier);
-	virtual std::string GetIdentifier();
+	std::string GetIdentifier() const;
 };

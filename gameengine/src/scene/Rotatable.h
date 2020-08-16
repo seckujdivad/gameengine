@@ -19,11 +19,12 @@ public:
 	void SetRotation(double x, double y, double z);
 	void SetRotation(int index, double value);
 	void SetRotation(glm::dvec3 scale);
-	double GetRotation(int index);
-	glm::dvec3 GetRotation();
 
-	glm::dmat4 GetRotationMatrix();
-	glm::dmat4 GetRotationMatrixInverse();
+	double GetRotation(int index) const;
+	glm::dvec3 GetRotation() const;
+
+	glm::dmat4 GetRotationMatrix() const;
+	glm::dmat4 GetRotationMatrixInverse() const;
 
 	bool CheckIfRotated(bool reset = true);
 };

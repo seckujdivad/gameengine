@@ -16,18 +16,16 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 	this->m_engine = new Engine(this, this->m_scene);
 
+	this->m_camera = new Camera();
+
 	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Postprocess);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
+	this->m_glcanvas->SetControlledCamera(this->m_camera);
 
 	this->m_glcanvas->MakeOpenGLFocus();
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
-
-	for (auto& model : this->m_scene->GetModels())
-	{
-		this->m_lb_models->Append(model->GetIdentifier());
-	}
 
 	//create rest of ui
 
@@ -87,6 +85,11 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_lb_models->Bind(wxEVT_LISTBOX, &Main::lb_models_OnSelection, this);
 	this->m_sizer->Add(this->m_lb_models, wxGBPosition(1, 0), wxGBSpan((int)attr_names.size() - 1, 1), wxEXPAND | wxALL);
 
+	for (auto& model : this->m_scene->GetModels())
+	{
+		this->m_lb_models->Append(model->GetIdentifier());
+	}
+
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
@@ -101,11 +104,12 @@ Main::~Main()
 {
 	delete this->m_engine;
 	delete this->m_scene;
+	delete this->m_camera;
 }
 
 void Main::btn_render_OnClick(wxCommandEvent& evt)
 {
-	this->m_glcanvas->Render();
+	this->m_engine->Render();
 	evt.Skip();
 }
 
@@ -153,7 +157,7 @@ void Main::sld_OnChange(wxCommandEvent& evt)
 			this->m_model_selected->SetScale(2, slider->GetValue());
 		}
 
-		this->m_glcanvas->Render();
+		this->m_engine->Render();
 	}
 	
 	evt.Skip();

@@ -7,10 +7,8 @@
 
 #include <map>
 
-#include "GLComponents.h"
 #include "render/EngineCanvas.h"
 #include "Engine.h"
-#include "Resource.h"
 #include "loaders/SceneLoader.h"
 
 class Main : public wxFrame
@@ -31,6 +29,7 @@ private:
 	Model* m_model_selected = nullptr;
 
 	Scene* m_scene;
+	Camera* m_camera;
 
 	void btn_render_OnClick(wxCommandEvent& evt);
 	void sld_OnChange(wxCommandEvent& evt);

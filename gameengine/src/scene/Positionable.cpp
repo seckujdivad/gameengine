@@ -52,12 +52,12 @@ void Positionable::SetPosition(int index, double value)
 	this->m_repositioned = true;
 }
 
-glm::dvec3 Positionable::GetPosition()
+glm::dvec3 Positionable::GetPosition() const
 {
 	return this->m_position;
 }
 
-double Positionable::GetPosition(int index)
+double Positionable::GetPosition(int index) const
 {
 	if (index == 0)
 	{

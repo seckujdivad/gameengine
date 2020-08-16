@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../Engine.h"
-#include "../Renderable.h"
-#include "../RenderTexture.h"
 #include "../../scene/Referenceable.h"
+#include "../RenderTextureData.h"
+
+class Engine;
 
 enum class RenderControllerType //runtime type determination is essential
 {
@@ -26,3 +26,6 @@ public:
 	virtual double GetRenderGroup() = 0;
 	virtual RenderControllerType GetType() = 0;
 };
+
+#include "../RenderTexture.h"
+#include "../../Engine.h"

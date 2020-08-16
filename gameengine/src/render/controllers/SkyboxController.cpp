@@ -2,7 +2,11 @@
 
 SkyboxController::SkyboxController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 {
-	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, ENGINECANVAS_NUM_DATA_TEX, GL_TEXTURE_CUBE_MAP, false);
+	RenderTextureInfo info;
+	info.colour = true;
+	info.depth = true;
+
+	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, false);
 }
 
 SkyboxController::~SkyboxController()

@@ -162,6 +162,12 @@
     <ClInclude Include="src\loaders\SceneLoader.h">
       <Filter>Header Files\loaders</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\RenderMode.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\RenderTextureData.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -298,6 +304,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="resources\shaders\model_mode1.geom">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\default.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\default.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

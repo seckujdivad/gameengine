@@ -19,8 +19,9 @@ public:
 	void SetPosition(double x, double y, double z);
 	void SetPosition(int index, double value);
 	void SetPosition(glm::dvec3 position);
-	glm::dvec3 GetPosition();
-	double GetPosition(int index);
+
+	glm::dvec3 GetPosition() const;
+	double GetPosition(int index) const;
 
 	bool CheckIfRepositioned(bool reset = true);
 };

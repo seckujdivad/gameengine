@@ -11,6 +11,7 @@
 #include <tuple>
 #include <string>
 #include <cmath>
+#include <array>
 
 #include "../Positionable.h"
 #include "../Rotatable.h"
@@ -19,6 +20,9 @@
 #include "Material.h"
 #include "../Referenceable.h"
 #include "../LocalTexture.h"
+#include "../Scene.h"
+
+class Scene;
 
 struct Face
 {
@@ -85,5 +89,5 @@ public:
 	void SetWireframeColourUnselected();
 	glm::vec3 GetWireframeColour();
 
-	static constexpr int GetValuesPerVert();
+	static constexpr int GetValuesPerVert() { return 14; };
 };

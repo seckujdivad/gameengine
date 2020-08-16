@@ -192,7 +192,9 @@
     <ClInclude Include="src\render\EngineCanvas.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\RenderMode.h" />
     <ClInclude Include="src\render\RenderTexture.h" />
+    <ClInclude Include="src\render\RenderTextureData.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\scene\Camera.h" />
@@ -253,6 +255,8 @@
     <ResourceCompile Include="shaders.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\default.frag" />
+    <None Include="resources\shaders\default.vert" />
     <None Include="resources\shaders\model.frag" />
     <None Include="resources\shaders\model.vert" />
     <None Include="resources\shaders\model_mode0.geom" />

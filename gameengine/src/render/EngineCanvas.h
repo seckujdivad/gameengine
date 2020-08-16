@@ -22,6 +22,7 @@ private:
 	void Paint(wxPaintEvent& evt);
 
 	//mouse look
+	Camera* m_camera_controlled = nullptr;
 	bool m_mouselook = false;
 	bool m_mouselook_active = false;
 	wxCursor m_blank_cursor;
@@ -33,7 +34,7 @@ private:
 	bool m_keyboard_move = false;
 	bool m_keyboard_move_active = false;
 	wxTimer* m_timer_mainloop;
-	float m_keyboard_move_increment = 0.1f;
+	double m_keyboard_move_increment = 0.1;
 
 	void SetKeyboardMoveActive(bool enable);
 	void CameraControlMainloop(wxTimerEvent& evt);
@@ -62,6 +63,9 @@ public:
 	std::tuple<int, int> GetOutputSize();
 
 	void MakeOpenGLFocus();
+
+	void SetControlledCamera(Camera* camera);
+	Camera* GetControlledCamera();
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
