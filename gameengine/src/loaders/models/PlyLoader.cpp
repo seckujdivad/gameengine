@@ -1,7 +1,7 @@
 #include <wx/wxprec.h>
 #include "PlyLoader.h"
 
-Model* ModelFromPly(std::string path, EventManager* model_evtman)
+ModelGeometry ModelFromPly(std::string path)
 {
 	//ply files could (in theory) contain pretty much any kind of data
 	//I have restricted this parser to work with Blender-style properties
@@ -19,17 +19,17 @@ Model* ModelFromPly(std::string path, EventManager* model_evtman)
 	int pattern_subindex = 0; //number of elements of the current pattern that have been read (post header)
 	std::vector<int> vertex_indices;
 
-	std::vector<glm::vec3> vertex_normals;
-	std::vector<glm::vec3> face_normals;
-	std::vector<glm::vec2> vertex_uvs;
-	std::vector<glm::vec2> face_uvs;
-	glm::vec3 face_normal;
+	std::vector<glm::dvec3> vertex_normals;
+	std::vector<glm::dvec3> face_normals;
+	std::vector<glm::dvec2> vertex_uvs;
+	std::vector<glm::dvec2> face_uvs;
+	glm::dvec3 face_normal;
 
 	std::vector<std::string> sliced_string;
 
 	std::map<std::string, PlyValueList> values;
 
-	Model* result = new Model(model_evtman);
+	ModelGeometry result;
 
 	file.open(path);
 	if (file.is_open())
@@ -122,19 +122,19 @@ Model* ModelFromPly(std::string path, EventManager* model_evtman)
 
 					if (header_layout.at(pattern_index)->name == "vertex")
 					{
-						result->AddVertex(
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
-						);
-						vertex_normals.push_back(glm::vec3(
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
+						result.vertices.push_back(glm::dvec3(
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
 						));
-						vertex_uvs.push_back(glm::vec2(
-							(GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
-							1.0f - (GLfloat)std::stof(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
+						vertex_normals.push_back(glm::dvec3(
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
+						));
+						vertex_uvs.push_back(glm::dvec2(
+							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
+							1.0 - std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
 						));
 					}
 					else if (header_layout.at(pattern_index)->name == "face")
@@ -158,7 +158,12 @@ Model* ModelFromPly(std::string path, EventManager* model_evtman)
 							face_normal = face_normal + face_normals.at(i);
 						}
 
-						result->AddFace(vertex_indices, glm::normalize(face_normal), face_uvs);
+						Face face;
+						face.normal = glm::normalize(face_normal);
+						face.uv = face_uvs;
+						face.vertices = vertex_indices;
+
+						result.faces.push_back(face);
 					}
 
 					//move to next subpattern

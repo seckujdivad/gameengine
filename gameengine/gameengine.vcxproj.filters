@@ -159,6 +159,9 @@
     <ClInclude Include="src\render\controllers\SkyboxController.h">
       <Filter>Header Files\render\controllers</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\SceneLoader.h">
+      <Filter>Header Files\loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -256,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="src\render\controllers\SkyboxController.cpp">
       <Filter>Source Files\render\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\SceneLoader.cpp">
+      <Filter>Source Files\loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

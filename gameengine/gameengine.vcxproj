@@ -184,6 +184,7 @@
     <ClInclude Include="src\EventManager.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
+    <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
     <ClInclude Include="src\render\controllers\ReflectionController.h" />
     <ClInclude Include="src\render\controllers\ShadowController.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="src\EventManager.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
+    <ClCompile Include="src\loaders\SceneLoader.cpp" />
     <ClCompile Include="src\render\controllers\EngineCanvasController.cpp" />
     <ClCompile Include="src\render\controllers\ReflectionController.cpp" />
     <ClCompile Include="src\render\controllers\RenderController.cpp" />

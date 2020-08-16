@@ -16,7 +16,7 @@ private:
 
 	bool m_shadows_enabled = false;
 
-	double m_shadow_bias = -0.05f;
+	double m_shadow_bias = -0.05;
 
 public:
 	PointLight(RenderTextureReference reference);

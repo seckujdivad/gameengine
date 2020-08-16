@@ -15,8 +15,7 @@
 #include "VisBox.h"
 #include "OrientedBoundingBox.h"
 #include "../render/Renderable.h"
-
-typedef unsigned int TextureReference;
+#include "Referenceable.h"
 
 class Scene : public Nameable
 {
@@ -56,6 +55,7 @@ public:
 	void Remove(Model* model);
 	void RemoveModel(ModelReference reference);
 	Model* GetModel(ModelReference reference);
+	Model* GetModel(std::string identifier);
 	std::vector<Model*> GetModels();
 	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode);
 
@@ -64,10 +64,12 @@ public:
 	std::vector<PointLight*> GetPointLights();
 
 	void Add(Reflection* reflection);
+	Reflection* GetReflection(std::string identifier);
 	void Remove(Reflection* reflection);
 	std::vector<Reflection*> GetReflections();
 
 	void Add(VisBox* visbox);
+	VisBox* GetVisBox(std::string identifier);
 	void Remove(VisBox* visbox);
 	std::vector<VisBox*> GetVisBoxes();
 

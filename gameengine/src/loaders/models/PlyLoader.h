@@ -8,7 +8,6 @@
 #include <map>
 
 #include "../../scene/model/Model.h"
-#include "../../EventManager.h"
 
 struct PlyType
 {
@@ -32,7 +31,7 @@ struct PlyValueList
 	std::vector<int> values_ints;
 };
 
-Model* ModelFromPly(std::string path, EventManager* model_evtman);
+ModelGeometry ModelFromPly(std::string path);
 bool IsPlyInt(std::string type_name);
 
 std::vector<std::string> SplitOnChar(std::string string, char splitter);

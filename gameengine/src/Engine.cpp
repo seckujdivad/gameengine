@@ -220,7 +220,7 @@ void Engine::Render()
 
 			int i = 0;
 			int j = 0;
-			while ((i < existing_cubemaps.size()) || (j < required_cubemaps.size()))
+			while ((i < (int)existing_cubemaps.size()) || (j < (int)required_cubemaps.size()))
 			{
 				State state;
 				if (i == existing_cubemaps.size())
@@ -337,7 +337,7 @@ void Engine::Render()
 			}
 			
 			std::vector<Model*> to_add;
-			for (int i = 0; i < this->GetScene()->GetModels().size(); i++)
+			for (int i = 0; i < (int)this->GetScene()->GetModels().size(); i++)
 			{
 				auto geometry_result = std::find(this->m_model_geometry_vbos.begin(), this->m_model_geometry_vbos.end(), this->GetScene()->GetModels().at(i)->GetReference());
 
@@ -347,7 +347,7 @@ void Engine::Render()
 				}
 			}
 
-			for (int i = 0; i < to_add.size(); i++)
+			for (int i = 0; i < (int)to_add.size(); i++)
 			{
 				Model* model = to_add.at(i);
 				this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));

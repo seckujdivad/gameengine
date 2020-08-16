@@ -9,7 +9,6 @@
 #include <vector>
 #include <tuple>
 
-#include "../../render/ShaderProgram.h"
 #include "Reflection.h"
 
 struct MaterialSSRConfig

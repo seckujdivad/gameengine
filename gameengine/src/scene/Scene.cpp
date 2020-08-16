@@ -36,7 +36,7 @@ void Scene::Add(Model* model)
 	this->m_models.push_back(model);
 }
 
-void Scene::Remove(Model* model)
+void Scene::Remove(Model* model) //TODO: remove ptrs to models in reflections and point lights
 {
 	std::vector<Model*>::iterator it = std::find(this->m_models.begin(), this->m_models.end(), model);
 	if (it != this->m_models.end())
@@ -52,24 +52,7 @@ void Scene::Remove(Model* model)
 
 void Scene::RemoveModel(ModelReference reference)
 {
-	std::vector<Model*>::iterator result = this->m_models.end();
-	for (std::vector<Model*>::iterator it = this->m_models.begin(); it != this->m_models.end(); it++)
-	{
-		if ((*it)->GetReference() == reference)
-		{
-			result = it;
-		}
-	}
-
-	if (result != this->m_models.end())
-	{
-		this->m_models.erase(result);
-
-		if (this->m_manage_children)
-		{
-			delete *result;
-		}
-	}
+	this->Remove(this->GetModel(reference));
 }
 
 Model* Scene::GetModel(ModelReference reference)
@@ -77,6 +60,19 @@ Model* Scene::GetModel(ModelReference reference)
 	for (std::vector<Model*>::iterator it = this->m_models.begin(); it != this->m_models.end(); it++)
 	{
 		if ((*it)->GetReference() == reference)
+		{
+			return *it;
+		}
+	}
+
+	return nullptr;
+}
+
+Model* Scene::GetModel(std::string identifier)
+{
+	for (std::vector<Model*>::iterator it = this->m_models.begin(); it != this->m_models.end(); it++)
+	{
+		if ((*it)->GetIdentifier() == identifier)
 		{
 			return *it;
 		}
@@ -218,7 +214,20 @@ void Scene::Add(Reflection* reflection)
 	this->m_reflections.push_back(reflection);
 }
 
-void Scene::Remove(Reflection* reflection)
+Reflection* Scene::GetReflection(std::string identifier)
+{
+	for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+	{
+		if ((*it)->GetIdentifier() == identifier)
+		{
+			return *it;
+		}
+	}
+
+	return nullptr;
+}
+
+void Scene::Remove(Reflection* reflection) //TODO: remove reflection pointers from model objects
 {
 	std::vector<Reflection*>::iterator it = std::find(this->m_reflections.begin(), this->m_reflections.end(), reflection);
 	if (it != this->m_reflections.end())
@@ -240,6 +249,19 @@ std::vector<Reflection*> Scene::GetReflections()
 void Scene::Add(VisBox* visbox)
 {
 	this->m_visboxes.push_back(visbox);
+}
+
+VisBox* Scene::GetVisBox(std::string identifier)
+{
+	for (std::vector<VisBox*>::iterator it = this->m_visboxes.begin(); it != this->m_visboxes.end(); it++)
+	{
+		if ((*it)->GetIdentifier() == identifier)
+		{
+			return *it;
+		}
+	}
+
+	return nullptr;
 }
 
 void Scene::Remove(VisBox* visbox)
@@ -275,12 +297,7 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 
 		if (result != this->m_reflections.end())
 		{
-			this->m_reflections.erase(result);
-
-			if (this->m_manage_children)
-			{
-				delete *result;
-			}
+			this->Remove(*result);
 		}
 	}
 
@@ -296,12 +313,7 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 
 		if (result != this->m_pointlights.end())
 		{
-			this->m_pointlights.erase(result);
-
-			if (this->m_manage_children)
-			{
-				delete *result;
-			}
+			this->Remove(*result);
 		}
 	}
 }

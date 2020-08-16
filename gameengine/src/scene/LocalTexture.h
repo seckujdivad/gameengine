@@ -44,7 +44,7 @@ public:
 
 	void SetVector(glm::vec3 colour);
 
-	void SetFullTexture(unsigned char* data, std::tuple<int, int> dimensions);
+	void SetFullTexture(unsigned char* data, std::tuple<int, int> dimensions, bool copy = false);
 
 	std::tuple<int, int> GetDimensions();
 	unsigned char* GetData();
