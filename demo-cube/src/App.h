@@ -20,4 +20,5 @@ private:
 
 public:
 	bool OnInit();
+	int OnExit();
 };
