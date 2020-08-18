@@ -419,7 +419,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 void Renderable::RecompileShader()
 {
-	if (this->m_shader_program == nullptr)
+	if (this->m_shader_program != nullptr)
 	{
 		delete this->m_shader_program;
 	}
