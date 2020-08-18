@@ -3,6 +3,7 @@
 
 Scene::Scene() : Nameable()
 {
+	this->m_skybox_texture = this->GetNewRenderTextureReference();
 }
 
 Scene::~Scene()
