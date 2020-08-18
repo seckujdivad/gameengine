@@ -20,6 +20,7 @@ protected:
 
 public:
 	RenderController(Engine* engine, RenderTextureReference reference);
+	virtual ~RenderController();
 
 	virtual void Render() = 0;
 	virtual RenderTextureGroup GetRenderTexture() = 0;

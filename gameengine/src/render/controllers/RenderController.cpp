@@ -4,3 +4,7 @@ RenderController::RenderController(Engine* engine, RenderTextureReference refere
 {
 	this->m_engine = engine;
 }
+
+RenderController::~RenderController()
+{
+}
