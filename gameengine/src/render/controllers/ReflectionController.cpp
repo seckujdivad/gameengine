@@ -25,6 +25,8 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 	this->m_camera->SetClips(cubemap->GetClips());
 	this->m_camera->SetFOV(90.0);
 	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
+
+	this->m_texture->SetCamera(this->m_camera);
 }
 
 ReflectionController::~ReflectionController()
