@@ -275,7 +275,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			//select shader (and texture group)
 			if (this->GetRenderMode() == RenderMode::Postprocess)
 			{
-				this->m_shader_program->Select(-1);
+				this->m_shader_program->Select(0);
 			}
 			else
 			{
