@@ -39,8 +39,9 @@ public:
 	struct LoadedGeometry
 	{
 		ModelGeometry geometry;
-		GLuint vbo;
-		int num_vertices;
+		GLuint vao = NULL;
+		GLuint vbo = NULL;
+		int num_vertices = 0;
 	};
 
 private:
@@ -56,7 +57,6 @@ private:
 	std::vector<RenderController*> m_render_controllers;
 
 	//loaded geometry
-	GLuint m_vao;
 	std::map<ModelReference, Engine::LoadedGeometry> m_model_geometry_vbos;
 	std::map<Model*, Engine::LoadedGeometry> m_temporary_vbos;
 
@@ -78,8 +78,8 @@ public:
 	LoadedTexture GetTexture(TextureReference reference);
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference);
 
-	Engine::LoadedGeometry BindVBO(Model* model);
-	void ReleaseVBO(Model* model);
+	Engine::LoadedGeometry BindVAO(Model* model);
+	void ReleaseVAO(Model* model);
 
 	void MakeContextCurrent();
 };

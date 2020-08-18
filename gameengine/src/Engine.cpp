@@ -37,11 +37,13 @@ Engine::LoadedGeometry Engine::LoadGeometry(const ModelGeometry& geometry)
 	loaded_geometry.geometry = geometry;
 
 	//create vbo
-	glBindVertexArray(this->m_vao);
+	glGenVertexArrays(1, &loaded_geometry.vao);
+	glBindVertexArray(loaded_geometry.vao);
 
 	glGenBuffers(1, &loaded_geometry.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+	
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
@@ -61,7 +63,8 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 {
 	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
-	this->m_glcontext_canvas = new wxGLCanvas(this->m_parent, this->m_canvas_args, wxID_ANY);
+	this->m_glcontext_canvas = new wxGLCanvas(parent, this->m_canvas_args, wxID_ANY);
+
 	wxGLContextAttrs ctx_attrs;
 	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
 	this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
@@ -84,32 +87,30 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
-
-	glGenVertexArrays(1, &this->m_vao);
 }
 
 Engine::~Engine()
 {
-	glDeleteVertexArrays(1, &this->m_vao);
-
-	for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+	for (RenderController* render_controller : this->m_render_controllers)
 	{
-		delete this->m_render_controllers.at(i);
+		delete render_controller;
 	}
 
-	for (auto it = this->m_textures_static.begin(); it != this->m_textures_static.end(); it++)
+	for (auto [reference, loaded_texture] : this->m_textures_static)
 	{
-		glDeleteTextures(1, &it->second.id);
+		glDeleteTextures(1, &loaded_texture.id);
 	}
 
-	for (auto it = this->m_model_geometry_vbos.begin(); it != this->m_model_geometry_vbos.end(); it++)
+	for (auto [reference, loaded_geometry] : this->m_model_geometry_vbos)
 	{
-		glDeleteBuffers(1, &it->second.vbo);
+		glDeleteBuffers(1, &loaded_geometry.vbo);
+		glDeleteVertexArrays(1, &loaded_geometry.vao);
 	}
 
-	for (auto it = this->m_temporary_vbos.begin(); it != this->m_temporary_vbos.end(); it++)
+	for (auto [model, loaded_geometry] : this->m_temporary_vbos)
 	{
-		glDeleteBuffers(1, &it->second.vbo);
+		glDeleteBuffers(1, &loaded_geometry.vbo);
+		glDeleteVertexArrays(1, &loaded_geometry.vao);
 	}
 
 	delete this->m_glcontext;
@@ -211,8 +212,6 @@ void Engine::Render()
 				Added,
 				Removed
 			};
-
-			
 
 			int i = 0;
 			int j = 0;
@@ -316,7 +315,7 @@ void Engine::Render()
 					{
 						std::vector<GLfloat> vertices = DoubleToSinglePrecision(model->GetTriangles());
 
-						glBindVertexArray(this->m_vao);
+						glBindVertexArray(it->second.vao);
 						glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
 						glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
 
@@ -331,18 +330,13 @@ void Engine::Render()
 				glDeleteBuffers(1, &std::get<1>(to_remove.at(i)).vbo);
 				this->m_model_geometry_vbos.erase(std::get<0>(to_remove.at(i)));
 			}
-			
-			std::vector<Model*> to_add;
+
 			for (Model* model : this->GetScene()->GetModels())
 			{
-				auto geometry_result = this->m_model_geometry_vbos.at(model->GetReference());
-				to_add.push_back(model);
-			}
-
-			for (int i = 0; i < (int)to_add.size(); i++)
-			{
-				Model* model = to_add.at(i);
-				this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
+				if (this->m_model_geometry_vbos.count(model->GetReference()) == 0)
+				{
+					this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
+				}
 			}
 		}
 
@@ -387,7 +381,7 @@ RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference)
 	return result;
 }
 
-Engine::LoadedGeometry Engine::BindVBO(Model* model)
+Engine::LoadedGeometry Engine::BindVAO(Model* model)
 {
 	LoadedGeometry loaded_geometry;
 	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //generate temporary VBO
@@ -400,13 +394,13 @@ Engine::LoadedGeometry Engine::BindVBO(Model* model)
 		loaded_geometry = this->m_model_geometry_vbos.at(model->GetReference());
 	}
 
-	glBindVertexArray(this->m_vao);
+	glBindVertexArray(loaded_geometry.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
 
 	return loaded_geometry;
 }
 
-void Engine::ReleaseVBO(Model* model)
+void Engine::ReleaseVAO(Model* model)
 {
 	if (this->m_temporary_vbos.count(model) == 0)
 	{
@@ -415,6 +409,7 @@ void Engine::ReleaseVBO(Model* model)
 	else
 	{
 		glDeleteBuffers(1, &this->m_temporary_vbos.at(model).vbo);
+		glDeleteVertexArrays(1, &this->m_temporary_vbos.at(model).vao);
 		this->m_temporary_vbos.erase(model);
 	}
 }
