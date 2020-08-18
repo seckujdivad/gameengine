@@ -159,21 +159,25 @@ void ShaderProgram::Select(int texture_group_id)
 		std::vector<int> targeted_groups;
 		if (texture_group_id == -1)
 		{
-
+			
 		}
 		else
 		{
 			targeted_groups.push_back(texture_group_id);
 		}
 
-		for (std::vector<int>::iterator it = targeted_groups.begin(); it != targeted_groups.end(); it++)
+		for (int group : targeted_groups)
 		{
-			std::vector<LoadedTexture> textures = this->m_textures.at(*it);
-			for (int i = 0; i < (int)textures.size(); i++)
+			auto it = this->m_textures.find(group);
+			if (it != this->m_textures.end())
 			{
-				glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
-				glBindTexture(textures.at(i).type, textures.at(i).id);
-				glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
+				std::vector<LoadedTexture> textures = it->second;
+				for (int i = 0; i < (int)textures.size(); i++)
+				{
+					glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
+					glBindTexture(textures.at(i).type, textures.at(i).id);
+					glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
+				}
 			}
 		}
 	}
@@ -187,7 +191,6 @@ GLuint ShaderProgram::GetUniform(std::string name)
 	}
 	else
 	{
-		return this->m_uniforms.at(name);
 		auto it = this->m_uniforms.find(name);
 		if (it == this->m_uniforms.end())
 		{
