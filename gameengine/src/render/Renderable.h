@@ -104,7 +104,7 @@ public:
 	Renderable(Engine* engine, RenderMode mode);
 	Renderable(const Renderable& copy_from) = delete;
 	Renderable& operator=(const Renderable& copy_from) = delete;
-	~Renderable();
+	virtual ~Renderable();
 	
 	void SetCamera(Camera* camera);
 	Camera* GetCamera();
