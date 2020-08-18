@@ -9,10 +9,25 @@ Scene::~Scene()
 {
 	if (this->m_manage_children)
 	{
-		for (int i = 0; this->m_models.size(); i++) { delete this->m_models.at(i); };
-		for (int i = 0; this->m_pointlights.size(); i++) { delete this->m_pointlights.at(i); };
-		for (int i = 0; this->m_reflections.size(); i++) { delete this->m_reflections.at(i); };
-		for (int i = 0; this->m_visboxes.size(); i++) { delete this->m_visboxes.at(i); };
+		for (Model* model : this->m_models)
+		{
+			delete model;
+		}
+
+		for (PointLight* pointlight : this->m_pointlights)
+		{
+			delete pointlight;
+		}
+
+		for (Reflection* reflection : this->m_reflections)
+		{
+			delete reflection;
+		}
+
+		for (VisBox* visbox : this->m_visboxes)
+		{
+			delete visbox;
+		}
 
 		if (this->m_skybox_scene != nullptr)
 		{
