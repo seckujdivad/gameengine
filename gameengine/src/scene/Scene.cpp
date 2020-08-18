@@ -154,7 +154,7 @@ glm::vec4 Scene::GetClearColour()
 
 std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode)
 {
-	if (mode == RenderMode::Normal)
+	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow))
 	{
 		std::unordered_set<Model*, HashPointer<Model>> visible_models;
 		std::unordered_set<VisBox*, HashPointer<VisBox>> enclosed_visboxes;
