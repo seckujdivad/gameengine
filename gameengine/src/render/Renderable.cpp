@@ -389,14 +389,14 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 
 			//load geometry
-			Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVBO(model);
+			Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model);
 
 			//draw geometry
 			glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
 
 			if (dealloc_models) //release geometry as the models are temporary
 			{
-				this->GetEngine()->ReleaseVBO(model);
+				this->GetEngine()->ReleaseVAO(model);
 			}
 		}
 
