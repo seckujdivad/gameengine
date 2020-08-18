@@ -188,6 +188,15 @@ GLuint ShaderProgram::GetUniform(std::string name)
 	else
 	{
 		return this->m_uniforms.at(name);
+		auto it = this->m_uniforms.find(name);
+		if (it == this->m_uniforms.end())
+		{
+			return this->RegisterUniform(name);
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 }
 
