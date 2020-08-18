@@ -36,11 +36,11 @@ void Rotatable::SetRotation(int index, double value)
 	{
 		this->m_rotation.x = value;
 	}
-	if (index == 1)
+	else if (index == 1)
 	{
 		this->m_rotation.y = value;
 	}
-	if (index == 2)
+	else if (index == 2)
 	{
 		this->m_rotation.z = value;
 	}

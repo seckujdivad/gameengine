@@ -30,11 +30,11 @@ void Scalable::SetScale(int index, double value)
 	{
 		this->m_scale.x = value;
 	}
-	if (index == 1)
+	else if (index == 1)
 	{
 		this->m_scale.y = value;
 	}
-	if (index == 2)
+	else if (index == 2)
 	{
 		this->m_scale.z = value;
 	}

@@ -36,11 +36,11 @@ void Positionable::SetPosition(int index, double value)
 	{
 		this->m_position.x = value;
 	}
-	if (index == 1)
+	else if (index == 1)
 	{
 		this->m_position.y = value;
 	}
-	if (index == 2)
+	else if (index == 2)
 	{
 		this->m_position.z = value;
 	}
