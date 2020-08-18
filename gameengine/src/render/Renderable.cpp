@@ -254,15 +254,17 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		switch (this->GetRenderMode())
 		{
 		case RenderMode::Normal:
+			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 			break;
 		case RenderMode::Postprocess:
-			glCullFace(GL_NONE);
+			glDisable(GL_CULL_FACE);
 			break;
 		case RenderMode::Wireframe:
-			glCullFace(GL_NONE);
+			glDisable(GL_CULL_FACE);
 			break;
 		case RenderMode::Shadow:
+			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
 			break;
 		}
