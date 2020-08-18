@@ -270,15 +270,12 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		}
 
 		//draw scene geometry
-		Model* model;
-		for (int i = 0; i < (int)models.size(); i++)
+		for (Model* model : models)
 		{
-			model = models.at(i);
-
 			//select shader (and texture group)
 			if (this->GetRenderMode() == RenderMode::Postprocess)
 			{
-				this->m_shader_program->Select(0);
+				this->m_shader_program->Select(-1);
 			}
 			else
 			{
