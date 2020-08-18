@@ -176,8 +176,9 @@ bool operator!=(const Face& first, const Face& second)
 	return !(first == second);
 }
 
-void MergeVertices(ModelGeometry& geometry, double threshold)
+void MergeVertices(ModelGeometry& geometry, double threshold) //TODO: fix
 {
+	/*
 	std::vector<std::vector<int>> matches;
 	for (int i = 0; i < (int)geometry.vertices.size(); i++)
 	{
@@ -203,7 +204,8 @@ void MergeVertices(ModelGeometry& geometry, double threshold)
 		}
 	}
 
-	std::vector<glm::dvec3> vertices;
+	//std::vector<glm::dvec3> vertices;
+	geometry.vertices.clear();
 	for (int i = 0; i < (int)matches.size(); i++)
 	{
 		glm::dvec3 point_sum;
@@ -211,7 +213,7 @@ void MergeVertices(ModelGeometry& geometry, double threshold)
 		{
 			point_sum += matches.at(i).at(j);
 		}
-		vertices.push_back(point_sum / (double)matches.at(i).size());
+		geometry.vertices.push_back(point_sum / (double)matches.at(i).size());
 	}
 
 	for (int i = 0; i < (int)geometry.faces.size(); i++)
@@ -230,7 +232,7 @@ void MergeVertices(ModelGeometry& geometry, double threshold)
 		}
 	}
 
-	geometry.vertices = vertices;
+	//geometry.vertices = vertices;*/
 }
 
 void InvertNormals(ModelGeometry& geometry)
@@ -245,15 +247,14 @@ std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geomet
 {
 	std::vector<double> triangles;
 
-	for (int i = 0; (int)geometry.faces.size(); i++)
+	for (const Face& face : geometry.faces)
 	{
-		const Face& face = geometry.faces.at(i);
 		if (face.vertices.size() > 2) //lines aren't faces, don't draw them
 		{
 			std::vector<glm::ivec3> tri_indices;
-			for (int j = 0; j < (int)face.vertices.size(); j++)
+			for (int j = 0; j < (int)face.vertices.size() - 2; j++)
 			{
-				tri_indices.push_back(glm::ivec3(0, j, j + 1));
+				tri_indices.push_back(glm::ivec3(0, j + 1, j + 2));
 			}
 
 			for (int j = 0; j < (int)tri_indices.size(); j++)
