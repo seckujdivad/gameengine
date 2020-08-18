@@ -14,18 +14,21 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	//create glcanvas
 	this->m_scene = SceneFromJSON(this->m_scene_path, this->m_scene_filename);
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
+
 	this->m_engine = new Engine(this, this->m_scene);
 
 	this->m_camera = new Camera();
 
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Postprocess);
+	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Postprocess, wxID_ANY, this);
+	this->m_glcanvas->SetControlledCamera(this->m_camera);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
-	this->m_glcanvas->SetControlledCamera(this->m_camera);
 
 	this->m_glcanvas->MakeOpenGLFocus();
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
+
+	this->m_engine->Render();
 
 	//create rest of ui
 
@@ -169,7 +172,8 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 
 	if (selection_index != -1)
 	{
-		this->m_model_selected = this->m_scene->GetModels().at(selection_index);
+		std::vector<Model*> models = this->m_scene->GetModels();
+		this->m_model_selected = models.at(selection_index);
 
 		wxSlider* slider;
 		for (size_t i = 0; i < this->m_mdl_sliders.size(); i++)
