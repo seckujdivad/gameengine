@@ -13,7 +13,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			{
 				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->m_rendermode);
 			}
-			else if (this->GetRenderMode() == RenderMode::Wireframe)
+			else if (this->GetRenderMode() == RenderMode::Postprocess)
 			{
 				models.clear();
 
