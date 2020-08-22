@@ -351,15 +351,13 @@ void Engine::Render()
 		//tell controllers to redraw themselves (if required)
 		std::sort(this->m_render_controllers.begin(), this->m_render_controllers.end(), [](RenderController* first, RenderController* second) {return first->GetRenderGroup() < second->GetRenderGroup();}); //lower render groups are rendered first
 
-		for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+		for (RenderController* render_controller : this->m_render_controllers)
 		{
-			if (this->m_render_controllers.at(i)->GetType() != RenderControllerType::Skybox) //skybox rendering is not yet supported
+			if (render_controller->GetType() != RenderControllerType::Skybox) //skybox rendering is not yet supported
 			{
-				this->m_render_controllers.at(i)->Render();
+				render_controller->Render();
 			}
 		}
-
-		glFlush();
 	}
 }
 
