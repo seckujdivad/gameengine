@@ -10,5 +10,5 @@ void main()
 {
 	vec2 sample_position = globalPosition;
 
-	gl_FragColor = texture(render_output, (sample_position + 1.0f) * 0.5f).rgba;
+	frag_out = texture(render_output, (sample_position + 1.0f) * 0.5f).rgba;
 }
