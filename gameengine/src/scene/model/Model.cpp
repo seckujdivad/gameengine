@@ -303,8 +303,8 @@ std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geomet
 				for (int k = 0; k < (int)tri_vecs.size(); k++)
 				{
 					triangles.push_back(tri_vecs.at(k).x);
-					triangles.push_back(tri_vecs.at(k).z);
 					triangles.push_back(tri_vecs.at(k).y);
+					triangles.push_back(tri_vecs.at(k).z);
 
 					if (!only_geometry)
 					{
