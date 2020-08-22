@@ -101,6 +101,7 @@ uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_data_cubemaps[REFLECTION_NUM * DATA_TEX_NUM];
+uniform int reflection_count;
 
 //scene approximation
 struct ApproximationOBB
@@ -359,7 +360,7 @@ void shade_mode0()
 			float refl_distance = 0.0f;
 			float current_distance;
 			int reflection_index;
-			for (int i = 0; i < REFLECTION_NUM; i++)
+			for (int i = 0; i < reflection_count; i++)
 			{
 				current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
 
@@ -458,7 +459,7 @@ void shade_mode0()
 					int final_index = reflection_index;
 					float final_length = length(line_end_pos - reflections[reflection_index].position);
 
-					for (int i = 0; i < REFLECTION_NUM; i++)
+					for (int i = 0; i < reflection_count; i++)
 					{
 						current_length = length(line_end_pos - reflections[i].position);
 						if (current_length < final_length)
@@ -501,6 +502,8 @@ void shade_mode0()
 
 	//store the pseudo-depth (depth accounting for skyboxes)
 	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
+
+	//frag_out = vec4(0.0f, 1.0f, 0.0f, 0.0f);
 }
 
 void shade_mode1()
