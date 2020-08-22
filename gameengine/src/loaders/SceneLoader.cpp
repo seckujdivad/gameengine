@@ -249,6 +249,10 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 							model->SetIdentifier(el.value()["identifier"].get<std::string>());
 						}
 
+						model->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
+						model->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
+						model->SetScale(GetVector(el.value()["scale"], glm::dvec3(1.0)));
+
 						//load ssr reflections
 						model->GetMaterial().ssr = default_ssr_config;
 
@@ -274,11 +278,17 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 						}
 
 						//load textures
-						model->GetColourTexture() = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
-						model->GetNormalTexture() = GetTexture(el.value()["textures"]["normal"], root_path, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
-						model->GetReflectionTexture() = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-						model->GetSpecularTexture() = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-						model->GetSkyboxMaskTexture() = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+						LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
+						LocalTexture normal_texture = GetTexture(el.value()["textures"]["normal"], root_path, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
+						LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+						LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+						LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+
+						model->GetColourTexture() = colour_texture;;
+						model->GetNormalTexture() = normal_texture;
+						model->GetReflectionTexture() = refl_texture;
+						model->GetSpecularTexture() = specular_texture;
+						model->GetSkyboxMaskTexture() = skybox_texture;
 
 						//load phong material
 						model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));
