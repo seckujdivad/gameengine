@@ -19,7 +19,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	this->m_camera = new Camera();
 
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Postprocess, wxID_ANY, this);
+	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Normal, wxID_ANY, this);
 	this->m_glcanvas->SetControlledCamera(this->m_camera);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
