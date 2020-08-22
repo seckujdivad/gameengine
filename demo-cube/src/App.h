@@ -9,6 +9,10 @@
 #include <crtdbg.h>
 #endif
 
+#ifdef _DEBUG
+#define PAUSE_ON_RUN
+#endif
+
 class Main;
 
 #include "Main.h"
