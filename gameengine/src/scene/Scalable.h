@@ -9,7 +9,7 @@
 class Scalable
 {
 private:
-	glm::dvec3 m_scale = glm::dvec3(0.0);
+	glm::dvec3 m_scale = glm::dvec3(1.0);
 
 	bool m_rescaled = true;
 	
