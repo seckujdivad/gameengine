@@ -18,6 +18,13 @@ EngineCanvasController::~EngineCanvasController()
 
 void EngineCanvasController::Render()
 {
+    
+    if (this->m_canvas->GetOutputSize() != this->m_dimensions_prev)
+    {
+        this->m_texture->SetOutputSize(this->m_canvas->GetOutputSize());
+        this->m_dimensions_prev = this->m_canvas->GetOutputSize();
+    }
+
     this->m_texture->SetCamera(this->m_canvas->GetControlledCamera());
     this->m_texture->Render();
     this->m_canvas->Render();
