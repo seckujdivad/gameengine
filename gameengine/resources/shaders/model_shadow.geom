@@ -3,7 +3,6 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices=18) out;
 
 uniform mat4 cubemap_transform[6];
-uniform bool is_cubemap;
 
 out vec4 FragPos;
 
