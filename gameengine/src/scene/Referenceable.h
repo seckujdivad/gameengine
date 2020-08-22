@@ -10,6 +10,12 @@ class Referenceable
 private:
 	ReferenceType m_reference;
 
+protected:
+	void SetReference(ReferenceType reference)
+	{
+		this->m_reference = reference;
+	}
+
 public:
 	Referenceable(ReferenceType reference)
 	{
