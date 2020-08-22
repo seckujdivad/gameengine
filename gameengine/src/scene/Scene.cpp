@@ -124,7 +124,7 @@ RenderTextureReference Scene::GetNewRenderTextureReference()
 
 TextureReference Scene::GetNewTextureReference()
 {
-	return this->m_reference_texture;
+	return this->m_reference_texture++;
 }
 
 void Scene::SetSkyboxScene(Scene* scene)
