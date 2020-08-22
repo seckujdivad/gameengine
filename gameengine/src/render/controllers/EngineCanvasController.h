@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 #include "../../Engine.h"
 #include "../EngineCanvas.h"
 #include "RenderController.h"
@@ -13,6 +15,8 @@ class EngineCanvasController : public RenderController
 private:
 	EngineCanvas* m_canvas;
 	RenderTexture* m_texture;
+
+	std::tuple<int, int> m_dimensions_prev = { -1, -1 };
 
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, RenderMode mode);
