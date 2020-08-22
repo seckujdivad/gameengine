@@ -11,6 +11,8 @@ LocalTexture::LocalTexture(const LocalTexture& copy_from) : Referenceable<Textur
 
 LocalTexture& LocalTexture::operator=(const LocalTexture& copy_from)
 {
+	this->SetReference(copy_from.GetReference());
+
 	this->m_type = copy_from.m_type;
 
 	this->m_dimensions = copy_from.m_dimensions;
