@@ -137,6 +137,14 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	{
 		glUseProgram(this->m_program_id);
 		GLuint uniform_id = glGetUniformLocation(this->m_program_id, name.c_str());
+
+#ifdef GM_SHADER_REJECT_UNKNOWN_UNIFORMS
+		if (uniform_id == (GLuint)(-1))
+		{
+			throw std::runtime_error("OpenGL returned -1 for uniform location - this is not allowed");
+		}
+#endif
+
 		this->m_uniforms.insert(std::pair<std::string, GLuint>(name, uniform_id));
 		return uniform_id;
 	}
@@ -157,11 +165,8 @@ void ShaderProgram::Select(int texture_group_id)
 		glUseProgram(this->m_program_id);
 
 		std::vector<int> targeted_groups;
-		if (texture_group_id == -1)
-		{
-			
-		}
-		else
+		targeted_groups.push_back(-1);
+		if (texture_group_id != -1)
 		{
 			targeted_groups.push_back(texture_group_id);
 		}
@@ -192,14 +197,25 @@ GLuint ShaderProgram::GetUniform(std::string name)
 	else
 	{
 		auto it = this->m_uniforms.find(name);
+
+		GLuint result;
 		if (it == this->m_uniforms.end())
 		{
-			return this->RegisterUniform(name);
+			result = this->RegisterUniform(name);
 		}
 		else
 		{
-			return it->second;
+			result = it->second;
 		}
+
+#ifdef GM_SHADER_REJECT_UNKNOWN_UNIFORMS
+		if (result == (GLuint)(-1))
+		{
+			throw std::runtime_error("Uniform location stored is -1 - this is not allowed");
+		}
+#endif
+
+		return result;
 	}
 }
 
