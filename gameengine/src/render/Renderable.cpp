@@ -24,10 +24,10 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				ModelGeometry geom;
 				geom.vertices = {
-					glm::dvec3(0.0, 0.0, 0.0),
-					glm::dvec3(0.0, 1.0, 0.0),
+					glm::dvec3(-1.0, -1.0, 0.0),
+					glm::dvec3(-1.0, 1.0, 0.0),
 					glm::dvec3(1.0, 1.0, 0.0),
-					glm::dvec3(1.0, 0.0, 0.0)
+					glm::dvec3(1.0, -1.0, 0.0)
 				};
 
 				geom.faces = {
