@@ -4,10 +4,16 @@
 ShaderProgram::ShaderProgram()
 {
 	this->m_program_id = NULL;
+
+	this->m_max_texture_units = 0;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &this->m_max_texture_units); //get number of texture units allowed at once
 }
 
 ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines, bool strings_are_paths)
 {
+	this->m_max_texture_units = 0;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &this->m_max_texture_units); //get number of texture units allowed at once
+
 	this->m_program_id = glCreateProgram();
 	if (this->m_program_id == NULL)
 	{
@@ -182,6 +188,11 @@ void ShaderProgram::Select(int texture_group_id)
 					textures.push_back(texture);
 				}
 			}
+		}
+
+		if ((int)textures.size() >= this->m_max_texture_units)
+		{
+			throw std::runtime_error("Too many bound textures - maximum is " + std::to_string(this->m_max_texture_units));
 		}
 		
 		for (int i = 0; i < (int)textures.size(); i++)

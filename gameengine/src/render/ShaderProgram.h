@@ -21,6 +21,8 @@ struct LoadedTexture
 class ShaderProgram
 {
 private:
+	GLint m_max_texture_units;
+
 	GLuint LoadShader(std::string path, GLenum type, std::vector<std::tuple<std::string, std::string>> preprocessor_defines, bool string_is_path);
 
 	std::map<std::string, GLuint> m_uniforms;
