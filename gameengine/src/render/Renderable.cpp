@@ -573,6 +573,23 @@ void Renderable::SetShaderUniform(std::string name, glm::dmat4 mat, bool demote)
 	}
 }
 
+void Renderable::SetShaderUniform(std::string name, glm::mat3 mat)
+{
+	glUniformMatrix3fv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Renderable::SetShaderUniform(std::string name, glm::dmat3 mat, bool demote)
+{
+	if (demote)
+	{
+		this->SetShaderUniform(name, glm::mat3(mat));
+	}
+	else
+	{
+		glUniformMatrix3dv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
+	}
+}
+
 void Renderable::ConfigureShader(RenderMode mode)
 {
 	if (mode != this->m_rendermode)
@@ -741,26 +758,26 @@ Engine* Renderable::GetEngine()
 
 void Renderable::SetRenderMode(NormalRenderModeData data)
 {
-	this->ConfigureShader(RenderMode::Normal);
 	this->m_rendermode_data_normal = data;
+	this->ConfigureShader(RenderMode::Normal);
 }
 
 void Renderable::SetRenderMode(WireframeRenderModeData data)
 {
-	this->ConfigureShader(RenderMode::Wireframe);
 	this->m_rendermode_data_wireframe = data;
+	this->ConfigureShader(RenderMode::Wireframe);
 }
 
 void Renderable::SetRenderMode(ShadowRenderModeData data)
 {
-	this->ConfigureShader(RenderMode::Shadow);
 	this->m_rendermode_data_shadow = data;
+	this->ConfigureShader(RenderMode::Shadow);
 }
 
 void Renderable::SetRenderMode(PostProcessRenderModeData data)
 {
-	this->ConfigureShader(RenderMode::Postprocess);
 	this->m_rendermode_data_postprocess = data;
+	this->ConfigureShader(RenderMode::Postprocess);
 }
 
 void Renderable::Render(std::vector<Model*> models, bool continuous_draw)

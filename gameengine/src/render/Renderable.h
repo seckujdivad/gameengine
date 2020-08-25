@@ -92,6 +92,8 @@ protected:
 	void SetShaderUniform(std::string name, glm::dvec4 vec, bool demote = true);
 	void SetShaderUniform(std::string name, glm::mat4 mat);
 	void SetShaderUniform(std::string name, glm::dmat4 mat, bool demote = true);
+	void SetShaderUniform(std::string name, glm::mat3 mat);
+	void SetShaderUniform(std::string name, glm::dmat3 mat, bool demote = true);
 
 	void ConfigureShader(RenderMode mode);
 
