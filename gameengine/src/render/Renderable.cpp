@@ -2,6 +2,11 @@
 
 void Renderable::RenderScene(std::vector<Model*> models)
 {
+	if (this->GetRenderMode() == RenderMode::Default)
+	{
+		throw std::runtime_error("Can't render when in default mode");
+	}
+
 	Scene* scene = this->m_engine->GetScene();
 	if (scene != nullptr)
 	{
