@@ -9,6 +9,12 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
     info.depth = true;
 
     this->m_texture = new RenderTexture(reference, engine, mode, info, GL_TEXTURE_2D, true);
+    if (mode == RenderMode::Normal)
+    {
+        NormalRenderModeData data;
+        data.previous_frame = this->m_texture->GetOutputTextures();
+        this->m_texture->SetRenderMode(data);
+    }
 
     PostProcessRenderModeData data;
     data.texture = this->m_texture->GetOutputTextures();
