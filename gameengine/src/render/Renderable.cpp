@@ -200,10 +200,10 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->SetShaderUniform(prefix + "dimensions", obb.GetDimensionsVec());
 
 				this->AddShaderUniformName(prefix + "rotation");
-				this->SetShaderUniform(prefix + "rotation", obb.GetRotationMatrix());
+				this->SetShaderUniform(prefix + "rotation", glm::mat3(obb.GetRotationMatrix()));
 
 				this->AddShaderUniformName(prefix + "rotation_inverse");
-				this->SetShaderUniform(prefix + "rotation_inverse", obb.GetInverseRotationMatrix());
+				this->SetShaderUniform(prefix + "rotation_inverse", glm::mat3(obb.GetInverseRotationMatrix()));
 			}
 
 			//skybox cubemap
