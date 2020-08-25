@@ -171,19 +171,24 @@ void ShaderProgram::Select(int texture_group_id)
 			targeted_groups.push_back(texture_group_id);
 		}
 
+		std::vector<LoadedTexture> textures;
 		for (int group : targeted_groups)
 		{
 			auto it = this->m_textures.find(group);
 			if (it != this->m_textures.end())
 			{
-				std::vector<LoadedTexture> textures = it->second;
-				for (int i = 0; i < (int)textures.size(); i++)
+				for (LoadedTexture texture : it->second)
 				{
-					glActiveTexture(GL_TEXTURE0 + ((GL_TEXTURE1 - GL_TEXTURE0) * i));
-					glBindTexture(textures.at(i).type, textures.at(i).id);
-					glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
+					textures.push_back(texture);
 				}
 			}
+		}
+		
+		for (int i = 0; i < (int)textures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(textures.at(i).type, textures.at(i).id);
+			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
 		}
 	}
 }
