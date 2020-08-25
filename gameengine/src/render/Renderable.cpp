@@ -99,7 +99,8 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 			}
 
-			this->SetShaderUniform("is_cubemap", this->m_fbo_target_type == GL_TEXTURE_CUBE_MAP);
+			bool is_cubemap = this->m_fbo_target_type == GL_TEXTURE_CUBE_MAP;
+			this->SetShaderUniform("is_cubemap", is_cubemap);
 		}
 
 		//specialised uniforms
