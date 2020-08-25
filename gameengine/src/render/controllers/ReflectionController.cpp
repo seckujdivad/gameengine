@@ -6,7 +6,11 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 	info.colour = true;
 	info.depth = true;
 
-	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_2D, false);
+	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, false);
+
+	NormalRenderModeData data;
+	data.previous_frame = this->m_texture->GetOutputTextures();
+	this->m_texture->SetRenderMode(data);
 
 	std::tuple<Cubemap*, CubemapType> cubemap_data = this->m_engine->GetScene()->GetCubemap(reference);
 	Cubemap* cubemap = std::get<0>(cubemap_data);
