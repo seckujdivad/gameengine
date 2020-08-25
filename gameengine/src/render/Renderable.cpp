@@ -453,7 +453,7 @@ GLuint Renderable::GetFramebuffer()
 	return this->m_fbo;
 }
 
-void Renderable::SetTargetType(GLuint target_type)
+void Renderable::SetTargetType(GLenum target_type)
 {
 	this->m_fbo_target_type = target_type;
 }
