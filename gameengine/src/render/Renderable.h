@@ -47,10 +47,10 @@ class Renderable
 private:
 	GLuint m_fbo = -1;
 	bool m_fbo_contains_render = false;
-	GLuint m_fbo_target_type = GL_TEXTURE_2D;
+	GLenum m_fbo_target_type = GL_TEXTURE_2D;
 
 	//scene rendering
-	RenderMode m_rendermode = RenderMode::Normal;
+	RenderMode m_rendermode = RenderMode::Default;
 
 	NormalRenderModeData m_rendermode_data_normal;
 	WireframeRenderModeData m_rendermode_data_wireframe;
@@ -76,7 +76,7 @@ private:
 protected:
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer();
-	void SetTargetType(GLuint target_type);
+	void SetTargetType(GLenum target_type);
 
 	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
 	void AddShaderUniformName(std::string name);

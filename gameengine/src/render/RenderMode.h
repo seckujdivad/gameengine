@@ -5,5 +5,6 @@ enum class RenderMode
 	Normal,
 	Wireframe,
 	Shadow,
-	Postprocess
+	Postprocess,
+	Default
 };

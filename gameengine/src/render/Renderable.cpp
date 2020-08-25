@@ -710,11 +710,11 @@ Renderable::Renderable(Engine* engine, RenderMode mode) : m_engine(engine)
 {
 	this->m_engine->MakeContextCurrent();
 
-	this->m_shaders = {
-		{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
-		{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
-	};
-	this->RecompileShader();
+	//this->m_shaders = {
+	//	{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
+	//	{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
+	//};
+	//this->RecompileShader();
 
 	this->ConfigureShader(mode);
 }
