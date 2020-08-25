@@ -19,6 +19,8 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 		throw std::runtime_error("Invalid reference given to controller - cubemap returned is not a reflection");
 	}
 
+	this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
+
 	this->m_camera = new Camera();
 	this->m_camera->SetPosition(cubemap->GetPosition());
 	this->m_camera->SetRotation(0.0, 0.0, 0.0);
