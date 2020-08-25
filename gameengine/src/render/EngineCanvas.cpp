@@ -159,6 +159,7 @@ void EngineCanvas::PostRenderEvent()
 void EngineCanvas::PreRenderEvent()
 {
 	this->MakeOpenGLFocus();
+	this->m_camera_controlled->SetViewportDimensions(std::tuple(this->GetSize().x, this->GetSize().y));
 }
 
 void EngineCanvas::SetMouselookActive(bool enable)
