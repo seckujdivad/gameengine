@@ -23,5 +23,8 @@ public:
 	glm::dvec3 GetPosition() const;
 	double GetPosition(int index) const;
 
+	glm::dmat4 GetTranslationMatrix() const;
+	glm::dmat4 GetTranslationMatrixInverse() const;
+
 	bool CheckIfRepositioned(bool reset = true);
 };

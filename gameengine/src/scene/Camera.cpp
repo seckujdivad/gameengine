@@ -43,8 +43,5 @@ glm::dmat4 Camera::GetPerspectiveMatrix()
 
 glm::dmat4 Camera::GetCombinedMatrix()
 {
-	glm::dmat4 matrix = glm::dmat4(1.0);
-	matrix = glm::translate(matrix, 0.0 - this->GetPosition());
-	matrix = this->GetPerspectiveMatrix() * this->GetRotationMatrix() * matrix;
-	return matrix;
+	return this->GetPerspectiveMatrix() * this->GetRotationMatrixInverse() * this->GetTranslationMatrixInverse();
 }
