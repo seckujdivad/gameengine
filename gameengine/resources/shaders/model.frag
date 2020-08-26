@@ -317,25 +317,27 @@ void shade_mode0()
 
 				int search_level = mat_ssr_refinements; //number of additional searches to carry out
 
-				float hit_increment = abs((mat_ssr_resolution * 2.0f * float(2 << (search_level - 1))) / ((ss_direction.x > ss_direction.y) ? (render_output_x * ss_direction.x) : (render_output_y * ss_direction.y)));
+				float hit_increment = abs(
+					(mat_ssr_resolution * 2.0f * float(2 << (search_level - 1))) / (
+							(abs(ss_direction.x) > abs(ss_direction.y)) ? (render_output_x * ss_direction.x) : (render_output_y * ss_direction.y)
+						)
+					);
 				hit_increment = max(hit_increment, 1.0f / 500.0f);
 
 				vec3 ss_position;
-				float sample_depth;
-				vec2 tex_pos;
 				float hit_pos = 0.0f;
-				
-				bool hit_detected;
 
 				while (!ssr_reflection_applied && all(greaterThan(ss_position, vec3(-1.0f))) && all(lessThan(ss_position, vec3(1.0f))) && (hit_pos < 1.0f))
 				{
 					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
-					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+					vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 					ss_position.z = 1 / mix(1 / ss_start_pos.z, 1 / ss_end_pos.z, hit_pos);
 
-					sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
+					float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
-					hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f) && (texture(render_output_data[0], tex_pos.xy).r > 0.5f) && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
+					bool hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f);
+					hit_detected = hit_detected && (texture(render_output_data[0], tex_pos.xy).r > 0.5f);
+					hit_detected = hit_detected && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
 
 					if (hit_detected && (search_level == 0))
 					{
@@ -345,7 +347,7 @@ void shade_mode0()
 					else if (hit_detected)
 					{
 						hit_pos = hit_pos - hit_increment;
-						hit_increment = hit_increment / 8;
+						hit_increment = hit_increment / 2;
 						search_level--;
 					}
 
