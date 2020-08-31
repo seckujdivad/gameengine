@@ -490,7 +490,7 @@ void Renderable::SetFramebuffer(GLuint fbo)
 	this->m_fbo_contains_render = false;
 }
 
-GLuint Renderable::GetFramebuffer()
+GLuint Renderable::GetFramebuffer() const
 {
 	return this->m_fbo;
 }
@@ -759,7 +759,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 	}
 }
 
-bool Renderable::FramebufferContainsRenderOutput()
+bool Renderable::FramebufferContainsRenderOutput() const
 {
 	return this->m_fbo_contains_render;
 }
@@ -795,12 +795,12 @@ void Renderable::SetCamera(Camera* camera)
 	this->m_camera = camera;
 }
 
-Camera* Renderable::GetCamera()
+Camera* Renderable::GetCamera() const
 {
 	return this->m_camera;
 }
 
-Engine* Renderable::GetEngine()
+Engine* Renderable::GetEngine() const
 {
 	return this->m_engine;
 }
@@ -852,12 +852,7 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 	}
 }
 
-std::tuple<int, int> Renderable::GetOutputSize()
-{
-	throw std::logic_error("Method must be overridden");
-}
-
-RenderMode Renderable::GetRenderMode()
+RenderMode Renderable::GetRenderMode() const
 {
 	return this->m_rendermode;
 }

@@ -9,7 +9,7 @@ void Cubemap::SetClips(std::tuple<double, double> clips)
 	this->m_clips = clips;
 }
 
-std::tuple<double, double> Cubemap::GetClips()
+std::tuple<double, double> Cubemap::GetClips() const
 {
 	return this->m_clips;
 }
@@ -19,7 +19,7 @@ void Cubemap::SetTextureDimensions(std::tuple<int, int> dimensions)
 	this->m_texture_dimensions = dimensions;
 }
 
-std::tuple<int, int> Cubemap::GetTextureDimensions()
+std::tuple<int, int> Cubemap::GetTextureDimensions() const
 {
 	return this->m_texture_dimensions;
 }
@@ -41,7 +41,7 @@ void Cubemap::RemoveStaticModel(ModelReference reference)
 	}
 }
 
-bool Cubemap::ModelIsStatic(ModelReference reference)
+bool Cubemap::ModelIsStatic(ModelReference reference) const
 {
 	return std::find(this->m_models_static.begin(), this->m_models_static.end(), reference) != this->m_models_static.end();
 }
@@ -63,17 +63,17 @@ void Cubemap::RemoveDynamicModel(ModelReference reference)
 	}
 }
 
-bool Cubemap::ModelIsDynamic(ModelReference reference)
+bool Cubemap::ModelIsDynamic(ModelReference reference) const
 {
 	return std::find(this->m_models_dynamic.begin(), this->m_models_dynamic.end(), reference) != this->m_models_dynamic.end();
 }
 
-std::vector<ModelReference> Cubemap::GetStaticModels()
+std::vector<ModelReference> Cubemap::GetStaticModels() const
 {
 	return this->m_models_static;
 }
 
-std::vector<ModelReference> Cubemap::GetDynamicModels()
+std::vector<ModelReference> Cubemap::GetDynamicModels() const
 {
 	return this->m_models_dynamic;
 }
@@ -84,7 +84,7 @@ void Cubemap::SetFramesRequiredForDynamicRender(int num_frames)
 	this->m_refresh_frames_elapsed = 0;
 }
 
-bool Cubemap::IsDynamicRenderRequired()
+bool Cubemap::IsDynamicRenderRequired() const
 {
 	return this->m_refresh_frames_elapsed == this->m_refresh_frames_required;
 }

@@ -33,8 +33,8 @@ private:
 public:
 	VisBox();
 
-	std::unordered_set<Model*, HashPointer<Model>> GetPotentiallyVisibleModels();
-	std::unordered_set<Model*, HashPointer<Model>> GetMemberModels();
+	std::unordered_set<Model*, HashPointer<Model>> GetPotentiallyVisibleModels() const;
+	std::unordered_set<Model*, HashPointer<Model>> GetMemberModels() const;
 	void AddMemberModel(Model* model);
 	void RemoveMemberModel(Model* model);
 

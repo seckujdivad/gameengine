@@ -9,7 +9,7 @@ void Reflection::SetIterations(int iterations)
 	this->m_parallax_iterations = iterations;
 }
 
-int Reflection::GetIterations()
+int Reflection::GetIterations() const
 {
 	return this->m_parallax_iterations;
 }

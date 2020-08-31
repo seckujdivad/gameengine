@@ -327,7 +327,7 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 	}
 }
 
-GLuint ShaderProgram::GetProgramID()
+GLuint ShaderProgram::GetProgramID() const
 {
 	if (this->m_program_id == NULL)
 	{

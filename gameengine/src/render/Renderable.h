@@ -74,7 +74,7 @@ private:
 
 protected:
 	void SetFramebuffer(GLuint fbo);
-	GLuint GetFramebuffer();
+	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
 
 	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
@@ -96,7 +96,7 @@ protected:
 
 	void ConfigureShader(RenderMode mode);
 
-	bool FramebufferContainsRenderOutput();
+	bool FramebufferContainsRenderOutput() const;
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
@@ -108,16 +108,17 @@ public:
 	virtual ~Renderable();
 	
 	void SetCamera(Camera* camera);
-	Camera* GetCamera();
+	Camera* GetCamera() const;
 
-	Engine* GetEngine();
+	Engine* GetEngine() const;
 
 	void SetRenderMode(NormalRenderModeData data);
 	void SetRenderMode(WireframeRenderModeData data);
 	void SetRenderMode(ShadowRenderModeData data);
 	void SetRenderMode(PostProcessRenderModeData data);
-	RenderMode GetRenderMode();
+	RenderMode GetRenderMode() const;
 
-	virtual void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
-	virtual std::tuple<int, int> GetOutputSize();
+	void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
+
+	virtual std::tuple<int, int> GetOutputSize() const = 0;
 };

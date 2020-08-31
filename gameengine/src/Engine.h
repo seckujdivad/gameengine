@@ -64,11 +64,11 @@ public:
 
 	void Render();
 
-	Scene* GetScene();
+	Scene* GetScene() const;
 
 	void LoadTexture(LocalTexture texture, std::string uniform_name);
-	LoadedTexture GetTexture(TextureReference reference);
-	RenderTextureGroup GetRenderTexture(RenderTextureReference reference);
+	LoadedTexture GetTexture(TextureReference reference) const;
+	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
 
 	Engine::LoadedGeometry BindVAO(Model* model);
 	void ReleaseVAO(Model* model);

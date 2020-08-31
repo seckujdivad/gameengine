@@ -14,5 +14,5 @@ public:
 
 	void AddOBB(OrientedBoundingBox obb);
 
-	int NumOBBs();
+	int NumOBBs() const;
 };

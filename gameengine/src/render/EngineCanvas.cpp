@@ -217,7 +217,7 @@ void EngineCanvas::SetVerticalSync(bool enabled)
 #endif
 }
 
-std::tuple<int, int> EngineCanvas::GetOutputSize()
+std::tuple<int, int> EngineCanvas::GetOutputSize() const
 {
 	return std::tuple<int, int>(this->GetSize().x, this->GetSize().y);
 }
@@ -232,7 +232,7 @@ void EngineCanvas::SetControlledCamera(Camera* camera)
 	this->m_camera_controlled = camera;
 }
 
-Camera* EngineCanvas::GetControlledCamera()
+Camera* EngineCanvas::GetControlledCamera() const
 {
 	return this->m_camera_controlled;
 }

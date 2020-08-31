@@ -17,12 +17,12 @@ private:
 public:
 	OrientedBoundingBox();
 
-	bool PointInBounds(glm::dvec3 point);
-	bool PointInBounds(double x, double y, double z);
+	bool PointInBounds(glm::dvec3 point) const;
+	bool PointInBounds(double x, double y, double z) const;
 
-	glm::dvec3 GetDimensionsVec();
-	glm::dmat3 GetRotationMatrix();
-	glm::dmat3 GetInverseRotationMatrix();
+	glm::dvec3 GetDimensionsVec() const;
+	glm::dmat3 GetRotationMatrix() const;
+	glm::dmat3 GetInverseRotationMatrix() const;
 };
 
 bool operator==(const OrientedBoundingBox& first, const OrientedBoundingBox& second);

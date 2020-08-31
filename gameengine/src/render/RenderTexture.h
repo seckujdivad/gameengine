@@ -37,9 +37,9 @@ public:
 	RenderTexture& operator=(const RenderTexture&) = delete;
 	~RenderTexture();
 
-	std::tuple<int, int> GetOutputSize() override;
+	std::tuple<int, int> GetOutputSize() const override;
 	void SetOutputSize(std::tuple<int, int> dimensions);
 
-	RenderTextureGroup GetOutputTextures();
-	RenderTextureInfo GetTextureInfo();
+	RenderTextureGroup GetOutputTextures() const;
+	RenderTextureInfo GetTextureInfo() const;
 };

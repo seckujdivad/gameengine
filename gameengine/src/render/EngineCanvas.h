@@ -57,12 +57,12 @@ public:
 
 	void SetVerticalSync(bool enabled);
 
-	std::tuple<int, int> GetOutputSize();
+	std::tuple<int, int> GetOutputSize() const override;
 
 	void MakeOpenGLFocus();
 
 	void SetControlledCamera(Camera* camera);
-	Camera* GetControlledCamera();
+	Camera* GetControlledCamera() const;
 };
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

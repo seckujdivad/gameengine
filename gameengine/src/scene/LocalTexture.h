@@ -45,11 +45,11 @@ public:
 
 	void SetFullTexture(unsigned char* data, std::tuple<int, int> dimensions, bool copy = false);
 
-	std::tuple<int, int> GetDimensions();
-	unsigned char* GetData();
+	std::tuple<int, int> GetDimensions() const;
+	unsigned char* GetData() const;
 
 	void SetMagFilter(LocalTextureFilter filter);
-	LocalTextureFilter GetMagFilter();
+	LocalTextureFilter GetMagFilter() const;
 	void SetMinFilter(LocalTextureFilter filter);
-	LocalTextureFilter GetMinFilter();
+	LocalTextureFilter GetMinFilter() const;
 };

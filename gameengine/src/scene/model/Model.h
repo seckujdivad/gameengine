@@ -65,13 +65,13 @@ private:
 public:
 	Model(ModelReference reference, ModelGeometry geometry, Scene* scene = nullptr);
 
-	std::vector<std::vector<double>> GetTriFans(); //not implemented
-	std::vector<std::vector<double>> GetTriStrips(); //not implemented
-	std::vector<double> GetTriangles(bool only_geometry = false);
+	std::vector<std::vector<double>> GetTriFans() const; //not implemented
+	std::vector<std::vector<double>> GetTriStrips() const; //not implemented
+	std::vector<double> GetTriangles(bool only_geometry = false) const;
 
 	Material& GetMaterial();
 
-	ModelGeometry GetGeometry();
+	ModelGeometry GetGeometry() const;
 
 	LocalTexture& GetColourTexture();
 	LocalTexture& GetReflectionTexture();
@@ -82,7 +82,7 @@ public:
 	void SetWireframeColour(glm::vec3 colour);
 	void SetWireframeColourSelected();
 	void SetWireframeColourUnselected();
-	glm::vec3 GetWireframeColour();
+	glm::vec3 GetWireframeColour() const;
 
 	static constexpr int GetValuesPerVert() { return 14; };
 };

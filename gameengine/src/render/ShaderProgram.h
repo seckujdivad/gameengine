@@ -34,7 +34,7 @@ public:
 
 	void Select(int texture_group_id = -1);
 
-	GLuint GetProgramID();
+	GLuint GetProgramID() const;
 
 	GLuint RegisterUniform(std::string name);
 	GLuint GetUniform(std::string name);

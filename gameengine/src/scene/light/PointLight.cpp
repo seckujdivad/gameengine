@@ -10,7 +10,7 @@ void PointLight::SetIntensity(glm::vec3 intensity)
 	this->m_intensity = intensity;
 }
 
-glm::vec3 PointLight::GetIntensity()
+glm::vec3 PointLight::GetIntensity() const
 {
 	return this->m_intensity;
 }
@@ -20,7 +20,7 @@ void PointLight::SetShadowsEnabled(bool enabled)
 	this->m_shadows_enabled = enabled;
 }
 
-bool PointLight::GetShadowsEnabled()
+bool PointLight::GetShadowsEnabled() const
 {
 	return this->m_shadows_enabled;
 }
@@ -30,7 +30,7 @@ void PointLight::SetShadowBias(double bias)
 	this->m_shadow_bias = bias;
 }
 
-double PointLight::GetShadowBias()
+double PointLight::GetShadowBias() const
 {
 	return this->m_shadow_bias;
 }

@@ -30,23 +30,23 @@ public:
 	Cubemap(RenderTextureReference reference);
 
 	void SetClips(std::tuple<double, double> clips);
-	std::tuple<double, double> GetClips();
+	std::tuple<double, double> GetClips() const;
 
 	void SetTextureDimensions(std::tuple<int, int> dimensions);
-	std::tuple<int, int> GetTextureDimensions();
+	std::tuple<int, int> GetTextureDimensions() const;
 
 	void AddStaticModel(ModelReference reference);
 	void RemoveStaticModel(ModelReference reference);
-	bool ModelIsStatic(ModelReference reference);
+	bool ModelIsStatic(ModelReference reference) const;
 
 	void AddDynamicModel(ModelReference reference);
 	void RemoveDynamicModel(ModelReference reference);
-	bool ModelIsDynamic(ModelReference reference);
+	bool ModelIsDynamic(ModelReference reference) const;
 
-	std::vector<ModelReference> GetStaticModels();
-	std::vector<ModelReference> GetDynamicModels();
+	std::vector<ModelReference> GetStaticModels() const;
+	std::vector<ModelReference> GetDynamicModels() const;
 
 	void SetFramesRequiredForDynamicRender(int num_frames);
-	bool IsDynamicRenderRequired();
+	bool IsDynamicRenderRequired() const;
 	void IncrementFrameCounter();
 };

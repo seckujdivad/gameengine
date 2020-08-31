@@ -6,13 +6,12 @@ VisBox::VisBox() : OrientedBoundingBox()
 {
 }
 
-std::unordered_set<Model*, HashPointer<Model>> VisBox::GetPotentiallyVisibleModels()
+std::unordered_set<Model*, HashPointer<Model>> VisBox::GetPotentiallyVisibleModels() const
 {
 	std::unordered_set<Model*, HashPointer<Model>> output = this->m_members;
 
-	for (auto it = this->m_pvs.begin(); it != this->m_pvs.end(); it++)
+	for (VisBox* visbox : this->m_pvs)
 	{
-		VisBox* visbox = *it;
 		std::unordered_set<Model*, HashPointer<Model>> member_models = visbox->GetMemberModels();
 		output.insert(member_models.begin(), member_models.end());
 	}
@@ -20,7 +19,7 @@ std::unordered_set<Model*, HashPointer<Model>> VisBox::GetPotentiallyVisibleMode
 	return output;
 }
 
-std::unordered_set<Model*, HashPointer<Model>> VisBox::GetMemberModels()
+std::unordered_set<Model*, HashPointer<Model>> VisBox::GetMemberModels() const
 {
 	return this->m_members;
 }

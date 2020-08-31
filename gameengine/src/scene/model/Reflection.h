@@ -20,5 +20,5 @@ public:
 
 	//iterative mode only
 	void SetIterations(int iterations);
-	int GetIterations();
+	int GetIterations() const;
 };

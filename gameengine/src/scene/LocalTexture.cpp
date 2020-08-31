@@ -86,7 +86,7 @@ void LocalTexture::SetFullTexture(unsigned char* data, std::tuple<int, int> dime
 	}
 }
 
-std::tuple<int, int> LocalTexture::GetDimensions()
+std::tuple<int, int> LocalTexture::GetDimensions() const
 {
 	if (this->m_type == LocalTextureType::None)
 	{
@@ -108,7 +108,7 @@ std::tuple<int, int> LocalTexture::GetDimensions()
 	return { -1, -1 };
 }
 
-unsigned char* LocalTexture::GetData()
+unsigned char* LocalTexture::GetData() const
 {
 	if (this->m_type == LocalTextureType::None)
 	{
@@ -133,7 +133,7 @@ void LocalTexture::SetMagFilter(LocalTextureFilter filter)
 	this->m_filter_mag = filter;
 }
 
-LocalTextureFilter LocalTexture::GetMagFilter()
+LocalTextureFilter LocalTexture::GetMagFilter() const
 {
 	return this->m_filter_mag;
 }
@@ -143,7 +143,7 @@ void LocalTexture::SetMinFilter(LocalTextureFilter filter)
 	this->m_filter_min = filter;
 }
 
-LocalTextureFilter LocalTexture::GetMinFilter()
+LocalTextureFilter LocalTexture::GetMinFilter() const
 {
 	return this->m_filter_min;
 }

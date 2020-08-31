@@ -262,7 +262,7 @@ RenderTexture::~RenderTexture()
 	glDeleteTextures(textures.size(), textures.data());
 }
 
-std::tuple<int, int> RenderTexture::GetOutputSize()
+std::tuple<int, int> RenderTexture::GetOutputSize() const
 {
 	return this->m_dimensions;
 }
@@ -281,7 +281,7 @@ void RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 	}
 }
 
-RenderTextureGroup RenderTexture::GetOutputTextures()
+RenderTextureGroup RenderTexture::GetOutputTextures() const
 {
 	if (this->m_simultaneous_read_write)
 	{
@@ -293,7 +293,7 @@ RenderTextureGroup RenderTexture::GetOutputTextures()
 	}
 }
 
-RenderTextureInfo RenderTexture::GetTextureInfo()
+RenderTextureInfo RenderTexture::GetTextureInfo() const
 {
 	return this->m_info;
 }

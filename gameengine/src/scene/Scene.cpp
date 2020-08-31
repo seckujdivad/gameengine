@@ -48,7 +48,7 @@ void Scene::ManageChildren(bool manage)
 	this->m_manage_children = manage;
 }
 
-bool Scene::ChildrenAreManaged()
+bool Scene::ChildrenAreManaged() const
 {
 	return this->m_manage_children;
 }
@@ -77,33 +77,33 @@ void Scene::RemoveModel(ModelReference reference)
 	this->Remove(this->GetModel(reference));
 }
 
-Model* Scene::GetModel(ModelReference reference)
+Model* Scene::GetModel(ModelReference reference) const
 {
-	for (std::vector<Model*>::iterator it = this->m_models.begin(); it != this->m_models.end(); it++)
+	for (Model* model : this->m_models)
 	{
-		if ((*it)->GetReference() == reference)
+		if (model->GetReference() == reference)
 		{
-			return *it;
+			return model;
 		}
 	}
 
 	return nullptr;
 }
 
-Model* Scene::GetModel(std::string identifier)
+Model* Scene::GetModel(std::string identifier) const
 {
-	for (std::vector<Model*>::iterator it = this->m_models.begin(); it != this->m_models.end(); it++)
+	for (Model* model : this->m_models)
 	{
-		if ((*it)->GetIdentifier() == identifier)
+		if (model->GetIdentifier() == identifier)
 		{
-			return *it;
+			return model;
 		}
 	}
 
 	return nullptr;
 }
 
-std::vector<Model*> Scene::GetModels()
+std::vector<Model*> Scene::GetModels() const
 {
 	return this->m_models;
 }
@@ -113,7 +113,7 @@ void Scene::SetAmbientLight(glm::vec3 light_intensity)
 	this->m_light_ambient = light_intensity;
 }
 
-glm::vec3 Scene::GetAmbientLight()
+glm::vec3 Scene::GetAmbientLight() const
 {
 	return this->m_light_ambient;
 }
@@ -139,12 +139,12 @@ void Scene::SetSkyboxScene(Scene* scene)
 	this->m_skybox_texture = this->GetNewRenderTextureReference();
 }
 
-Scene* Scene::GetSkyboxScene()
+Scene* Scene::GetSkyboxScene() const
 {
 	return this->m_skybox_scene;
 }
 
-RenderTextureReference Scene::GetSkyboxTextureReference()
+RenderTextureReference Scene::GetSkyboxTextureReference() const
 {
 	return this->m_skybox_texture;
 }
@@ -154,12 +154,12 @@ void Scene::SetClearColour(glm::vec4 colour)
 	this->m_clear_colour = colour;
 }
 
-glm::vec4 Scene::GetClearColour()
+glm::vec4 Scene::GetClearColour() const
 {
 	return this->m_clear_colour;
 }
 
-std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode)
+std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode) const
 {
 	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow))
 	{
@@ -226,7 +226,7 @@ void Scene::Remove(PointLight* pointlight)
 	}
 }
 
-std::vector<PointLight*> Scene::GetPointLights()
+std::vector<PointLight*> Scene::GetPointLights() const
 {
 	return this->m_pointlights;
 }
@@ -236,13 +236,13 @@ void Scene::Add(Reflection* reflection)
 	this->m_reflections.push_back(reflection);
 }
 
-Reflection* Scene::GetReflection(std::string identifier)
+Reflection* Scene::GetReflection(std::string identifier) const
 {
-	for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+	for (Reflection* reflection : this->m_reflections)
 	{
-		if ((*it)->GetIdentifier() == identifier)
+		if (reflection->GetIdentifier() == identifier)
 		{
-			return *it;
+			return reflection;
 		}
 	}
 
@@ -263,7 +263,7 @@ void Scene::Remove(Reflection* reflection) //TODO: remove reflection pointers fr
 	}
 }
 
-std::vector<Reflection*> Scene::GetReflections()
+std::vector<Reflection*> Scene::GetReflections() const
 {
 	return this->m_reflections;
 }
@@ -273,13 +273,13 @@ void Scene::Add(VisBox* visbox)
 	this->m_visboxes.push_back(visbox);
 }
 
-VisBox* Scene::GetVisBox(std::string identifier)
+VisBox* Scene::GetVisBox(std::string identifier) const
 {
-	for (std::vector<VisBox*>::iterator it = this->m_visboxes.begin(); it != this->m_visboxes.end(); it++)
+	for (VisBox* visbox : this->m_visboxes)
 	{
-		if ((*it)->GetIdentifier() == identifier)
+		if (visbox->GetIdentifier() == identifier)
 		{
-			return *it;
+			return visbox;
 		}
 	}
 
@@ -300,7 +300,7 @@ void Scene::Remove(VisBox* visbox)
 	}
 }
 
-std::vector<VisBox*> Scene::GetVisBoxes()
+std::vector<VisBox*> Scene::GetVisBoxes() const
 {
 	return this->m_visboxes;
 }
@@ -340,28 +340,28 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 	}
 }
 
-std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference reference)
+std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference reference) const
 {
-	for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+	for (Reflection* reflection : this->m_reflections)
 	{
-		if ((*it)->GetReference() == reference)
+		if (reflection->GetReference() == reference)
 		{
-			return { *it, CubemapType::Reflection };
+			return { reflection, CubemapType::Reflection };
 		}
 	}
 
-	for (std::vector<PointLight*>::iterator it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
+	for (PointLight* point_light : this->m_pointlights)
 	{
-		if ((*it)->GetReference() == reference)
+		if (point_light->GetReference() == reference)
 		{
-			return { *it, CubemapType::Pointlight };
+			return { point_light, CubemapType::Pointlight };
 		}
 	}
 
 	return { nullptr, CubemapType::None };
 }
 
-std::vector<std::tuple<Cubemap*, CubemapType>> Scene::GetCubemaps()
+std::vector<std::tuple<Cubemap*, CubemapType>> Scene::GetCubemaps() const
 {
 	std::vector<std::tuple<Cubemap*, CubemapType>> cubemaps;
 	for (auto it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
@@ -387,7 +387,7 @@ void Scene::Remove(OrientedBoundingBox obb)
 	this->m_approximations.erase(std::find(this->m_approximations.begin(), this->m_approximations.end(), obb));
 }
 
-std::vector<OrientedBoundingBox> Scene::GetOBBApproximations()
+std::vector<OrientedBoundingBox> Scene::GetOBBApproximations() const
 {
 	return this->m_approximations;
 }

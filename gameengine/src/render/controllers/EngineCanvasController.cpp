@@ -44,22 +44,22 @@ void EngineCanvasController::Render()
     this->m_canvas->Render();
 }
 
-RenderTextureGroup EngineCanvasController::GetRenderTexture()
+RenderTextureGroup EngineCanvasController::GetRenderTexture() const
 {
     return this->m_texture->GetOutputTextures();
 }
 
-double EngineCanvasController::GetRenderGroup()
+double EngineCanvasController::GetRenderGroup() const
 {
     return 1.0; //last render
 }
 
-RenderControllerType EngineCanvasController::GetType()
+RenderControllerType EngineCanvasController::GetType() const
 {
     return RenderControllerType::EngineCanvas;
 }
 
-EngineCanvas* EngineCanvasController::GetEngineCanvas()
+EngineCanvas* EngineCanvasController::GetEngineCanvas() const
 {
     return this->m_canvas;
 }

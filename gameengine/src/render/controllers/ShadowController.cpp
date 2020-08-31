@@ -62,17 +62,17 @@ void ShadowController::Render()
 	this->m_texture->Render();
 }
 
-RenderTextureGroup ShadowController::GetRenderTexture()
+RenderTextureGroup ShadowController::GetRenderTexture() const
 {
 	return this->m_texture->GetOutputTextures();
 }
 
-double ShadowController::GetRenderGroup()
+double ShadowController::GetRenderGroup() const
 {
 	return 0.0; //shadows have no dependencies, draw first
 }
 
-RenderControllerType ShadowController::GetType()
+RenderControllerType ShadowController::GetType() const
 {
 	return RenderControllerType::Shadow;
 }

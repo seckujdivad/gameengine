@@ -392,17 +392,17 @@ void Engine::Render()
 	}
 }
 
-Scene* Engine::GetScene()
+Scene* Engine::GetScene() const
 {
 	return this->m_scene;
 }
 
-LoadedTexture Engine::GetTexture(TextureReference reference)
+LoadedTexture Engine::GetTexture(TextureReference reference) const
 {
 	return this->m_textures_static.at(reference);
 }
 
-RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference)
+RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) const
 {
 	for (RenderController* controller : this->m_render_controllers)
 	{

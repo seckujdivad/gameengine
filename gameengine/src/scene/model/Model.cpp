@@ -26,17 +26,17 @@ Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : P
 	}
 }
 
-std::vector<std::vector<double>> Model::GetTriFans()
+std::vector<std::vector<double>> Model::GetTriFans() const
 {
 	throw std::logic_error("Not implemented");
 }
 
-std::vector<std::vector<double>> Model::GetTriStrips()
+std::vector<std::vector<double>> Model::GetTriStrips() const
 {
 	throw std::logic_error("Not implemented");
 }
 
-std::vector<double> Model::GetTriangles(bool only_geometry)
+std::vector<double> Model::GetTriangles(bool only_geometry) const
 {
 	return ::GetTriangles(this->m_geometry, only_geometry);
 }
@@ -46,7 +46,7 @@ Material& Model::GetMaterial()
 	return this->m_material;
 }
 
-ModelGeometry Model::GetGeometry()
+ModelGeometry Model::GetGeometry() const
 {
 	return this->m_geometry;
 }
@@ -91,7 +91,7 @@ void Model::SetWireframeColourUnselected()
 	this->SetWireframeColour(glm::vec3(0.0f));
 }
 
-glm::vec3 Model::GetWireframeColour()
+glm::vec3 Model::GetWireframeColour() const
 {
 	return this->m_wireframe_colour;
 }

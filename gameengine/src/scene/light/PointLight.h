@@ -18,11 +18,11 @@ public:
 	PointLight(RenderTextureReference reference);
 
 	void SetIntensity(glm::vec3 intensity);
-	glm::vec3 GetIntensity();
+	glm::vec3 GetIntensity() const;
 
 	void SetShadowsEnabled(bool enabled);
-	bool GetShadowsEnabled();
+	bool GetShadowsEnabled() const;
 
 	void SetShadowBias(double bias);
-	double GetShadowBias();
+	double GetShadowBias() const;
 };

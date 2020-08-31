@@ -19,7 +19,7 @@ public:
 	~ReflectionController();
 
 	void Render() override;
-	RenderTextureGroup GetRenderTexture() override;
-	double GetRenderGroup() override;
-	RenderControllerType GetType() override;
+	RenderTextureGroup GetRenderTexture() const override;
+	double GetRenderGroup() const override;
+	RenderControllerType GetType() const override;
 };

@@ -69,17 +69,17 @@ void ReflectionController::Render()
 	this->m_texture->Render();
 }
 
-RenderTextureGroup ReflectionController::GetRenderTexture()
+RenderTextureGroup ReflectionController::GetRenderTexture() const
 {
 	return this->m_texture->GetOutputTextures();
 }
 
-double ReflectionController::GetRenderGroup()
+double ReflectionController::GetRenderGroup() const
 {
 	return 0.5; //reflections are dependent on shadows
 }
 
-RenderControllerType ReflectionController::GetType()
+RenderControllerType ReflectionController::GetType() const
 {
 	return RenderControllerType::Reflection;
 }

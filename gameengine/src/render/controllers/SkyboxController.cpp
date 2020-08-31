@@ -21,17 +21,17 @@ void SkyboxController::Render()
 	this->m_texture->Render();
 }
 
-RenderTextureGroup SkyboxController::GetRenderTexture()
+RenderTextureGroup SkyboxController::GetRenderTexture() const
 {
 	return this->m_texture->GetOutputTextures();
 }
 
-double SkyboxController::GetRenderGroup()
+double SkyboxController::GetRenderGroup() const
 {
 	return 0.0;
 }
 
-RenderControllerType SkyboxController::GetType()
+RenderControllerType SkyboxController::GetType() const
 {
 	return RenderControllerType::Skybox;
 }

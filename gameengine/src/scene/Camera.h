@@ -20,14 +20,14 @@ public:
 	Camera();
 
 	void SetFOV(double fov);
-	double GetFOV();
+	double GetFOV() const;
 
 	void SetClips(std::tuple<double, double> clips);
-	std::tuple<double, double> GetClips();
+	std::tuple<double, double> GetClips() const;
 
 	void SetViewportDimensions(std::tuple<int, int> dimensions);
-	std::tuple<int, int> GetViewportDimensions();
+	std::tuple<int, int> GetViewportDimensions() const;
 
-	glm::dmat4 GetPerspectiveMatrix();
-	glm::dmat4 GetCombinedMatrix();
+	glm::dmat4 GetPerspectiveMatrix() const;
+	glm::dmat4 GetCombinedMatrix() const;
 };

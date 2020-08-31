@@ -48,48 +48,48 @@ public:
 	~Scene();
 
 	void ManageChildren(bool manage);
-	bool ChildrenAreManaged();
+	bool ChildrenAreManaged() const;
 
 	void Add(Model* model);
 	void Remove(Model* model);
 	void RemoveModel(ModelReference reference);
-	Model* GetModel(ModelReference reference);
-	Model* GetModel(std::string identifier);
-	std::vector<Model*> GetModels();
-	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode);
+	Model* GetModel(ModelReference reference) const;
+	Model* GetModel(std::string identifier) const;
+	std::vector<Model*> GetModels() const;
+	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode) const;
 
 	void Add(PointLight* pointlight);
 	void Remove(PointLight* pointlight);
-	std::vector<PointLight*> GetPointLights();
+	std::vector<PointLight*> GetPointLights() const;
 
 	void Add(Reflection* reflection);
-	Reflection* GetReflection(std::string identifier);
+	Reflection* GetReflection(std::string identifier) const;
 	void Remove(Reflection* reflection);
-	std::vector<Reflection*> GetReflections();
+	std::vector<Reflection*> GetReflections() const;
 
 	void Add(VisBox* visbox);
-	VisBox* GetVisBox(std::string identifier);
+	VisBox* GetVisBox(std::string identifier) const;
 	void Remove(VisBox* visbox);
-	std::vector<VisBox*> GetVisBoxes();
+	std::vector<VisBox*> GetVisBoxes() const;
 
 	void RemoveCubemap(RenderTextureReference reference);
-	std::tuple<Cubemap*, CubemapType> GetCubemap(RenderTextureReference reference);
-	std::vector<std::tuple<Cubemap*, CubemapType>> GetCubemaps();
+	std::tuple<Cubemap*, CubemapType> GetCubemap(RenderTextureReference reference) const;
+	std::vector<std::tuple<Cubemap*, CubemapType>> GetCubemaps() const;
 
 	void Add(OrientedBoundingBox obb);
 	void Remove(OrientedBoundingBox obb);
-	std::vector<OrientedBoundingBox> GetOBBApproximations();
+	std::vector<OrientedBoundingBox> GetOBBApproximations() const;
 
 	void SetSkyboxScene(Scene* scene);
-	Scene* GetSkyboxScene();
+	Scene* GetSkyboxScene() const;
 
-	RenderTextureReference GetSkyboxTextureReference();
+	RenderTextureReference GetSkyboxTextureReference() const;
 
 	void SetClearColour(glm::vec4 colour);
-	glm::vec4 GetClearColour();
+	glm::vec4 GetClearColour() const;
 
 	void SetAmbientLight(glm::vec3 colour);
-	glm::vec3 GetAmbientLight();
+	glm::vec3 GetAmbientLight() const;
 
 	ModelReference GetNewModelReference();
 	RenderTextureReference GetNewRenderTextureReference();
