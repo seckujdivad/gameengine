@@ -139,6 +139,14 @@ GLuint ShaderProgram::RegisterUniform(std::string name)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
+	else if (name == "")
+	{
+#ifdef GM_SHADER_REJECT_UNKNOWN_UNIFORMS
+		throw std::invalid_argument("Shader uniform can't be blank");
+#else
+		return (GLuint)-1;
+#endif
+	}
 	else if (this->m_uniforms.find(name) == this->m_uniforms.end())
 	{
 		glUseProgram(this->m_program_id);
