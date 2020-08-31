@@ -223,7 +223,7 @@ void ShaderProgram::Select(int texture_group_id)
 		{
 			throw std::runtime_error("Too many bound textures - maximum is " + std::to_string(this->m_max_texture_units));
 		}
-		
+
 		for (int i = 0; i < (int)textures.size(); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
