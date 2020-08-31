@@ -12,6 +12,8 @@ private:
 
 	Camera* m_camera;
 
+	int m_frame_counter;
+
 public:
 	ReflectionController(Engine* engine, RenderTextureReference reference);
 	ReflectionController(const ReflectionController&) = delete;

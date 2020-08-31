@@ -78,22 +78,12 @@ std::vector<ModelReference> Cubemap::GetDynamicModels() const
 	return this->m_models_dynamic;
 }
 
-void Cubemap::SetFramesRequiredForDynamicRender(int num_frames)
+void Cubemap::SetDynamicRedrawFrames(int num_frames)
 {
 	this->m_refresh_frames_required = num_frames;
-	this->m_refresh_frames_elapsed = 0;
 }
 
-bool Cubemap::IsDynamicRenderRequired() const
+int Cubemap::GetDynamicRedrawFrames() const
 {
-	return this->m_refresh_frames_elapsed == this->m_refresh_frames_required;
-}
-
-void Cubemap::IncrementFrameCounter()
-{
-	this->m_refresh_frames_elapsed++;
-	if (this->m_refresh_frames_elapsed > this->m_refresh_frames_required)
-	{
-		this->m_refresh_frames_elapsed = 0;
-	}
+	return this->m_refresh_frames_required;
 }

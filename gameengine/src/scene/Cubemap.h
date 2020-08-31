@@ -21,7 +21,6 @@ private:
 	std::tuple<double, double> m_clips = { 0.1, 100.0 };
 
 	int m_refresh_frames_required = 0;
-	int m_refresh_frames_elapsed = 0;
 
 	std::vector<ModelReference> m_models_static;
 	std::vector<ModelReference> m_models_dynamic;
@@ -46,7 +45,6 @@ public:
 	std::vector<ModelReference> GetStaticModels() const;
 	std::vector<ModelReference> GetDynamicModels() const;
 
-	void SetFramesRequiredForDynamicRender(int num_frames);
-	bool IsDynamicRenderRequired() const;
-	void IncrementFrameCounter();
+	void SetDynamicRedrawFrames(int num_frames);
+	int GetDynamicRedrawFrames() const;
 };

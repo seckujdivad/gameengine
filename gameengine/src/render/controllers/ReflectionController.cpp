@@ -40,6 +40,15 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
 
 	this->m_texture->SetCamera(this->m_camera);
+
+	if (cubemap->GetDynamicRedrawFrames() > 0)
+	{
+		this->m_frame_counter = std::rand() % cubemap->GetDynamicRedrawFrames();
+	}
+	else
+	{
+		this->m_frame_counter = 0;
+	}
 }
 
 ReflectionController::~ReflectionController()
@@ -50,23 +59,35 @@ ReflectionController::~ReflectionController()
 
 void ReflectionController::Render()
 {
-	NormalRenderModeData data;
-	data.previous_frame = this->m_texture->GetOutputTextures();
-	this->m_texture->SetRenderMode(data);
-
 	Cubemap* cubemap = std::get<0>(this->m_engine->GetScene()->GetCubemap(this->GetReference()));
 	if (cubemap == nullptr)
 	{
 		throw std::runtime_error("Reflection no longer exists");
 	}
 
-	this->m_camera->SetPosition(cubemap->GetPosition());
-	this->m_camera->SetClips(cubemap->GetClips());
-	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
+	if (cubemap->GetDynamicRedrawFrames() != -1)
+	{
+		if (cubemap->GetDynamicRedrawFrames() <= this->m_frame_counter)
+		{
+			NormalRenderModeData data;
+			data.previous_frame = this->m_texture->GetOutputTextures();
+			this->m_texture->SetRenderMode(data);
 
-	this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
+			this->m_camera->SetPosition(cubemap->GetPosition());
+			this->m_camera->SetClips(cubemap->GetClips());
+			this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
 
-	this->m_texture->Render();
+			this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
+
+			this->m_texture->Render();
+
+			this->m_frame_counter = 0;
+		}
+		else
+		{
+			this->m_frame_counter++;
+		}
+	}
 }
 
 RenderTextureGroup ReflectionController::GetRenderTexture() const
