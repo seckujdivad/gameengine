@@ -103,23 +103,30 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		//load "constant" uniforms (uniforms constant between models like camera data) into program
 		// cubemap uniforms
 		{
-			std::vector<glm::mat4> transforms;
-			glm::vec3 translate = glm::vec3(0.0f);
-
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-			for (int i = 0; i < (int)transforms.size(); i++)
-			{
-				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
-			}
-
 			bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
 			this->SetShaderUniform("is_cubemap", is_cubemap);
+
+			if (is_cubemap)
+			{
+				std::vector<glm::mat4> transforms;
+				glm::vec3 translate = glm::vec3(0.0f);
+
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+				for (int i = 0; i < (int)transforms.size(); i++)
+				{
+					this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
+				}
+			}
+			else
+			{
+				this->SetShaderUniform("cubemap_transform[0]", glm::mat4(1.0f));
+			}
 		}
 
 		//specialised uniforms

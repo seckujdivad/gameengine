@@ -13,7 +13,6 @@ out vec2 vertUV;
 
 out vec4 vertMdlSpaceNormal;
 out vec4 vertSceneSpaceNormal;
-out vec4 vertCamSpaceNormal;
 
 out mat3 vertNormalTBN;
 
@@ -42,16 +41,13 @@ void main()
 
 	// camera
 	vertCamSpacePos = vertSceneSpacePos + cam_translate;
-	vertCamSpacePos = cam_rotate * vertCamSpacePos;
-	vertCamSpacePos = vertCamSpacePos / vertCamSpacePos.w;
 
 	// perspective
-	gl_Position = cam_persp * vertCamSpacePos;
+	gl_Position = vertCamSpacePos;
 
 	//outputs
 	vertMdlSpaceNormal = normalize(vec4(inNormal.xyz, 1.0f));
 	vertSceneSpaceNormal = mdl_rotate * vertMdlSpaceNormal;
-	vertCamSpaceNormal = cam_rotate * vertSceneSpaceNormal;
 	
 	vertUV = inUV;
 

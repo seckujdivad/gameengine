@@ -10,7 +10,6 @@ in vec2 vertUV[];
 
 in vec4 vertMdlSpaceNormal[];
 in vec4 vertSceneSpaceNormal[];
-in vec4 vertCamSpaceNormal[];
 
 in mat3 vertNormalTBN[];
 
@@ -29,6 +28,9 @@ out mat3 geomNormalTBN;
 uniform mat4 cubemap_transform[6];
 uniform bool is_cubemap;
 
+uniform mat4 cam_rotate;
+uniform mat4 cam_persp;
+
 void set_outputs(int index)
 {
 	geomMdlSpacePos = vertMdlSpacePos[index % 3];
@@ -39,11 +41,15 @@ void set_outputs(int index)
 
 	geomMdlSpaceNormal = vertMdlSpaceNormal[index % 3];
 	geomSceneSpaceNormal = vertSceneSpaceNormal[index % 3];
-	geomCamSpaceNormal = vertCamSpaceNormal[index % 3];
 
 	geomNormalTBN = vertNormalTBN[index % 3];
 
-	gl_Position = gl_in[index % 3].gl_Position;
+	//calculate post camera transformation values (which are affected by the cubemap face)
+	geomCamSpacePos = (cubemap_transform[gl_Layer] * cam_rotate * geomCamSpacePos) / geomCamSpacePos.w;
+
+	gl_Position = cam_persp * geomCamSpacePos;
+
+	geomCamSpaceNormal = cubemap_transform[gl_Layer] * cam_rotate * vertSceneSpaceNormal[index % 3];
 }
 
 void main()
