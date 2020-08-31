@@ -63,11 +63,21 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 {
 	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
 
+	if (!wxGLCanvas::IsDisplaySupported(this->m_canvas_args))
+	{
+		throw std::runtime_error("Display settings are not supported");
+	}
+
 	this->m_glcontext_canvas = new wxGLCanvas(parent, this->m_canvas_args, wxID_ANY);
 
 	wxGLContextAttrs ctx_attrs;
 	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
 	this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
+
+	if (!this->m_glcontext->IsOK())
+	{
+		throw std::runtime_error("OpenGL Context is not correct");
+	}
 
 	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
 
