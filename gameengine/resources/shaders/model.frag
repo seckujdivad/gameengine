@@ -77,12 +77,13 @@ struct PointLight
 	vec3 position;
 	vec3 intensity;
 	bool shadows_enabled;
-	samplerCube shadow_cubemap;
 	float shadow_far_plane;
 	float shadow_bias;
 };
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
+
+uniform samplerCube light_shadow_cubemaps[POINT_LIGHT_NUM];
 
 //reflections
 
@@ -137,7 +138,8 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 	}
 
 	vec3 lighttofrag = fragpos - light_points[lightindex].position;
-	float depth_sample = texture(light_points[lightindex].shadow_cubemap, lighttofrag).r;
+
+	float depth_sample = texture(light_shadow_cubemaps[lightindex], lighttofrag).r;
 	float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
 	float frag_depth = length(lighttofrag);
 	
@@ -259,7 +261,7 @@ void shade_mode0()
 			light_change = vec3(0.0f);
 
 			fragtolight = light_points[i].position - geomSceneSpacePos.xyz; //get direction from the fragment to the light source
-
+			
 			if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
 			{
 				fragtolight = normalize(fragtolight);

@@ -175,14 +175,17 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				this->AddShaderUniformName(root_name + "shadow_bias");
 				this->SetShaderUniform(root_name + "shadow_bias", point_light->GetShadowBias());
+				
+				std::string cubemap_name = "light_shadow_cubemaps[" + std::to_string(i) + "]";
 
-				this->AddShaderUniformName(root_name + "shadow_cubemap");
+				this->AddShaderUniformName(cubemap_name);
 				RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
-				LoadedTexture loaded_texture;
 				loaded_texture.id = texture.colour;
-				loaded_texture.type = texture.type;
-				loaded_texture.uniform_name = root_name + "shadow_cubemap";
 
+				LoadedTexture loaded_texture;
+				loaded_texture.type = GL_TEXTURE_CUBE_MAP;
+				loaded_texture.uniform_name = cubemap_name;
+				
 				this->m_shader_program->SetTexture(-1, loaded_texture);
 			}
 
