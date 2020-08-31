@@ -288,7 +288,7 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 	else
 	{
 		bool found_match = false;
-		std::vector<LoadedTexture> textures = this->m_textures.at(texture_group_id);
+		std::vector<LoadedTexture>& textures = this->m_textures.at(texture_group_id);
 		for (int i = 0; (i < (int)textures.size()) && !found_match; i++)
 		{
 			if (textures.at(i).uniform_name == texture.uniform_name)
@@ -302,8 +302,6 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 		{
 			textures.push_back(texture);
 		}
-
-		this->m_textures.at(texture_group_id) = textures;
 	}
 }
 
