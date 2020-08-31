@@ -81,9 +81,6 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 
 	glLoadIdentity();
 
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
