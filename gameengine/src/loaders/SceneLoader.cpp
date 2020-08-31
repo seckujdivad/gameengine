@@ -127,7 +127,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 
 			obb.SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 			obb.SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
-			obb.SetScale(GetVector(el.value()["rotation"], glm::dvec3(2.0)) * 0.5);
+			obb.SetScale(GetVector(el.value()["dimensions"], glm::dvec3(2.0)) * 0.5);
 
 			scene->Add(obb);
 		}
