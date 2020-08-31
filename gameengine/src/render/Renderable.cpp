@@ -34,7 +34,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		{
 			if ((this->GetRenderMode() == RenderMode::Normal) || (this->GetRenderMode() == RenderMode::Shadow) || (this->GetRenderMode() == RenderMode::Wireframe))
 			{
-				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->m_rendermode);
+				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode());
 			}
 			else if (this->GetRenderMode() == RenderMode::Postprocess)
 			{
@@ -118,7 +118,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 			}
 
-			bool is_cubemap = this->m_fbo_target_type == GL_TEXTURE_CUBE_MAP;
+			bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
 			this->SetShaderUniform("is_cubemap", is_cubemap);
 		}
 
@@ -500,6 +500,11 @@ void Renderable::SetTargetType(GLenum target_type)
 	this->m_fbo_target_type = target_type;
 }
 
+GLenum Renderable::GetTargetType() const
+{
+	return this->m_fbo_target_type;
+}
+
 bool Renderable::SetShaderDefine(std::string key, std::string value)
 {
 	std::map<std::string, std::string>::iterator it = this->m_shader_defines.find(key);
@@ -839,10 +844,6 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 		}
 		this->PreRenderEvent();
 
-		std::tuple<int, int> sizes = this->GetOutputSize();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
-		glViewport(0, 0, std::get<0>(sizes), std::get<0>(sizes));
 		this->RenderScene(models);
 
 		if (!continuous_draw)

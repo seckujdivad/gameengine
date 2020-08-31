@@ -76,6 +76,7 @@ protected:
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
+	GLenum GetTargetType() const;
 
 	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
 	void AddShaderUniformName(std::string name);
