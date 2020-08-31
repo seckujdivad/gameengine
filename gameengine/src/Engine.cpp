@@ -390,6 +390,8 @@ void Engine::Render()
 			}
 		}
 	}
+
+	glFlush();
 }
 
 Scene* Engine::GetScene() const
