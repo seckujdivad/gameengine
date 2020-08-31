@@ -247,7 +247,15 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			//previous render result
 			{
-				this->SetShaderUniform("render_output_valid", this->FramebufferContainsRenderOutput());
+				if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
+				{
+					this->SetShaderUniform("render_output_valid", false);
+				}
+				else
+				{
+					this->SetShaderUniform("render_output_valid", this->FramebufferContainsRenderOutput());
+				}
+
 				this->SetShaderUniform("render_output_x", std::get<0>(this->GetOutputSize()));
 				this->SetShaderUniform("render_output_y", std::get<1>(this->GetOutputSize()));
 
