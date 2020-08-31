@@ -39,6 +39,8 @@ public:
 	LocalTexture(TextureReference reference);
 	LocalTexture(const LocalTexture& copy_from);
 	LocalTexture& operator=(const LocalTexture& copy_from);
+	LocalTexture(LocalTexture&& move_from) noexcept;
+	LocalTexture& operator=(LocalTexture&& move_from) noexcept;
 	~LocalTexture();
 
 	void SetVector(glm::vec3 colour);

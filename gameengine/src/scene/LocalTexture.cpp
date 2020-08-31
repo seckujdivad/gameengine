@@ -11,23 +11,53 @@ LocalTexture::LocalTexture(const LocalTexture& copy_from) : Referenceable<Textur
 
 LocalTexture& LocalTexture::operator=(const LocalTexture& copy_from)
 {
+	if (this == &copy_from)
+	{
+		return *this;
+	}
+
 	this->SetReference(copy_from.GetReference());
-
 	this->m_type = copy_from.m_type;
-
 	this->m_dimensions = copy_from.m_dimensions;
+	this->m_vec_colour = copy_from.m_vec_colour;
+
 	if (copy_from.m_full_data != nullptr)
 	{
 		this->m_full_data = new unsigned char[std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions) * 3];
 		std::memcpy(this->m_full_data, copy_from.m_full_data, sizeof(unsigned char) * std::get<0>(this->m_dimensions) * std::get<1>(this->m_dimensions) * 3);
 	}
 
-	this->m_vec_colour = copy_from.m_vec_colour;
 	if (copy_from.m_vec_data != nullptr)
 	{
 		this->m_vec_data = new unsigned char[3];
 		std::memcpy(this->m_vec_data, copy_from.m_vec_data, sizeof(unsigned char) * 3);
 	}
+
+	return *this;
+}
+
+LocalTexture::LocalTexture(LocalTexture&& move_from) noexcept : Referenceable<TextureReference>(move_from)
+{
+	*this = std::move(move_from);
+}
+
+LocalTexture& LocalTexture::operator=(LocalTexture&& move_from) noexcept
+{
+	if (this == &move_from)
+	{
+		return *this;
+	}
+
+	this->SetReference(move_from.GetReference());
+	this->m_type = move_from.m_type;
+	this->m_dimensions = std::move(move_from.m_dimensions);
+	this->m_vec_colour = std::move(move_from.m_vec_colour);
+
+	this->m_full_data = move_from.m_full_data;
+	move_from.m_full_data = nullptr;
+
+	this->m_vec_data = move_from.m_vec_data;
+	move_from.m_vec_data = nullptr;
 
 	return *this;
 }
