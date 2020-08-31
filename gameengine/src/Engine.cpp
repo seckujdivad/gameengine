@@ -373,18 +373,15 @@ LoadedTexture Engine::GetTexture(TextureReference reference)
 
 RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference)
 {
-	for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+	for (RenderController* controller : this->m_render_controllers)
 	{
-		if (this->m_render_controllers.at(i)->GetReference() == reference)
+		if (controller->GetReference() == reference)
 		{
-			return this->m_render_controllers.at(i)->GetRenderTexture();
+			return controller->GetRenderTexture();
 		}
 	}
 
-	RenderTextureGroup result;
-	result.dimensions = { -1, -1 };
-
-	return result;
+	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
 }
 
 Engine::LoadedGeometry Engine::BindVAO(Model* model)
