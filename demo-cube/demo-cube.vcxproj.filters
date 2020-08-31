@@ -81,4 +81,9 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameengine_GL.log">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
