@@ -180,9 +180,9 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				this->AddShaderUniformName(cubemap_name);
 				RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
-				loaded_texture.id = texture.colour;
 
 				LoadedTexture loaded_texture;
+				loaded_texture.id = texture.depth;
 				loaded_texture.type = GL_TEXTURE_CUBE_MAP;
 				loaded_texture.uniform_name = cubemap_name;
 				
