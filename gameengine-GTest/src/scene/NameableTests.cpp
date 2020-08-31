@@ -3,9 +3,9 @@
 
 TEST(NameableTests, Identifier_SetGet)
 {
-    Nameable* nameable = new Nameable();
-    EXPECT_EQ(nameable->GetIdentifier(), "");
+	Nameable* nameable = new Nameable();
+	EXPECT_EQ(nameable->GetIdentifier(), "");
 
-    nameable->SetIdentifier("Hello World!");
-    EXPECT_EQ(nameable->GetIdentifier(), "Hello World!");
+	nameable->SetIdentifier("Hello World!");
+	EXPECT_EQ(nameable->GetIdentifier(), "Hello World!");
 }
