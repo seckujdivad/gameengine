@@ -208,6 +208,13 @@ void ShaderProgram::Select(int texture_group_id)
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(textures.at(i).type, textures.at(i).id);
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
+
+#ifdef _DEBUG
+			if ((textures.at(i).id != 0) && !glIsTexture(textures.at(i).id))
+			{
+				throw std::runtime_error("Texture does not exist (uniform \"" + textures.at(i).uniform_name + "\")");
+			}
+#endif
 		}
 	}
 }
