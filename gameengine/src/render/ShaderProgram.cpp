@@ -21,22 +21,22 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	}
 
 	std::vector<GLuint> shader_ids;
-	for (size_t i = 0; i < shaders.size(); i++)
+	for (std::tuple<std::string, GLenum> shader : shaders)
 	{
-		shader_ids.push_back(this->LoadShader(std::get<0>(shaders.at(i)), std::get<1>(shaders.at(i)), preprocessor_defines, strings_are_paths));
+		shader_ids.push_back(this->LoadShader(std::get<0>(shader), std::get<1>(shader), preprocessor_defines, strings_are_paths));
 	}
 
 	//link shaders
-	for (size_t i = 0; i < shader_ids.size(); i++)
+	for (GLuint shader_id : shader_ids)
 	{
-		glAttachShader(this->m_program_id, shader_ids.at(i));
+		glAttachShader(this->m_program_id, shader_id);
 	}
 	glLinkProgram(this->m_program_id);
 
 	//clean up shaders as they have already been linked
-	for (size_t i = 0; i < shader_ids.size(); i++)
+	for (GLuint shader_id : shader_ids)
 	{
-		glDeleteShader(shader_ids.at(i));
+		glDeleteShader(shader_id);
 	}
 
 	//check for errors
@@ -102,9 +102,9 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	}
 
 	//add preprocessor defines
-	for (int i = 0; i < (int)preprocessor_defines.size(); i++)
+	for (std::tuple<std::string, std::string> preprocessor_define : preprocessor_defines)
 	{
-		shader_file_contents = "#define " + std::get<0>(preprocessor_defines.at(i)) + " " + std::get<1>(preprocessor_defines.at(i)) + "\n" + shader_file_contents;
+		shader_file_contents = "#define " + std::get<0>(preprocessor_define) + " " + std::get<1>(preprocessor_define) + "\n" + shader_file_contents;
 	}
 
 	shader_file_contents = line0 + "\n" + shader_file_contents;
