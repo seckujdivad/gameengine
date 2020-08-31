@@ -283,7 +283,8 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 {
 	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
 	{
-		this->m_textures.insert({ texture_group_id, std::vector<LoadedTexture>({texture}) });
+		this->m_textures.insert(std::pair(texture_group_id, std::vector<LoadedTexture>()));
+		this->m_textures.at(texture_group_id).push_back(texture);
 	}
 	else
 	{
