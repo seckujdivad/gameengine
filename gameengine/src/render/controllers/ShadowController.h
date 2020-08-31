@@ -16,6 +16,8 @@ public:
 	ShadowController(Engine* engine, RenderTextureReference reference);
 	ShadowController(const ShadowController&) = delete;
 	ShadowController& operator=(const ShadowController&) = delete;
+	ShadowController(ShadowController&&) = delete;
+	ShadowController& operator=(ShadowController&&) = delete;
 	~ShadowController();
 
 	void Render() override;

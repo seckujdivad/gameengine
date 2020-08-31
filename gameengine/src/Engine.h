@@ -58,6 +58,8 @@ public:
 	Engine(wxWindow* parent, Scene* scene);
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
+	Engine(Engine&&) = delete;
+	Engine& operator=(Engine&&) = delete;
 	~Engine();
 
 	EngineCanvas* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);

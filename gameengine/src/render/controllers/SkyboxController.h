@@ -13,6 +13,8 @@ public:
 	SkyboxController(Engine* engine, RenderTextureReference reference);
 	SkyboxController(const SkyboxController&) = delete;
 	SkyboxController& operator=(const SkyboxController&) = delete;
+	SkyboxController(SkyboxController&&) = delete;
+	SkyboxController& operator=(SkyboxController&&) = delete;
 	~SkyboxController();
 
 	void Render() override;

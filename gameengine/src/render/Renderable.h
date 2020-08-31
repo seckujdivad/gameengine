@@ -103,8 +103,10 @@ protected:
 
 public:
 	Renderable(Engine* engine, RenderMode mode);
-	Renderable(const Renderable& copy_from) = delete;
-	Renderable& operator=(const Renderable& copy_from) = delete;
+	Renderable(const Renderable&) = delete;
+	Renderable& operator=(const Renderable&) = delete;
+	Renderable(Renderable&&) = delete;
+	Renderable& operator=(Renderable&&) = delete;
 	virtual ~Renderable();
 	
 	void SetCamera(Camera* camera);

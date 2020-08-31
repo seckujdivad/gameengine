@@ -19,8 +19,10 @@ private:
 
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, RenderMode mode);
-	EngineCanvasController(const EngineCanvasController& copy_from) = delete;
-	EngineCanvasController& operator=(const EngineCanvasController& copy_from) = delete;
+	EngineCanvasController(const EngineCanvasController&) = delete;
+	EngineCanvasController& operator=(const EngineCanvasController&) = delete;
+	EngineCanvasController(EngineCanvasController&&) = delete;
+	EngineCanvasController& operator=(EngineCanvasController&&) = delete;
 	~EngineCanvasController();
 
 	void Render() override;

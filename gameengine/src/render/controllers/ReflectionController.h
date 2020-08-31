@@ -16,6 +16,8 @@ public:
 	ReflectionController(Engine* engine, RenderTextureReference reference);
 	ReflectionController(const ReflectionController&) = delete;
 	ReflectionController& operator=(const ReflectionController&) = delete;
+	ReflectionController(ReflectionController&&) = delete;
+	ReflectionController& operator=(ReflectionController&&) = delete;
 	~ReflectionController();
 
 	void Render() override;

@@ -49,6 +49,10 @@ private:
 
 public:
 	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode);
+	EngineCanvas(const EngineCanvas&) = delete;
+	EngineCanvas& operator=(const EngineCanvas&) = delete;
+	EngineCanvas(EngineCanvas&&) = delete;
+	EngineCanvas& operator=(EngineCanvas&&) = delete;
 	~EngineCanvas();
 
 	void SetMouselook(bool enable);

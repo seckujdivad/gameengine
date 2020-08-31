@@ -30,6 +30,8 @@ public:
 	ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shaders, std::vector<std::tuple<std::string, std::string>> preprocessor_defines, bool strings_are_paths = true);
 	ShaderProgram(const ShaderProgram&) = delete; //This is a deliberate overload to throw an error. Copying of this object is not supported
 	ShaderProgram& operator=(const ShaderProgram&) = delete;
+	ShaderProgram(ShaderProgram&&) = delete;
+	ShaderProgram& operator=(ShaderProgram&&) = delete;
 	~ShaderProgram();
 
 	void Select(int texture_group_id = -1);
