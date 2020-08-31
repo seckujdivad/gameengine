@@ -128,7 +128,10 @@ void Engine::Render()
 {
 	if (this->m_scene != nullptr)
 	{
+		this->MakeContextCurrent();
+
 		//load unloaded static textures
+		// load model textures
 		std::vector<Model*> models = this->m_scene->GetModels();
 		for (std::vector<Model*>::iterator it = models.begin(); it != models.end(); it++)
 		{
@@ -286,19 +289,26 @@ void Engine::Render()
 		}
 
 		//create new cubemap controllers
-		for (int i = 0; i < (int)cubemaps_to_add.size(); i++)
+		for (std::tuple<RenderTextureReference, CubemapType> cubemap_to_add : cubemaps_to_add)
 		{
-			if (std::get<1>(cubemaps_to_add.at(i)) == CubemapType::Reflection)
+			RenderTextureReference reference = std::get<0>(cubemap_to_add);
+			CubemapType type = std::get<1>(cubemap_to_add);
+
+			if (type == CubemapType::Reflection)
 			{
-				this->m_render_controllers.push_back(new ReflectionController(this, std::get<0>(cubemaps_to_add.at(i))));
+				this->m_render_controllers.push_back(new ReflectionController(this, reference));
 			}
-			else if (std::get<1>(cubemaps_to_add.at(i)) == CubemapType::Pointlight)
+			else if (type == CubemapType::Pointlight)
 			{
-				this->m_render_controllers.push_back(new ShadowController(this, std::get<0>(cubemaps_to_add.at(i))));
+				this->m_render_controllers.push_back(new ShadowController(this, reference));
 			}
-			else if (std::get<1>(cubemaps_to_add.at(i)) == CubemapType::Skybox)
+			else if (type == CubemapType::Skybox)
 			{
-				this->m_render_controllers.push_back(new SkyboxController(this, std::get<0>(cubemaps_to_add.at(i))));
+				this->m_render_controllers.push_back(new SkyboxController(this, reference));
+			}
+			else
+			{
+				throw std::runtime_error("Invalid CubemapType enum: " + std::to_string((int)type));
 			}
 		}
 
