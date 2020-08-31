@@ -219,7 +219,7 @@ void shade_mode0()
 {
 	for (int i = 0; i < DATA_TEX_NUM; i++)
 	{
-		data_out[0] = vec4(0.0f);
+		data_out[i] = vec4(0.0f);
 	}
 
 	//get base colour
