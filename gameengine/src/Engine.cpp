@@ -453,15 +453,6 @@ void Engine::ReleaseVAO(Model* model)
 void Engine::MakeContextCurrent()
 {
 	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
-
-	for (RenderController*& controller : this->m_render_controllers)
-	{
-		if (controller->GetType() == RenderControllerType::EngineCanvas)
-		{
-			EngineCanvasController* canvas_controller = dynamic_cast<EngineCanvasController*>(controller);
-			canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
-		}
-	}
 }
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
