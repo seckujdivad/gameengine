@@ -10,6 +10,15 @@ void Renderable::RenderScene(std::vector<Model*> models)
 	Scene* scene = this->m_engine->GetScene();
 	if (scene != nullptr)
 	{
+#ifdef _DEBUG
+		if ((this->m_fbo != 0) && !glIsFramebuffer(this->m_fbo))
+		{
+			throw std::runtime_error("FBO provided is not an FBO");
+		}
+#endif
+
+		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
+
 		bool dealloc_models = false;
 		//resolve models
 		if ((models.size() == 1) && (models.at(0) == nullptr)) //default state
@@ -66,7 +75,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			recompile_required = this->SetShaderDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
 
 			//data textures
-			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(ENGINECANVAS_NUM_DATA_TEX)) ? true : recompile_required;
+			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
 
 			//OBB approximations
 			recompile_required = this->SetShaderDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) ? true : recompile_required;
@@ -87,6 +96,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		{
 			std::vector<glm::mat4> transforms;
 			glm::vec3 translate = glm::vec3(0.0f);
+
 			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
@@ -111,7 +121,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			texture.type = GL_TEXTURE_2D;
 			texture.uniform_name = "render_output";
 
-			this->m_shader_program->SetTexture(0, texture);
+			this->m_shader_program->SetTexture(-1, texture);
 		}
 		else if (this->GetRenderMode() == RenderMode::Shadow)
 		{
@@ -210,14 +220,14 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 
 			//skybox cubemap
-			{
+			/*{
 				RenderTextureGroup render_texture = this->GetEngine()->GetRenderTexture(this->GetEngine()->GetScene()->GetSkyboxTextureReference());
 				LoadedTexture loaded_texture;
 				loaded_texture.id = render_texture.colour;
 				loaded_texture.type = render_texture.type;
 				loaded_texture.uniform_name = "skyboxTexture";
 				this->m_shader_program->SetTexture(-1, loaded_texture);
-			}
+			}*/
 
 			//previous render result
 			{
@@ -230,7 +240,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				{
 					LoadedTexture texture;
 					texture.type = this->m_rendermode_data_normal.previous_frame.type;
-					
 					texture.id = this->m_rendermode_data_normal.previous_frame.colour;
 					texture.uniform_name = "render_output_colour";
 					this->m_shader_program->SetTexture(-1, texture);
@@ -249,8 +258,33 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 		}
 
+		switch (this->GetRenderMode())
+		{
+		case RenderMode::Normal:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+
+			glEnable(GL_DEPTH_TEST);
+			break;
+		case RenderMode::Postprocess:
+			glDisable(GL_CULL_FACE);
+
+			glDisable(GL_DEPTH_TEST);
+			break;
+		case RenderMode::Wireframe:
+			glDisable(GL_CULL_FACE);
+
+			glEnable(GL_DEPTH_TEST);
+			break;
+		case RenderMode::Shadow:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+
+			glEnable(GL_DEPTH_TEST);
+			break;
+		}
+
 		//prepare viewport
-		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
 		glClearColor(
 			scene->GetClearColour().r,
@@ -258,39 +292,22 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			scene->GetClearColour().b,
 			scene->GetClearColour().a
 		);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		switch (this->GetRenderMode())
+		glClearDepth(1.0);
+		glDepthMask(GL_TRUE);
+
+		if (this->GetRenderMode() == RenderMode::Shadow)
 		{
-		case RenderMode::Normal:
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-			break;
-		case RenderMode::Postprocess:
-			glDisable(GL_CULL_FACE);
-			break;
-		case RenderMode::Wireframe:
-			glDisable(GL_CULL_FACE);
-			break;
-		case RenderMode::Shadow:
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_FRONT);
-			break;
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
+		else
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 
 		//draw scene geometry
 		for (Model* model : models)
 		{
-			//select shader (and texture group)
-			if (this->GetRenderMode() == RenderMode::Postprocess)
-			{
-				this->m_shader_program->Select(0);
-			}
-			else
-			{
-				this->m_shader_program->Select((int)model->GetReference());
-			}
-
 			//set uniforms
 			if (this->GetRenderMode() != RenderMode::Postprocess) //postprocessing is done in one draw call
 			{
@@ -366,9 +383,9 @@ void Renderable::RenderScene(std::vector<Model*> models)
 							"reflection_cubemaps[" + std::to_string(i) + "]",
 							"reflection_depth_cubemaps[" + std::to_string(i) + "]"
 							});
-						for (int j = 0; j < ENGINECANVAS_NUM_DATA_TEX; j++)
+						for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 						{
-							this->AddShaderUniformName("reflection_data_cubemaps[" + std::to_string((i * ENGINECANVAS_NUM_DATA_TEX) + j) + "]");
+							this->AddShaderUniformName("reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]");
 						}
 						
 						RenderTextureGroup reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
@@ -384,17 +401,29 @@ void Renderable::RenderScene(std::vector<Model*> models)
 						texture.uniform_name = "reflection_depth_cubemaps[" + std::to_string(i) + "]";
 						this->m_shader_program->SetTexture((int)model->GetReference(), texture);
 
-						for (int j = 0; j < ENGINECANVAS_NUM_DATA_TEX; j++)
+						for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 						{
 							texture.id = reflection_output.data.at(j);
-							texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * ENGINECANVAS_NUM_DATA_TEX) + j) + "]";
+							texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
 							this->m_shader_program->SetTexture((int)model->GetReference(), texture);
 						}
 					}
 
+					this->SetShaderUniform("reflection_count", (int)reflections.size());
+
 					//shade mode 1 (wireframe)
 					this->SetShaderUniform("mode1_colour", model->GetWireframeColour());
 				}
+			}
+
+			//select shader (and texture group)
+			if (this->GetRenderMode() == RenderMode::Postprocess)
+			{
+				this->m_shader_program->Select(-1);
+			}
+			else
+			{
+				this->m_shader_program->Select((int)model->GetReference());
 			}
 
 			//load geometry
@@ -408,11 +437,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->GetEngine()->ReleaseVAO(model);
 			}
 		}
-
-		//iterate through models
-		// load model data into shader program
-		// load model textures into shader program
-		// draw model
 
 		this->m_fbo_contains_render = true;
 
@@ -498,9 +522,9 @@ void Renderable::AddShaderUniformName(std::string name)
 
 void Renderable::AddShaderUniformNames(std::vector<std::string> names)
 {
-	for (int i = 0; i < (int)names.size(); i++)
+	for (std::string name : names)
 	{
-		this->AddShaderUniformName(names.at(i));
+		this->AddShaderUniformName(name);
 	}
 }
 
@@ -638,15 +662,26 @@ void Renderable::ConfigureShader(RenderMode mode)
 			};
 		}
 
-		this->AddShaderUniformNames({
-			"cubemap_transform[0]",
-			"cubemap_transform[1]",
-			"cubemap_transform[2]",
-			"cubemap_transform[3]",
-			"cubemap_transform[4]",
-			"cubemap_transform[5]",
-			"is_cubemap"
-			});
+		this->m_shader_uniform_names.clear();
+
+		this->RecompileShader();
+
+		if (mode != RenderMode::Postprocess)
+		{
+			this->AddShaderUniformNames({
+				"cubemap_transform[0]",
+				"cubemap_transform[1]",
+				"cubemap_transform[2]",
+				"cubemap_transform[3]",
+				"cubemap_transform[4]",
+				"cubemap_transform[5]"
+				});
+
+			if (mode != RenderMode::Shadow)
+			{
+				this->AddShaderUniformName("is_cubemap");
+			}
+		}
 
 		if ((mode == RenderMode::Normal) || (mode == RenderMode::Wireframe))
 		{
@@ -679,6 +714,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"specularTexture",
 				"reflectionIntensityTexture",
 				"light_ambient",
+				"reflection_count",
 				"skyboxMaskTexture",
 				"skyboxTexture",
 				"render_output_valid",
@@ -689,17 +725,14 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"mode1_colour"
 				});
 
-			for (int i = 0; i < ENGINECANVAS_NUM_DATA_TEX; i++)
+			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
 			{
 				this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
 			}
 		}
 		else if (mode == RenderMode::Postprocess)
 		{
-			this->AddShaderUniformNames({
-				//fragment
-				"render_output"
-				});
+			this->AddShaderUniformName("render_output");
 		}
 		else if (mode == RenderMode::Shadow)
 		{
@@ -714,8 +747,6 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"light_near_plane"
 				});
 		}
-
-		this->RecompileShader();
 	}
 }
 

@@ -1,7 +1,5 @@
 #pragma once
 
-const int ENGINECANVAS_NUM_DATA_TEX = 1;
-
 #include "../GLComponents.h"
 
 #include <GL/GL.h>

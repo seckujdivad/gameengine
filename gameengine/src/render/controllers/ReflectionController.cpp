@@ -5,8 +5,9 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 	RenderTextureInfo info;
 	info.colour = true;
 	info.depth = true;
+	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, false);
+	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, true);
 
 	NormalRenderModeData data;
 	data.previous_frame = this->m_texture->GetOutputTextures();
@@ -43,10 +44,21 @@ ReflectionController::~ReflectionController()
 
 void ReflectionController::Render()
 {
+	NormalRenderModeData data;
+	data.previous_frame = this->m_texture->GetOutputTextures();
+	this->m_texture->SetRenderMode(data);
+
 	Cubemap* cubemap = std::get<0>(this->m_engine->GetScene()->GetCubemap(this->GetReference()));
+	if (cubemap == nullptr)
+	{
+		throw std::runtime_error("Reflection no longer exists");
+	}
+
 	this->m_camera->SetPosition(cubemap->GetPosition());
 	this->m_camera->SetClips(cubemap->GetClips());
 	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
+
+	this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
 
 	this->m_texture->Render();
 }

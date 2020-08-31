@@ -5,6 +5,8 @@ ShadowController::ShadowController(Engine* engine, RenderTextureReference refere
 	RenderTextureInfo info;
 	info.colour = false;
 	info.depth = true;
+	info.depth_filtering = GL_LINEAR;
+	info.num_data = 0;
 
 	this->m_texture = new RenderTexture(reference, engine, RenderMode::Shadow, info, GL_TEXTURE_CUBE_MAP, false);
 
@@ -40,9 +42,16 @@ ShadowController::~ShadowController()
 void ShadowController::Render()
 {
 	Cubemap* cubemap = std::get<0>(this->m_engine->GetScene()->GetCubemap(this->GetReference()));
+	if (cubemap == nullptr)
+	{
+		throw std::runtime_error("Point light no longer exists");
+	}
+
 	this->m_camera->SetPosition(cubemap->GetPosition());
 	this->m_camera->SetClips(cubemap->GetClips());
 	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
+
+	this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
 
 	this->m_texture->Render();
 }
