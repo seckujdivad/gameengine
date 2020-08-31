@@ -1,8 +1,5 @@
 OpenGL renderer using wxWidgets components.
 
-## Installation
-An x86 installer is provided, but it isn't as thoroughly tested as the zip file. It shouldn't break in a way that damages anything (it's provided by Visual Studio) but it might not properly unpack all of the dependencies. If files seem to be missing, file an issue and try the zipped releases.
-
 ## Build Dependencies
 ### vcpkg
 * nlohmann-json
@@ -26,4 +23,4 @@ Google Test is only required for building and running the unit tests. If you don
 64-bit compilation is supported, but you will need to download 64-bit versions of the vcpkg dependencies to your machine. vcpkg can be downloaded and set up from [here](https://docs.microsoft.com/en-us/cpp/build/vcpkg).
 
 ### Python
-When the project is built in `Release` mode, Visual Studio runs a Python script that creates ZIP archives containing all the runtime dependencies for the x86 and x64 versions of the application. This script should run on any Python 3 version without any PIP requirements. You can still run the application inside Visual Studio without running this script, or collect the runtime dependencies yourself.
+When the project is built in `Release` mode, Visual Studio runs a Python script that creates ZIP archives containing all the runtime dependencies for the x86 and x64 versions of the application. This script should run on any Python 3 version without any PIP requirements. You can still run the application inside Visual Studio without running this script (in debug mode or by removing the post build event), or collect the runtime dependencies yourself.

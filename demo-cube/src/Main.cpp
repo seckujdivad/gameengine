@@ -22,6 +22,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	//create glcanvas
 	this->m_scene = SceneFromJSON(this->m_scene_path, this->m_scene_filename);
+	this->m_scene->SetClearColour(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
 	this->m_engine = new Engine(this, this->m_scene);
