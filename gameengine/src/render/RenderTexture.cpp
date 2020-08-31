@@ -177,30 +177,22 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-	auto GenerateFramebufferTexture = [](GLenum attachment, GLenum textarget, GLuint& texture) {
-		if (textarget == GL_TEXTURE_2D)
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textarget, texture, 0);
-		}
-		else if (textarget == GL_TEXTURE_CUBE_MAP)
-		{
-			glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture, 0);
-		}
-	};
 
 	if (info.colour)
 	{
-		GenerateFramebufferTexture(GL_COLOR_ATTACHMENT0, this->m_texture_write.type, this->m_texture_write.colour);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.colour, 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT0);
 	}
 
 	if (info.depth)
 	{
-		GenerateFramebufferTexture(GL_DEPTH_ATTACHMENT, this->m_texture_write.type, this->m_texture_write.depth);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
 	}
 
 	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
 	{
-		GenerateFramebufferTexture(GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.type, this->m_texture_write.data.at(i));
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);
 	}
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
