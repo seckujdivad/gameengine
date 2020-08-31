@@ -199,46 +199,45 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 
 	this->SetTargetType(type);
 
-	GLuint fbo;
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-	this->SetFramebuffer(fbo);
-
 	this->InitialiseTextureGroup(this->m_texture_write, this->m_type);
 	if (simultaneous_read_write)
 	{
 		this->InitialiseTextureGroup(this->m_texture_read, this->m_type);
 	}
-	glBindTexture(type, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLuint fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	this->SetFramebuffer(fbo);
 
 	std::vector<GLenum> attachments;
 
 	if (info.colour)
 	{
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.colour, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.colour, 0);
 		attachments.push_back(GL_COLOR_ATTACHMENT0);
 	}
 
 	if (info.depth)
 	{
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
 	}
 
 	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
 	{
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
 		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);
 	}
 
 	glDrawBuffers(attachments.size(), attachments.data());
-	glReadBuffer(GL_NONE);
 
-	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		throw std::runtime_error("Framebuffer is not complete: " + std::to_string((int)glGetError()) + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 	}
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 RenderTexture::~RenderTexture()
