@@ -18,5 +18,9 @@ struct RenderTextureGroup
 struct RenderTextureInfo
 {
 	bool colour = true;
+	GLenum colour_filtering = GL_LINEAR;
 	bool depth = true;
+	GLenum depth_filtering = GL_NEAREST;
+	int num_data = GAMEENGINE_NUM_DATA_TEX;
+	GLenum data_filtering = GL_NEAREST;
 };

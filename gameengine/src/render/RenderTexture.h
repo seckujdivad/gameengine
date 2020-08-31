@@ -25,11 +25,9 @@ private:
 
 	std::tuple<int, int> m_dimensions;
 
-	int m_num_data_tex;
-
 	static void CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create = true);
 
-	void InitialiseTextureGroup(RenderTextureGroup& texture_group, int num_data_tex, GLenum type, bool do_create = true);
+	void InitialiseTextureGroup(RenderTextureGroup& texture_group, GLenum type, bool do_create = true);
 	void ResizeTextureGroup(RenderTextureGroup& texture_group);
 
 	void PostRenderEvent() override;
