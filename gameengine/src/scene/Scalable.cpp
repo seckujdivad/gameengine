@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "Scalable.h"
+
+#include <stdexcept>
 
 bool Scalable::CheckIfRescaled(bool reset)
 {

@@ -2,9 +2,8 @@
 
 #include <tuple>
 
-#include "../../Engine.h"
-#include "../EngineCanvas.h"
 #include "RenderController.h"
+#include "../RenderMode.h"
 
 class EngineCanvas;
 class RenderTexture;

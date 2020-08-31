@@ -1,26 +1,20 @@
 #pragma once
 
-#include <wx/wxprec.h>
-#include "../GLComponents.h"
-
 #include <vector>
-#include <unordered_set>
 #include <string>
 #include <tuple>
 
-#include "model/Model.h"
-#include "Camera.h"
-#include "light/PointLight.h"
-#include "model/Reflection.h"
-#include "VisBox.h"
 #include "OrientedBoundingBox.h"
+#include "Nameable.h"
 #include "Referenceable.h"
 #include "../render/RenderMode.h"
+#include "Cubemap.h"
 
 class Model;
 class PointLight;
 class Reflection;
 class VisBox;
+class Scene;
 
 class Scene : public Nameable
 {

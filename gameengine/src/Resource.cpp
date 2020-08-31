@@ -1,5 +1,7 @@
 #include "Resource.h"
 
+#include <stdexcept>
+
 Resource::Resource(int resource_id, int resource_type)
 {
 	this->m_resource = FindResourceW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(resource_id), MAKEINTRESOURCEW(resource_type));

@@ -1,5 +1,8 @@
 #pragma once
 
+class Camera;
+class RenderTexture;
+
 #include "RenderController.h"
 
 class ShadowController : public RenderController

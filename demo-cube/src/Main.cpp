@@ -1,5 +1,14 @@
-#include <wx/wxprec.h>
 #include "Main.h"
+
+#include <wx/gbsizer.h>
+#include <wx/listbox.h>
+
+#include "render/EngineCanvas.h"
+#include "Engine.h"
+#include "loaders/SceneLoader.h"
+#include "scene/Scene.h"
+#include "scene/model/Model.h"
+#include "scene/Camera.h"
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize(800, 600))
 {

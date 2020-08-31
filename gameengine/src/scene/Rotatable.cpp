@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "Rotatable.h"
+
+#include <stdexcept>
 
 bool Rotatable::CheckIfRotated(bool reset)
 {

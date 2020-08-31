@@ -1,5 +1,9 @@
-#include <wx/wxprec.h>
 #include "Model.h"
+
+#include <array>
+#include <cmath>
+
+#include "../Scene.h"
 
 Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : Positionable(), Rotatable(), Nameable(), Scalable(), Referenceable<ModelReference>(reference)
 {

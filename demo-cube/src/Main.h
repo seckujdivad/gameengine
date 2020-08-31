@@ -1,15 +1,19 @@
 #pragma once
 
-#include <wx/wxprec.h>
 #include <wx/wx.h>
-#include <wx/gbsizer.h>
-#include <wx/listbox.h>
 
 #include <map>
 
-#include "render/EngineCanvas.h"
-#include "Engine.h"
-#include "loaders/SceneLoader.h"
+class wxGridBagSizer;
+class wxButton;
+class wxListBox;
+
+class Engine;
+class EngineCanvas;
+class Scene;
+class Camera;
+class Model;
+
 
 class Main : public wxFrame
 {

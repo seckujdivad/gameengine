@@ -1,5 +1,7 @@
 #include "SkyboxController.h"
 
+#include "../RenderTexture.h"
+
 SkyboxController::SkyboxController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 {
 	RenderTextureInfo info;

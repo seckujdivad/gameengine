@@ -1,5 +1,7 @@
 #include "EventManager.h"
 
+#include <stdexcept>
+
 EventManager::EventManager()
 {
 }

@@ -1,4 +1,3 @@
-#include <wx/wxprec.h>
 #include "Reflection.h"
 
 Reflection::Reflection(RenderTextureReference reference) : Nameable(), Cubemap(reference)

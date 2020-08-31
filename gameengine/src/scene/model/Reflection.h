@@ -1,17 +1,7 @@
 #pragma once
 
-#include <wx/wxprec.h>
-#include "../../GLComponents.h"
-
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-
-#include <vector>
-#include <tuple>
-
-#include "../Nameable.h"
 #include "../Cubemap.h"
-#include "../Referenceable.h"
+#include "../Nameable.h"
 
 enum class ReflectionMode
 {

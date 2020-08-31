@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "App.h"
+
+#include "Main.h"
 
 wxIMPLEMENT_APP(App);
 

@@ -1,4 +1,3 @@
-#include <wx/wxprec.h>
 #include "LocallyMovable.h"
 
 LocallyMovable::LocallyMovable() : Positionable(), Rotatable()

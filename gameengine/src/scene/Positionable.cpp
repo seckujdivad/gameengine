@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "Positionable.h"
+
+#include <stdexcept>
 
 bool Positionable::CheckIfRepositioned(bool reset)
 {

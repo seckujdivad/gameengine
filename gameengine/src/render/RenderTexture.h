@@ -8,7 +8,6 @@
 
 #include "Renderable.h"
 #include "../scene/Referenceable.h"
-#include "../Engine.h"
 #include "RenderTextureData.h"
 
 class Engine;

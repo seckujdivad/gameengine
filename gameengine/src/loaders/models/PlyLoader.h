@@ -1,10 +1,7 @@
 #pragma once
 
-#include <wx/wxprec.h>
-
 #include <vector>
 #include <string>
-#include <fstream>
 #include <map>
 
 #include "../../scene/model/Model.h"

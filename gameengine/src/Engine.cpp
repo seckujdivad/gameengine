@@ -1,5 +1,19 @@
-#include <wx/wxprec.h>
 #include "Engine.h"
+
+#include <tuple>
+#include <wx/image.h>
+#include <algorithm>
+
+#include "scene/Scene.h"
+
+#include "render/Renderable.h"
+#include "render/EngineCanvas.h"
+
+#include "render/controllers/RenderController.h"
+#include "render/controllers/EngineCanvasController.h"
+#include "render/controllers/ShadowController.h"
+#include "render/controllers/SkyboxController.h"
+#include "render/controllers/ReflectionController.h"
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 {

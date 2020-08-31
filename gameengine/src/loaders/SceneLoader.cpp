@@ -1,5 +1,16 @@
 #include "SceneLoader.h"
 
+#include <stdexcept>
+#include <fstream>
+
+#include <wx/image.h>
+
+#include "../scene/Scene.h"
+#include "../scene/model/Model.h"
+#include "../scene/Cubemap.h"
+#include "../scene/VisBox.h"
+#include "../scene/light/PointLight.h"
+
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name)
 {
 	//load json

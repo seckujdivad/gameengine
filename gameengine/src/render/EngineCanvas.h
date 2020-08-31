@@ -5,9 +5,6 @@
 #include <wx/wx.h>
 #include <wx/dcclient.h>
 
-#include <iostream>
-#include <fstream>
-
 #include <GL/wglew.h>
 
 #include "Renderable.h"

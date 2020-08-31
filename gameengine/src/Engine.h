@@ -1,37 +1,29 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
-
-#include <wx/image.h>
-
-#include <string>
-#include <vector>
-#include <map>
-#include <algorithm>
-
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
 
+#include <string>
+#include <vector>
+#include <map>
+
+#include <nlohmann/json.hpp>
+
 #include "GLComponents.h"
-#include "Resource.h"
 
-#include "scene/Scene.h"
 #include "scene/Referenceable.h"
-
-#include "render/Renderable.h"
-#include "render/EngineCanvas.h"
-#include "render/RenderTexture.h"
-#include "render/ShaderProgram.h"
+#include "scene/model/Model.h"
+#include "render/LoadedTexture.h"
+#include "render/RenderTextureData.h"
+#include "render/RenderMode.h"
 
 class RenderController;
-class EngineCanvasController;
-class ReflectionController;
-class ShadowController;
-class SkyboxController;
 class EngineCanvas;
+class Scene;
+class Renderable;
 
 class Engine
 {
@@ -86,9 +78,3 @@ public:
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
 bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
-
-#include "render/controllers/RenderController.h"
-#include "render/controllers/EngineCanvasController.h"
-#include "render/controllers/ShadowController.h"
-#include "render/controllers/SkyboxController.h"
-#include "render/controllers/ReflectionController.h"

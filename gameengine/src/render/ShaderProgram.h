@@ -1,22 +1,15 @@
 #pragma once
 
 #include <string>
-#include <fstream>
 #include <vector>
 #include <tuple>
 #include <map>
 
 #include "../GLComponents.h"
-#include <glm/glm.hpp>
+
+#include "LoadedTexture.h"
 
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
-
-struct LoadedTexture
-{
-	GLuint id = NULL;
-	GLenum type = NULL;
-	std::string uniform_name;
-};
 
 class ShaderProgram
 {

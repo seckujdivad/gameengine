@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "OrientedBoundingBox.h"
-#include "../render/ShaderProgram.h"
 
 class SceneApproximation
 {

@@ -3,22 +3,23 @@
 #include "../GLComponents.h"
 
 #include <GL/GL.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <vector>
 #include <string>
 #include <tuple>
 #include <map>
 
+#include "../scene/Referenceable.h"
 #include "RenderMode.h"
-#include "../Resource.h"
-#include "../scene/model/Model.h"
-#include "../scene/Camera.h"
 #include "RenderTextureData.h"
-#include "ShaderProgram.h"
+#include "LoadedTexture.h"
 
 class Engine;
 class Model;
 class Camera;
+class ShaderProgram;
 
 struct NormalRenderModeData
 {
@@ -120,5 +121,3 @@ public:
 	virtual void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
 	virtual std::tuple<int, int> GetOutputSize();
 };
-
-#include "../Engine.h"

@@ -1,5 +1,10 @@
-#include <wx/wxprec.h>
 #include "EngineCanvas.h"
+
+#include <iostream>
+#include <fstream>
+
+#include "../Engine.h"
+#include "../scene/Camera.h"
 
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode) : wxGLCanvas(parent, args, id), Renderable(engine, mode)
 {

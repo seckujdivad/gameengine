@@ -1,9 +1,6 @@
 #pragma once
 
-#include "../../GLComponents.h"
-
 #include <glm/glm.hpp>
-#include <glm/ext.hpp>
 
 #include "../Nameable.h"
 #include "../Cubemap.h"

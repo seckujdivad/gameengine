@@ -2,6 +2,8 @@
 
 #include "RenderController.h"
 
+class RenderTexture;
+
 class SkyboxController : public RenderController
 {
 private:

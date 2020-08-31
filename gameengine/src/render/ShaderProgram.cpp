@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "ShaderProgram.h"
+
+#include <fstream>
 
 ShaderProgram::ShaderProgram()
 {

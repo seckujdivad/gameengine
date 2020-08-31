@@ -1,5 +1,11 @@
 #include "ReflectionController.h"
 
+#include "../RenderTexture.h"
+#include "../../scene/Camera.h"
+#include "../../scene/Cubemap.h"
+#include "../../Engine.h"
+#include "../../scene/Scene.h"
+
 ReflectionController::ReflectionController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 {
 	RenderTextureInfo info;

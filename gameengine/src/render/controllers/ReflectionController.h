@@ -1,8 +1,9 @@
 #pragma once
 
+class RenderTexture;
+class Camera;
+
 #include "RenderController.h"
-#include "../../scene/Camera.h"
-#include "../../scene/Cubemap.h"
 
 class ReflectionController : public RenderController
 {

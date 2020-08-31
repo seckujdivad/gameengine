@@ -168,6 +168,9 @@
     <ClInclude Include="src\render\RenderTextureData.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\LoadedTexture.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">

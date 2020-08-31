@@ -1,5 +1,9 @@
 #include "EngineCanvasController.h"
 
+#include "../../Engine.h"
+#include "../EngineCanvas.h"
+#include "../RenderTexture.h"
+
 EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, RenderMode mode) : RenderController(engine, reference)
 {
     this->m_canvas = canvas;

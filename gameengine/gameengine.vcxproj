@@ -194,6 +194,7 @@
     <ClInclude Include="src\render\controllers\ShadowController.h" />
     <ClInclude Include="src\render\controllers\SkyboxController.h" />
     <ClInclude Include="src\render\EngineCanvas.h" />
+    <ClInclude Include="src\render\LoadedTexture.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
     <ClInclude Include="src\render\RenderMode.h" />

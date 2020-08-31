@@ -1,13 +1,11 @@
 #pragma once
 
-#include <wx/wx.h>
 #include <Windows.h>
 #include <WinBase.h>
 #include <atlbase.h>
 
 #include <string>
 #include <string_view>
-#include <stdexcept>
 
 #include "../resource.h"
 

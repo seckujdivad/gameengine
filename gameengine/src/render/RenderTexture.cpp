@@ -1,5 +1,7 @@
 #include "RenderTexture.h"
 
+#include "../Engine.h"
+
 void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {
 	void* pixels = NULL;

@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "VisBox.h"
+
+#include "model/Model.h"
 
 VisBox::VisBox() : OrientedBoundingBox()
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-typedef int ModelReference;
-typedef int TextureReference;
-typedef int RenderTextureReference;
+using ModelReference = int;
+using TextureReference = int;
+using RenderTextureReference = int;
 
 template<class ReferenceType>
 class Referenceable

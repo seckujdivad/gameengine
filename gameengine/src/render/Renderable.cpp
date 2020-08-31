@@ -1,5 +1,14 @@
 #include "Renderable.h"
 
+#include "../scene/model/Model.h"
+#include "../scene/Camera.h"
+#include "../scene/Scene.h"
+#include "../scene/light/PointLight.h"
+#include "../scene/OrientedBoundingBox.h"
+#include "ShaderProgram.h"
+#include "../Engine.h"
+#include "../Resource.h"
+
 void Renderable::RenderScene(std::vector<Model*> models)
 {
 	if (this->GetRenderMode() == RenderMode::Default)

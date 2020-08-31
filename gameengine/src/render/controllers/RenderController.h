@@ -27,6 +27,3 @@ public:
 	virtual double GetRenderGroup() = 0;
 	virtual RenderControllerType GetType() = 0;
 };
-
-#include "../RenderTexture.h"
-#include "../../Engine.h"

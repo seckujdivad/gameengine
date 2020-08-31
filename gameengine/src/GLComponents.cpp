@@ -1,4 +1,3 @@
-#include <wx/wxprec.h>
 #include "GLComponents.h"
 
 void GL_CHECK_ERROR()

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wx/wxprec.h>
 #include "../../GLComponents.h"
 
 #include <glm/glm.hpp>
@@ -9,9 +8,6 @@
 #include <string>
 #include <vector>
 #include <tuple>
-#include <string>
-#include <cmath>
-#include <array>
 
 #include "../Positionable.h"
 #include "../Rotatable.h"
@@ -20,7 +16,6 @@
 #include "Material.h"
 #include "../Referenceable.h"
 #include "../LocalTexture.h"
-#include "../Scene.h"
 
 class Scene;
 

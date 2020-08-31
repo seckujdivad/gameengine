@@ -1,17 +1,11 @@
 #pragma once
 
-#include <wx/wxprec.h>
-#include "../GLComponents.h"
-
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-
 #include <unordered_set>
 
-#include "model/Model.h"
 #include "OrientedBoundingBox.h"
 
 class Model;
+class VisBox;
 
 template <typename T>
 class HashPointer : public std::hash<T*>

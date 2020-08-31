@@ -1,5 +1,6 @@
-#include <wx/wxprec.h>
 #include "PlyLoader.h"
+
+#include <fstream>
 
 ModelGeometry ModelFromPly(std::string path)
 {

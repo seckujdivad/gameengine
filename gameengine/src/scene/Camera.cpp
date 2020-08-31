@@ -1,9 +1,8 @@
-#include <wx/wxprec.h>
 #include "Camera.h"
 
 Camera::Camera() : LocallyMovable(), Nameable()
 {
-	this->m_fov = (GLfloat)45;
+	this->SetFOV(45.0);
 }
 
 void Camera::SetFOV(double fov)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wx/wxprec.h>
 #include <wx/wx.h>
 
 #ifdef _DEBUG
@@ -14,8 +13,6 @@
 #endif
 
 class Main;
-
-#include "Main.h"
 
 class App : public wxApp
 {

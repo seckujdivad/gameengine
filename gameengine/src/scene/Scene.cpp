@@ -1,5 +1,11 @@
-#include <wx/wxprec.h>
 #include "Scene.h"
+
+#include <unordered_set>
+
+#include "model/Model.h"
+#include "light/PointLight.h"
+#include "model/Reflection.h"
+#include "VisBox.h"
 
 Scene::Scene() : Nameable()
 {

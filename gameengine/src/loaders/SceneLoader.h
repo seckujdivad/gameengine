@@ -1,21 +1,17 @@
 #pragma once
 
 #include <string>
-#include <iostream>
 #include <filesystem>
 #include <map>
 #include <vector>
-#include <stdexcept>
 
 #include <nlohmann/json.hpp>
 
-#include <wx/image.h>
+class Scene;
+class Cubemap;
 
 #include "models/PlyLoader.h"
-#include "../scene/Scene.h"
 #include "../scene/LocalTexture.h"
-#include "../scene/model/Model.h"
-#include "../scene/Cubemap.h"
 #include "../scene/Referenceable.h"
 
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name);
