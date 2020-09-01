@@ -160,9 +160,7 @@ void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, GL
 
 void RenderTexture::ResizeTextureGroup(RenderTextureGroup& texture_group)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, this->GetFramebuffer());
 	this->InitialiseTextureGroup(texture_group, texture_group.type, false);
-	glViewport(0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions));
 }
 
 void RenderTexture::PostRenderEvent()
