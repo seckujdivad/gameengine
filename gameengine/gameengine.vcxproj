@@ -197,6 +197,7 @@
     <ClInclude Include="src\render\LoadedTexture.h" />
     <ClInclude Include="src\render\Renderable.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\RenderableConfig.h" />
     <ClInclude Include="src\render\RenderMode.h" />
     <ClInclude Include="src\render\RenderTexture.h" />
     <ClInclude Include="src\render\RenderTextureData.h" />

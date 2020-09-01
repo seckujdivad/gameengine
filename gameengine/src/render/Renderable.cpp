@@ -334,13 +334,16 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		glClearDepth(1.0);
 		glDepthMask(GL_TRUE);
 
-		if (this->GetRenderMode() == RenderMode::Shadow)
+		if (this->m_config.clear_fbo)
 		{
-			glClear(GL_DEPTH_BUFFER_BIT);
-		}
-		else
-		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			if (this->GetRenderMode() == RenderMode::Shadow)
+			{
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+			else
+			{
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			}
 		}
 
 		//draw scene geometry
@@ -885,4 +888,14 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 RenderMode Renderable::GetRenderMode() const
 {
 	return this->m_rendermode;
+}
+
+void Renderable::SetConfig(RenderableConfig config)
+{
+	this->m_config = config;
+}
+
+RenderableConfig Renderable::GetConfig()
+{
+	return this->m_config;
 }

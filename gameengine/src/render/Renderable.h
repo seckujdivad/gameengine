@@ -13,33 +13,13 @@
 
 #include "../scene/Referenceable.h"
 #include "RenderMode.h"
-#include "RenderTextureData.h"
 #include "LoadedTexture.h"
+#include "RenderableConfig.h"
 
 class Engine;
 class Model;
 class Camera;
 class ShaderProgram;
-
-struct NormalRenderModeData
-{
-	RenderTextureGroup previous_frame;
-};
-
-struct WireframeRenderModeData
-{
-
-};
-
-struct ShadowRenderModeData
-{
-
-};
-
-struct PostProcessRenderModeData
-{
-	RenderTextureGroup texture;
-};
 
 class Renderable
 {
@@ -50,6 +30,7 @@ private:
 
 	//scene rendering
 	RenderMode m_rendermode = RenderMode::Default;
+	RenderableConfig m_config;
 
 	NormalRenderModeData m_rendermode_data_normal;
 	WireframeRenderModeData m_rendermode_data_wireframe;
@@ -120,6 +101,9 @@ public:
 	void SetRenderMode(ShadowRenderModeData data);
 	void SetRenderMode(PostProcessRenderModeData data);
 	RenderMode GetRenderMode() const;
+
+	void SetConfig(RenderableConfig config);
+	RenderableConfig GetConfig();
 
 	void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
 
