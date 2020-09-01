@@ -1,6 +1,6 @@
 #include "Scene.h"
 
-#include <unordered_set>
+#include <set>
 
 #include "model/Model.h"
 #include "light/PointLight.h"
@@ -159,39 +159,53 @@ glm::vec4 Scene::GetClearColour() const
 	return this->m_clear_colour;
 }
 
-std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode) const
+std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode, std::vector<Model*> model_pool) const
 {
 	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow))
 	{
-		std::unordered_set<Model*, HashPointer<Model>> visible_models;
-		std::unordered_set<VisBox*, HashPointer<VisBox>> enclosed_visboxes;
+		std::set<Model*> visible_models;
+		std::set<VisBox*> enclosed_visboxes;
 
-		for (size_t i = 0; i < this->m_visboxes.size(); i++)
+		for (VisBox* visbox : this->m_visboxes)
 		{
-			if (this->m_visboxes.at(i)->PointInBounds(position))
+			if (visbox->PointInBounds(position))
 			{
-				enclosed_visboxes.insert(this->m_visboxes.at(i));
+				enclosed_visboxes.insert(enclosed_visboxes.begin(), visbox);
 			}
 		}
 
 		if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
 		{
-			for (size_t i = 0; i < this->m_models.size(); i++)
+			for (Model* model : this->m_models)
 			{
-				visible_models.insert(this->m_models.at(i));
+				visible_models.insert(model);
 			}
 		}
 		else
 		{
 			for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
 			{
-				std::unordered_set<Model*, HashPointer<Model>> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+				std::set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
 				visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
 			}
 		}
 
 		std::vector<Model*> output;
-		output.assign(visible_models.begin(), visible_models.end());
+		if (model_pool == this->GetModels())
+		{
+			output.assign(visible_models.begin(), visible_models.end());
+		}
+		else
+		{
+			std::set<Model*> output_set;
+
+			std::set<Model*> model_pool_set;
+			model_pool_set.insert(model_pool.begin(), model_pool.end());
+			
+			std::set_intersection(model_pool_set.begin(), model_pool_set.end(), visible_models.begin(), visible_models.end(), std::inserter(output_set, output_set.begin()));
+
+			output.assign(output_set.begin(), output_set.end());
+		}
 
 		std::sort(output.begin(), output.end(), [position](Model* a, Model* b) mutable { return glm::length(a->GetPosition() - position) < glm::length(b->GetPosition() - position); }); //true means a should be moved forward and drawn earlier
 

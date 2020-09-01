@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_set>
+#include <set>
 
 #include "OrientedBoundingBox.h"
 
@@ -27,14 +27,14 @@ public:
 class VisBox : public OrientedBoundingBox
 {
 private:
-	std::unordered_set<VisBox*, HashPointer<VisBox>> m_pvs;
-	std::unordered_set<Model*, HashPointer<Model>> m_members;
+	std::set<VisBox*> m_pvs;
+	std::set<Model*> m_members;
 
 public:
 	VisBox();
 
-	std::unordered_set<Model*, HashPointer<Model>> GetPotentiallyVisibleModels() const;
-	std::unordered_set<Model*, HashPointer<Model>> GetMemberModels() const;
+	std::set<Model*> GetPotentiallyVisibleModels() const;
+	std::set<Model*> GetMemberModels() const;
 	void AddMemberModel(Model* model);
 	void RemoveMemberModel(Model* model);
 

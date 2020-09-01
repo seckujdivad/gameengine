@@ -58,7 +58,7 @@ public:
 	Model* GetModel(ModelReference reference) const;
 	Model* GetModel(std::string identifier) const;
 	std::vector<Model*> GetModels() const;
-	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode) const;
+	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderMode mode, std::vector<Model*> model_pool) const;
 
 	void Add(PointLight* pointlight);
 	void Remove(PointLight* pointlight);

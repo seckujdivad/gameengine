@@ -79,7 +79,22 @@ void ReflectionController::Render()
 
 			this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
 
-			this->m_texture->Render();
+			std::vector<ModelReference> model_references = cubemap->GetStaticModels();
+			std::vector<Model*> models;
+			for (ModelReference reference : model_references)
+			{
+				Model* model = this->m_engine->GetScene()->GetModel(reference);
+				if (model == nullptr)
+				{
+					throw std::runtime_error("Model reference " + std::to_string(reference) + " contained in cubemap is invalid");
+				}
+				else
+				{
+					models.push_back(model);
+				}
+			}
+
+			this->m_texture->Render(models);
 
 			this->m_frame_counter = 0;
 		}

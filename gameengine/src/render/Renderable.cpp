@@ -30,48 +30,62 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 		bool dealloc_models = false;
 		//resolve models
-		if ((models.size() == 1) && (models.at(0) == nullptr)) //default state
+		
 		{
+			bool models_provided = !((models.size() == 1) && (models.at(0) == nullptr));
+			if (!models_provided)
+			{
+				models.clear();
+			}
+
 			if ((this->GetRenderMode() == RenderMode::Normal) || (this->GetRenderMode() == RenderMode::Shadow) || (this->GetRenderMode() == RenderMode::Wireframe))
 			{
-				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode());
+				if (!models_provided)
+				{
+					models = scene->GetModels();
+				}
+
+				models = scene->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode(), models);
 			}
 			else if (this->GetRenderMode() == RenderMode::Postprocess)
 			{
-				models.clear();
+				if (!models_provided) //default state
+				{
+					models.clear();
 
-				ModelGeometry geom;
-				geom.vertices = {
-					glm::dvec3(-1.0, -1.0, 0.0),
-					glm::dvec3(-1.0, 1.0, 0.0),
-					glm::dvec3(1.0, 1.0, 0.0),
-					glm::dvec3(1.0, -1.0, 0.0)
-				};
+					ModelGeometry geom;
+					geom.vertices = {
+						glm::dvec3(-1.0, -1.0, 0.0),
+						glm::dvec3(-1.0, 1.0, 0.0),
+						glm::dvec3(1.0, 1.0, 0.0),
+						glm::dvec3(1.0, -1.0, 0.0)
+					};
 
-				geom.faces = {
-					Face(),
-					Face()
-				};
+					geom.faces = {
+						Face(),
+						Face()
+					};
 
-				geom.faces.at(0).vertices = { 0, 1, 2 };
-				geom.faces.at(0).uv = {
-					glm::dvec2(0.0, 0.0),
-					glm::dvec2(0.0, 1.0),
-					glm::dvec2(1.0, 1.0)
-				};
-				geom.faces.at(0).normal = glm::dvec3(0.0, 0.0, -1.0);
+					geom.faces.at(0).vertices = { 0, 1, 2 };
+					geom.faces.at(0).uv = {
+						glm::dvec2(0.0, 0.0),
+						glm::dvec2(0.0, 1.0),
+						glm::dvec2(1.0, 1.0)
+					};
+					geom.faces.at(0).normal = glm::dvec3(0.0, 0.0, -1.0);
 
-				geom.faces.at(1).vertices = { 0, 3, 2 };
-				geom.faces.at(1).uv = {
-					glm::dvec2(0.0, 0.0),
-					glm::dvec2(0.1, 0.0),
-					glm::dvec2(1.0, 1.0)
-				};
-				geom.faces.at(1).normal = glm::dvec3(0.0, 0.0, -1.0);
+					geom.faces.at(1).vertices = { 0, 3, 2 };
+					geom.faces.at(1).uv = {
+						glm::dvec2(0.0, 0.0),
+						glm::dvec2(0.1, 0.0),
+						glm::dvec2(1.0, 1.0)
+					};
+					geom.faces.at(1).normal = glm::dvec3(0.0, 0.0, -1.0);
 
-				models.push_back(new Model(-1, geom));
+					models.push_back(new Model(-1, geom));
 
-				dealloc_models = true;
+					dealloc_models = true;
+				}
 			}
 		}
 
