@@ -275,6 +275,9 @@
     <ClCompile Include="src\loaders\SceneLoader.cpp">
       <Filter>Source Files\loaders</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\RenderTextureData.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">

@@ -236,6 +236,7 @@
     <ClCompile Include="src\render\EngineCanvas.cpp" />
     <ClCompile Include="src\render\Renderable.cpp" />
     <ClCompile Include="src\render\RenderTexture.cpp" />
+    <ClCompile Include="src\render\RenderTextureData.cpp" />
     <ClCompile Include="src\render\ShaderProgram.cpp" />
     <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\scene\Camera.cpp" />
