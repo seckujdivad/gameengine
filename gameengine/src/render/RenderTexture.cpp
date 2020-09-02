@@ -264,9 +264,13 @@ std::tuple<int, int> RenderTexture::GetOutputSize() const
 	return this->m_dimensions;
 }
 
-void RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
+bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 {
-	if (dimensions != this->m_dimensions)
+	if (dimensions == this->m_dimensions)
+	{
+		return false;
+	}
+	else
 	{
 		this->m_dimensions = dimensions;
 
@@ -275,6 +279,8 @@ void RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 		{
 			this->ResizeTextureGroup(this->m_texture_read);
 		}
+
+		return true;
 	}
 }
 
