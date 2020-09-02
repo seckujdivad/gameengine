@@ -8,20 +8,8 @@
 
 ReflectionController::ReflectionController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 {
-	RenderTextureInfo info;
-	info.colour = true;
-	info.depth = true;
-	info.num_data = GAMEENGINE_NUM_DATA_TEX;
-
-	this->m_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, true);
-
-	NormalRenderModeData data;
-	data.previous_frame = this->m_texture->GetOutputTextures();
-	this->m_texture->SetRenderMode(data);
-
 	std::tuple<Cubemap*, CubemapType> cubemap_data = this->m_engine->GetScene()->GetCubemap(reference);
-	Cubemap* cubemap = std::get<0>(cubemap_data);
-	if (cubemap == nullptr)
+	if (std::get<0>(cubemap_data) == nullptr)
 	{
 		throw std::runtime_error("Invalid reference given to controller - nullptr returned when retrieving cubemap");
 	}
@@ -30,20 +18,61 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 		throw std::runtime_error("Invalid reference given to controller - cubemap returned is not a reflection");
 	}
 
-	this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
+	this->m_reflection = static_cast<Reflection*>(std::get<0>(cubemap_data));
 
 	this->m_camera = new Camera();
-	this->m_camera->SetPosition(cubemap->GetPosition());
+	this->m_camera->SetPosition(this->m_reflection->GetPosition());
 	this->m_camera->SetRotation(0.0, 0.0, 0.0);
-	this->m_camera->SetClips(cubemap->GetClips());
+	this->m_camera->SetClips(this->m_reflection->GetClips());
 	this->m_camera->SetFOV(90.0);
-	this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
+	this->m_camera->SetViewportDimensions(this->m_reflection->GetTextureDimensions());
 
-	this->m_texture->SetCamera(this->m_camera);
+	this->m_models_static = this->m_engine->GetScene()->GetModels(this->m_reflection->GetStaticModels());
+	this->m_models_dynamic = this->m_engine->GetScene()->GetModels(this->m_reflection->GetDynamicModels());
 
-	if (cubemap->GetDynamicRedrawFrames() > 0)
 	{
-		this->m_frame_counter = std::rand() % cubemap->GetDynamicRedrawFrames();
+		RenderTextureInfo info;
+		info.colour = true;
+		info.depth = true;
+		info.num_data = GAMEENGINE_NUM_DATA_TEX;
+
+		NormalRenderModeData data;
+
+		for (int i = 0; i < 2; i++)
+		{
+			RenderTexture* render_texture = new RenderTexture(reference, engine, RenderMode::Normal, info, GL_TEXTURE_CUBE_MAP, false);
+			render_texture->SetOutputSize(this->m_reflection->GetTextureDimensions());
+			render_texture->SetCamera(this->m_camera);
+
+			std::vector<Model*> models;
+			if (i == 0)
+			{
+				models = this->m_models_static;
+			}
+			else if (i == 1)
+			{
+				models = this->m_models_dynamic;
+			}
+
+			render_texture->SetRenderFunction([render_texture, models](std::vector<Model*> models_input)
+			{
+				render_texture->RenderScene(models);
+			});
+
+			data.previous_frame = render_texture->GetOutputTextures();
+			render_texture->SetRenderMode(data);
+
+			this->m_render_textures.push_back(render_texture);
+		}
+	}
+
+	this->m_render_textures.at(1)->GetConfig().clear_fbo = false;
+
+	this->m_cumulative_texture = CumulativeTexture(this->m_render_textures);
+
+	if (this->m_reflection->GetDynamicRedrawFrames() > 0)
+	{
+		this->m_frame_counter = std::rand() % this->m_reflection->GetDynamicRedrawFrames();
 	}
 	else
 	{
@@ -53,48 +82,43 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 
 ReflectionController::~ReflectionController()
 {
-	delete this->m_texture;
+	for (RenderTexture* render_texture : this->m_render_textures)
+	{
+		delete render_texture;
+	}
+
 	delete this->m_camera;
 }
 
 void ReflectionController::Render()
 {
-	Cubemap* cubemap = std::get<0>(this->m_engine->GetScene()->GetCubemap(this->GetReference()));
-	if (cubemap == nullptr)
+	if (!this->m_render_textures.at(0)->FramebufferContainsRenderOutput())
 	{
-		throw std::runtime_error("Reflection no longer exists");
+		this->m_cumulative_texture.Render();
 	}
 
-	if (cubemap->GetDynamicRedrawFrames() != -1)
+	if (this->m_reflection->GetDynamicRedrawFrames() != -1)
 	{
-		if (cubemap->GetDynamicRedrawFrames() <= this->m_frame_counter)
+		if (this->m_reflection->GetDynamicRedrawFrames() <= this->m_frame_counter)
 		{
-			NormalRenderModeData data;
-			data.previous_frame = this->m_texture->GetOutputTextures();
-			this->m_texture->SetRenderMode(data);
+			this->m_camera->SetPosition(this->m_reflection->GetPosition());
+			this->m_camera->SetClips(this->m_reflection->GetClips());
+			this->m_camera->SetViewportDimensions(this->m_reflection->GetTextureDimensions());
 
-			this->m_camera->SetPosition(cubemap->GetPosition());
-			this->m_camera->SetClips(cubemap->GetClips());
-			this->m_camera->SetViewportDimensions(cubemap->GetTextureDimensions());
-
-			this->m_texture->SetOutputSize(cubemap->GetTextureDimensions());
-
-			std::vector<ModelReference> model_references = cubemap->GetStaticModels();
-			std::vector<Model*> models;
-			for (ModelReference reference : model_references)
+			bool static_redraw_required = false;
+			for (RenderTexture* render_texture : this->m_render_textures)
 			{
-				Model* model = this->m_engine->GetScene()->GetModel(reference);
-				if (model == nullptr)
-				{
-					throw std::runtime_error("Model reference " + std::to_string(reference) + " contained in cubemap is invalid");
-				}
-				else
-				{
-					models.push_back(model);
-				}
+				static_redraw_required = render_texture->SetOutputSize(this->m_reflection->GetTextureDimensions());
 			}
 
-			this->m_texture->Render(models);
+			if (static_redraw_required)
+			{
+				this->m_cumulative_texture.Render(0);
+			}
+			else
+			{
+				this->m_cumulative_texture.Render(1);
+			}
 
 			this->m_frame_counter = 0;
 		}
@@ -107,7 +131,7 @@ void ReflectionController::Render()
 
 RenderTextureGroup ReflectionController::GetRenderTexture() const
 {
-	return this->m_texture->GetOutputTextures();
+	return this->m_cumulative_texture.GetOutput()->GetOutputTextures();
 }
 
 double ReflectionController::GetRenderGroup() const

@@ -1,18 +1,29 @@
 #pragma once
 
-class RenderTexture;
-class Camera;
+#include <vector>
 
 #include "RenderController.h"
+#include "../CumulativeTexture.h"
+
+class RenderTexture;
+class Camera;
+class Reflection;
+class Model;
 
 class ReflectionController : public RenderController
 {
 private:
-	RenderTexture* m_texture;
+	std::vector<RenderTexture*> m_render_textures;
+
+	CumulativeTexture m_cumulative_texture;
 
 	Camera* m_camera;
+	Reflection* m_reflection;
 
 	int m_frame_counter;
+
+	std::vector<Model*> m_models_static;
+	std::vector<Model*> m_models_dynamic;
 
 public:
 	ReflectionController(Engine* engine, RenderTextureReference reference);
