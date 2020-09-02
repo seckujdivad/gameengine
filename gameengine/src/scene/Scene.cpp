@@ -108,6 +108,24 @@ std::vector<Model*> Scene::GetModels() const
 	return this->m_models;
 }
 
+std::vector<Model*> Scene::GetModels(std::vector<ModelReference> references) const
+{
+	std::vector<Model*> models;
+	for (ModelReference reference : references)
+	{
+		Model* model = this->GetModel(reference);
+		if (model == nullptr)
+		{
+			throw std::invalid_argument("Model reference " + std::to_string(reference) + " is invalid");
+		}
+		else
+		{
+			models.push_back(model);
+		}
+	}
+	return models;
+}
+
 void Scene::SetAmbientLight(glm::vec3 light_intensity)
 {
 	this->m_light_ambient = light_intensity;
