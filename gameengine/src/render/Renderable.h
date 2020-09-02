@@ -10,6 +10,7 @@
 #include <string>
 #include <tuple>
 #include <map>
+#include <functional>
 
 #include "../scene/Referenceable.h"
 #include "RenderMode.h"
@@ -20,6 +21,9 @@ class Engine;
 class Model;
 class Camera;
 class ShaderProgram;
+class Renderable;
+
+using RenderableControllerFunction = std::function<void(std::vector<Model*>)>;
 
 class Renderable
 {
@@ -49,6 +53,8 @@ private:
 	std::vector<std::string> m_shader_uniform_names;
 
 	std::map<int, LoadedTexture> m_textures;
+
+	RenderableControllerFunction m_render_function;
 
 	void RecompileShader();
 
@@ -100,7 +106,7 @@ public:
 	RenderMode GetRenderMode() const;
 
 	void SetConfig(RenderableConfig config);
-	RenderableConfig GetConfig();
+	RenderableConfig& GetConfig();
 
 	bool FramebufferContainsRenderOutput() const;
 
@@ -108,4 +114,6 @@ public:
 	void RenderScene(std::vector<Model*> models = { nullptr }); //only for calling by lambdas passed in through SetRenderFunction
 
 	virtual std::tuple<int, int> GetOutputSize() const = 0;
+
+	void SetRenderFunction(RenderableControllerFunction function);
 };

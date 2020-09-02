@@ -813,11 +813,10 @@ Renderable::Renderable(Engine* engine, RenderMode mode) : m_engine(engine)
 {
 	this->m_engine->MakeContextCurrent();
 
-	//this->m_shaders = {
-	//	{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
-	//	{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
-	//};
-	//this->RecompileShader();
+	this->m_render_function = [this](std::vector<Model*> models)
+	{
+		this->RenderScene(models);
+	};
 
 	this->ConfigureShader(mode);
 }
@@ -876,13 +875,18 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 		}
 		this->PreRenderEvent();
 
-		this->RenderScene(models);
+		this->m_render_function(models);
 
 		if (!continuous_draw)
 		{
 			this->PostRenderEvent();
 		}
 	}
+}
+
+void Renderable::SetRenderFunction(RenderableControllerFunction function)
+{
+	this->m_render_function = function;
 }
 
 RenderMode Renderable::GetRenderMode() const
@@ -895,7 +899,7 @@ void Renderable::SetConfig(RenderableConfig config)
 	this->m_config = config;
 }
 
-RenderableConfig Renderable::GetConfig()
+RenderableConfig& Renderable::GetConfig()
 {
 	return this->m_config;
 }
