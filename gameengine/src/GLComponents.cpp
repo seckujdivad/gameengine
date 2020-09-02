@@ -1,5 +1,7 @@
 #include "GLComponents.h"
 
+#include <stdexcept>
+
 void GL_CHECK_ERROR()
 {
 	GLenum exception = glGetError();
