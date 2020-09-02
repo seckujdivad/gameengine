@@ -474,9 +474,10 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 
 				if (el.value()["shadows"].is_object())
 				{
+					pointlight->SetShadowsEnabled(true);
 					if (el.value()["shadows"]["enabled"].is_boolean())
 					{
-						pointlight->SetShadowBias(el.value()["shadows"]["enabled"].get<bool>());
+						pointlight->SetShadowsEnabled(el.value()["shadows"]["enabled"].get<bool>());
 					}
 
 					if (el.value()["shadows"]["acceptance bias"].is_number())
@@ -485,6 +486,10 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 					}
 
 					ConfigureCubemap(el.value()["shadows"], pointlight, scene);
+				}
+				else
+				{
+					pointlight->SetShadowsEnabled(false);
 				}
 
 				scene->Add(pointlight);
