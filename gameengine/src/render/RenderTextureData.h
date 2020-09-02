@@ -24,3 +24,5 @@ struct RenderTextureInfo
 	int num_data = GAMEENGINE_NUM_DATA_TEX;
 	GLenum data_filtering = GL_NEAREST;
 };
+
+void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination, RenderTextureInfo info, std::tuple<int, int> dimensions);
