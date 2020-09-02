@@ -25,4 +25,7 @@ struct RenderTextureInfo
 	GLenum data_filtering = GL_NEAREST;
 };
 
+bool operator==(const RenderTextureInfo& first, const RenderTextureInfo& second);
+bool operator!=(const RenderTextureInfo& first, const RenderTextureInfo& second);
+
 void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination, RenderTextureInfo info, std::tuple<int, int> dimensions);

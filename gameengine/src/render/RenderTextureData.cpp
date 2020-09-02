@@ -2,6 +2,46 @@
 
 #include <stdexcept>
 
+bool operator==(const RenderTextureInfo& first, const RenderTextureInfo& second)
+{
+	if (first.colour != second.colour)
+	{
+		return false;
+	}
+
+	if (first.colour_filtering != second.colour_filtering)
+	{
+		return false;
+	}
+
+	if (first.depth != second.depth)
+	{
+		return false;
+	}
+
+	if (first.depth_filtering != second.depth_filtering)
+	{
+		return false;
+	}
+
+	if (first.num_data != second.num_data)
+	{
+		return false;
+	}
+
+	if (first.data_filtering != second.data_filtering)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const RenderTextureInfo& first, const RenderTextureInfo& second)
+{
+	return !(first == second);
+}
+
 void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination, RenderTextureInfo info, std::tuple<int, int> dimensions)
 {
 	if (source.data.size() != destination.data.size())
