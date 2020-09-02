@@ -50,7 +50,6 @@ private:
 
 	std::map<int, LoadedTexture> m_textures;
 
-	void RenderScene(std::vector<Model*> models = { nullptr });
 	void RecompileShader();
 
 protected:
@@ -78,8 +77,6 @@ protected:
 
 	void ConfigureShader(RenderMode mode);
 
-	bool FramebufferContainsRenderOutput() const;
-
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
@@ -105,7 +102,10 @@ public:
 	void SetConfig(RenderableConfig config);
 	RenderableConfig GetConfig();
 
+	bool FramebufferContainsRenderOutput() const;
+
 	void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
+	void RenderScene(std::vector<Model*> models = { nullptr }); //only for calling by lambdas passed in through SetRenderFunction
 
 	virtual std::tuple<int, int> GetOutputSize() const = 0;
 };
