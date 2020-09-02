@@ -167,20 +167,7 @@ void RenderTexture::PostRenderEvent()
 {
 	if (this->m_simultaneous_read_write)
 	{
-		if (this->m_info.colour)
-		{
-			glCopyImageSubData(this->m_texture_write.colour, this->m_texture_write.type, 0, 0, 0, 0, this->m_texture_read.colour, this->m_texture_write.type, 0, 0, 0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), this->m_texture_write.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
-		}
-
-		if (this->m_info.depth)
-		{
-			glCopyImageSubData(this->m_texture_write.depth, this->m_texture_write.type, 0, 0, 0, 0, this->m_texture_read.depth, this->m_texture_write.type, 0, 0, 0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), this->m_texture_write.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
-		}
-
-		for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
-		{
-			glCopyImageSubData(this->m_texture_write.data.at(i), this->m_texture_write.type, 0, 0, 0, 0, this->m_texture_read.data.at(i), this->m_texture_write.type, 0, 0, 0, 0, std::get<0>(this->m_dimensions), std::get<1>(this->m_dimensions), this->m_texture_write.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
-		}
+		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
 	}
 }
 
