@@ -384,6 +384,11 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 			}
 		}
 
+		if (el.value()["draw shadows"].is_boolean())
+		{
+			reflection->SetDrawShadows(el.value()["draw shadows"].get<bool>()); 
+		}
+
 		ConfigureCubemap(el.value(), reflection, scene);
 
 		scene->Add(reflection);
