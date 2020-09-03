@@ -15,10 +15,15 @@ private:
 	//iterative parallax correction
 	int m_parallax_iterations = 1;
 
+	bool m_draw_shadows = true;
+
 public:
 	Reflection(RenderTextureReference reference);
 
 	//iterative mode only
 	void SetIterations(int iterations);
 	int GetIterations() const;
+
+	void SetDrawShadows(bool value);
+	bool GetDrawShadows();
 };

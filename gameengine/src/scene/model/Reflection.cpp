@@ -13,3 +13,13 @@ int Reflection::GetIterations() const
 {
 	return this->m_parallax_iterations;
 }
+
+void Reflection::SetDrawShadows(bool value)
+{
+	this->m_draw_shadows = value;
+}
+
+bool Reflection::GetDrawShadows()
+{
+	return this->m_draw_shadows;
+}
