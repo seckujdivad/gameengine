@@ -105,6 +105,11 @@ public:
 	void SetRenderMode(PostProcessRenderModeData data);
 	RenderMode GetRenderMode() const;
 
+	NormalRenderModeData& GetNormalRenderModeData();
+	WireframeRenderModeData& GetWireframeRenderModeData();
+	ShadowRenderModeData& GetShadowRenderModeData();
+	PostProcessRenderModeData& GetPostProcessRenderModeData();
+
 	void SetConfig(RenderableConfig config);
 	RenderableConfig& GetConfig();
 

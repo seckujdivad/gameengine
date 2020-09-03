@@ -903,6 +903,54 @@ RenderMode Renderable::GetRenderMode() const
 	return this->m_rendermode;
 }
 
+NormalRenderModeData& Renderable::GetNormalRenderModeData()
+{
+	if (this->GetRenderMode() == RenderMode::Normal)
+	{
+		return this->m_rendermode_data_normal;
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be normal");
+	}
+}
+
+WireframeRenderModeData& Renderable::GetWireframeRenderModeData()
+{
+	if (this->GetRenderMode() == RenderMode::Wireframe)
+	{
+		return this->m_rendermode_data_wireframe;
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be wireframe");
+	}
+}
+
+ShadowRenderModeData& Renderable::GetShadowRenderModeData()
+{
+	if (this->GetRenderMode() == RenderMode::Shadow)
+	{
+		return this->m_rendermode_data_shadow;
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be shadow");
+	}
+}
+
+PostProcessRenderModeData& Renderable::GetPostProcessRenderModeData()
+{
+	if (this->GetRenderMode() == RenderMode::Postprocess)
+	{
+		return this->m_rendermode_data_postprocess;
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be post process");
+	}
+}
+
 void Renderable::SetConfig(RenderableConfig config)
 {
 	this->m_config = config;
