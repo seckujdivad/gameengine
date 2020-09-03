@@ -207,8 +207,17 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->AddShaderUniformName(root_name + "intensity");
 				this->SetShaderUniform(root_name + "intensity", point_light->GetIntensity());
 
+				bool shadows_enabled = point_light->GetShadowsEnabled();
+				if (this->GetRenderMode() == RenderMode::Normal)
+				{
+					if (!this->m_rendermode_data_normal.draw_shadows)
+					{
+						shadows_enabled = false;
+					}
+				}
+
 				this->AddShaderUniformName(root_name + "shadows_enabled");
-				this->SetShaderUniform(root_name + "shadows_enabled", point_light->GetShadowsEnabled());
+				this->SetShaderUniform(root_name + "shadows_enabled", shadows_enabled);
 
 				this->AddShaderUniformName(root_name + "shadow_far_plane");
 				this->SetShaderUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));

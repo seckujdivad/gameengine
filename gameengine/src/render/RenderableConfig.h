@@ -10,6 +10,7 @@ struct RenderableConfig
 struct NormalRenderModeData
 {
 	RenderTextureGroup previous_frame;
+	bool draw_shadows = true;
 };
 
 struct WireframeRenderModeData
