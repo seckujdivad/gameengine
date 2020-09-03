@@ -585,7 +585,7 @@ void Renderable::AddShaderUniformNames(std::vector<std::string> names)
 
 void Renderable::SetShaderUniform(std::string name, bool value)
 {
-	glUniform1i(this->m_shader_program->GetUniform(name), value);
+	glUniform1i(this->m_shader_program->GetUniform(name), value ? GL_TRUE : GL_FALSE);
 }
 
 void Renderable::SetShaderUniform(std::string name, int value)
