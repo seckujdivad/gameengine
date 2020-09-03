@@ -60,6 +60,7 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 			});
 
 			data.previous_frame = render_texture->GetOutputTextures();
+			data.draw_shadows = this->m_reflection->GetDrawShadows();
 			render_texture->SetRenderMode(data);
 
 			this->m_render_textures.push_back(render_texture);
@@ -92,12 +93,13 @@ ReflectionController::~ReflectionController()
 
 void ReflectionController::Render()
 {
+	int redraw_level = -1;
+
 	if (!this->m_render_textures.at(0)->FramebufferContainsRenderOutput())
 	{
-		this->m_cumulative_texture.Render();
+		redraw_level = 0;
 	}
-
-	if (this->m_reflection->GetDynamicRedrawFrames() != -1)
+	else if (this->m_reflection->GetDynamicRedrawFrames() != -1)
 	{
 		if (this->m_reflection->GetDynamicRedrawFrames() <= this->m_frame_counter)
 		{
@@ -109,15 +111,21 @@ void ReflectionController::Render()
 			for (RenderTexture* render_texture : this->m_render_textures)
 			{
 				static_redraw_required = render_texture->SetOutputSize(this->m_reflection->GetTextureDimensions());
+
+				if (render_texture->GetNormalRenderModeData().draw_shadows != this->m_reflection->GetDrawShadows())
+				{
+					static_redraw_required = true;
+					render_texture->GetNormalRenderModeData().draw_shadows = this->m_reflection->GetDrawShadows();
+				}
 			}
 
 			if (static_redraw_required)
 			{
-				this->m_cumulative_texture.Render(0);
+				redraw_level = 0;
 			}
 			else
 			{
-				this->m_cumulative_texture.Render(1);
+				redraw_level = 1;
 			}
 
 			this->m_frame_counter = 0;
@@ -126,6 +134,11 @@ void ReflectionController::Render()
 		{
 			this->m_frame_counter++;
 		}
+	}
+
+	if (redraw_level != -1)
+	{
+		this->m_cumulative_texture.Render(redraw_level);
 	}
 }
 
