@@ -349,8 +349,7 @@ void Engine::Render()
 				}
 				else
 				{
-					ModelGeometry geometry = it->second.geometry;
-					if (geometry != model->GetGeometry())
+					if (it->second.geometry != model->GetGeometry())
 					{
 						std::vector<GLfloat> vertices = DoubleToSinglePrecision(model->GetTriangles());
 
