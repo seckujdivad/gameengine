@@ -61,7 +61,7 @@ void CubemapController::DerivedClassConstructedEvent()
 			{
 				model_ptrs = engine->GetScene()->GetModels(cubemap->GetStaticModels());
 			}
-			else if(layer == 1)
+			else if (layer == 1)
 			{
 				model_ptrs = engine->GetScene()->GetModels(cubemap->GetDynamicModels());
 			}

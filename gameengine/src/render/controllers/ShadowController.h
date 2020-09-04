@@ -1,27 +1,20 @@
 #pragma once
 
-class Camera;
-class RenderTexture;
+#include "CubemapController.h"
 
-#include "RenderController.h"
-
-class ShadowController : public RenderController
+class ShadowController : public CubemapController
 {
 private:
-	RenderTexture* m_texture;
-
-	Camera* m_camera;
+	RenderTextureInfo GetRenderTextureInfo() const override;
+	RenderMode GetRenderMode() const override;
+	void InitialConfigureRenderTexture(RenderTexture* render_texture) const override;
+	bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const override;
 
 public:
 	ShadowController(Engine* engine, RenderTextureReference reference);
-	ShadowController(const ShadowController&) = delete;
-	ShadowController& operator=(const ShadowController&) = delete;
-	ShadowController(ShadowController&&) = delete;
-	ShadowController& operator=(ShadowController&&) = delete;
-	~ShadowController();
 
-	void Render() override;
-	RenderTextureGroup GetRenderTexture() const override;
 	double GetRenderGroup() const override;
 	RenderControllerType GetType() const override;
+
+	CubemapType GetCubemapType() const override;
 };
