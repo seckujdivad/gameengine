@@ -177,6 +177,9 @@
     <ClInclude Include="src\render\CumulativeTexture.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\controllers\CubemapController.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -283,6 +286,9 @@
     </ClCompile>
     <ClCompile Include="src\render\RenderTextureData.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\controllers\CubemapController.cpp">
+      <Filter>Source Files\render\controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

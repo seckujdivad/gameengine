@@ -1,40 +1,20 @@
 #pragma once
 
-#include <vector>
+#include "CubemapController.h"
 
-#include "RenderController.h"
-#include "../CumulativeTexture.h"
-
-class RenderTexture;
-class Camera;
-class Reflection;
-class Model;
-
-class ReflectionController : public RenderController
+class ReflectionController : public CubemapController
 {
 private:
-	std::vector<RenderTexture*> m_render_textures;
-
-	CumulativeTexture m_cumulative_texture;
-
-	Camera* m_camera;
-	Reflection* m_reflection;
-
-	int m_frame_counter;
-
-	std::vector<Model*> m_models_static;
-	std::vector<Model*> m_models_dynamic;
+	RenderTextureInfo GetRenderTextureInfo() const override;
+	RenderMode GetRenderMode() const override;
+	void InitialConfigureRenderTexture(RenderTexture* render_texture) const override;
+	bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const override;
 
 public:
 	ReflectionController(Engine* engine, RenderTextureReference reference);
-	ReflectionController(const ReflectionController&) = delete;
-	ReflectionController& operator=(const ReflectionController&) = delete;
-	ReflectionController(ReflectionController&&) = delete;
-	ReflectionController& operator=(ReflectionController&&) = delete;
-	~ReflectionController();
-
-	void Render() override;
-	RenderTextureGroup GetRenderTexture() const override;
+	
 	double GetRenderGroup() const override;
 	RenderControllerType GetType() const override;
+
+	CubemapType GetCubemapType() const override;
 };
