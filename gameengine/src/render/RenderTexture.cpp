@@ -6,8 +6,27 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 {
 	void* pixels = NULL;
 #ifdef _DEBUG
-	std::vector<GLubyte> pixel_data_ubyte(std::get<0>(dimensions) * std::get<1>(dimensions), 128);
-	std::vector<GLfloat> pixel_data_float(std::get<0>(dimensions) * std::get<1>(dimensions), 0.5f);
+	std::vector<GLubyte> pixel_data_ubyte;
+	std::vector<GLfloat> pixel_data_float;
+	if (do_create)
+	{
+		if (format == GL_UNSIGNED_BYTE)
+		{
+			pixel_data_ubyte.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
+			for (std::size_t i = 0; i < std::get<0>(dimensions) * std::get<1>(dimensions); i++)
+			{
+				pixel_data_ubyte.push_back(128);
+			}
+		}
+		else if (format == GL_FLOAT)
+		{
+			pixel_data_float.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
+			for (std::size_t i = 0; i < std::get<0>(dimensions) * std::get<1>(dimensions); i++)
+			{
+				pixel_data_float.push_back(0.5f);
+			}
+		}
+	}
 
 	if (do_create)
 	{
