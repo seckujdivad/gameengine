@@ -18,18 +18,16 @@ private:
 	std::vector<RenderTexture*> m_render_textures;
 	CumulativeTexture m_cumulative_texture;
 
-	Camera* m_camera;
-
 	int m_frame_counter;
 
 protected:
 	Cubemap* m_cubemap;
+	Camera* m_camera;
 
 	void DerivedClassConstructedEvent(); //this MUST be called by the derived constructor
 
-	virtual RenderTextureInfo GetRenderTextureInfo() const = 0;
 	virtual RenderMode GetRenderMode() const = 0;
-	virtual void InitialConfigureRenderTexture(RenderTexture* render_texture) const = 0;
+	virtual RenderTexture* GenerateRenderTexture(int layer) const = 0;
 	virtual bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const = 0;
 
 public:

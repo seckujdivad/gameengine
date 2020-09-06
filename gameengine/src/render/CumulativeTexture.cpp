@@ -30,7 +30,7 @@ CumulativeTexture::CumulativeTexture(std::vector<RenderTexture*> textures) :
 	}
 }
 
-void CumulativeTexture::Render(int index) const
+void CumulativeTexture::Render(int index, bool continuous_draw) const
 {
 	if ((index < 0) || (index >= (int)this->m_textures.size()))
 	{
@@ -44,7 +44,7 @@ void CumulativeTexture::Render(int index) const
 			CopyTextureGroup(this->m_textures.at(i - 1)->GetOutputTextures(), this->m_textures.at(i)->GetOutputTextures(), this->m_textures.at(i)->GetTextureInfo(), this->m_textures.at(i)->GetOutputSize());
 		}
 
-		this->m_textures.at(i)->Render();
+		this->m_textures.at(i)->Render({ nullptr }, continuous_draw);
 	}
 }
 

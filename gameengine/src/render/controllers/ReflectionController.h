@@ -5,9 +5,8 @@
 class ReflectionController : public CubemapController
 {
 private:
-	RenderTextureInfo GetRenderTextureInfo() const override;
 	RenderMode GetRenderMode() const override;
-	void InitialConfigureRenderTexture(RenderTexture* render_texture) const override;
+	RenderTexture* GenerateRenderTexture(int layer) const override;
 	bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const override;
 
 public:

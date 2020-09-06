@@ -41,16 +41,10 @@ void CubemapController::DerivedClassConstructedEvent()
 	this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
 
 	//initialise 2 render textures for the cumulative texture
+	this->m_render_textures.reserve(2);
 	for (int i = 0; i < 2; i++) //0 = static render, 1 = dynamic render
 	{
-		RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, this->GetRenderMode(), this->GetRenderTextureInfo(), GL_TEXTURE_CUBE_MAP, false);
-		render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-		render_texture->SetCamera(this->m_camera);
-
-		if (i != 0)
-		{
-			render_texture->GetConfig().clear_fbo = false;
-		}
+		RenderTexture* render_texture = this->GenerateRenderTexture(i);
 
 		render_texture->SetRenderFunction(
 			[render_texture, cubemap = this->m_cubemap, engine = this->m_engine, layer = i]
@@ -65,12 +59,13 @@ void CubemapController::DerivedClassConstructedEvent()
 			{
 				model_ptrs = engine->GetScene()->GetModels(cubemap->GetDynamicModels());
 			}
+			else
+			{
+				throw std::invalid_argument("Invalid layer: " + std::to_string(layer));
+			}
 
 			render_texture->RenderScene(model_ptrs);
 		});
-
-		//further cubemap - specific initialisation (i.e. initialise render struct)
-		this->InitialConfigureRenderTexture(render_texture);
 
 		this->m_render_textures.push_back(render_texture);
 	}
@@ -79,12 +74,12 @@ void CubemapController::DerivedClassConstructedEvent()
 	this->m_cumulative_texture = CumulativeTexture(this->m_render_textures);
 }
 
+//some members aren't initialised - this is fine if the derived class calls DerivedClassConstructedEvent (which it must)
 #pragma warning(push)
-#pragma warning(disable: 26495) //some members aren't initialised - this is fine if the derived class calls DerivedClassConstructedEvent (which it must)
+#pragma warning(disable: 26495) 
 CubemapController::CubemapController(Engine* engine, RenderTextureReference reference) : RenderController(engine, reference)
 #pragma warning(pop)
 {
-	
 }
 
 CubemapController::~CubemapController()
@@ -149,6 +144,10 @@ void CubemapController::Render()
 			}
 
 			this->m_frame_counter = 0;
+		}
+		else
+		{
+			this->m_frame_counter++;
 		}
 	}
 

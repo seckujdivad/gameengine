@@ -13,7 +13,7 @@ public:
 	CumulativeTexture();
 	CumulativeTexture(std::vector<RenderTexture*> textures);
 
-	void Render(int index = 0) const;
+	void Render(int index = 0, bool continuous_draw = false) const;
 
 	RenderTexture* GetOutput() const;
 };
