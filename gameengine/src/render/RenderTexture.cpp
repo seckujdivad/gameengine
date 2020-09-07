@@ -13,7 +13,7 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 		if (format == GL_UNSIGNED_BYTE)
 		{
 			pixel_data_ubyte.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
-			for (std::size_t i = 0; i < std::get<0>(dimensions) * std::get<1>(dimensions); i++)
+			for (std::size_t i = 0; i < static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)); i++)
 			{
 				pixel_data_ubyte.push_back(128);
 			}
@@ -21,7 +21,7 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 		else if (format == GL_FLOAT)
 		{
 			pixel_data_float.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
-			for (std::size_t i = 0; i < std::get<0>(dimensions) * std::get<1>(dimensions); i++)
+			for (std::size_t i = 0; i < static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)); i++)
 			{
 				pixel_data_float.push_back(0.5f);
 			}
