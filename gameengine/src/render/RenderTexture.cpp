@@ -303,6 +303,11 @@ RenderTextureGroup RenderTexture::GetOutputTextures() const
 	}
 }
 
+RenderTextureGroup RenderTexture::GetWriteTextures() const
+{
+	return this->m_texture_write;
+}
+
 RenderTextureInfo RenderTexture::GetTextureInfo() const
 {
 	return this->m_info;

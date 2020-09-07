@@ -44,6 +44,7 @@ public:
 	bool SetOutputSize(std::tuple<int, int> dimensions);
 
 	RenderTextureGroup GetOutputTextures() const;
+	RenderTextureGroup GetWriteTextures() const;
 	RenderTextureInfo GetTextureInfo() const;
 
 	void SwapBuffers();
