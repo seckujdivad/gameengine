@@ -41,7 +41,7 @@ void CumulativeTexture::Render(int index, bool continuous_draw) const
 	{
 		if (i != 0)
 		{
-			CopyTextureGroup(this->m_textures.at(i - 1)->GetOutputTextures(), this->m_textures.at(i)->GetOutputTextures(), this->m_textures.at(i)->GetTextureInfo(), this->m_textures.at(i)->GetOutputSize());
+			CopyTextureGroup(this->m_textures.at(i - 1)->GetOutputTextures(), this->m_textures.at(i)->GetWriteTextures(), this->m_textures.at(i)->GetTextureInfo(), this->m_textures.at(i)->GetOutputSize());
 		}
 
 		this->m_textures.at(i)->Render({ nullptr }, continuous_draw);
