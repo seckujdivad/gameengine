@@ -19,6 +19,7 @@ private:
 	RenderTextureInfo m_info;
 
 	bool m_simultaneous_read_write;
+	bool m_auto_swap_buffers;
 	RenderTextureGroup m_texture_write;
 	RenderTextureGroup m_texture_read;
 
@@ -32,7 +33,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false);
+	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false, bool auto_swap_buffers = true);
 	RenderTexture(const RenderTexture&) = delete;
 	RenderTexture& operator=(const RenderTexture&) = delete;
 	RenderTexture(RenderTexture&&) = delete;
@@ -44,4 +45,6 @@ public:
 
 	RenderTextureGroup GetOutputTextures() const;
 	RenderTextureInfo GetTextureInfo() const;
+
+	void SwapBuffers();
 };

@@ -184,20 +184,21 @@ void RenderTexture::ResizeTextureGroup(RenderTextureGroup& texture_group)
 
 void RenderTexture::PostRenderEvent()
 {
-	if (this->m_simultaneous_read_write)
+	if (this->m_simultaneous_read_write && this->m_auto_swap_buffers)
 	{
 		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write, bool auto_swap_buffers)
 	:
 	Renderable(engine, mode),
 	Referenceable<RenderTextureReference>(reference),
 	m_dimensions(1, 1),
 	m_simultaneous_read_write(simultaneous_read_write),
 	m_info(info),
-	m_type(type)
+	m_type(type),
+	m_auto_swap_buffers(auto_swap_buffers)
 {
 	this->GetEngine()->MakeContextCurrent();
 
@@ -305,4 +306,12 @@ RenderTextureGroup RenderTexture::GetOutputTextures() const
 RenderTextureInfo RenderTexture::GetTextureInfo() const
 {
 	return this->m_info;
+}
+
+void RenderTexture::SwapBuffers()
+{
+	if (this->m_simultaneous_read_write)
+	{
+		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
+	}
 }
