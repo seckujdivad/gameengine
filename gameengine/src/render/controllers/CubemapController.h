@@ -14,13 +14,12 @@ class Model;
 
 class CubemapController : public RenderController
 {
-private:
+protected:
 	std::vector<RenderTexture*> m_render_textures;
 	CumulativeTexture m_cumulative_texture;
 
 	int m_frame_counter;
 
-protected:
 	Cubemap* m_cubemap;
 	Camera* m_camera;
 
