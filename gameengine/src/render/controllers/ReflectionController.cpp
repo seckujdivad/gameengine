@@ -16,7 +16,7 @@ RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, this->GetRenderMode(), info, GL_TEXTURE_CUBE_MAP, false);
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, this->GetRenderMode(), info, GL_TEXTURE_CUBE_MAP, true, layer != 1);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera);
 
@@ -51,6 +51,11 @@ bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render
 ReflectionController::ReflectionController(Engine* engine, RenderTextureReference reference) : CubemapController(engine, reference)
 {
 	this->DerivedClassConstructedEvent();
+}
+
+void ReflectionController::PostRender()
+{
+	this->m_render_textures.at(1)->SwapBuffers();
 }
 
 double ReflectionController::GetRenderGroup() const
