@@ -388,6 +388,14 @@ void Engine::Render()
 				render_controller->Render();
 			}
 		}
+
+		for (RenderController* render_controller : this->m_render_controllers)
+		{
+			if (render_controller->GetType() != RenderControllerType::Skybox)
+			{
+				render_controller->PostRender();
+			}
+		}
 	}
 
 	glFlush();

@@ -10,3 +10,7 @@ RenderController::RenderController(Engine* engine, RenderTextureReference refere
 RenderController::~RenderController()
 {
 }
+
+void RenderController::PostRender()
+{
+}

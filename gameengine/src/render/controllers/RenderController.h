@@ -23,6 +23,8 @@ public:
 	virtual ~RenderController();
 
 	virtual void Render() = 0;
+	virtual void PostRender();
+
 	virtual RenderTextureGroup GetRenderTexture() const = 0;
 	virtual double GetRenderGroup() const = 0;
 	virtual RenderControllerType GetType() const = 0;
