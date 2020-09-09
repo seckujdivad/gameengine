@@ -5,6 +5,7 @@
 #include "../scene/Scene.h"
 #include "../scene/light/PointLight.h"
 #include "../scene/OrientedBoundingBox.h"
+#include "../scene/Skybox.h"
 #include "ShaderProgram.h"
 #include "../Engine.h"
 #include "../Resource.h"
@@ -258,16 +259,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->SetShaderUniform(prefix + "rotation_inverse", glm::mat3(obb.GetInverseRotationMatrix()));
 			}
 
-			//skybox cubemap
-			/*{
-				RenderTextureGroup render_texture = this->GetEngine()->GetRenderTexture(this->GetEngine()->GetScene()->GetSkyboxTextureReference());
-				LoadedTexture loaded_texture;
-				loaded_texture.id = render_texture.colour;
-				loaded_texture.type = render_texture.type;
-				loaded_texture.uniform_name = "skyboxTexture";
-				this->m_shader_program->SetTexture(-1, loaded_texture);
-			}*/
-
 			//previous render result
 			{
 				if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
@@ -463,6 +454,21 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					//shade mode 1 (wireframe)
 					this->SetShaderUniform("mode1_colour", model->GetWireframeColour());
+				}
+
+				//skybox cubemap
+				if (this->GetRenderMode() == RenderMode::Normal)
+				{
+					Skybox* skybox = model->GetSkybox();
+					if (skybox != nullptr)
+					{
+						RenderTextureGroup render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
+						LoadedTexture loaded_texture;
+						loaded_texture.id = render_texture.colour;
+						loaded_texture.type = render_texture.type;
+						loaded_texture.uniform_name = "skyboxTexture";
+						this->m_shader_program->SetTexture((int)model->GetReference(), loaded_texture);
+					}
 				}
 			}
 
