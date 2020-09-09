@@ -230,11 +230,6 @@ void Engine::Render()
 				required_cubemaps.push_back({ std::get<0>(required_cubemap_ptrs.at(i))->GetReference(), std::get<1>(required_cubemap_ptrs.at(i)) });
 			}
 
-			if (this->m_scene->GetSkyboxScene() != nullptr)
-			{
-				required_cubemaps.push_back({ this->m_scene->GetSkyboxTextureReference(), CubemapType::Skybox });
-			}
-
 			std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
 			std::sort(required_cubemaps.begin(), required_cubemaps.end());
 
@@ -383,18 +378,12 @@ void Engine::Render()
 
 		for (RenderController* render_controller : this->m_render_controllers)
 		{
-			if (render_controller->GetType() != RenderControllerType::Skybox) //skybox rendering is not yet supported
-			{
-				render_controller->Render();
-			}
+			render_controller->Render();
 		}
 
 		for (RenderController* render_controller : this->m_render_controllers)
 		{
-			if (render_controller->GetType() != RenderControllerType::Skybox)
-			{
-				render_controller->PostRender();
-			}
+			render_controller->PostRender();
 		}
 	}
 

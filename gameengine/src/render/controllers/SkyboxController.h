@@ -1,24 +1,19 @@
 #pragma once
 
-#include "RenderController.h"
+#include "CubemapController.h"
 
-class RenderTexture;
-
-class SkyboxController : public RenderController
+class SkyboxController : public CubemapController
 {
 private:
-	RenderTexture* m_texture;
+	RenderMode GetRenderMode() const override;
+	RenderTexture* GenerateRenderTexture(int layer) const override;
+	bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const override;
 
 public:
 	SkyboxController(Engine* engine, RenderTextureReference reference);
-	SkyboxController(const SkyboxController&) = delete;
-	SkyboxController& operator=(const SkyboxController&) = delete;
-	SkyboxController(SkyboxController&&) = delete;
-	SkyboxController& operator=(SkyboxController&&) = delete;
-	~SkyboxController();
 
-	void Render() override;
-	RenderTextureGroup GetRenderTexture() const override;
 	double GetRenderGroup() const override;
 	RenderControllerType GetType() const override;
+
+	CubemapType GetCubemapType() const override;
 };
