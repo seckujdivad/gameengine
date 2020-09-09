@@ -740,7 +740,7 @@ dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
 				}
 
 				dvec<dimensions> result = default_value;
-				for (int i = 0; i < (int)std::min(values.size(), dimensions); i++)
+				for (int i = 0; i < (int)std::min(static_cast<unsigned int>(values.size()), dimensions); i++)
 				{
 					result[i] = values.at(i);
 				}

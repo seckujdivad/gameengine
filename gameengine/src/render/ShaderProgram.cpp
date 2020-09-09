@@ -359,7 +359,7 @@ int ShaderProgram::ReserveShaderArrayIndex(std::string array_name, void* object)
 		}
 		else
 		{
-			return std::distance(object_pointers.begin(), it);
+			return static_cast<int>(std::distance(object_pointers.begin(), it));
 		}
 	}
 }
@@ -381,7 +381,7 @@ int ShaderProgram::GetShaderArrayIndex(std::string array_name, void* object)
 		}
 		else
 		{
-			return std::distance(object_pointers.begin(), it);
+			return static_cast<int>(std::distance(object_pointers.begin(), it));
 		}
 	}
 }

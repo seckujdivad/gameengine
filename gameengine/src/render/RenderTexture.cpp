@@ -235,7 +235,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);
 	}
 
-	glDrawBuffers(attachments.size(), attachments.data());
+	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -263,7 +263,7 @@ RenderTexture::~RenderTexture()
 		textures.insert(textures.end(), this->m_texture_read.data.begin(), this->m_texture_read.data.end());
 	}
 
-	glDeleteTextures(textures.size(), textures.data());
+	glDeleteTextures(static_cast<GLsizei>(textures.size()), textures.data());
 }
 
 std::tuple<int, int> RenderTexture::GetOutputSize() const

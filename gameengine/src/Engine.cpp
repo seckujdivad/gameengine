@@ -47,7 +47,7 @@ Engine::LoadedGeometry Engine::LoadGeometry(const ModelGeometry& geometry)
 	std::vector<double> vertices_highp = GetTriangles(geometry);
 	std::vector<GLfloat> vertices = DoubleToSinglePrecision(vertices_highp);
 
-	loaded_geometry.num_vertices = vertices.size() / Model::GetValuesPerVert();
+	loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / Model::GetValuesPerVert();
 	loaded_geometry.geometry = geometry;
 
 	//create vbo
@@ -356,7 +356,7 @@ void Engine::Render()
 						glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
 
 						it->second.geometry = model->GetGeometry();
-						it->second.num_vertices = vertices.size() / model->GetValuesPerVert();
+						it->second.num_vertices = static_cast<int>(vertices.size()) / model->GetValuesPerVert();
 					}
 				}
 			}
