@@ -10,6 +10,7 @@
 #include "../scene/Cubemap.h"
 #include "../scene/VisBox.h"
 #include "../scene/light/PointLight.h"
+#include "../scene/Skybox.h"
 
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name)
 {
@@ -421,7 +422,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 				}
 				else
 				{
-					throw std::runtime_error("An alternative reflection mode string must be provided");
+				throw std::runtime_error("An alternative reflection mode string must be provided");
 				}
 
 				std::vector<std::string> refl_names;
@@ -502,6 +503,47 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 			else
 			{
 				throw std::runtime_error("All point lights must be specified as objects");
+			}
+		}
+	}
+
+	//load all skyboxes
+	{
+		for (auto& el : scene_data["skyboxes"].items())
+		{
+			if (el.value().is_object())
+			{
+				Skybox* skybox = new Skybox(scene->GetNewRenderTextureReference());
+				skybox->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
+
+				ConfigureCubemap(el.value(), skybox, scene);
+
+				scene->Add(skybox);
+
+				for (auto& el2 : el.value()["drawn on"].items())
+				{
+					if (el2.value().is_string())
+					{
+						Model* model = scene->GetModel(el2.value().get<std::string>());
+
+						if (model == nullptr)
+						{
+							throw std::runtime_error("Invalid model identifier \"" + el2.value().get<std::string>() + "\"");
+						}
+						else
+						{
+							model->SetSkybox(skybox);
+						}
+					}
+					else
+					{
+						throw std::runtime_error("All models that have this skybox drawn on must be specified as strings");
+					}
+				}
+			}
+			else
+			{
+				throw std::runtime_error("All skyboxes must be specified as objects");
 			}
 		}
 	}
