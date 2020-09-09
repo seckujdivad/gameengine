@@ -180,6 +180,9 @@
     <ClInclude Include="src\render\controllers\CubemapController.h">
       <Filter>Header Files\render\controllers</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\Skybox.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -289,6 +292,9 @@
     </ClCompile>
     <ClCompile Include="src\render\controllers\CubemapController.cpp">
       <Filter>Source Files\render\controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Skybox.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
