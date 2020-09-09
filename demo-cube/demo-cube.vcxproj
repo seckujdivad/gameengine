@@ -209,9 +209,6 @@
     <None Include="resources\simplescene.json">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="resources\simplescene_skybox.json">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
