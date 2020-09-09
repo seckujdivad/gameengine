@@ -96,6 +96,16 @@ glm::vec3 Model::GetWireframeColour() const
 	return this->m_wireframe_colour;
 }
 
+void Model::SetSkybox(Skybox* skybox)
+{
+	this->m_skybox = skybox;
+}
+
+Skybox* Model::GetSkybox()
+{
+	return this->m_skybox;
+}
+
 bool operator==(const ModelGeometry& first, const ModelGeometry& second)
 {
 	//faces

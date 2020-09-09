@@ -18,6 +18,7 @@
 #include "../LocalTexture.h"
 
 class Scene;
+class Skybox;
 
 struct Face
 {
@@ -62,6 +63,9 @@ private:
 	//wireframe colour
 	glm::vec3 m_wireframe_colour = glm::vec3(0.0f);
 
+	//skybox
+	Skybox* m_skybox = nullptr;
+
 public:
 	Model(ModelReference reference, ModelGeometry geometry, Scene* scene = nullptr);
 
@@ -85,4 +89,7 @@ public:
 	glm::vec3 GetWireframeColour() const;
 
 	static constexpr int GetValuesPerVert() { return 14; };
+
+	void SetSkybox(Skybox* skybox);
+	Skybox* GetSkybox();
 };
