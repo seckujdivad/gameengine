@@ -487,11 +487,8 @@ void shade_mode0()
 
 	//apply skybox
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
-	if (skybox_intensity != vec3(0.0f, 0.0f, 0.0f))
-	{
-		frag_out = vec4(1 - skybox_intensity, 1.0f) * frag_out;
-		frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
-	}
+	frag_out *= vec4(1.0f - skybox_intensity, 1.0f);
+	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
 	
 	//texture usage:
 	// colour: all 4 channels assigned, alpha is currently ignored
