@@ -13,6 +13,7 @@
 class Model;
 class PointLight;
 class Reflection;
+class Skybox;
 class VisBox;
 class Scene;
 
@@ -23,14 +24,11 @@ private:
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//skybox
-	Scene* m_skybox_scene = nullptr;
-	RenderTextureReference m_skybox_texture;
-
 	//scene components - all are managed by the scene
 	std::vector<Model*> m_models;
 	std::vector<PointLight*> m_pointlights;
 	std::vector<Reflection*> m_reflections;
+	std::vector<Skybox*> m_skyboxes;
 	std::vector<VisBox*> m_visboxes;
 	std::vector<OrientedBoundingBox> m_approximations;
 
@@ -70,23 +68,23 @@ public:
 	void Remove(Reflection* reflection);
 	std::vector<Reflection*> GetReflections() const;
 
-	void Add(VisBox* visbox);
-	VisBox* GetVisBox(std::string identifier) const;
-	void Remove(VisBox* visbox);
-	std::vector<VisBox*> GetVisBoxes() const;
+	void Add(Skybox* skybox);
+	Skybox* GetSkybox(std::string identifier) const;
+	void Remove(Skybox* skybox);
+	std::vector<Skybox*> GetSkyboxes() const;
 
 	void RemoveCubemap(RenderTextureReference reference);
 	std::tuple<Cubemap*, CubemapType> GetCubemap(RenderTextureReference reference) const;
 	std::vector<std::tuple<Cubemap*, CubemapType>> GetCubemaps() const;
 
+	void Add(VisBox* visbox);
+	VisBox* GetVisBox(std::string identifier) const;
+	void Remove(VisBox* visbox);
+	std::vector<VisBox*> GetVisBoxes() const;
+
 	void Add(OrientedBoundingBox obb);
 	void Remove(OrientedBoundingBox obb);
 	std::vector<OrientedBoundingBox> GetOBBApproximations() const;
-
-	void SetSkyboxScene(Scene* scene);
-	Scene* GetSkyboxScene() const;
-
-	RenderTextureReference GetSkyboxTextureReference() const;
 
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour() const;

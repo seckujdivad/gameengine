@@ -5,11 +5,11 @@
 #include "model/Model.h"
 #include "light/PointLight.h"
 #include "model/Reflection.h"
+#include "Skybox.h"
 #include "VisBox.h"
 
 Scene::Scene() : Nameable()
 {
-	this->m_skybox_texture = this->GetNewRenderTextureReference();
 }
 
 Scene::~Scene()
@@ -31,14 +31,14 @@ Scene::~Scene()
 			delete reflection;
 		}
 
+		for (Skybox* skybox : this->m_skyboxes)
+		{
+			delete skybox;
+		}
+
 		for (VisBox* visbox : this->m_visboxes)
 		{
 			delete visbox;
-		}
-
-		if (this->m_skybox_scene != nullptr)
-		{
-			delete this->m_skybox_scene;
 		}
 	}
 }
@@ -149,22 +149,6 @@ RenderTextureReference Scene::GetNewRenderTextureReference()
 TextureReference Scene::GetNewTextureReference()
 {
 	return this->m_reference_texture++;
-}
-
-void Scene::SetSkyboxScene(Scene* scene)
-{
-	this->m_skybox_scene = scene;
-	this->m_skybox_texture = this->GetNewRenderTextureReference();
-}
-
-Scene* Scene::GetSkyboxScene() const
-{
-	return this->m_skybox_scene;
-}
-
-RenderTextureReference Scene::GetSkyboxTextureReference() const
-{
-	return this->m_skybox_texture;
 }
 
 void Scene::SetClearColour(glm::vec4 colour)
@@ -300,6 +284,43 @@ std::vector<Reflection*> Scene::GetReflections() const
 	return this->m_reflections;
 }
 
+void Scene::Add(Skybox* skybox)
+{
+	this->m_skyboxes.push_back(skybox);
+}
+
+Skybox* Scene::GetSkybox(std::string identifier) const
+{
+	for (Skybox* skybox : this->m_skyboxes)
+	{
+		if (skybox->GetIdentifier() == identifier)
+		{
+			return skybox;
+		}
+	}
+
+	return nullptr;
+}
+
+void Scene::Remove(Skybox* skybox)
+{
+	std::vector<Skybox*>::iterator it = std::find(this->m_skyboxes.begin(), this->m_skyboxes.end(), skybox);
+	if (it != this->m_skyboxes.end())
+	{
+		this->m_skyboxes.erase(it);
+
+		if (this->m_manage_children)
+		{
+			delete* it;
+		}
+	}
+}
+
+std::vector<Skybox*> Scene::GetSkyboxes() const
+{
+	return this->m_skyboxes;
+}
+
 void Scene::Add(VisBox* visbox)
 {
 	this->m_visboxes.push_back(visbox);
@@ -370,6 +391,22 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 			this->Remove(*result);
 		}
 	}
+
+	{
+		std::vector<Skybox*>::iterator result = this->m_skyboxes.end();
+		for (std::vector<Skybox*>::iterator it = this->m_skyboxes.begin(); it != this->m_skyboxes.end(); it++)
+		{
+			if ((*it)->GetReference() == reference)
+			{
+				result = it;
+			}
+		}
+
+		if (result != this->m_skyboxes.end())
+		{
+			this->Remove(*result);
+		}
+	}
 }
 
 std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference reference) const
@@ -390,6 +427,14 @@ std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference refer
 		}
 	}
 
+	for (Skybox* skybox : this->m_skyboxes)
+	{
+		if (skybox->GetReference() == reference)
+		{
+			return { skybox, CubemapType::Skybox };
+		}
+	}
+
 	return { nullptr, CubemapType::None };
 }
 
@@ -404,6 +449,11 @@ std::vector<std::tuple<Cubemap*, CubemapType>> Scene::GetCubemaps() const
 	for (auto it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
 	{
 		cubemaps.push_back({ *it, CubemapType::Pointlight });
+	}
+
+	for (auto it = this->m_skyboxes.begin(); it != this->m_skyboxes.end(); it++)
+	{
+		cubemaps.push_back({ *it, CubemapType::Skybox });
 	}
 
 	return cubemaps;
