@@ -145,6 +145,9 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
 	this->m_render_controllers.push_back(controller);
 
+	this->m_glcontext_canvas->Destroy();
+	this->m_glcontext_canvas = nullptr;
+
 	return canvas;
 }
 
@@ -448,7 +451,31 @@ void Engine::ReleaseVAO(Model* model)
 
 void Engine::MakeContextCurrent()
 {
-	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+	if (this->m_glcontext_canvas == nullptr)
+	{
+		bool context_set = false;
+		for (RenderController* render_controller : this->m_render_controllers)
+		{
+			if (!context_set)
+			{
+				if (render_controller->GetType() == RenderControllerType::EngineCanvas)
+				{
+					EngineCanvasController* engine_canvas_controller = dynamic_cast<EngineCanvasController*>(render_controller);
+					engine_canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
+					context_set = true;
+				}
+			}
+		}
+
+		if (!context_set)
+		{
+			throw std::runtime_error("Unable to set context as current");
+		}
+	}
+	else
+	{
+		this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+	}
 }
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
