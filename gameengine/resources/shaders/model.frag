@@ -237,50 +237,30 @@ void shade_mode0()
 	//sample specular map
 	vec3 sample_specular = texture(specularTexture, geomUV).rgb * mat_specular;
 
-	//vars for loop
-	float diffuse_intensity;
-	float specular_intensity;
-	vec3 fragtolight;
 	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos.xyz); //get direction from the fragment to the camera
-
-	//phong
-	//vec3 perfect_reflection;
-	//blinn-phong
-	vec3 halfway_dir;
-
-	vec3 light_change;
-
-	//shadows
-	float shadow_intensity;
 
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
-		if (light_points[i].intensity != vec3(0.0f, 0.0f, 0.0f))
-		{
-			//calculate light
-			light_change = vec3(0.0f);
+		//calculate light
+		vec3 light_change = vec3(0.0f);
 
-			fragtolight = light_points[i].position - geomSceneSpacePos.xyz; //get direction from the fragment to the light source
+		vec3 fragtolight = light_points[i].position - geomSceneSpacePos.xyz; //get direction from the fragment to the light source
 			
-			if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
-			{
-				fragtolight = normalize(fragtolight);
+		if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
+		{
+			fragtolight = normalize(fragtolight);
 
-				// diffuse
-				diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
-				light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
+			// diffuse
+			float diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
+			light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
 		
-				// specular blinn-phong
-				halfway_dir = normalize(fragtolight + fragtocam);
-				specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
-				light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
-		
-				//get shadow intensity multiplier
-				shadow_intensity = GetShadowIntensity(geomSceneSpacePos.xyz, i);
+			// specular blinn-phong
+			vec3 halfway_dir = normalize(fragtolight + fragtocam);
+			float specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
+			light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
 
-				//apply light to fragment
-				frag_intensity = frag_intensity + (light_change * shadow_intensity);
-			}
+			//apply light to fragment
+			frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos.xyz, i));
 		}
 	}
 
@@ -362,11 +342,10 @@ void shade_mode0()
 		{
 			//find reflection to use
 			float refl_distance = 0.0f;
-			float current_distance;
 			int reflection_index;
 			for (int i = 0; i < reflection_count; i++)
 			{
-				current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
+				float current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
 
 				if ((refl_distance == 0.0f) || (current_distance < refl_distance))
 				{
@@ -403,7 +382,6 @@ void shade_mode0()
 				vec3 intersections[2];
 				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM];
 				float final_length = -1.0f;
-				float current_length;
 				int search_index = -1;
 				vec3 refl_dir = normalize(reflect(-fragtocam, normal));
 				bool included_segments[APPROXIMATION_OBB_NUM];
@@ -416,15 +394,11 @@ void shade_mode0()
 					all_intersections[(i * 2)] = intersections[0];
 					all_intersections[(i * 2) + 1] = intersections[1];
 
-					if (!is_valid)
-					{
-						included_segments[i] = true;
-					}
-					else
-					{
-						included_segments[i] = false;
+					included_segments[i] = !is_valid;
 
-						current_length = length(intersections[1] - geomSceneSpacePos.xyz);
+					if (is_valid)
+					{
+						float current_length = length(intersections[1] - geomSceneSpacePos.xyz);
 
 						if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
 						{
@@ -446,7 +420,7 @@ void shade_mode0()
 					vec3 line_start_pos = all_intersections[search_index * 2];
 					vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
 					int current_index = 0;
-					current_length = length(line_end_pos - line_start_pos);
+					float current_length = length(line_end_pos - line_start_pos);
 				
 					while (current_index < APPROXIMATION_OBB_NUM)
 					{
@@ -466,6 +440,7 @@ void shade_mode0()
 					for (int i = 0; i < reflection_count; i++)
 					{
 						current_length = length(line_end_pos - reflections[i].position);
+
 						if (current_length < final_length)
 						{
 							final_index = i;
@@ -503,8 +478,6 @@ void shade_mode0()
 
 	//store the pseudo-depth (depth accounting for skyboxes)
 	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
-
-	//frag_out = vec4(0.0f, 1.0f, 0.0f, 0.0f);
 }
 
 void shade_mode1()
