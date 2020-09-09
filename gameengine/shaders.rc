@@ -5,11 +5,12 @@ RCID_TF_POSTPROCESS_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/pos
 
 RCID_TF_MODEL_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model.frag"
 RCID_TF_MODEL_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model.vert"
-RCID_TF_MODEL_GEOMSHADER_MODE0 RCT_TEXTFILE "../gameengine/resources/shaders/model_mode0.geom"
-RCID_TF_MODEL_GEOMSHADER_MODE1 RCT_TEXTFILE "../gameengine/resources/shaders/model_mode1.geom"
 
 RCID_TF_MODEL_SHADOW_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.frag"
 RCID_TF_MODEL_SHADOW_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.vert"
+
+RCID_TF_MODEL_NORMAL_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_normal.geom"
+RCID_TF_MODEL_WIREFRAME_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_wireframe.geom"
 RCID_TF_MODEL_SHADOW_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.geom"
 
 RCID_TF_DEFAULT_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/default.frag"

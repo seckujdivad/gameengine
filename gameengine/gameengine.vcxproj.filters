@@ -327,12 +327,6 @@
     <None Include="resources\shaders\model_shadow.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="resources\shaders\model_mode0.geom">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="resources\shaders\model_mode1.geom">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
     <None Include="resources\shaders\default.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>

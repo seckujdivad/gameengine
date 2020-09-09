@@ -695,7 +695,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 		{
 			this->m_shaders = {
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE0), GL_GEOMETRY_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 			};
 		}
@@ -703,7 +703,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 		{
 			this->m_shaders = {
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER_MODE1), GL_GEOMETRY_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 			};
 		}

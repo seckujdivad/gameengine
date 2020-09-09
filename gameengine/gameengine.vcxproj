@@ -272,8 +272,6 @@
     <None Include="resources\shaders\default.vert" />
     <None Include="resources\shaders\model.frag" />
     <None Include="resources\shaders\model.vert" />
-    <None Include="resources\shaders\model_mode0.geom" />
-    <None Include="resources\shaders\model_mode1.geom" />
     <None Include="resources\shaders\model_shadow.frag" />
     <None Include="resources\shaders\model_shadow.geom" />
     <None Include="resources\shaders\model_shadow.vert" />
