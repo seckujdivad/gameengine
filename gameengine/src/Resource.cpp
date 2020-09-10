@@ -5,7 +5,16 @@
 Resource::Resource(int resource_id, int resource_type)
 {
 	this->m_resource = FindResourceW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(resource_id), MAKEINTRESOURCEW(resource_type));
+	if (this->m_resource == NULL)
+	{
+		throw std::runtime_error("FindResourceW returned NULL");
+	}
+
 	this->m_memory = LoadResource(nullptr, this->m_resource);
+	if (this->m_memory == NULL)
+	{
+		throw std::runtime_error("LoadResource returned NULL");
+	}
 
 	if (this->m_resource == nullptr)
 	{
