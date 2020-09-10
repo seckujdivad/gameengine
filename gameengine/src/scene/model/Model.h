@@ -75,7 +75,7 @@ public:
 
 	Material& GetMaterial();
 
-	ModelGeometry GetGeometry() const;
+	const ModelGeometry& GetGeometry() const;
 
 	LocalTexture& GetColourTexture();
 	LocalTexture& GetReflectionTexture();

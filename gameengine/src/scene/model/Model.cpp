@@ -46,7 +46,7 @@ Material& Model::GetMaterial()
 	return this->m_material;
 }
 
-ModelGeometry Model::GetGeometry() const
+const ModelGeometry& Model::GetGeometry() const
 {
 	return this->m_geometry;
 }
