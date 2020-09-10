@@ -525,7 +525,7 @@ void Renderable::RecompileShader()
 		false
 	);
 
-	for (std::vector<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
+	for (std::set<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
 	{
 		this->m_shader_program->RegisterUniform(*it);
 	}
@@ -570,14 +570,11 @@ bool Renderable::SetShaderDefine(std::string key, std::string value)
 
 void Renderable::AddShaderUniformName(std::string name)
 {
-	if (std::find(this->m_shader_uniform_names.begin(), this->m_shader_uniform_names.end(), name) == this->m_shader_uniform_names.end())
-	{
-		this->m_shader_uniform_names.push_back(name);
+	std::pair<std::set<std::string>::iterator, bool> insert_result = this->m_shader_uniform_names.insert(name);
 
-		if (this->m_shader_program != nullptr)
-		{
-			this->m_shader_program->RegisterUniform(name);
-		}
+	if (insert_result.second && (this->m_shader_program != nullptr))
+	{
+		this->m_shader_program->RegisterUniform(name);
 	}
 }
 

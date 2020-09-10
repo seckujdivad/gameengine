@@ -11,6 +11,7 @@
 #include <tuple>
 #include <map>
 #include <functional>
+#include <set>
 
 #include "../scene/Referenceable.h"
 #include "RenderMode.h"
@@ -50,7 +51,7 @@ private:
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
 	std::map<std::string, std::string> m_shader_defines;
-	std::vector<std::string> m_shader_uniform_names;
+	std::set<std::string> m_shader_uniform_names;
 
 	std::map<int, LoadedTexture> m_textures;
 
