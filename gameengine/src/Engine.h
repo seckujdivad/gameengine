@@ -54,6 +54,8 @@ private:
 
 	Engine::LoadedGeometry LoadGeometry(const ModelGeometry& geometry);
 
+	void AddRenderController(RenderController* render_controller);
+
 public:
 	Engine(wxWindow* parent, Scene* scene);
 	Engine(const Engine&) = delete;

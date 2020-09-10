@@ -73,6 +73,20 @@ Engine::LoadedGeometry Engine::LoadGeometry(const ModelGeometry& geometry)
 	return loaded_geometry;
 }
 
+void Engine::AddRenderController(RenderController* render_controller)
+{
+	int insert_index = 0;
+	for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
+	{
+		if (this->m_render_controllers.at(i)->GetRenderGroup() <= render_controller->GetRenderGroup())
+		{
+			insert_index = i;
+		}
+	}
+
+	this->m_render_controllers.insert(this->m_render_controllers.begin() + insert_index, render_controller);
+}
+
 Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent)
 {
 	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
@@ -143,7 +157,7 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	canvas->MakeOpenGLFocus();
 
 	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
-	this->m_render_controllers.push_back(controller);
+	this->AddRenderController(controller);
 
 	this->m_glcontext_canvas->Destroy();
 	this->m_glcontext_canvas = nullptr;
@@ -318,15 +332,15 @@ void Engine::Render()
 
 			if (type == CubemapType::Reflection)
 			{
-				this->m_render_controllers.push_back(new ReflectionController(this, reference));
+				this->AddRenderController(new ReflectionController(this, reference));
 			}
 			else if (type == CubemapType::Pointlight)
 			{
-				this->m_render_controllers.push_back(new ShadowController(this, reference));
+				this->AddRenderController(new ShadowController(this, reference));
 			}
 			else if (type == CubemapType::Skybox)
 			{
-				this->m_render_controllers.push_back(new SkyboxController(this, reference));
+				this->AddRenderController(new SkyboxController(this, reference));
 			}
 			else
 			{
@@ -377,8 +391,6 @@ void Engine::Render()
 		}
 
 		//tell controllers to redraw themselves (if required)
-		std::sort(this->m_render_controllers.begin(), this->m_render_controllers.end(), [](RenderController* first, RenderController* second) {return first->GetRenderGroup() < second->GetRenderGroup();}); //lower render groups are rendered first
-
 		for (RenderController* render_controller : this->m_render_controllers)
 		{
 			render_controller->Render();
