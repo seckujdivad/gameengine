@@ -159,8 +159,11 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
 	this->AddRenderController(controller);
 
-	this->m_glcontext_canvas->Destroy();
-	this->m_glcontext_canvas = nullptr;
+	if (this->m_glcontext_canvas != nullptr)
+	{
+		this->m_glcontext_canvas->Destroy();
+		this->m_glcontext_canvas = nullptr;
+	}
 
 	return canvas;
 }
