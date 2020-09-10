@@ -255,7 +255,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->SetShaderUniform(prefix + "rotation", glm::mat3(obb.GetRotationMatrix()));
 
 				this->AddShaderUniformName(prefix + "rotation_inverse");
-				this->SetShaderUniform(prefix + "rotation_inverse", glm::mat3(obb.GetInverseRotationMatrix()));
+				this->SetShaderUniform(prefix + "rotation_inverse", glm::mat3(obb.GetRotationMatrixInverse()));
 			}
 
 			//previous render result
