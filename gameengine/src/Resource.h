@@ -1,8 +1,12 @@
 #pragma once
 
-#include <Windows.h>
-#include <WinBase.h>
-#include <atlbase.h>
+#ifdef _WIN32 //according to my GCC install on windows, this is still defined (ie not exclusive to MSVC++)
+	#include <Windows.h>
+	#include <WinBase.h>
+	#include <atlbase.h>
+#else
+	#error Resource embedding is only implemented through WinAPI
+#endif
 
 #include <string>
 #include <string_view>
