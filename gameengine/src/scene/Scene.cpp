@@ -386,6 +386,11 @@ void Scene::Remove(VisBox* visbox)
 			delete *it;
 		}
 	}
+
+	for (VisBox* second_visbox : this->GetVisBoxes())
+	{
+		second_visbox->RemovePotentiallyVisible(visbox);
+	}
 }
 
 std::vector<VisBox*> Scene::GetVisBoxes() const
