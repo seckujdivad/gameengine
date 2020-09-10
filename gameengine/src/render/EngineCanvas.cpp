@@ -184,8 +184,11 @@ void EngineCanvas::SetMouselookActive(bool enable)
 
 void EngineCanvas::SetMouselook(bool enable)
 {
+	if (!(enable && this->m_mouselook_active))
+	{
+		this->SetMouselookActive(false);
+	}
 	this->m_mouselook = enable;
-	this->SetMouselookActive(enable);
 }
 
 void EngineCanvas::SetKeyboardMove(bool enable)
@@ -193,7 +196,6 @@ void EngineCanvas::SetKeyboardMove(bool enable)
 	this->m_keyboard_move = enable;
 	this->SetKeyboardMoveActive(enable);
 }
-
 
 void EngineCanvas::SetKeyboardMoveActive(bool enable)
 {
