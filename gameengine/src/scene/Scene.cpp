@@ -58,7 +58,7 @@ void Scene::Add(Model* model)
 	this->m_models.push_back(model);
 }
 
-void Scene::Remove(Model* model) //TODO: remove ptrs to models in reflections and point lights
+void Scene::Remove(Model* model)
 {
 	std::vector<Model*>::iterator it = std::find(this->m_models.begin(), this->m_models.end(), model);
 	if (it != this->m_models.end())
@@ -69,6 +69,17 @@ void Scene::Remove(Model* model) //TODO: remove ptrs to models in reflections an
 		{
 			delete *it;
 		}
+	}
+
+	for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetCubemaps())
+	{
+		std::get<0>(cubemap_data)->RemoveStaticModel(model->GetReference());
+		std::get<0>(cubemap_data)->RemoveDynamicModel(model->GetReference());
+	}
+
+	for (VisBox* visbox : this->GetVisBoxes())
+	{
+		visbox->RemoveMemberModel(model);
 	}
 }
 
