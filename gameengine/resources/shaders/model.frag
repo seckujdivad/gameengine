@@ -321,23 +321,20 @@ void shade_mode0()
 			{
 				float current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
 
-				if ((refl_distance == 0.0f) || (current_distance < refl_distance))
-				{
-					reflection_index = i;
-					refl_distance = current_distance;
-				}
+				bool condition = (refl_distance == 0.0f) || (current_distance < refl_distance);
+				reflection_index = condition ? i : reflection_index;
+				refl_distance = mix(int(condition), refl_distance, current_distance);
 			}
 
 			if (reflections[reflection_index].mode == 0) //iteratively apply perspective correction
 			{
 				vec3 sample_vector = reflect(-fragtocam, normal);
-				float depth_sample;
 				float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
 				vec3 offset = geomSceneSpacePos.xyz - reflections[reflection_index].position;
 
 				for (int i = 0; i < reflections[reflection_index].iterations; i++)
 				{
-					depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
+					float depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
 					if (depth_sample == 1.0f)
 					{
 						i = reflections[reflection_index].iterations; //exit loop
