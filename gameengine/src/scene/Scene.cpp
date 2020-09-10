@@ -341,6 +341,14 @@ void Scene::Remove(Skybox* skybox)
 			delete* it;
 		}
 	}
+
+	for (Model* model : this->GetModels())
+	{
+		if (model->GetSkybox() == skybox)
+		{
+			model->SetSkybox(nullptr);
+		}
+	}
 }
 
 std::vector<Skybox*> Scene::GetSkyboxes() const
