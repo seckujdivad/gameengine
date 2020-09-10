@@ -276,7 +276,7 @@ Reflection* Scene::GetReflection(std::string identifier) const
 	return nullptr;
 }
 
-void Scene::Remove(Reflection* reflection) //TODO: remove reflection pointers from model objects
+void Scene::Remove(Reflection* reflection)
 {
 	std::vector<Reflection*>::iterator it = std::find(this->m_reflections.begin(), this->m_reflections.end(), reflection);
 	if (it != this->m_reflections.end())
@@ -286,6 +286,22 @@ void Scene::Remove(Reflection* reflection) //TODO: remove reflection pointers fr
 		if (this->m_manage_children)
 		{
 			delete *it;
+		}
+	}
+
+	for (Model* model : this->GetModels())
+	{
+		Material& material = model->GetMaterial();
+
+		for (int i = 0; i < static_cast<int>(material.reflections.size()); i++)
+		{
+			std::tuple<Reflection*, ReflectionMode> reflection_data = material.reflections.at(i);
+
+			if (std::get<0>(reflection_data) == reflection)
+			{
+				material.reflections.erase(material.reflections.begin(), material.reflections.begin() + i);
+				i--;
+			}
 		}
 	}
 }
