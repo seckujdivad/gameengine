@@ -39,5 +39,5 @@ public:
 	void RemoveMemberModel(Model* model);
 
 	void AddPotentiallyVisible(VisBox* visbox);
-
+	void RemovePotentiallyVisible(VisBox* visbox);
 };

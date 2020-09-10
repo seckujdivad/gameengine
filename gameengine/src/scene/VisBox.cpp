@@ -38,3 +38,8 @@ void VisBox::AddPotentiallyVisible(VisBox* visbox)
 {
 	this->m_pvs.insert(visbox);
 }
+
+void VisBox::RemovePotentiallyVisible(VisBox* visbox)
+{
+	this->m_pvs.erase(visbox);
+}
