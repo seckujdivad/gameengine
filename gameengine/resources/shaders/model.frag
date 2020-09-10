@@ -76,14 +76,14 @@ struct PointLight
 {
 	vec3 position;
 	vec3 intensity;
-	bool shadows_enabled;
 	float shadow_far_plane;
 	float shadow_bias;
 };
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
-
 uniform samplerCube light_shadow_cubemaps[POINT_LIGHT_NUM];
+
+uniform bool light_shadow_draw;
 
 //reflections
 
@@ -132,31 +132,19 @@ uniform vec3 mode1_colour;
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
-	if (!light_points[lightindex].shadows_enabled)
+	if (light_shadow_draw)
 	{
-		return 1.0f;
-	}
+		vec3 lighttofrag = fragpos - light_points[lightindex].position;
 
-	vec3 lighttofrag = fragpos - light_points[lightindex].position;
+		float depth_sample = texture(light_shadow_cubemaps[lightindex], lighttofrag).r;
+		float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
+		float frag_depth = length(lighttofrag);
 
-	float depth_sample = texture(light_shadow_cubemaps[lightindex], lighttofrag).r;
-	float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
-	float frag_depth = length(lighttofrag);
-	
-	if (depth_sample == 1.0f)
-	{
-		if (frag_depth < light_points[lightindex].shadow_far_plane)
-		{
-			return 1.0f;
-		}
-		else
-		{
-			return 0.0f;
-		}
-	}
-	else if (frag_depth - light_points[lightindex].shadow_bias > corrected_depth_sample)
-	{
-		return 0.0f;
+		bool frag_in_range = depth_sample != 1.0f;
+		bool frag_obscured = (frag_depth - light_points[lightindex].shadow_bias) > corrected_depth_sample;
+		bool frag_in_shadow = frag_in_range && frag_obscured;
+
+		return float(!frag_in_shadow);
 	}
 	else
 	{
@@ -171,10 +159,6 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	vec3 fragpos_oob = obb_rotation_inverse * (start_pos - obb_translation);
 
 	vec3 intersections[2];
-	float lambda;
-	float pinned_value;
-	float second_axis_value;
-	float third_axis_value;
 	int intersection_index = 0;
 	float lambdas[2];
 
@@ -185,12 +169,12 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 		for (int j = 0; j < 2; j++)
 		{
 			//at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
-			pinned_value = (j == 0) ? 0.0f : obb_dimensions[i];
-			lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
+			float pinned_value = (j == 0) ? 0.0f : obb_dimensions[i];
+			float lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
 			//intersection_index = (lambda > 0.0) ? 1 : 0;
 
-			second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
-			third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
+			float second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
+			float third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
 			if ((0.0f <= second_axis_value) && (second_axis_value <= obb_dimensions[(i + 1) % 3]) &&
 				(0.0f <= third_axis_value) && (third_axis_value <= obb_dimensions[(i + 2) % 3]))
 			{
@@ -244,24 +228,19 @@ void shade_mode0()
 		//calculate light
 		vec3 light_change = vec3(0.0f);
 
-		vec3 fragtolight = light_points[i].position - geomSceneSpacePos.xyz; //get direction from the fragment to the light source
-			
-		if (length(fragtolight) < light_points[i].shadow_far_plane) //make sure fragment isn't too far away from the light
-		{
-			fragtolight = normalize(fragtolight);
+		vec3 fragtolight = normalize(light_points[i].position - geomSceneSpacePos.xyz); //get direction from the fragment to the light source
 
-			// diffuse
-			float diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
-			light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
+		// diffuse
+		float diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
+		light_change = diffuse_intensity * mat_diffuse * light_points[i].intensity; //apply diffuse intensity and material diffuse colour to fragment intensity
 		
-			// specular blinn-phong
-			vec3 halfway_dir = normalize(fragtolight + fragtocam);
-			float specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
-			light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
+		// specular blinn-phong
+		vec3 halfway_dir = normalize(fragtolight + fragtocam);
+		float specular_intensity = pow(max(dot(normal, halfway_dir), 0.0f), mat_specular_highlight);
+		light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
 
-			//apply light to fragment
-			frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos.xyz, i));
-		}
+		//apply light to fragment
+		frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos.xyz, i));
 	}
 
 	//apply lighting to fragment
@@ -270,11 +249,6 @@ void shade_mode0()
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, geomUV).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
-	if (reflection_intensity == vec3(0.0f, 0.0f, 0.0f))
-	{
-		//do nothing - reflections have no effect on this fragment
-	}
-	else
 	{
 		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)

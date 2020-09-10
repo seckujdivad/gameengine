@@ -195,6 +195,17 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			// ambient light
 			this->SetShaderUniform("light_ambient", scene->GetAmbientLight());
 
+			// shadows
+			bool shadows_enabled = true;
+			if (this->GetRenderMode() == RenderMode::Normal)
+			{
+				if (!this->m_rendermode_data_normal.draw_shadows)
+				{
+					shadows_enabled = false;
+				}
+			}
+			this->SetShaderUniform("light_shadow_draw", shadows_enabled);
+
 			//point lights
 			std::vector<PointLight*> point_lights = this->GetEngine()->GetScene()->GetPointLights();
 			for (int i = 0; i < (int)point_lights.size(); i++)
@@ -207,18 +218,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				this->AddShaderUniformName(root_name + "intensity");
 				this->SetShaderUniform(root_name + "intensity", point_light->GetIntensity());
-
-				bool shadows_enabled = point_light->GetShadowsEnabled();
-				if (this->GetRenderMode() == RenderMode::Normal)
-				{
-					if (!this->m_rendermode_data_normal.draw_shadows)
-					{
-						shadows_enabled = false;
-					}
-				}
-
-				this->AddShaderUniformName(root_name + "shadows_enabled");
-				this->SetShaderUniform(root_name + "shadows_enabled", shadows_enabled);
 
 				this->AddShaderUniformName(root_name + "shadow_far_plane");
 				this->SetShaderUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));
@@ -772,6 +771,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"specularTexture",
 				"reflectionIntensityTexture",
 				"light_ambient",
+				"light_shadow_draw",
 				"reflection_count",
 				"skyboxMaskTexture",
 				"skyboxTexture",

@@ -113,7 +113,6 @@
         "position": [ 10, 0, 0 ],
         "intensity": 1,
         "shadows": {
-          "enabled": true,
           "clips": [ 0.1, 25 ],
           "texture": [ 2048, 2048 ],
           "dynamic draw": [ "simple cube", "blender suzanne" ],
