@@ -210,12 +210,12 @@ void EngineCanvas::SetRenderLoop(bool enable)
 	this->SwapBuffers();
 }
 
-void EngineCanvas::SetVerticalSync(bool enabled)
+void EngineCanvas::SetVerticalSync(bool enabled) //TODO: implement for other platforms
 {
 #ifdef _WIN32 //both 32 and 64 bit windows
 	wglSwapIntervalEXT(enabled);
 #else
-	throw std::runtime_error("Disabling/reenabling VSync isn't implemented outside of Windows");
+	#error Disabling/reenabling VSync isn't implemented outside of Windows
 #endif
 }
 
