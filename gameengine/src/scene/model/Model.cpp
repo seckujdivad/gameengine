@@ -2,6 +2,8 @@
 
 #include <array>
 #include <cmath>
+#include <set>
+#include <map>
 
 #include "../Scene.h"
 
@@ -190,63 +192,62 @@ bool operator!=(const Face& first, const Face& second)
 	return !(first == second);
 }
 
-void MergeVertices(ModelGeometry& geometry, double threshold) //TODO: fix
+void MergeVertices(ModelGeometry& geometry, double threshold)
 {
-	/*
-	std::vector<std::vector<int>> matches;
-	for (int i = 0; i < (int)geometry.vertices.size(); i++)
+	//make several groups of points that are within the threshold from each other (this is approximate)
+	//the first vertex to be added to the group is the one that is preserved, all others map onto it
+	std::vector<std::vector<int>> groups;
+	for (int i = 0; i < static_cast<int>(geometry.vertices.size()); i++)
 	{
-		int match_index = -1;
+		bool group_found = false;
+		int group_index;
 
-		for (int j = 0; j < (int)geometry.vertices.size(); j++)
+		for (int j = 0; j < static_cast<int>(groups.size()); j++)
 		{
-			if ((i != j) && (glm::length(geometry.vertices.at(i) - geometry.vertices.at(j)) <= threshold))
+			if (glm::length(geometry.vertices.at(groups.at(j).at(0)) - geometry.vertices.at(i)) <= threshold) //a group has been found
 			{
-				match_index = j;
+				group_found = true;
+				group_index = j;
+				j = groups.size(); //exit loop, no need to look for another group
 			}
 		}
 
-		if (match_index != -1)
+		if (group_found)
 		{
-			for (int j = 0; j < (int)matches.size(); j++)
-			{
-				if (std::find(matches.at(j).begin(), matches.at(j).end(), i) != matches.at(j).end())
-				{
-					matches.at(j).push_back(i);
-				}
-			}
+			groups.at(group_index).push_back(i);
+		}
+		else
+		{
+			groups.push_back(std::vector(1, i));
 		}
 	}
 
-	//std::vector<glm::dvec3> vertices;
+	//create a more performant way of looking up the primary vertex from a group member
+	std::map<int, int> group_lookup;
+	for (int i = 0; i < static_cast<int>(groups.size()); i++)
+	{
+		for (int member_index : groups.at(i))
+		{
+			group_lookup.insert(std::pair(member_index, i));
+		}
+	}
+
+	//create final list of vertices that contains the primary vertex of each group
+	std::vector<glm::dvec3> vecs_copy = geometry.vertices;
 	geometry.vertices.clear();
-	for (int i = 0; i < (int)matches.size(); i++)
+	for (std::vector<int> group : groups)
 	{
-		glm::dvec3 point_sum;
-		for (int j = 0; (int)matches.at(i).size(); j++)
-		{
-			point_sum += matches.at(i).at(j);
-		}
-		geometry.vertices.push_back(point_sum / (double)matches.at(i).size());
+		geometry.vertices.push_back(vecs_copy.at(group.at(0)));
 	}
 
-	for (int i = 0; i < (int)geometry.faces.size(); i++)
+	//write the index of the primary vertex to any faces that reference the secondary vertex
+	for (Face& face : geometry.faces)
 	{
-		Face& face = geometry.faces.at(i);
-		for (int j = 0; j < (int)face.vertices.size(); j++)
+		for (int& vertex_index : face.vertices)
 		{
-			for (int k = 0; k < (int)matches.size(); k++)
-			{
-				std::vector<int>::iterator match = std::find(matches.at(k).begin(), matches.at(k).end(), face.vertices.at(j));
-				if (match != matches.at(k).end())
-				{
-					face.vertices.at(j) = k;
-				}
-			}
+			vertex_index = group_lookup.at(vertex_index);
 		}
 	}
-
-	//geometry.vertices = vertices;*/
 }
 
 void InvertNormals(ModelGeometry& geometry)
