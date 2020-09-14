@@ -208,7 +208,7 @@ void MergeVertices(ModelGeometry& geometry, double threshold)
 			{
 				group_found = true;
 				group_index = j;
-				j = groups.size(); //exit loop, no need to look for another group
+				j = static_cast<int>(groups.size()); //exit loop, no need to look for another group
 			}
 		}
 
