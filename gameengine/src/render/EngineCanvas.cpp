@@ -210,10 +210,12 @@ void EngineCanvas::SetRenderLoop(bool enable)
 	this->SwapBuffers();
 }
 
-void EngineCanvas::SetVerticalSync(bool enabled) //TODO: implement for other platforms
+void EngineCanvas::SetVerticalSync(bool enabled) //not implemented for Mac because OpenGL on Mac is messy and going away
 {
 #ifdef _WIN32 //both 32 and 64 bit windows
 	wglSwapIntervalEXT(enabled);
+#elif defined(__linux__)
+	glXSwapIntervalEXT(enabled); //according to https://www.khronos.org/opengl/wiki/Swap_Interval, untested
 #else
 	#error Disabling/reenabling VSync isn't implemented outside of Windows
 #endif
