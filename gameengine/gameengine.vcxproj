@@ -186,6 +186,7 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventEmitter.h" />
     <ClInclude Include="src\EventManager.h" />
+    <ClInclude Include="src\generic\KDTree.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventEmitter.cpp" />
     <ClCompile Include="src\EventManager.cpp" />
+    <ClCompile Include="src\generic\KDTree.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\loaders\SceneLoader.cpp" />

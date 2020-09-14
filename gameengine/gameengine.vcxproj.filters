@@ -58,6 +58,12 @@
     <Filter Include="Source Files\render\controllers">
       <UniqueIdentifier>{2ab107a9-80dd-456f-aa56-781c53613d42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\generic">
+      <UniqueIdentifier>{d5b366c3-fc32-4b70-8915-3d1ce390ad80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generic">
+      <UniqueIdentifier>{f666e222-9035-429f-8690-71cda92cdec1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\EngineCanvas.h">
@@ -183,6 +189,9 @@
     <ClInclude Include="src\scene\Skybox.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\KDTree.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -295,6 +304,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\Skybox.cpp">
       <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\KDTree.cpp">
+      <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
