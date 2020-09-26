@@ -89,7 +89,7 @@ void Engine::AddRenderController(RenderController* render_controller)
 
 Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent)
 {
-	this->m_canvas_args.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList();
+	this->m_canvas_args.PlatformDefaults().Depth(32).Stencil(0).RGBA().DoubleBuffer().EndList();
 
 	if (!wxGLCanvas::IsDisplaySupported(this->m_canvas_args))
 	{
