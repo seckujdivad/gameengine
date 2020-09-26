@@ -324,9 +324,6 @@
     <None Include="resources\shaders\postprocess.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="resources\shaders\model.frag">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
     <None Include="resources\shaders\model.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
@@ -343,6 +340,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="resources\shaders\default.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_wireframe.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_normal.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

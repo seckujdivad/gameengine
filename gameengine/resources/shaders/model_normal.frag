@@ -33,8 +33,6 @@ in vec4 geomCamSpaceNormal;
 
 in mat3 geomNormalTBN;
 
-uniform int shade_mode;
-
 //model
 uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
@@ -127,9 +125,6 @@ uniform sampler2D render_output_data[DATA_TEX_NUM];
 uniform int render_output_x;
 uniform int render_output_y;
 
-//shade mode 1
-uniform vec3 mode1_colour;
-
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
@@ -199,7 +194,7 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	}
 }
 
-void shade_mode0()
+void main()
 {
 	for (int i = 0; i < DATA_TEX_NUM; i++)
 	{
@@ -449,21 +444,4 @@ void shade_mode0()
 
 	//store the pseudo-depth (depth accounting for skyboxes)
 	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
-}
-
-void shade_mode1()
-{
-	frag_out.rgb = mode1_colour;
-}
-
-void main()
-{
-	if (shade_mode == 1)
-	{
-		shade_mode1();
-	}
-	else
-	{
-		shade_mode0();
-	}
 }

@@ -189,9 +189,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			this->SetShaderUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
 			this->SetShaderUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
 
-			//shading mode
-			this->SetShaderUniform("shade_mode", this->GetRenderMode() == RenderMode::Wireframe ? 1 : 0);
-
 			// ambient light
 			this->SetShaderUniform("light_ambient", scene->GetAmbientLight());
 
@@ -450,9 +447,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					}
 
 					this->SetShaderUniform("reflection_count", (int)reflections.size());
+				}
 
-					//shade mode 1 (wireframe)
-					this->SetShaderUniform("mode1_colour", model->GetWireframeColour());
+				if (this->GetRenderMode() == RenderMode::Wireframe)
+				{
+					this->SetShaderUniform("wireframe_colour", model->GetWireframeColour());
 				}
 
 				//skybox cubemap
@@ -690,7 +689,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 		if (mode == RenderMode::Normal)
 		{
 			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 			};
@@ -698,7 +697,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 		else if (mode == RenderMode::Wireframe)
 		{
 			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_FRAGSHADER), GL_FRAGMENT_SHADER },
+				{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER },
 				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 			};
@@ -754,34 +753,45 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"cam_clip_far",
 				"cam_transform",
 				"cam_transform_inverse",
-				//fragment
-				"shade_mode",
-				"mat_diffuse",
-				"mat_specular",
-				"mat_specular_highlight",
-				"mat_ssr_enabled",
-				"mat_ssr_resolution",
-				"mat_ssr_max_distance",
-				"mat_ssr_max_cast_distance",
-				"mat_ssr_depth_acceptance",
-				"mat_ssr_show_this",
-				"mat_ssr_refinements",
-				"colourTexture",
-				"normalTexture",
-				"specularTexture",
-				"reflectionIntensityTexture",
-				"light_ambient",
-				"light_shadow_draw",
-				"reflection_count",
-				"skyboxMaskTexture",
-				"skyboxTexture",
-				"render_output_valid",
-				"render_output_colour",
-				"render_output_depth",
-				"render_output_x",
-				"render_output_y"
-				"mode1_colour"
 				});
+
+			if (mode == RenderMode::Normal)
+			{
+				this->AddShaderUniformNames({
+					//fragment
+					"mat_diffuse",
+					"mat_specular",
+					"mat_specular_highlight",
+					"mat_ssr_enabled",
+					"mat_ssr_resolution",
+					"mat_ssr_max_distance",
+					"mat_ssr_max_cast_distance",
+					"mat_ssr_depth_acceptance",
+					"mat_ssr_show_this",
+					"mat_ssr_refinements",
+					"colourTexture",
+					"normalTexture",
+					"specularTexture",
+					"reflectionIntensityTexture",
+					"light_ambient",
+					"light_shadow_draw",
+					"reflection_count",
+					"skyboxMaskTexture",
+					"skyboxTexture",
+					"render_output_valid",
+					"render_output_colour",
+					"render_output_depth",
+					"render_output_x",
+					"render_output_y"
+					});
+			}
+			else if (mode == RenderMode::Wireframe)
+			{
+				this->AddShaderUniformNames({
+					//fragment
+					"wireframe_colour"
+					});
+			}
 
 			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
 			{
