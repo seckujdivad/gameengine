@@ -61,7 +61,8 @@ private:
 	LocalTexture m_texture_skybox_mask = LocalTexture(0);
 
 	//wireframe colour
-	glm::vec3 m_wireframe_colour = glm::vec3(0.0f);
+	int m_wireframe_colours_index = 0;
+	std::vector<glm::vec3> m_wireframe_colours = { glm::vec3(0.0f), glm::vec3(1.0f, 0.75f, 0.0f) };
 
 	//skybox
 	Skybox* m_skybox = nullptr;
@@ -83,13 +84,13 @@ public:
 	LocalTexture& GetNormalTexture();
 	LocalTexture& GetSkyboxMaskTexture();
 
-	void SetWireframeColour(glm::vec3 colour);
-	void SetWireframeColourSelected();
-	void SetWireframeColourUnselected();
-	glm::vec3 GetWireframeColour() const;
+	void SetWireframeColours(std::vector<glm::vec3> colours);
+	void SetCurrentWireframeIndex(int index);
+	void SetCurrentWireframeColour(glm::vec3 colour);
+	glm::vec3 GetCurrentWireframeColour() const;
 
 	static constexpr int GetValuesPerVert() { return 14; };
 
 	void SetSkybox(Skybox* skybox);
-	Skybox* GetSkybox();
+	Skybox* GetSkybox() const;
 };

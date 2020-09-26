@@ -451,7 +451,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				if (this->GetRenderMode() == RenderMode::Wireframe)
 				{
-					this->SetShaderUniform("wireframe_colour", model->GetWireframeColour());
+					this->SetShaderUniform("wireframe_colour", model->GetCurrentWireframeColour());
 				}
 
 				//skybox cubemap

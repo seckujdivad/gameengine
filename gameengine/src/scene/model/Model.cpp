@@ -78,24 +78,46 @@ LocalTexture& Model::GetSkyboxMaskTexture()
 	return this->m_texture_skybox_mask;
 }
 
-void Model::SetWireframeColour(glm::vec3 colour)
+void Model::SetWireframeColours(std::vector<glm::vec3> colours)
 {
-	this->m_wireframe_colour = colour;
+	if (colours.size() == 0)
+	{
+		throw std::invalid_argument("At least one colour must be provided");
+	}
+	else if (static_cast<int>(colours.size()) <= this->m_wireframe_colours_index)
+	{
+		throw std::invalid_argument("The provided colour list contains " + std::to_string(colours.size()) + " colours, but colour number " + std::to_string(this->m_wireframe_colours_index + 1) + "is selected");
+	}
+	else
+	{
+		this->m_wireframe_colours = colours;
+	}
 }
 
-void Model::SetWireframeColourSelected()
+void Model::SetCurrentWireframeIndex(int index)
 {
-	this->SetWireframeColour(glm::vec3(1.0f, 0.75f, 0.0f));
+	if (index < 0)
+	{
+		throw std::invalid_argument("Index must be positive or zero");
+	}
+	else if (static_cast<int>(this->m_wireframe_colours.size()) <= index)
+	{
+		throw std::invalid_argument("Index must be a valid index of the provided wireframe colours list (which has a length of " + std::to_string(this->m_wireframe_colours.size()) + ")");
+	}
+	else
+	{
+		this->m_wireframe_colours_index = index;
+	}
 }
 
-void Model::SetWireframeColourUnselected()
+void Model::SetCurrentWireframeColour(glm::vec3 colour)
 {
-	this->SetWireframeColour(glm::vec3(0.0f));
+	this->m_wireframe_colours.at(this->m_wireframe_colours_index) = colour;
 }
 
-glm::vec3 Model::GetWireframeColour() const
+glm::vec3 Model::GetCurrentWireframeColour() const
 {
-	return this->m_wireframe_colour;
+	return this->m_wireframe_colours.at(this->m_wireframe_colours_index);
 }
 
 void Model::SetSkybox(Skybox* skybox)
@@ -103,7 +125,7 @@ void Model::SetSkybox(Skybox* skybox)
 	this->m_skybox = skybox;
 }
 
-Skybox* Model::GetSkybox()
+Skybox* Model::GetSkybox() const
 {
 	return this->m_skybox;
 }
