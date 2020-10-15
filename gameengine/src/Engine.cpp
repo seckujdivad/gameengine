@@ -89,11 +89,31 @@ void Engine::AddRenderController(RenderController* render_controller)
 
 Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent)
 {
-	this->m_canvas_args.PlatformDefaults().Depth(32).Stencil(0).RGBA().DoubleBuffer().EndList();
-
-	if (!wxGLCanvas::IsDisplaySupported(this->m_canvas_args))
 	{
-		throw std::runtime_error("Display settings are not supported");
+		bool display_supported = false;
+		int display_config_index = 0;
+
+		while (!display_supported)
+		{
+			wxGLAttributes attributes;
+
+			switch (display_config_index)
+			{
+			case 0: attributes.PlatformDefaults().Depth(32).Stencil(0).RGBA().DoubleBuffer().EndList(); break;
+			case 1: attributes.PlatformDefaults().Depth(24).Stencil(8).RGBA().DoubleBuffer().EndList(); break;
+			default: throw std::runtime_error("All display attributes have been tried and none of them are supported"); break;
+			}
+
+			if (wxGLCanvas::IsDisplaySupported(attributes))
+			{
+				this->m_canvas_args = attributes;
+				display_supported = true;
+			}
+			else
+			{
+				display_config_index++;
+			}
+		}
 	}
 
 	this->m_glcontext_canvas = new wxGLCanvas(parent, this->m_canvas_args, wxID_ANY);
