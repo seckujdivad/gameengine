@@ -194,6 +194,18 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	}
 }
 
+vec3 GenerateErrorPattern(vec3 primary = vec3(0.0f), vec3 secondary = vec3(0.6f, 0.0f, 1.0f))
+{
+	const vec2 tiles = vec2(15);
+	const vec2 tile_state = gl_FragCoord.xy / tiles;
+	const int colour_index = int(tile_state.x) + int(tile_state.y);
+	switch (colour_index % 2)
+	{
+		case 0: return primary;
+		case 1: return secondary;
+	};
+}
+
 void main()
 {
 	for (int i = 0; i < DATA_TEX_NUM; i++)
@@ -376,7 +388,7 @@ void main()
 				
 				if (search_index == -1)
 				{
-					reflection_colour = vec3(1.0f, vec2(0.0f));
+					reflection_colour = GenerateErrorPattern(vec3(1.0f, 0.0f, 0.0f), vec3(1.0f)); //error state
 				}
 				else
 				{
