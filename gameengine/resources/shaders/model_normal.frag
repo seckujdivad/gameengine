@@ -147,6 +147,9 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 	}
 }
 
+/*
+Finds the two points of intersection between an oriented bounding box and a line (if the points exist)
+*/
 void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, vec3 obb_dimensions, mat3 obb_rotation, mat3 obb_rotation_inverse, out bool isvalid, out vec3 results[2])
 {
 	vec3 obb_translation = obb_position - (obb_rotation * 0.5f * obb_dimensions);
@@ -357,19 +360,20 @@ void main()
 			}
 			else if (reflections[reflection_index].mode == 1) //oriented bounding box
 			{
-				vec3 intersections[2];
-				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM];
-				float final_length = -1.0f;
-				int search_index = -1;
-				vec3 refl_dir = normalize(reflect(-fragtocam, normal));
-				bool included_segments[APPROXIMATION_OBB_NUM];
-				bool is_valid;
+				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM]; //2d array with start and end positions of all line segments
+				float final_length = -1.0f; //length of furthest intersection
+				int search_index = -1; //index of furthest intersection
+				vec3 refl_dir = normalize(reflect(-fragtocam, normal)); //direction to cast the rays in
+				bool included_segments[APPROXIMATION_OBB_NUM]; //whether or not each pair in all_intersections is a valid line segment or just junk data
 
 				for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 				{
-					GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections);
+					bool is_valid; //whether or not the line segment is junk data
+					vec3 intersections[2]; //start and end of line segment
+					GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
 
-					all_intersections[(i * 2)] = intersections[0];
+					//write OBB intersection info into proper storage locations
+					all_intersections[i * 2] = intersections[0];
 					all_intersections[(i * 2) + 1] = intersections[1];
 
 					included_segments[i] = !is_valid;
