@@ -22,4 +22,6 @@ private:
 public:
 	bool OnInit();
 	int OnExit();
+
+	void OnUnhandledException();
 };

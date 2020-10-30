@@ -26,3 +26,10 @@ int App::OnExit()
 {
 	return 0;
 }
+
+void App::OnUnhandledException()
+{
+#ifdef _DEBUG
+	throw;
+#endif
+}
