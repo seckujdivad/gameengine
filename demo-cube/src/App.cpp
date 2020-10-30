@@ -1,5 +1,9 @@
 #include "App.h"
 
+#include <string>
+
+#include <wx/msgdlg.h>
+
 #include "Main.h"
 
 wxIMPLEMENT_APP(App);
@@ -31,5 +35,27 @@ void App::OnUnhandledException()
 {
 #ifdef _DEBUG
 	throw;
+#else
+	std::string err_message;
+	try
+	{
+		throw;
+	}
+	catch (std::exception& e)
+	{
+		err_message.append("Standard exception was uncaught\nChoose OK to exit, Cancel to debug\nType: " + std::string(typeid(e).name()) + "\n" + e.what());
+	}
+	catch (...)
+	{
+		err_message.append("Unknown exception was uncaught\nChoose OK to exit, Cancel to debug");
+	}
+
+	wxMessageDialog err_dialog = wxMessageDialog(nullptr, err_message, "Uncaught exception", wxOK | wxCANCEL | wxICON_ERROR | wxCENTRE);
+
+	int result = err_dialog.ShowModal();
+	if (result == wxID_CANCEL)
+	{
+		throw;
+	}
 #endif
 }
