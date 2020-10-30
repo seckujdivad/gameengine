@@ -197,7 +197,7 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	}
 }
 
-vec3 GenerateErrorPattern(vec3 primary = vec3(0.0f), vec3 secondary = vec3(0.6f, 0.0f, 1.0f))
+vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
 {
 	const vec2 tiles = vec2(15);
 	const vec2 tile_state = gl_FragCoord.xy / tiles;
