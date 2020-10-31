@@ -393,6 +393,8 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
 
 					//reflections
+					this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
+
 					std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
 					for (int i = 0; i < (int)reflections.size(); i++)
 					{
@@ -775,6 +777,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"reflectionIntensityTexture",
 					"light_ambient",
 					"light_shadow_draw",
+					"reflections_enabled",
 					"reflection_count",
 					"skyboxMaskTexture",
 					"skyboxTexture",

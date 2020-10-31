@@ -401,8 +401,12 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		for (int i = 0; i < (int)scene_data["layout"].size(); i++)
 		{
 			auto& el = scene_data["layout"][i];
+			Model* model = models.at(i);
+
 			if (el["reflections"]["alternative"].is_object())
 			{
+				model->GetMaterial().reflections_enabled = true;
+
 				ReflectionMode mode;
 				if (el["reflections"]["alternative"]["mode"].is_string())
 				{
@@ -422,7 +426,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 				}
 				else
 				{
-				throw std::runtime_error("An alternative reflection mode string must be provided");
+					throw std::runtime_error("An alternative reflection mode string must be provided");
 				}
 
 				std::vector<std::string> refl_names;
@@ -458,10 +462,13 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 					}
 					else
 					{
-						Model* model = models.at(i);
 						model->GetMaterial().reflections.push_back(std::tuple(reflection, mode));
 					}
 				}
+			}
+			else
+			{
+				model->GetMaterial().reflections_enabled = false;
 			}
 		}
 	}

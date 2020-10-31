@@ -26,5 +26,6 @@ struct Material
 	bool ssr_enabled = true;
 	MaterialSSRConfig ssr;
 
+	bool reflections_enabled = true;
 	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;
 };

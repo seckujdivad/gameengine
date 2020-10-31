@@ -96,6 +96,7 @@ uniform struct Reflection
 	int iterations;
 };
 
+uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
@@ -331,118 +332,126 @@ void main()
 
 		if (!ssr_reflection_applied)
 		{
-			//find reflection to use
-			float refl_distance = 0.0f;
-			int reflection_index;
-			for (int i = 0; i < reflection_count; i++)
+			if (reflections_enabled)
 			{
-				float current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
-
-				bool condition = (refl_distance == 0.0f) || (current_distance < refl_distance);
-				reflection_index = condition ? i : reflection_index;
-				refl_distance = mix(int(condition), refl_distance, current_distance);
-			}
-			
-			if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
-			{
-				vec3 sample_vector = reflect(-fragtocam, normal);
-				float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
-				vec3 offset = geomSceneSpacePos.xyz - reflections[reflection_index].position;
-
-				for (int i = 0; i < reflections[reflection_index].iterations; i++)
+				//find reflection to use
+				float refl_distance = 0.0f;
+				int reflection_index;
+				for (int i = 0; i < reflection_count; i++)
 				{
-					float depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
-					if (depth_sample == 1.0f)
+					float current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
+
+					bool condition = (refl_distance == 0.0f) || (current_distance < refl_distance);
+					reflection_index = condition ? i : reflection_index;
+					refl_distance = mix(int(condition), refl_distance, current_distance);
+				}
+			
+				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
+				{
+					vec3 sample_vector = reflect(-fragtocam, normal);
+					float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
+					vec3 offset = geomSceneSpacePos.xyz - reflections[reflection_index].position;
+
+					for (int i = 0; i < reflections[reflection_index].iterations; i++)
 					{
-						i = reflections[reflection_index].iterations; //exit loop
+						float depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
+						if (depth_sample == 1.0f)
+						{
+							i = reflections[reflection_index].iterations; //exit loop
+						}
+						else
+						{
+							depth_sample = (depth_sample * sample_space_length) + reflections[reflection_index].clip_near;
+							sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+						}
+					}
+
+					reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
+				}
+				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
+				{
+					vec3 all_intersections[2 * APPROXIMATION_OBB_NUM]; //2d array with start and end positions of all line segments
+					float final_length = -1.0f; //length of furthest intersection
+					int search_index = -1; //index of furthest intersection
+					vec3 refl_dir = normalize(reflect(-fragtocam, normal)); //direction to cast the rays in
+					bool included_segments[APPROXIMATION_OBB_NUM]; //whether or not each pair in all_intersections is a valid line segment or just junk data
+
+					for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
+					{
+						bool is_valid; //whether or not the line segment is junk data
+						vec3 intersections[2]; //start and end of line segment
+						GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
+
+						//write OBB intersection info into proper storage locations
+						all_intersections[i * 2] = intersections[0];
+						all_intersections[(i * 2) + 1] = intersections[1];
+
+						included_segments[i] = !is_valid;
+
+						if (is_valid)
+						{
+							float current_length = length(intersections[1] - geomSceneSpacePos.xyz);
+
+							if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
+							{
+								final_length = current_length;
+								search_index = i;
+							}
+						}
+					}
+				
+					if (search_index == -1)
+					{
+						reflection_colour = GenerateErrorPattern(vec3(1.0f, 0.0f, 0.0f), vec3(1.0f)); //error state
 					}
 					else
 					{
-						depth_sample = (depth_sample * sample_space_length) + reflections[reflection_index].clip_near;
-						sample_vector = (normalize(sample_vector) * depth_sample) + offset;
+						//search all values and see if you can step on from
+						included_segments[search_index] = true;
+				
+						vec3 line_start_pos = all_intersections[search_index * 2];
+						vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
+						int current_index = 0;
+						float current_length = length(line_end_pos - line_start_pos);
+				
+						while (current_index < APPROXIMATION_OBB_NUM)
+						{
+							if (!included_segments[current_index] && (length(all_intersections[current_index * 2] - line_start_pos) - 0.1f < current_length) && (length(all_intersections[(current_index * 2) + 1] - line_start_pos) > current_length))
+							{
+								line_end_pos = all_intersections[(current_index * 2) + 1];
+								included_segments[current_index] = true;
+								current_index = -1;
+								current_length = length(line_end_pos - line_start_pos);
+							}
+							current_index++;
+						}
+
+						int final_index = reflection_index;
+						float final_length = length(line_end_pos - reflections[reflection_index].position);
+
+						for (int i = 0; i < reflection_count; i++)
+						{
+							current_length = length(line_end_pos - reflections[i].position);
+
+							if (current_length < final_length)
+							{
+								final_index = i;
+								final_length = current_length;
+							}
+						}
+				
+						//sample using the final values
+						vec3 sample_vector = line_end_pos - reflections[final_index].position;
+						vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
+
+						reflection_colour = (texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
 					}
 				}
-
-				reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
 			}
-			else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
+			else
 			{
-				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM]; //2d array with start and end positions of all line segments
-				float final_length = -1.0f; //length of furthest intersection
-				int search_index = -1; //index of furthest intersection
-				vec3 refl_dir = normalize(reflect(-fragtocam, normal)); //direction to cast the rays in
-				bool included_segments[APPROXIMATION_OBB_NUM]; //whether or not each pair in all_intersections is a valid line segment or just junk data
-
-				for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
-				{
-					bool is_valid; //whether or not the line segment is junk data
-					vec3 intersections[2]; //start and end of line segment
-					GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
-
-					//write OBB intersection info into proper storage locations
-					all_intersections[i * 2] = intersections[0];
-					all_intersections[(i * 2) + 1] = intersections[1];
-
-					included_segments[i] = !is_valid;
-
-					if (is_valid)
-					{
-						float current_length = length(intersections[1] - geomSceneSpacePos.xyz);
-
-						if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
-						{
-							final_length = current_length;
-							search_index = i;
-						}
-					}
-				}
-				
-				if (search_index == -1)
-				{
-					reflection_colour = GenerateErrorPattern(vec3(1.0f, 0.0f, 0.0f), vec3(1.0f)); //error state
-				}
-				else
-				{
-					//search all values and see if you can step on from
-					included_segments[search_index] = true;
-				
-					vec3 line_start_pos = all_intersections[search_index * 2];
-					vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
-					int current_index = 0;
-					float current_length = length(line_end_pos - line_start_pos);
-				
-					while (current_index < APPROXIMATION_OBB_NUM)
-					{
-						if (!included_segments[current_index] && (length(all_intersections[current_index * 2] - line_start_pos) - 0.1f < current_length) && (length(all_intersections[(current_index * 2) + 1] - line_start_pos) > current_length))
-						{
-							line_end_pos = all_intersections[(current_index * 2) + 1];
-							included_segments[current_index] = true;
-							current_index = -1;
-							current_length = length(line_end_pos - line_start_pos);
-						}
-						current_index++;
-					}
-
-					int final_index = reflection_index;
-					float final_length = length(line_end_pos - reflections[reflection_index].position);
-
-					for (int i = 0; i < reflection_count; i++)
-					{
-						current_length = length(line_end_pos - reflections[i].position);
-
-						if (current_length < final_length)
-						{
-							final_index = i;
-							final_length = current_length;
-						}
-					}
-				
-					//sample using the final values
-					vec3 sample_vector = line_end_pos - reflections[final_index].position;
-					vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
-
-					reflection_colour = (texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
-				}
+				reflection_intensity = vec3(0.0f);
+				reflection_colour = vec3(0.0f);
 			}
 		}
 	}
