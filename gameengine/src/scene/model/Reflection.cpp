@@ -19,7 +19,7 @@ void Reflection::SetDrawShadows(bool value)
 	this->m_draw_shadows = value;
 }
 
-bool Reflection::GetDrawShadows()
+bool Reflection::GetDrawShadows() const
 {
 	return this->m_draw_shadows;
 }

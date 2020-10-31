@@ -91,7 +91,7 @@ uniform struct Reflection
 	float clip_near;
 	float clip_far;
 
-	int mode; //0: iterative, 1: obb
+	int mode; //ReflectionMode
 
 	int iterations;
 };
@@ -124,6 +124,13 @@ uniform sampler2D render_output_depth;
 uniform sampler2D render_output_data[DATA_TEX_NUM];
 uniform int render_output_x;
 uniform int render_output_y;
+
+//enums
+//ReflectionMode - scene/model/Reflection.h
+const int ReflectionModeIterative = 0;
+const int ReflectionModeOBB = 1;
+
+//functions
 
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
@@ -335,8 +342,8 @@ void main()
 				reflection_index = condition ? i : reflection_index;
 				refl_distance = mix(int(condition), refl_distance, current_distance);
 			}
-
-			if (reflections[reflection_index].mode == 0) //iteratively apply perspective correction
+			
+			if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
 			{
 				vec3 sample_vector = reflect(-fragtocam, normal);
 				float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
@@ -358,7 +365,7 @@ void main()
 
 				reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
 			}
-			else if (reflections[reflection_index].mode == 1) //oriented bounding box
+			else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 			{
 				vec3 all_intersections[2 * APPROXIMATION_OBB_NUM]; //2d array with start and end positions of all line segments
 				float final_length = -1.0f; //length of furthest intersection

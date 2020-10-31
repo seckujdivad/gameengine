@@ -3,7 +3,7 @@
 #include "../Cubemap.h"
 #include "../Nameable.h"
 
-enum class ReflectionMode
+enum class ReflectionMode //reproduced in resources/shaders/model_normal.frag
 {
 	Iterative,
 	OBB
@@ -25,5 +25,5 @@ public:
 	int GetIterations() const;
 
 	void SetDrawShadows(bool value);
-	bool GetDrawShadows();
+	bool GetDrawShadows() const;
 };

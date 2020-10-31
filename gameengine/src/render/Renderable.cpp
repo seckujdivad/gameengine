@@ -411,7 +411,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 						this->SetShaderUniform(prefix + "clip_far", std::get<1>(reflection->GetClips()));
 
 						this->AddShaderUniformName(prefix + "mode");
-						this->SetShaderUniform(prefix + "mode", reflection_mode == ReflectionMode::Iterative ? 0 : 1);
+						this->SetShaderUniform(prefix + "mode", static_cast<int>(reflection_mode));
 
 						this->AddShaderUniformName(prefix + "iterations");
 						this->SetShaderUniform(prefix + "iterations", reflection->GetIterations());
