@@ -138,6 +138,7 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
 
 	std::remove(GAMEENGINE_LOG_PATH);
+	LogMessage("New Engine created");
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -151,7 +152,9 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 
-
+	LogMessage(std::string("Renderer: ") + (const char*)glGetString(GL_RENDERER) + " (" + (const char*)glGetString(GL_VENDOR) + ")");
+	LogMessage(std::string("Active OpenGL version: ") + (const char*)glGetString(GL_VERSION));
+	LogMessage(std::string("Supported OpenGL shading language version: ") + (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
 Engine::~Engine()
