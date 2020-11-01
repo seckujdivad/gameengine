@@ -126,13 +126,39 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 
 	this->m_glcontext_canvas = new wxGLCanvas(parent, this->m_canvas_args, wxID_ANY);
 
-	wxGLContextAttrs ctx_attrs;
-	ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3).EndList();
-	this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
-
-	if (!this->m_glcontext->IsOK())
 	{
-		throw std::runtime_error("OpenGL Context is not correct");
+		wxGLContextAttrs ctx_attrs;
+
+		wxLogNull no_logging; //disable logging popups until this object is destroyed
+
+#ifdef _DEBUG
+		//test an impossible context to make sure wxGLContext::IsOK is working (this is done in the pyramid sample)
+		ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(99).MinorVersion(2).EndList();
+		this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
+
+		if (this->m_glcontext->IsOK())
+		{
+			throw std::runtime_error("Successfully created an impossible context - this should have failed");
+		}
+
+		delete this->m_glcontext;
+		ctx_attrs.Reset();
+#endif
+		//create the proper context
+		ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3);
+
+#ifdef _DEBUG
+		ctx_attrs.DebugCtx();
+#endif
+
+		ctx_attrs.EndList();
+
+		this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
+
+		if (!this->m_glcontext->IsOK())
+		{
+			throw std::runtime_error("OpenGL Context is not correct");
+		}
 	}
 
 	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
