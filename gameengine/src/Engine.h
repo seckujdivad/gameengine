@@ -82,3 +82,5 @@ public:
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
 bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
+
+void LogMessage(std::string message);

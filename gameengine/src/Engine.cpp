@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 #include <wx/image.h>
 
@@ -547,35 +548,47 @@ bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometr
 	return !(first == second);
 }
 
+void LogMessage(std::string message)
+{
+	std::chrono::system_clock::time_point now_time_point = std::chrono::system_clock::now();
+	std::time_t now_time_t = std::chrono::system_clock::to_time_t(now_time_point);
+	std::string now_string = std::ctime(&now_time_t);
+	now_string = now_string.substr(0, now_string.size() - 1); //remove the newline that is added for some reason
+
+	std::ofstream output_file;
+	output_file.open(GAMEENGINE_LOG_PATH, std::ios_base::app);
+	output_file << now_string << ": " << message << std::endl;
+	output_file.close();
+}
+
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	std::ofstream output_file;
-	output_file.open(GAMEENGINE_LOG_PATH);
-	output_file << "(type: " << type << ", severity: ";
+	std::string log_message = "(type: " + std::to_string(type) + ", severity: ";
 
 	if (severity == GL_DEBUG_SEVERITY_HIGH)
 	{
-		output_file << "high";
+		log_message += "high";
 	}
 	else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
 	{
-		output_file << "medium";
+		log_message += "medium";
 	}
 	else if (severity == GL_DEBUG_SEVERITY_LOW)
 	{
-		output_file << "low";
+		log_message += "low";
 	}
 	else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
 	{
-		output_file << "notification";
+		log_message += "notification";
 	}
 	else
 	{
-		output_file << severity;
+		log_message += severity;
 	}
-	output_file << "): " << message << std::endl;
 
-	output_file.close();
+	log_message += "): " + std::string(message);
+
+	LogMessage(log_message);
 
 	if ((type == GL_INVALID_ENUM
 		|| type == GL_INVALID_VALUE
