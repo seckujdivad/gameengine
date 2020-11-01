@@ -152,9 +152,9 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	LogMessage(std::string("Renderer: ") + reinterpret_cast<const char*>(glGetString(GL_RENDERER)) + " (" + reinterpret_cast<const char*>(glGetString(GL_VENDOR)) + ")");
-	LogMessage(std::string("Active OpenGL version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-	LogMessage(std::string("Supported OpenGL shading language version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+	LogMessage(std::string("Renderer: ") + reinterpret_cast<const char*>(glGetString(GL_RENDERER)) + " (" + reinterpret_cast<const char*>(glGetString(GL_VENDOR)) + ")" + '\n'
+		+ std::string("Active OpenGL version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)) + '\n'
+		+ std::string("Supported OpenGL shading language version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 }
 
 Engine::~Engine()
@@ -560,7 +560,52 @@ void LogMessage(std::string message)
 
 	std::ofstream output_file;
 	output_file.open(GAMEENGINE_LOG_PATH, std::ios_base::app);
-	output_file << now_string << ": " << message << std::endl;
+
+	output_file << now_string << ": ";
+
+	std::string padding;
+	for (std::size_t i = 0; i < now_string.size() + 2U; i++)
+	{
+		padding += ' ';
+	}
+
+	std::vector<std::string> lines = { "" };
+	for (char& character : message)
+	{
+		if (character == '\n')
+		{
+			if (!lines.back().empty())
+			{
+				lines.push_back("");
+			}
+		}
+		else
+		{
+			lines.back() += character;
+		}
+	}
+
+	{
+		for (std::size_t i = 0U; i < lines.size(); i++)
+		{
+			std::string& line = lines.at(i);
+
+			if (!(
+				i != 0U
+				&& i + 1U == lines.size()
+				&& line.empty()
+				))
+			{
+				if (i != 0U)
+				{
+					output_file << padding;
+				}
+
+				output_file << line << std::endl;
+			}
+		}
+	}
+
 	output_file.close();
 }
 
