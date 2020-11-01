@@ -174,6 +174,10 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 
 	glLoadIdentity();
 
+#ifdef _DEBUG
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
+
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
@@ -637,42 +641,39 @@ void LogMessage(std::string message)
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	std::string log_message = "(type: " + std::to_string(type) + ", severity: ";
+	std::string err_type;
+	switch (type) //https://www.khronos.org/opengl/wiki/OpenGL_Error#Meaning_of_errors
+	{
+	case GL_INVALID_ENUM: err_type = "invalid enum"; break;
+	case GL_INVALID_VALUE: err_type = "invalid value"; break;
+	case GL_INVALID_OPERATION: err_type = "invalid operation"; break;
+	case GL_STACK_OVERFLOW: err_type = "stack overflow"; break;
+	case GL_STACK_UNDERFLOW: err_type = "stack underflow"; break;
+	case GL_OUT_OF_MEMORY: err_type = "out of memory"; break;
+	case GL_INVALID_FRAMEBUFFER_OPERATION: err_type = "invalid framebuffer operation"; break;
+	case GL_CONTEXT_LOST: err_type = "context lost"; break;
+	//case GL_TABLE_TOO_LARGE: err_type = "table too large"; break; //deprecated in 3.0 core, removed in 3.1 core and above
+	default: err_type = std::to_string(type) + " - unknown"; break;
+	}
 
-	if (severity == GL_DEBUG_SEVERITY_HIGH)
+	std::string log_message = "(type: " + err_type + "), severity: ";
+
+	switch (severity)
 	{
-		log_message += "high";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
-	{
-		log_message += "medium";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_LOW)
-	{
-		log_message += "low";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-	{
-		log_message += "notification";
-	}
-	else
-	{
-		log_message += severity;
+	case GL_DEBUG_SEVERITY_HIGH: log_message += "high"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM: log_message += "medium"; break;
+	case GL_DEBUG_SEVERITY_LOW: log_message += "low"; break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION: log_message += "notification"; break;
+	default: log_message += severity; break;
 	}
 
 	log_message += "): " + std::string(message);
 
 	LogMessage(log_message);
 
-	if ((type == GL_INVALID_ENUM
-		|| type == GL_INVALID_VALUE
-		|| type == GL_INVALID_OPERATION
-		|| type == GL_STACK_OVERFLOW
-		|| type == GL_STACK_UNDERFLOW
-		|| type == GL_OUT_OF_MEMORY
-		|| type == GL_INVALID_FRAMEBUFFER_OPERATION
-		|| type == GL_TABLE_TOO_LARGE)
-		|| (severity == GL_DEBUG_SEVERITY_HIGH))
+	if (severity == GL_DEBUG_SEVERITY_HIGH
+		|| severity == GL_DEBUG_SEVERITY_MEDIUM
+		|| severity == GL_DEBUG_SEVERITY_LOW)
 	{
 		throw std::runtime_error(message);
 	}
