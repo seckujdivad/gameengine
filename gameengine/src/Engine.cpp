@@ -152,9 +152,9 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	LogMessage(std::string("Renderer: ") + (const char*)glGetString(GL_RENDERER) + " (" + (const char*)glGetString(GL_VENDOR) + ")");
-	LogMessage(std::string("Active OpenGL version: ") + (const char*)glGetString(GL_VERSION));
-	LogMessage(std::string("Supported OpenGL shading language version: ") + (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+	LogMessage(std::string("Renderer: ") + reinterpret_cast<const char*>(glGetString(GL_RENDERER)) + " (" + reinterpret_cast<const char*>(glGetString(GL_VENDOR)) + ")");
+	LogMessage(std::string("Active OpenGL version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+	LogMessage(std::string("Supported OpenGL shading language version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 }
 
 Engine::~Engine()
