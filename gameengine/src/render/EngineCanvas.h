@@ -5,8 +5,6 @@
 #include <wx/wx.h>
 #include <wx/dcclient.h>
 
-#include <GL/wglew.h>
-
 #include "Renderable.h"
 
 class EngineCanvas : public wxGLCanvas, public Renderable

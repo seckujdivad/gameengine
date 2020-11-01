@@ -1,5 +1,12 @@
 #include "EngineCanvas.h"
 
+#if defined(GAMEENGINE_USE_WGL)
+#include <GL/wglew.h>
+#elif defined(GAMEENGINE_USE_GLX)
+#include <GL/glxew.h>
+#else
+#error
+#endif
 
 #include "../Engine.h"
 #include "../scene/Camera.h"
@@ -208,14 +215,14 @@ void EngineCanvas::SetRenderLoop(bool enable)
 	this->SwapBuffers();
 }
 
-void EngineCanvas::SetVerticalSync(bool enabled) //not implemented for Mac because OpenGL on Mac is messy and going away
+void EngineCanvas::SetVerticalSync(bool enabled)
 {
-#ifdef _WIN32 //both 32 and 64 bit windows
+#if defined(GAMEENGINE_USE_WGL)
 	wglSwapIntervalEXT(enabled);
-#elif defined(__linux__)
+#elif defined(GAMEENGINE_USE_GLX)
 	glXSwapIntervalEXT(enabled); //according to https://www.khronos.org/opengl/wiki/Swap_Interval, untested
 #else
-	#error Disabling/reenabling VSync isn't implemented outside of Windows
+#error
 #endif
 }
 
