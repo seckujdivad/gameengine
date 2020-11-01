@@ -9,8 +9,6 @@
 
 #include "Renderable.h"
 
-const char ENGINECANVAS_LOG_PATH[] = "gameengine_GL.log";
-
 class EngineCanvas : public wxGLCanvas, public Renderable
 {
 private:
@@ -68,5 +66,3 @@ public:
 	void SetControlledCamera(Camera* camera);
 	Camera* GetControlledCamera() const;
 };
-
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

@@ -1,8 +1,11 @@
 #include "Engine.h"
 
 #include <tuple>
-#include <wx/image.h>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
+
+#include <wx/image.h>
 
 #include "scene/Scene.h"
 
@@ -14,6 +17,10 @@
 #include "render/controllers/ShadowController.h"
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
+
+const char GAMEENGINE_LOG_PATH[] = "gameengine_GL.log";
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 {
@@ -129,7 +136,7 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 
 	this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
 
-	std::remove(ENGINECANVAS_LOG_PATH);
+	std::remove(GAMEENGINE_LOG_PATH);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -142,6 +149,8 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
+
+
 }
 
 Engine::~Engine()
@@ -536,4 +545,48 @@ bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometr
 bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
 {
 	return !(first == second);
+}
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	std::ofstream output_file;
+	output_file.open(GAMEENGINE_LOG_PATH);
+	output_file << "(type: " << type << ", severity: ";
+
+	if (severity == GL_DEBUG_SEVERITY_HIGH)
+	{
+		output_file << "high";
+	}
+	else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
+	{
+		output_file << "medium";
+	}
+	else if (severity == GL_DEBUG_SEVERITY_LOW)
+	{
+		output_file << "low";
+	}
+	else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+	{
+		output_file << "notification";
+	}
+	else
+	{
+		output_file << severity;
+	}
+	output_file << "): " << message << std::endl;
+
+	output_file.close();
+
+	if ((type == GL_INVALID_ENUM
+		|| type == GL_INVALID_VALUE
+		|| type == GL_INVALID_OPERATION
+		|| type == GL_STACK_OVERFLOW
+		|| type == GL_STACK_UNDERFLOW
+		|| type == GL_OUT_OF_MEMORY
+		|| type == GL_INVALID_FRAMEBUFFER_OPERATION
+		|| type == GL_TABLE_TOO_LARGE)
+		|| (severity == GL_DEBUG_SEVERITY_HIGH))
+	{
+		throw std::runtime_error(message);
+	}
 }

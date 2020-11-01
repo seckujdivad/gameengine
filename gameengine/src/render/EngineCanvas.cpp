@@ -1,7 +1,5 @@
 #include "EngineCanvas.h"
 
-#include <iostream>
-#include <fstream>
 
 #include "../Engine.h"
 #include "../scene/Camera.h"
@@ -239,48 +237,4 @@ void EngineCanvas::SetControlledCamera(Camera* camera)
 Camera* EngineCanvas::GetControlledCamera() const
 {
 	return this->m_camera_controlled;
-}
-
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
-	std::ofstream output_file;
-	output_file.open(ENGINECANVAS_LOG_PATH);
-	output_file << "(type: " << type << ", severity: ";
-
-	if (severity == GL_DEBUG_SEVERITY_HIGH)
-	{
-		output_file << "high";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
-	{
-		output_file << "medium";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_LOW)
-	{
-		output_file << "low";
-	}
-	else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-	{
-		output_file << "notification";
-	}
-	else
-	{
-		output_file << severity;
-	}
-	output_file << "): " << message << std::endl;
-
-	output_file.close();
-	
-	if ((type == GL_INVALID_ENUM
-		|| type == GL_INVALID_VALUE
-		|| type == GL_INVALID_OPERATION
-		|| type == GL_STACK_OVERFLOW
-		|| type == GL_STACK_UNDERFLOW
-		|| type == GL_OUT_OF_MEMORY
-		|| type == GL_INVALID_FRAMEBUFFER_OPERATION
-		|| type == GL_TABLE_TOO_LARGE)
-		|| (severity == GL_DEBUG_SEVERITY_HIGH))
-	{
-		throw std::runtime_error(message);
-	}
 }
