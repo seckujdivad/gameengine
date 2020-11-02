@@ -581,22 +581,25 @@ bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometr
 	return !(first == second);
 }
 
-void LogMessage(std::string message)
+void LogMessage(std::string message, bool show_time)
 {
-	std::chrono::system_clock::time_point now_time_point = std::chrono::system_clock::now();
-	std::time_t now_time_t = std::chrono::system_clock::to_time_t(now_time_point);
-	std::string now_string = std::ctime(&now_time_t);
-	now_string = now_string.substr(0, now_string.size() - 1); //remove the newline that is added for some reason
-
 	std::ofstream output_file;
 	output_file.open(GAMEENGINE_LOG_PATH, std::ios_base::app);
 
-	output_file << now_string << ": ";
-
 	std::string padding;
-	for (std::size_t i = 0; i < now_string.size() + 2U; i++)
+	if (show_time)
 	{
-		padding += ' ';
+		std::chrono::system_clock::time_point now_time_point = std::chrono::system_clock::now();
+		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now_time_point);
+		std::string now_string = std::ctime(&now_time_t);
+		now_string = now_string.substr(0, now_string.size() - 1); //remove the newline that is added for some reason
+
+		output_file << now_string << ": ";
+
+		for (std::size_t i = 0; i < now_string.size() + 2U; i++)
+		{
+			padding += ' ';
+		}
 	}
 
 	std::vector<std::string> lines = { "" };
@@ -615,24 +618,22 @@ void LogMessage(std::string message)
 		}
 	}
 
+	for (std::size_t i = 0U; i < lines.size(); i++)
 	{
-		for (std::size_t i = 0U; i < lines.size(); i++)
+		std::string& line = lines.at(i);
+
+		if (!(
+			i != 0U
+			&& i + 1U == lines.size()
+			&& line.empty()
+			))
 		{
-			std::string& line = lines.at(i);
-
-			if (!(
-				i != 0U
-				&& i + 1U == lines.size()
-				&& line.empty()
-				))
+			if (i != 0U)
 			{
-				if (i != 0U)
-				{
-					output_file << padding;
-				}
-
-				output_file << line << std::endl;
+				output_file << padding;
 			}
+
+			output_file << line << std::endl;
 		}
 	}
 
@@ -641,9 +642,23 @@ void LogMessage(std::string message)
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
+	std::string source_str;
+	switch (source)
+	{
+		//extracted from glew.h
+	case GL_DEBUG_SOURCE_API: source_str = "API"; break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM: source_str = "window system"; break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER: source_str = "shader compiler"; break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY: source_str = "third party"; break;
+	case GL_DEBUG_SOURCE_APPLICATION: source_str = "application"; break;
+	case GL_DEBUG_SOURCE_OTHER: source_str = "other"; break;
+	default: source_str = "unknown"; break;
+	}
+
 	std::string err_type;
 	switch (type) //https://www.khronos.org/opengl/wiki/OpenGL_Error#Meaning_of_errors
 	{
+		//listed errors
 	case GL_INVALID_ENUM: err_type = "invalid enum"; break;
 	case GL_INVALID_VALUE: err_type = "invalid value"; break;
 	case GL_INVALID_OPERATION: err_type = "invalid operation"; break;
@@ -653,10 +668,28 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	case GL_INVALID_FRAMEBUFFER_OPERATION: err_type = "invalid framebuffer operation"; break;
 	case GL_CONTEXT_LOST: err_type = "context lost"; break;
 	//case GL_TABLE_TOO_LARGE: err_type = "table too large"; break; //deprecated in 3.0 core, removed in 3.1 core and above
+
+		//errors start with 0x05 - these names were extracted from glew.h
+#if GL_INVALID_FRAMEBUFFER_OPERATION_EXT != GL_INVALID_FRAMEBUFFER_OPERATION
+	case GL_INVALID_FRAMEBUFFER_OPERATION_EXT: err_type = "invalid framebuffer operation EXT"; break;
+#endif
+
+		//debug messages - extracted from glew.h
+	case GL_DEBUG_TYPE_ERROR: err_type = "debug error"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: err_type = "deprecated behaviour"; break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: err_type = "undefined behaviour"; break;
+	case GL_DEBUG_TYPE_PORTABILITY: err_type = "portability"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE: err_type = "performance"; break;
+	case GL_DEBUG_TYPE_OTHER: err_type = "other"; break;
+	case GL_DEBUG_TYPE_MARKER: err_type = "marker"; break;
+	case GL_DEBUG_TYPE_PUSH_GROUP: err_type = "push group"; break;
+	case GL_DEBUG_TYPE_POP_GROUP: err_type = "pop group"; break;
+
+		//default
 	default: err_type = std::to_string(type) + " - unknown"; break;
 	}
 
-	std::string log_message = "(type: " + err_type + "), severity: ";
+	std::string log_message = "[source: " + source_str + ", type: " + err_type + ", severity: ";
 
 	switch (severity)
 	{
@@ -667,13 +700,19 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	default: log_message += severity; break;
 	}
 
-	log_message += "): " + std::string(message);
+	log_message += "] " + std::string(message);
 
-	LogMessage(log_message);
+	LogMessage(log_message, false);
 
 	if (severity == GL_DEBUG_SEVERITY_HIGH
-		|| severity == GL_DEBUG_SEVERITY_MEDIUM
-		|| severity == GL_DEBUG_SEVERITY_LOW)
+		|| type == GL_INVALID_ENUM
+		|| type == GL_INVALID_VALUE
+		|| type == GL_INVALID_OPERATION
+		|| type == GL_STACK_OVERFLOW
+		|| type == GL_STACK_UNDERFLOW
+		|| type == GL_OUT_OF_MEMORY
+		|| type == GL_INVALID_FRAMEBUFFER_OPERATION
+		|| type == GL_CONTEXT_LOST)
 	{
 		throw std::runtime_error(message);
 	}
