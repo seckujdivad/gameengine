@@ -24,7 +24,7 @@ struct Face
 {
 	std::vector<int> vertices;
 	std::vector<glm::dvec2> uv;
-	glm::dvec3 normal;
+	glm::dvec3 normal = glm::dvec3(1.0, 0.0, 0.0);
 };
 
 struct ModelGeometry
