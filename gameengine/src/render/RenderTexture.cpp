@@ -77,6 +77,7 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 
 	glTexParameteri(type, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, 0);
+	glGenerateMipmap(type);
 
 #ifdef _DEBUG
 	if (do_create)
