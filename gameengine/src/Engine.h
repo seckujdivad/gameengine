@@ -36,6 +36,14 @@ public:
 		int num_vertices = 0;
 	};
 
+	struct DebugMessageConfig
+	{
+		GLenum source = GL_DONT_CARE;
+		GLenum type = GL_DONT_CARE;
+		GLenum severity = GL_DONT_CARE;
+		bool enabled = true;
+	};
+
 private:
 	wxGLContext* m_glcontext;
 	wxWindow* m_parent;
@@ -77,7 +85,10 @@ public:
 	Engine::LoadedGeometry BindVAO(Model* model);
 	void ReleaseVAO(Model* model);
 
-	void MakeContextCurrent();
+	void MakeContextCurrent() const;
+
+	void SetDebugMessageLevel(Engine::DebugMessageConfig config) const;
+	void SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config) const;
 };
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);

@@ -175,10 +175,6 @@ Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent
 
 	glLoadIdentity();
 
-#ifdef _DEBUG
-	//glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-#endif
-
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
@@ -528,7 +524,7 @@ void Engine::ReleaseVAO(Model* model)
 	}
 }
 
-void Engine::MakeContextCurrent()
+void Engine::MakeContextCurrent() const
 {
 	if (this->m_glcontext_canvas == nullptr)
 	{
@@ -554,6 +550,21 @@ void Engine::MakeContextCurrent()
 	else
 	{
 		this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+	}
+}
+
+void Engine::SetDebugMessageLevel(Engine::DebugMessageConfig config) const
+{
+	this->MakeContextCurrent();
+	glDebugMessageControl(config.source, config.type, config.severity, 0, nullptr, config.enabled ? GL_TRUE : GL_FALSE);
+}
+
+void Engine::SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config) const
+{
+	this->MakeContextCurrent();
+	for (Engine::DebugMessageConfig& config_detail : config)
+	{
+		glDebugMessageControl(config_detail.source, config_detail.type, config_detail.severity, 0, nullptr, config_detail.enabled ? GL_TRUE : GL_FALSE);
 	}
 }
 
