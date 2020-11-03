@@ -27,6 +27,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
 	this->m_engine = new Engine(this, this->m_scene);
+	this->m_engine->SetDebugMessageLevel(std::vector({
+		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
+		}));
 
 	this->m_camera = new Camera();
 	this->m_camera->SetFOV(90.0);
