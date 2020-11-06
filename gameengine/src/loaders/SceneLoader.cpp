@@ -288,6 +288,13 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 
 							//don't set up the alternative fallback reflections as they will be set up once the reflections have been created
 						}
+						else if (el.value()["reflections"].is_boolean())
+						{
+							if (el.value()["reflections"].get<bool>())
+							{
+								throw std::runtime_error("If \"reflections\" is a bool, it must be false (i.e. disabling reflections). If you want to enable reflections, you must provide more configuration data");
+							}
+						}
 
 						//load textures
 						LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
@@ -403,7 +410,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 			auto& el = scene_data["layout"][i];
 			Model* model = models.at(i);
 
-			if (el["reflections"]["alternative"].is_object())
+			if (el["reflections"].is_object() && el["reflections"]["alternative"].is_object())
 			{
 				model->GetMaterial().reflections_enabled = true;
 
