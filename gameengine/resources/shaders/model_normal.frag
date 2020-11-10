@@ -219,11 +219,6 @@ vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
 
 void main()
 {
-	for (int i = 0; i < DATA_TEX_NUM; i++)
-	{
-		data_out[i] = vec4(0.0f);
-	}
-
 	//get base colour
 	frag_out = texture(colourTexture, geomUV);
 
@@ -475,5 +470,5 @@ void main()
 	data_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
 
 	//store the pseudo-depth (depth accounting for skyboxes)
-	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragDepth;
+	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragCoord.z;
 }
