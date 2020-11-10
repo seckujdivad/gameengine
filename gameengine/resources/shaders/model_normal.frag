@@ -385,11 +385,12 @@ void main()
 
 						if (is_valid)
 						{
-							float current_length = length(intersections[1] - geomSceneSpacePos.xyz);
+							const float dist_to_seg_end = length(intersections[1] - geomSceneSpacePos.xyz);
+							const bool points_correct_direction = dot(intersections[1] - geomSceneSpacePos.xyz, refl_dir) > 0.0f; //make sure the intersection is on the correct side of the point of reflection (i.e. not inside the surface)
 
-							if ((final_length == -1.0f) || ((final_length > current_length) && (current_length > 0.1f)))
+							if ((final_length == -1.0f) || ((final_length > dist_to_seg_end) && (dist_to_seg_end > 0.1f)) && points_correct_direction) //check if this is the furthest known intersection
 							{
-								final_length = current_length;
+								final_length = dist_to_seg_end;
 								search_index = i;
 							}
 						}
@@ -404,7 +405,7 @@ void main()
 						//search all values and see if you can step on from
 						included_segments[search_index] = true;
 				
-						vec3 line_start_pos = all_intersections[search_index * 2];
+						const vec3 line_start_pos = all_intersections[search_index * 2];
 						vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
 						int current_index = 0;
 						float current_length = length(line_end_pos - line_start_pos);
