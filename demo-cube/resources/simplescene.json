@@ -115,7 +115,8 @@
       "material": {
         "diffuse": 0.2,
         "specular": 0.2,
-        "specular highlight": 32
+        "specular highlight": 32,
+        "displacement multiplier": 1
       },
       "reflections": {
         "screen space": true,
@@ -125,7 +126,10 @@
         }
       },
       "textures": {
-        "specular": 1
+        "colour": "textures/bricks2.jpg",
+        "normal": "textures/bricks2_normal.jpg",
+        "specular": 1,
+        "displacement": "textures/bricks2_disp.jpg"
       },
       "visboxes": [ "level section 2" ]
     }

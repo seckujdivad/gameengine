@@ -230,6 +230,9 @@
     <Image Include="main.ico">
       <DeploymentContent>false</DeploymentContent>
     </Image>
+    <Image Include="resources\textures\bricks2.jpg" />
+    <Image Include="resources\textures\bricks2_disp.jpg" />
+    <Image Include="resources\textures\bricks2_normal.jpg" />
     <Image Include="resources\textures\cube_normals.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
