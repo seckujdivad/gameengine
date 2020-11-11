@@ -348,5 +348,11 @@
     <None Include="resources\shaders\model_normal.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="resources\shaders\model_normal.geom">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="resources\shaders\model_wireframe.geom">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
