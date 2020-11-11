@@ -392,9 +392,10 @@ void main()
 
 						if (is_valid)
 						{
+							//check if the line segment overlaps the reflection point (i.e. starts on one side and ends on the other)
 							const float tolerance = 0.1f;
 							const vec3 tolerance_vec = tolerance * refl_dir;
-							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos.xyz - tolerance_vec, refl_dir) < 0.0f; //whether intersection 0 is ahead of the 
+							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos.xyz - tolerance_vec, refl_dir) < 0.0f;
 							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos.xyz + tolerance_vec, refl_dir) > 0.0f;
 
 							if (intersection_0_before_point && intersection_1_after_point)
@@ -406,14 +407,14 @@ void main()
 				
 					if (search_index == -1)
 					{
-						reflection_colour = GenerateErrorPattern(vec3(1.0f, 0.0f, 0.0f), vec3(1.0f)); //error state
+						reflection_colour = GenerateErrorPattern(vec3(1.0f, 0.0f, 0.0f), vec3(1.0f)); //error state - no line segment overlapped with the reflection point
 					}
 					else
 					{
 						bool included_segments[APPROXIMATION_OBB_NUM];
 						for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 						{
-							included_segments[i] = i == search_index;
+							included_segments[i] = i == search_index; //initialise array - at the start, only the search_index segment has been used to construct the line
 						}
 
 						const vec3 line_start = all_intersections[search_index * 2]; //no need to extend the start point backwards, should be prevented by the refl surface and couldn't affect the result anyway
@@ -439,7 +440,7 @@ void main()
 										const bool starts_before_end = dot(all_intersections[i * 2] - line_end - tolerance_vec, refl_dir) < 0.0f;
 										const bool ends_after_end = dot(all_intersections[(i * 2) + 1] - line_end - tolerance_vec, refl_dir) > 0.0f;
 
-										if (starts_after_start && starts_before_end && ends_after_end) //extend line
+										if (starts_after_start && starts_before_end && ends_after_end) //new line segment overlaps with end of current line segment - extend line
 										{
 											clear_run = false;
 											included_segments[i] = true;
@@ -470,13 +471,12 @@ void main()
 						//sample using the final values
 						{
 							vec3 sample_vector = line_end - reflections[reflection_index].position;
-							vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector).rgba;
+							vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector);
 
 							reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f)
 							? texture(skyboxTexture,  refl_dir).rgb
 							: reflection_sample.rgb;
 						}
-
 					}
 				}
 			}
