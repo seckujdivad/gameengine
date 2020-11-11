@@ -366,10 +366,9 @@ void main()
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
 					vec3 all_intersections[2 * APPROXIMATION_OBB_NUM]; //2d array with start and end positions of all line segments
-					float final_length = -1.0f; //length of furthest intersection
-					int search_index = -1; //index of furthest intersection
+					int search_index = -1; //index of a line segment that contains the point of reflection
 					vec3 refl_dir = normalize(reflect(-fragtocam, normal)); //direction to cast the rays in
-					bool included_segments[APPROXIMATION_OBB_NUM]; //whether or not each pair in all_intersections is a valid line segment or just junk data
+					bool valid_segments[APPROXIMATION_OBB_NUM]; //whether or not each pair in all_intersections is a valid line segment or just junk data
 
 					for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 					{
@@ -377,20 +376,29 @@ void main()
 						vec3 intersections[2]; //start and end of line segment
 						GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
 
+						//make sure that the line segment is aligned with the reflection vector (i.e. 0 -> 1 is aligned)
+						if (dot(intersections[1] - intersections[0], refl_dir) < 0.0f)
+						{
+							vec3 swap = intersections[0];
+							intersections[0] = intersections[1];
+							intersections[1] = swap;
+						}
+
 						//write OBB intersection info into proper storage locations
 						all_intersections[i * 2] = intersections[0];
 						all_intersections[(i * 2) + 1] = intersections[1];
 
-						included_segments[i] = !is_valid;
+						valid_segments[i] = is_valid;
 
 						if (is_valid)
 						{
-							const float dist_to_seg_end = length(intersections[1] - geomSceneSpacePos.xyz);
-							const bool points_correct_direction = dot(intersections[1] - geomSceneSpacePos.xyz, refl_dir) > 0.0f; //make sure the intersection is on the correct side of the point of reflection (i.e. not inside the surface)
+							const float tolerance = 0.1f;
+							const vec3 tolerance_vec = tolerance * refl_dir;
+							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos.xyz - tolerance_vec, refl_dir) < 0.0f; //whether intersection 0 is ahead of the 
+							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos.xyz + tolerance_vec, refl_dir) > 0.0f;
 
-							if ((final_length == -1.0f) || ((final_length > dist_to_seg_end) && (dist_to_seg_end > 0.1f)) && points_correct_direction) //check if this is the furthest known intersection
+							if (intersection_0_before_point && intersection_1_after_point)
 							{
-								final_length = dist_to_seg_end;
 								search_index = i;
 							}
 						}
@@ -402,45 +410,73 @@ void main()
 					}
 					else
 					{
-						//search all values and see if you can step on from
-						included_segments[search_index] = true;
-				
-						const vec3 line_start_pos = all_intersections[search_index * 2];
-						vec3 line_end_pos = all_intersections[(search_index * 2) + 1];
-						int current_index = 0;
-						float current_length = length(line_end_pos - line_start_pos);
-				
-						while (current_index < APPROXIMATION_OBB_NUM)
+						bool included_segments[APPROXIMATION_OBB_NUM];
+						for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 						{
-							if (!included_segments[current_index] && (length(all_intersections[current_index * 2] - line_start_pos) - 0.1f < current_length) && (length(all_intersections[(current_index * 2) + 1] - line_start_pos) > current_length))
-							{
-								line_end_pos = all_intersections[(current_index * 2) + 1];
-								included_segments[current_index] = true;
-								current_index = -1;
-								current_length = length(line_end_pos - line_start_pos);
-							}
-							current_index++;
+							included_segments[i] = i == search_index;
 						}
 
-						int final_index = reflection_index;
-						float final_length = length(line_end_pos - reflections[reflection_index].position);
+						const vec3 line_start = all_intersections[search_index * 2]; //no need to extend the start point backwards, should be prevented by the refl surface and couldn't affect the result anyway
+						vec3 line_end = all_intersections[(search_index * 2) + 1];
+						int line_end_index = search_index;
 
-						for (int i = 0; i < reflection_count; i++)
 						{
-							current_length = length(line_end_pos - reflections[i].position);
-
-							if (current_length < final_length)
+							bool clear_run = false;
+							while (!clear_run)
 							{
-								final_index = i;
-								final_length = current_length;
+								clear_run = true; //changes to false whenever a line segment is merged in that affects the end point
+
+								for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
+								{
+									if (valid_segments[i] && !included_segments[i]) //don't check line segments that are already included in the line
+									{
+										//check if extending end is possible
+										const float tolerance = 0.1f;
+										const vec3 tolerance_vec = tolerance * refl_dir;
+
+										// (of the existing line segment)
+										const bool starts_after_start = dot(all_intersections[i * 2] - line_start + tolerance_vec, refl_dir) > 0.0f;
+										const bool starts_before_end = dot(all_intersections[i * 2] - line_end - tolerance_vec, refl_dir) < 0.0f;
+										const bool ends_after_end = dot(all_intersections[(i * 2) + 1] - line_end - tolerance_vec, refl_dir) > 0.0f;
+
+										if (starts_after_start && starts_before_end && ends_after_end) //extend line
+										{
+											clear_run = false;
+											included_segments[i] = true;
+
+											line_end = all_intersections[(i * 2) + 1];
+											line_end_index = i;
+										}
+									}
+								}
+							}
+						}
+
+						//find nearest reflection to end of line
+						int reflection_index = 0;
+						{
+							float current_length = length(reflections[0].position - line_end);
+							for (int i = 1; i < reflection_count; i++)
+							{
+								float new_length = length(reflections[i].position - line_end);
+								if (new_length < current_length)
+								{
+									reflection_index = i;
+									current_length = new_length;
+								}
 							}
 						}
 				
 						//sample using the final values
-						vec3 sample_vector = line_end_pos - reflections[final_index].position;
-						vec4 reflection_sample = texture(reflection_cubemaps[final_index], sample_vector).rgba;
+						{
+							vec3 sample_vector = line_end - reflections[reflection_index].position;
+							vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector).rgba;
 
-						reflection_colour = (texture(reflection_data_cubemaps[final_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture,  reflect(-fragtocam, normal)).rgb : reflection_sample.rgb;
+							reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f)
+							? texture(skyboxTexture,  refl_dir).rgb
+							: reflection_sample.rgb;
+						}
+
 					}
 				}
 			}
