@@ -393,7 +393,7 @@ void main()
 						if (is_valid)
 						{
 							//check if the line segment overlaps the reflection point (i.e. starts on one side and ends on the other)
-							const float tolerance = 0.1f;
+							const float tolerance = 0.01f;
 							const vec3 tolerance_vec = tolerance * refl_dir;
 							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos.xyz - tolerance_vec, refl_dir) < 0.0f;
 							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos.xyz + tolerance_vec, refl_dir) > 0.0f;
@@ -432,7 +432,7 @@ void main()
 									if (valid_segments[i] && !included_segments[i]) //don't check line segments that are already included in the line
 									{
 										//check if extending end is possible
-										const float tolerance = 0.1f;
+										const float tolerance = 0.01f;
 										const vec3 tolerance_vec = tolerance * refl_dir;
 
 										// (of the existing line segment)
