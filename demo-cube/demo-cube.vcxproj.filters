@@ -36,6 +36,12 @@
     <None Include="resources\models\opened cube.ply">
       <Filter>Resource Files\models</Filter>
     </None>
+    <None Include="resources\models\level.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="resources\models\flat plane.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h">

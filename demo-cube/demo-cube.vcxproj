@@ -197,9 +197,11 @@
     <None Include="resources\models\cube.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\models\flat plane.ply" />
     <None Include="resources\models\joining section.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\models\level.ply" />
     <None Include="resources\models\opened cube.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
