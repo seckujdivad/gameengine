@@ -106,6 +106,21 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			//reflections
 			recompile_required = this->SetShaderDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) ? true : recompile_required;
+
+			//determine if any models might need to discard fragments
+			{
+				bool frags_may_be_discarded = false;
+
+				for (Model* model : models)
+				{
+					if (model->GetMaterial().displacement.discard_out_of_range)
+					{
+						frags_may_be_discarded = true;
+					}
+				}
+
+				recompile_required = this->SetShaderDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0") ? true : recompile_required;
+			}
 		}
 
 		if (recompile_required)

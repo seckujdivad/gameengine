@@ -17,6 +17,10 @@
 #define REFLECTION_NUM 1
 #endif
 
+#if !defined(SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING)
+#define SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING 1
+#endif
+
 //shader input-output
 layout(location = 0) out vec4 frag_out;
 layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
@@ -271,6 +275,7 @@ void main()
 		const vec3 tangent_space_view_dir = normalize(geomTangentSpacePos - geomTangentSpaceCameraPos);
 		parallax_uv = ParallaxMapUV(geomUV, tangent_space_view_dir);
 
+#if SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING == 1 //allows for early z testing on scenes without models that may discard even on an imperfect shader compiler
 		if (mat_displacement_discard_out_of_range)
 		{
 			if (any(lessThan(parallax_uv, vec2(0.0f))) || any(greaterThan(parallax_uv, vec2(1.0f))))
@@ -278,6 +283,7 @@ void main()
 				discard;
 			}
 		}
+#endif
 	}
 	
 	//get base colour
