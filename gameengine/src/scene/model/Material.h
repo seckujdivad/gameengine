@@ -17,6 +17,12 @@ struct MaterialSSRConfig
 	int refinements = 1;
 };
 
+struct MaterialDisplacementConfig
+{
+	float multiplier = 1.0f;
+	bool discard_out_of_range = true;
+};
+
 struct Material
 {
 	glm::vec3 diffuse = glm::vec3(0.0f);
@@ -29,5 +35,5 @@ struct Material
 	bool reflections_enabled = true;
 	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;
 
-	float displacement_multiplier = 1.0f;
+	MaterialDisplacementConfig displacement;
 };

@@ -320,13 +320,21 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 							model->GetMaterial().specular_highlight = el.value()["material"]["specular highlight"].get<float>();
 						}
 
-						if (el.value()["material"]["displacement multiplier"].is_number())
+						if (el.value()["material"]["displacement"].is_object())
 						{
-							model->GetMaterial().displacement_multiplier = el.value()["material"]["displacement multiplier"].get<float>();
-						}
-						else
-						{
-							model->GetMaterial().displacement_multiplier = 0.0f;
+							if (el.value()["material"]["displacement"]["multiplier"].is_number())
+							{
+								model->GetMaterial().displacement.multiplier = el.value()["material"]["displacement"]["multiplier"].get<float>();
+							}
+							else
+							{
+								model->GetMaterial().displacement.multiplier = 0.0f;
+							}
+
+							if (el.value()["material"]["displacement"]["discard out of range"].is_boolean())
+							{
+								model->GetMaterial().displacement.discard_out_of_range = el.value()["material"]["displacement"]["discard out of range"].get<bool>();
+							}
 						}
 					}
 

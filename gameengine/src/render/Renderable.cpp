@@ -359,7 +359,8 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->SetShaderUniform("mat_diffuse", material.diffuse);
 					this->SetShaderUniform("mat_specular", material.specular);
 					this->SetShaderUniform("mat_specular_highlight", material.specular_highlight);
-					this->SetShaderUniform("mat_displacement_multiplier", material.displacement_multiplier);
+					this->SetShaderUniform("mat_displacement_multiplier", material.displacement.multiplier);
+					this->SetShaderUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
 
 					//screen space reflections
 					this->SetShaderUniform("mat_ssr_enabled", material.ssr_enabled);
@@ -770,6 +771,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"mat_specular",
 					"mat_specular_highlight",
 					"mat_displacement_multiplier",
+					"mat_displacement_discard_out_of_range",
 					"mat_ssr_enabled",
 					"mat_ssr_resolution",
 					"mat_ssr_max_distance",

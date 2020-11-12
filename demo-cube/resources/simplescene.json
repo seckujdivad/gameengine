@@ -116,7 +116,10 @@
         "diffuse": 0.2,
         "specular": 0.2,
         "specular highlight": 32,
-        "displacement multiplier": 0.05
+        "displacement": {
+          "multiplier": 0.05,
+          "discard out of range": true
+        }
       },
       "reflections": {
         "screen space": true,

@@ -55,6 +55,7 @@ uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
 uniform float mat_displacement_multiplier;
+uniform bool mat_displacement_discard_out_of_range;
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
@@ -257,6 +258,14 @@ void main()
 	{	
 		const vec3 tangent_space_view_dir = normalize(geomTangentSpacePos - geomTangentSpaceCameraPos);
 		parallax_uv = ParallaxMapUV(geomUV, tangent_space_view_dir);
+
+		if (mat_displacement_discard_out_of_range)
+		{
+			if (any(lessThan(parallax_uv, vec2(0.0f))) || any(greaterThan(parallax_uv, vec2(1.0f))))
+			{
+				discard;
+			}
+		}
 	}
 	
 	//get base colour
