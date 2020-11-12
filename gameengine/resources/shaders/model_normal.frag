@@ -236,6 +236,11 @@ vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tan
 	float current_depth = 0.0f;
 	vec2 current_uv = uv;
 	float current_depth_sample = texture(displacementTexture, current_uv).r;
+
+	if (current_depth_sample == 0.0f)
+	{
+		return uv;
+	}
 	
 	while (current_depth < current_depth_sample)
 	{
@@ -244,7 +249,14 @@ vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tan
 		current_depth += layer_depth;
 	}
 
-	return current_uv;
+	//interpolate between last two samples (one of which was above the surface, one was below)
+	vec2 prev_uv = current_uv + delta_uv;
+
+	float prev_depth_sample_translated = texture(displacementTexture, prev_uv).r + layer_depth - current_depth;
+	float current_depth_sample_translated = current_depth_sample - current_depth;
+
+	float interpolation_weight = current_depth_sample_translated / (current_depth_sample_translated / prev_depth_sample_translated);
+	return mix(prev_uv, current_uv, interpolation_weight);
 }
 
 void main()

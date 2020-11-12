@@ -117,7 +117,7 @@
         "specular": 0.2,
         "specular highlight": 32,
         "displacement": {
-          "multiplier": 0.05,
+          "multiplier": 0.1,
           "discard out of range": true
         }
       },
