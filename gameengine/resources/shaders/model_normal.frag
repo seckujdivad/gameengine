@@ -222,11 +222,28 @@ vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
 	};
 }
 
+//not my algorithm - https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
 vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tangent_space_view_direction must be normalised
 {
-	const float height = texture(displacementTexture, uv).r * mat_displacement_multiplier;
-	const vec2 uv_offset = tangent_space_view_direction.xy / tangent_space_view_direction.z * height;
-	return uv - uv_offset;
+	const float min_layers = 8.0f;
+	const float max_layers = 32.0f;
+	const float num_layers = mix(min_layers, max_layers, clamp(dot(vec3(0.0f, 0.0f, 1.0f), tangent_space_view_direction), 0.0f, 1.0f));
+
+	const float layer_depth = 1.0f / num_layers;
+	const vec2 delta_uv = tangent_space_view_direction.xy * mat_displacement_multiplier * layer_depth;
+
+	float current_depth = 0.0f;
+	vec2 current_uv = uv;
+	float current_depth_sample = texture(displacementTexture, current_uv).r;
+	
+	while (current_depth < current_depth_sample)
+	{
+		current_uv -= delta_uv;
+		current_depth_sample = texture(displacementTexture, current_uv).r;
+		current_depth += layer_depth;
+	}
+
+	return current_uv;
 }
 
 void main()
