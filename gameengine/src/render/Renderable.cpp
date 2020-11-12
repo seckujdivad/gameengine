@@ -359,6 +359,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->SetShaderUniform("mat_diffuse", material.diffuse);
 					this->SetShaderUniform("mat_specular", material.specular);
 					this->SetShaderUniform("mat_specular_highlight", material.specular_highlight);
+					this->SetShaderUniform("mat_displacement_multiplier", material.displacement_multiplier);
 
 					//screen space reflections
 					this->SetShaderUniform("mat_ssr_enabled", material.ssr_enabled);
@@ -374,23 +375,27 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					texture = this->GetEngine()->GetTexture(model->GetColourTexture().GetReference());
 					texture.uniform_name = "colourTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetNormalTexture().GetReference());
 					texture.uniform_name = "normalTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference());
 					texture.uniform_name = "specularTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetReflectionTexture().GetReference());
 					texture.uniform_name = "reflectionIntensityTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference());
 					texture.uniform_name = "skyboxMaskTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference());
+					texture.uniform_name = "displacementTexture";
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					//reflections
 					this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
@@ -764,6 +769,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"mat_diffuse",
 					"mat_specular",
 					"mat_specular_highlight",
+					"mat_displacement_multiplier",
 					"mat_ssr_enabled",
 					"mat_ssr_resolution",
 					"mat_ssr_max_distance",
@@ -775,6 +781,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"normalTexture",
 					"specularTexture",
 					"reflectionIntensityTexture",
+					"displacementTexture",
 					"light_ambient",
 					"light_shadow_draw",
 					"reflections_enabled",

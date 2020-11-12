@@ -18,6 +18,8 @@ Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : P
 		this->m_texture_reflection = LocalTexture(-1);
 		this->m_texture_specular = LocalTexture(-1);
 		this->m_texture_normal = LocalTexture(-1);
+		this->m_texture_skybox_mask = LocalTexture(-1);
+		this->m_texture_displacement = LocalTexture(-1);
 	}
 	else
 	{
@@ -25,6 +27,8 @@ Model::Model(ModelReference reference, ModelGeometry geometry, Scene* scene) : P
 		this->m_texture_reflection = LocalTexture(scene->GetNewTextureReference());
 		this->m_texture_specular = LocalTexture(scene->GetNewTextureReference());
 		this->m_texture_normal = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_skybox_mask = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_displacement = LocalTexture(scene->GetNewTextureReference());
 	}
 }
 
@@ -76,6 +80,11 @@ LocalTexture& Model::GetNormalTexture()
 LocalTexture& Model::GetSkyboxMaskTexture()
 {
 	return this->m_texture_skybox_mask;
+}
+
+LocalTexture& Model::GetDisplacementTexture()
+{
+	return this->m_texture_displacement;
 }
 
 void Model::SetWireframeColours(std::vector<glm::vec3> colours)

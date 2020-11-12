@@ -302,12 +302,14 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 						LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
 						LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
 						LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+						LocalTexture displacement_texture = GetTexture(el.value()["textures"]["displacement"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
 
 						model->GetColourTexture() = colour_texture;;
 						model->GetNormalTexture() = normal_texture;
 						model->GetReflectionTexture() = refl_texture;
 						model->GetSpecularTexture() = specular_texture;
 						model->GetSkyboxMaskTexture() = skybox_texture;
+						model->GetDisplacementTexture() = displacement_texture;
 
 						//load phong material
 						model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));
@@ -316,6 +318,16 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 						if (el.value()["material"]["specular highlight"].is_number())
 						{
 							model->GetMaterial().specular_highlight = el.value()["material"]["specular highlight"].get<float>();
+						}
+
+						if (el.value()["material"]["displacement multiplier"].is_number())
+						{
+							model->GetMaterial().displacement_multiplier = el.value()["material"]["displacement multiplier"].get<float>();
+						}
+
+						if (!el.value()["textures"]["displacement"].is_object())
+						{
+							model->GetMaterial().displacement_multiplier = 0.0f;
 						}
 					}
 

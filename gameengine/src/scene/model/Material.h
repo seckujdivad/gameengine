@@ -28,4 +28,6 @@ struct Material
 
 	bool reflections_enabled = true;
 	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;
+
+	float displacement_multiplier = 1.0f;
 };

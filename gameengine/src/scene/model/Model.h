@@ -59,6 +59,7 @@ private:
 	LocalTexture m_texture_specular = LocalTexture(0);
 	LocalTexture m_texture_normal = LocalTexture(0);
 	LocalTexture m_texture_skybox_mask = LocalTexture(0);
+	LocalTexture m_texture_displacement = LocalTexture(0);
 
 	//wireframe colour
 	int m_wireframe_colours_index = 0;
@@ -83,6 +84,7 @@ public:
 	LocalTexture& GetSpecularTexture();
 	LocalTexture& GetNormalTexture();
 	LocalTexture& GetSkyboxMaskTexture();
+	LocalTexture& GetDisplacementTexture();
 
 	void SetWireframeColours(std::vector<glm::vec3> colours);
 	void SetCurrentWireframeIndex(int index);
