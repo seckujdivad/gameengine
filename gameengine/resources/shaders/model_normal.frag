@@ -24,6 +24,7 @@ layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
 in vec4 geomMdlSpacePos;
 in vec4 geomSceneSpacePos;
 in vec4 geomCamSpacePos;
+in vec3 geomTangentSpacePos;
 
 in vec2 geomUV;
 
@@ -32,6 +33,8 @@ in vec4 geomSceneSpaceNormal;
 in vec4 geomCamSpaceNormal;
 
 in mat3 geomNormalTBN;
+
+in vec3 geomTangentSpaceCameraPos;
 
 //model
 uniform vec4 mdl_translate;
@@ -51,6 +54,7 @@ uniform mat4 cam_transform_inverse;
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
+uniform float mat_displacement_multiplier;
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
@@ -66,6 +70,7 @@ uniform sampler2D colourTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D reflectionIntensityTexture;
+uniform sampler2D displacementTexture;
 
 //lighting
 uniform vec3 light_ambient;
@@ -217,22 +222,40 @@ vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
 	};
 }
 
+vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tangent_space_view_direction must be normalised
+{
+	const float height = texture(displacementTexture, uv).r * mat_displacement_multiplier;
+	const vec2 uv_offset = tangent_space_view_direction.xy / tangent_space_view_direction.z * height;
+	return uv - uv_offset;
+}
+
 void main()
 {
+	vec2 parallax_uv;
+	if (mat_displacement_multiplier == 0.0f)
+	{
+		parallax_uv = geomUV;
+	}
+	else
+	{	
+		const vec3 tangent_space_view_dir = normalize(geomTangentSpaceCameraPos - geomTangentSpacePos);
+		parallax_uv = ParallaxMapUV(geomUV, tangent_space_view_dir);
+	}
+	
 	//get base colour
-	frag_out = texture(colourTexture, geomUV);
+	frag_out = texture(colourTexture, parallax_uv);
 
 	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
 	frag_intensity = frag_intensity + light_ambient;
 
 	//calculate local mapped normal
-	vec3 sample_normal = texture(normalTexture, geomUV).rgb;
+	vec3 sample_normal = texture(normalTexture, parallax_uv).rgb;
 	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
 	vec3 normal = normalize(geomNormalTBN * sample_normal);
 
 	//sample specular map
-	vec3 sample_specular = texture(specularTexture, geomUV).rgb * mat_specular;
+	vec3 sample_specular = texture(specularTexture, parallax_uv).rgb * mat_specular;
 
 	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos.xyz); //get direction from the fragment to the camera
 
@@ -260,7 +283,7 @@ void main()
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
 
 	//reflections
-	vec3 reflection_intensity = texture(reflectionIntensityTexture, geomUV).rgb;
+	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
 		bool ssr_reflection_applied = false;
