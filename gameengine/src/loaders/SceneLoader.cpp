@@ -324,8 +324,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 						{
 							model->GetMaterial().displacement_multiplier = el.value()["material"]["displacement multiplier"].get<float>();
 						}
-
-						if (!el.value()["textures"]["displacement"].is_object())
+						else
 						{
 							model->GetMaterial().displacement_multiplier = 0.0f;
 						}
