@@ -255,7 +255,7 @@ void main()
 	}
 	else
 	{	
-		const vec3 tangent_space_view_dir = normalize(geomTangentSpaceCameraPos - geomTangentSpacePos);
+		const vec3 tangent_space_view_dir = normalize(geomTangentSpacePos - geomTangentSpaceCameraPos);
 		parallax_uv = ParallaxMapUV(geomUV, tangent_space_view_dir);
 	}
 	
