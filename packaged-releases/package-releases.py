@@ -54,10 +54,14 @@ for project_name in packages_config["projects"]:
         
         os.mkdir(package_path)
 
-        for include_source in build_config["include"]:
-            copy_file(os.path.join(solution_dir, include_source), os.path.join(package_path, build_config["include"][include_source]))
+        try:
+            for include_source in build_config["include"]:
+                copy_file(os.path.join(solution_dir, include_source), os.path.join(package_path, build_config["include"][include_source]))
 
-        print(" done")
+            print(" done")
+
+        except FileNotFoundError:
+            print(" failed (one or more files not found, has this package been built?)")
 
         print("Archiving " + build_name + "...", end = "")
         shutil.make_archive(package_path, 'zip', os.path.join(sys.path[0], "package sources", build_name))
