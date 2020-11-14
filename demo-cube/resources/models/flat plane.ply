@@ -1,0 +1,19 @@
+ply
+format ascii 1.0
+element vertex 4
+property float x
+property float y
+property float z
+property float nx
+property float ny
+property float nz
+property float s
+property float t
+element face 1
+property list uchar uint vertex_indices
+end_header
+-1.0 -1.0 0.0 0.0 0.0 1.0 0.0 0.0
+-1.0 1.0 0.0 0.0 0.0 1.0 0.0 1.0
+1.0 1.0 0.0 0.0 0.0 1.0 1.0 1.0
+1.0 -1.0 0.0 0.0 0.0 1.0 1.0 0.0
+4 0 1 2 3

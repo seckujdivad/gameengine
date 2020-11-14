@@ -106,6 +106,21 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			//reflections
 			recompile_required = this->SetShaderDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) ? true : recompile_required;
+
+			//determine if any models might need to discard fragments
+			{
+				bool frags_may_be_discarded = false;
+
+				for (Model* model : models)
+				{
+					if (model->GetMaterial().displacement.discard_out_of_range)
+					{
+						frags_may_be_discarded = true;
+					}
+				}
+
+				recompile_required = this->SetShaderDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0") ? true : recompile_required;
+			}
 		}
 
 		if (recompile_required)
@@ -359,6 +374,8 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->SetShaderUniform("mat_diffuse", material.diffuse);
 					this->SetShaderUniform("mat_specular", material.specular);
 					this->SetShaderUniform("mat_specular_highlight", material.specular_highlight);
+					this->SetShaderUniform("mat_displacement_multiplier", material.displacement.multiplier);
+					this->SetShaderUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
 
 					//screen space reflections
 					this->SetShaderUniform("mat_ssr_enabled", material.ssr_enabled);
@@ -374,23 +391,27 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					texture = this->GetEngine()->GetTexture(model->GetColourTexture().GetReference());
 					texture.uniform_name = "colourTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetNormalTexture().GetReference());
 					texture.uniform_name = "normalTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference());
 					texture.uniform_name = "specularTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetReflectionTexture().GetReference());
 					texture.uniform_name = "reflectionIntensityTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					texture = this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference());
 					texture.uniform_name = "skyboxMaskTexture";
-					this->m_shader_program->SetTexture((int)model->GetReference(), texture);
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+					texture = this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference());
+					texture.uniform_name = "displacementTexture";
+					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					//reflections
 					this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
@@ -764,6 +785,8 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"mat_diffuse",
 					"mat_specular",
 					"mat_specular_highlight",
+					"mat_displacement_multiplier",
+					"mat_displacement_discard_out_of_range",
 					"mat_ssr_enabled",
 					"mat_ssr_resolution",
 					"mat_ssr_max_distance",
@@ -775,6 +798,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"normalTexture",
 					"specularTexture",
 					"reflectionIntensityTexture",
+					"displacementTexture",
 					"light_ambient",
 					"light_shadow_draw",
 					"reflections_enabled",

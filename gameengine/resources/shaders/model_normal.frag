@@ -17,6 +17,10 @@
 #define REFLECTION_NUM 1
 #endif
 
+#if !defined(SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING)
+#define SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING 1
+#endif
+
 //shader input-output
 layout(location = 0) out vec4 frag_out;
 layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
@@ -24,6 +28,7 @@ layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
 in vec4 geomMdlSpacePos;
 in vec4 geomSceneSpacePos;
 in vec4 geomCamSpacePos;
+in vec3 geomTangentSpacePos;
 
 in vec2 geomUV;
 
@@ -32,6 +37,8 @@ in vec4 geomSceneSpaceNormal;
 in vec4 geomCamSpaceNormal;
 
 in mat3 geomNormalTBN;
+
+in vec3 geomTangentSpaceCameraPos;
 
 //model
 uniform vec4 mdl_translate;
@@ -51,6 +58,8 @@ uniform mat4 cam_transform_inverse;
 uniform vec3 mat_diffuse;
 uniform vec3 mat_specular;
 uniform float mat_specular_highlight;
+uniform float mat_displacement_multiplier;
+uniform bool mat_displacement_discard_out_of_range;
 
 // screen space reflections
 uniform bool mat_ssr_enabled;
@@ -66,6 +75,7 @@ uniform sampler2D colourTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D reflectionIntensityTexture;
+uniform sampler2D displacementTexture;
 
 //lighting
 uniform vec3 light_ambient;
@@ -217,22 +227,79 @@ vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
 	};
 }
 
+//not my algorithm - https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
+vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tangent_space_view_direction must be normalised
+{
+	const float min_layers = 8.0f;
+	const float max_layers = 32.0f;
+	const float num_layers = mix(min_layers, max_layers, clamp(dot(vec3(0.0f, 0.0f, 1.0f), tangent_space_view_direction), 0.0f, 1.0f));
+
+	const float layer_depth = 1.0f / num_layers;
+	const vec2 delta_uv = tangent_space_view_direction.xy * mat_displacement_multiplier * layer_depth;
+
+	float current_depth = 0.0f;
+	vec2 current_uv = uv;
+	float current_depth_sample = texture(displacementTexture, current_uv).r;
+
+	if (current_depth_sample == 0.0f)
+	{
+		return uv;
+	}
+	
+	while (current_depth < current_depth_sample)
+	{
+		current_uv -= delta_uv;
+		current_depth_sample = texture(displacementTexture, current_uv).r;
+		current_depth += layer_depth;
+	}
+
+	//interpolate between last two samples (one of which was above the surface, one was below)
+	vec2 prev_uv = current_uv + delta_uv;
+
+	float prev_depth_sample_translated = texture(displacementTexture, prev_uv).r + layer_depth - current_depth;
+	float current_depth_sample_translated = current_depth_sample - current_depth;
+
+	float interpolation_weight = current_depth_sample_translated / (current_depth_sample_translated / prev_depth_sample_translated);
+	return mix(prev_uv, current_uv, interpolation_weight);
+}
+
 void main()
 {
+	vec2 parallax_uv;
+	if (mat_displacement_multiplier == 0.0f)
+	{
+		parallax_uv = geomUV;
+	}
+	else
+	{	
+		const vec3 tangent_space_view_dir = normalize(geomTangentSpacePos - geomTangentSpaceCameraPos);
+		parallax_uv = ParallaxMapUV(geomUV, tangent_space_view_dir);
+
+#if SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING == 1 //allows for early z testing on scenes without models that may discard even on an imperfect shader compiler
+		if (mat_displacement_discard_out_of_range)
+		{
+			if (any(lessThan(parallax_uv, vec2(0.0f))) || any(greaterThan(parallax_uv, vec2(1.0f))))
+			{
+				discard;
+			}
+		}
+#endif
+	}
+	
 	//get base colour
-	frag_out = texture(colourTexture, geomUV);
+	frag_out = texture(colourTexture, parallax_uv);
 
 	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
 	frag_intensity = frag_intensity + light_ambient;
 
 	//calculate local mapped normal
-	vec3 sample_normal = texture(normalTexture, geomUV).rgb;
+	vec3 sample_normal = texture(normalTexture, parallax_uv).rgb;
 	sample_normal = normalize(2.0f * (sample_normal - 0.5f));
 	vec3 normal = normalize(geomNormalTBN * sample_normal);
 
 	//sample specular map
-	vec3 sample_specular = texture(specularTexture, geomUV).rgb * mat_specular;
+	vec3 sample_specular = texture(specularTexture, parallax_uv).rgb * mat_specular;
 
 	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos.xyz); //get direction from the fragment to the camera
 
@@ -260,7 +327,7 @@ void main()
 	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
 
 	//reflections
-	vec3 reflection_intensity = texture(reflectionIntensityTexture, geomUV).rgb;
+	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
 		bool ssr_reflection_applied = false;

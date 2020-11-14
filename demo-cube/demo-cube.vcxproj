@@ -151,7 +151,7 @@
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>py $(SolutionDir)\packaged-releases/package-releases.py</Command>
+      <Command>py "$(SolutionDir)\packaged-releases/package-releases.py"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Packaging release in zip archive</Message>
@@ -197,6 +197,7 @@
     <None Include="resources\models\cube.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="resources\models\flat plane.ply" />
     <None Include="resources\models\joining section.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -229,6 +230,9 @@
     <Image Include="main.ico">
       <DeploymentContent>false</DeploymentContent>
     </Image>
+    <Image Include="resources\textures\bricks2.jpg" />
+    <Image Include="resources\textures\bricks2_disp.jpg" />
+    <Image Include="resources\textures\bricks2_normal.jpg" />
     <Image Include="resources\textures\cube_normals.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

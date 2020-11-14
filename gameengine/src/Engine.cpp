@@ -278,6 +278,14 @@ void Engine::Render()
 					this->LoadTexture((*it)->GetSkyboxMaskTexture(), "skyboxMaskTexture");
 				}
 			}
+
+			{
+				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetDisplacementTexture().GetReference());
+				if (it2 == this->m_textures_static.end())
+				{
+					this->LoadTexture((*it)->GetDisplacementTexture(), "displacementTexture");
+				}
+			}
 		}
 
 		//load required cubemaps and unload unused ones
