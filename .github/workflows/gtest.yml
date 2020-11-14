@@ -27,8 +27,11 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build gameengine
-        run: msbuild gameengine.sln -target:gameengine/gameengine.vcxproj:Build
+        run: msbuild gameengine.sln -target:gameengine/gameengine.vcxproj
 
       # Runs a set of commands using the runners shell
       - name: Build gameengine-GTest
-        run: msbuild gameengine.sln -target:gameengine-GTest/gameengine-GTest.vcxproj:Build
+        run: msbuild gameengine.sln -target:gameengine-GTest/gameengine-GTest.vcxproj
+      
+      - name: Run gameengine-GTest
+        run: start "" "Debug/gameengine-GTest.exe"
