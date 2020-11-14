@@ -1,0 +1,8 @@
+gtest
+wxwidgets
+glm
+opengl
+nlohmann-json
+glew
+--triplet
+x86

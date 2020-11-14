@@ -21,9 +21,26 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+
+          # Restore from cache the previously built ports. If cache-miss, download, build vcpkg.
+      - name: Restore from cache and install vcpkg
+        # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
+        uses: lukka/run-vcpkg@v5
+        with:
+          setupOnly: true
+      # Now that vcpkg is installed, it is being used to run desired arguments.
+      - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
+        shell: bash
       
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1
+
+      - name: Cache Primes
+        id: cache-binaries
+        uses: actions/cache@v2
+        with:
+          path: /Debug/
+          key: ${{ runner.os }}-binaries
 
       # Runs a single command using the runners shell
       - name: Build gameengine
