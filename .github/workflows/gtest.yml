@@ -22,6 +22,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Cache vcpkg
+        uses: pat-s/always-upload-cache@v2.1.3
+        with:
+          path: /vcpkg/
+          key: ${{ runner.os }}-vcpkg-binaries
+
           # Restore from cache the previously built ports. If cache-miss, download, build vcpkg.
       - name: Restore from cache and install vcpkg
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
@@ -29,6 +35,9 @@ jobs:
         with:
           setupOnly: true
           vcpkgGitCommitId: 4727bc86a
+      - run: $VCPKG_ROOT/vcpkg integrate install
+        shell: bash
+
       # Now that vcpkg is installed, it is being used to run desired arguments.
       - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
         shell: bash
@@ -37,8 +46,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1
 
       - name: Cache project binaries
-        id: cache-binaries
-        uses: actions/cache@v2
+        uses: pat-s/always-upload-cache@v2.1.3
         with:
           path: /Debug/
           key: ${{ runner.os }}-binaries
