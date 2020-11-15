@@ -39,6 +39,7 @@ jobs:
         shell: bash
       
       - run: echo if (PORT STREQUAL wxwidgets) set(VCPKG_LIBRARY_LINKAGE static) endif() > $VCPKG_ROOT/triplets/x86-windows.cmake
+        shell: bash
         name: Make sure that wxWidgets builds statically
 
       # Now that vcpkg is installed, it is being used to run desired arguments.
