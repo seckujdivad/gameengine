@@ -44,7 +44,7 @@ jobs:
 
       # Now that vcpkg is installed, it is being used to run desired arguments.
       - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
-        shell: cmd
+        shell: bash
       
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1
