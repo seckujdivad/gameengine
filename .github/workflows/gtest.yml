@@ -52,8 +52,11 @@ jobs:
           key: ${{ runner.os }}-binaries
 
       # Runs a set of commands using the runners shell
+      - name: Build gameengine
+        run: msbuild gameengine/gameengine.vcxproj
+
       - name: Build gameengine-GTest
-        run: msbuild gameengine.sln /t:gameengine-GTest /p:Configuration="Release" /p:Platform="x86"
+        run: msbuild gameengine-GTest/gameengine-GTest.vcxproj
       
       - name: Run gameengine-GTest
         run: "Debug/gameengine-GTest.exe"
