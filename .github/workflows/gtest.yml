@@ -37,6 +37,9 @@ jobs:
           vcpkgGitCommitId: 5dc53211c
       - run: $VCPKG_ROOT/vcpkg integrate install
         shell: bash
+      
+      - run: echo if (PORT STREQUAL wxwidgets) set(VCPKG_LIBRARY_LINKAGE static) endif() > $VCPKG_ROOT/triplets/x86-windows.cmake
+        name: Make sure that wxWidgets builds statically
 
       # Now that vcpkg is installed, it is being used to run desired arguments.
       - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
