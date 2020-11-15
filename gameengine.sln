@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{769039FF-934C-4034-AD31-63FD5F1CCA49}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		vcpkg_install.txt = vcpkg_install.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packaged-releases", "packaged-releases", "{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A}"
@@ -23,6 +24,13 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gameengine-editor", "gameengine-editor\gameengine-editor.vcxproj", "{62088BFF-5FE7-46F5-943B-E7DF5F97595D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4F4B007F-EE21-46CF-B8DE-2447B8B8015A} = {4F4B007F-EE21-46CF-B8DE-2447B8B8015A}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B4177548-9D46-4B5A-BFB3-3422E96328B1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{02CF9FCD-26A8-45F6-BA14-9D051DDC3C5C}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\gtest.yml = .github\workflows\gtest.yml
 	EndProjectSection
 EndProject
 Global
@@ -69,6 +77,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
+		{B4177548-9D46-4B5A-BFB3-3422E96328B1} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
+		{02CF9FCD-26A8-45F6-BA14-9D051DDC3C5C} = {B4177548-9D46-4B5A-BFB3-3422E96328B1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63979F0E-A6D0-403D-AFA4-4FD1400E4095}
