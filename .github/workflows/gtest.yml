@@ -36,7 +36,7 @@ jobs:
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1
 
-      - name: Cache Primes
+      - name: Cache project binaries
         id: cache-binaries
         uses: actions/cache@v2
         with:

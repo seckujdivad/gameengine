@@ -5,4 +5,4 @@ opengl
 nlohmann-json
 glew
 --triplet
-x86
+x86-windows
