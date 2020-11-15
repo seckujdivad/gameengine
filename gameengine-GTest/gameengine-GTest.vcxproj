@@ -54,14 +54,9 @@
       <Project>{4f4b007f-ee21-46cf-b8de-2447b8b8015a}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets" Condition="Exists('..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets')" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -76,7 +71,18 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\manual-link\gtest_maind.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\*.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreLinkEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" &gt; nul</Command>
+      <Message>Prevent gmock linking</Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib"</Command>
+      <Message>Clean up from preventing gmock linking</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -92,7 +98,16 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\manual-link\gtest_maind.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\*.lib</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" &gt; nul</Command>
+      <Message>Prevent gmock linking</Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib"</Command>
+      <Message>Clean up from preventing gmock linking</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -109,7 +124,20 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\manual-link\gtest_main.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\*.lib</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" &gt; nul</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Prevent gmock linking</Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib/gmock.lib"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Clean up from preventing gmock linking</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -126,12 +154,19 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\manual-link\gtest_main.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\*.lib</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" &gt; nul</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Prevent gmock linking</Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib/gmock.lib"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Clean up from preventing gmock linking</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets'))" />
-  </Target>
 </Project>

@@ -34,7 +34,7 @@ jobs:
         uses: lukka/run-vcpkg@v5
         with:
           setupOnly: true
-          vcpkgGitCommitId: 4727bc86a
+          vcpkgGitCommitId: 5dc53211c
       - run: $VCPKG_ROOT/vcpkg integrate install
         shell: bash
 
@@ -60,4 +60,4 @@ jobs:
         run: msbuild gameengine-GTest/gameengine-GTest.vcxproj
       
       - name: Run gameengine-GTest
-        run: start "" "Debug/gameengine-GTest.exe"
+        run: "Debug/gameengine-GTest.exe"
