@@ -3,8 +3,24 @@ name: Windows build and test
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+    - 'NVIDIA Nsight/**'
+    - 'gameengine-editor/**'
+    - 'demo-cube/**'
+    - 'packaged-releases/**'
+    - '.gitattributes'
+    - '.gitignore'
+    - 'README.md'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+    - 'NVIDIA Nsight/**'
+    - 'gameengine-editor/**'
+    - 'demo-cube/**'
+    - 'packaged-releases/**'
+    - '.gitattributes'
+    - '.gitignore'
+    - 'README.md'
 
 jobs:
   build:
