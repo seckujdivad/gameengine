@@ -1,0 +1,72 @@
+name: Windows build and test
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+    - 'NVIDIA Nsight/**'
+    - 'gameengine-editor/**'
+    - 'demo-cube/**'
+    - 'packaged-releases/**'
+    - '.gitattributes'
+    - '.gitignore'
+    - 'README.md'
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+    - 'NVIDIA Nsight/**'
+    - 'gameengine-editor/**'
+    - 'demo-cube/**'
+    - 'packaged-releases/**'
+    - '.gitattributes'
+    - '.gitignore'
+    - 'README.md'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v5
+        with:
+          setupOnly: true
+          vcpkgGitCommitId: 5dc53211c
+      - run: $VCPKG_ROOT/vcpkg integrate install
+        shell: bash
+      
+      - run: |
+          echo[ >> vcpkg/triplets/x86-windows.cmake
+          echo if (PORT STREQUAL wxwidgets) >> vcpkg/triplets/x86-windows.cmake
+          echo set(VCPKG_LIBRARY_LINKAGE static) >> vcpkg/triplets/x86-windows.cmake
+          echo endif() >> vcpkg/triplets/x86-windows.cmake
+          echo[ >> vcpkg/triplets/x86-windows.cmake
+        shell: cmd
+        name: Make sure that wxWidgets builds statically
+
+      - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
+        shell: bash
+      
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Cache project binaries
+        uses: pat-s/always-upload-cache@v2.1.3
+        with:
+          path: /Debug/
+          key: ${{ runner.os }}-binaries
+
+      - name: Build gameengine
+        run: msbuild gameengine/gameengine.vcxproj
+
+      - name: Build gameengine-GTest
+        run: msbuild gameengine-GTest/gameengine-GTest.vcxproj
+      
+      - name: Run gameengine-GTest
+        run: |
+          cd gameengine-GTest
+          cd Debug
+          gameengine-GTest.exe
+        shell: cmd
