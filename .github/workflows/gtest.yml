@@ -68,4 +68,8 @@ jobs:
         run: msbuild gameengine-GTest/gameengine-GTest.vcxproj
       
       - name: Run gameengine-GTest
-        run: "Debug/gameengine-GTest.exe"
+        run: |
+          cd gameengine-GTest
+          cd Debug
+          gameengine-GTest.exe
+        shell: cmd
