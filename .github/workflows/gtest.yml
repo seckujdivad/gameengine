@@ -39,11 +39,11 @@ jobs:
         shell: bash
       
       - run: |
-          echo >> vcpkg/triplets/x86-windows.cmake
+          echo[ >> vcpkg/triplets/x86-windows.cmake
           echo if (PORT STREQUAL wxwidgets) >> vcpkg/triplets/x86-windows.cmake
           echo set(VCPKG_LIBRARY_LINKAGE static) >> vcpkg/triplets/x86-windows.cmake
           echo endif() >> vcpkg/triplets/x86-windows.cmake
-          echo >> vcpkg/triplets/x86-windows.cmake
+          echo[ >> vcpkg/triplets/x86-windows.cmake
         shell: cmd
         name: Make sure that wxWidgets builds statically
 
