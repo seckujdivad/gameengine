@@ -7,5 +7,5 @@ TEST(NameableTests, Identifier_SetGet)
 	EXPECT_EQ(nameable->GetIdentifier(), "");
 
 	nameable->SetIdentifier("Hello World!");
-	EXPECT_EQ(nameable->GetIdentifier(), "Hello World");
+	EXPECT_EQ(nameable->GetIdentifier(), "Hello World!");
 }
