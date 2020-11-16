@@ -8,4 +8,6 @@ TEST(CameraTests, FOV_SetGet)
 
 	cam->SetFOV(90);
 	EXPECT_EQ(cam->GetFOV(), 90);
+
+	delete cam;
 }

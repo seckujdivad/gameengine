@@ -12,6 +12,8 @@ TEST(RotatableTests, Rotation_SetGet_Individual)
 	EXPECT_EQ(rotatable->GetRotation(0), 90);
 	EXPECT_EQ(rotatable->GetRotation(1), 5231);
 	EXPECT_EQ(rotatable->GetRotation(2), -19);
+
+	delete rotatable;
 }
 
 TEST(RotatableTests, Rotation_SetGet_Group)
@@ -23,6 +25,8 @@ TEST(RotatableTests, Rotation_SetGet_Group)
 	EXPECT_EQ(rotatable->GetRotation(0), 52);
 	EXPECT_EQ(rotatable->GetRotation(1), 89);
 	EXPECT_EQ(rotatable->GetRotation(2), -1);
+
+	delete rotatable;
 }
 
 TEST(RotatableTests, Rotation_SetGet_Vector)
@@ -37,4 +41,6 @@ TEST(RotatableTests, Rotation_SetGet_Vector)
 
 	glm::dvec3 rotation = rotatable->GetRotation();
 	EXPECT_EQ(rotation_testdata, rotation);
+
+	delete rotatable;
 }

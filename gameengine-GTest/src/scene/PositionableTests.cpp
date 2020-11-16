@@ -12,6 +12,8 @@ TEST(PositionableTests, Position_SetGet_Individual)
 	EXPECT_EQ(positionable->GetPosition(0), 90);
 	EXPECT_EQ(positionable->GetPosition(1), 5231);
 	EXPECT_EQ(positionable->GetPosition(2), -19);
+
+	delete positionable;
 }
 
 TEST(PositionableTests, Position_SetGet_Group)
@@ -23,6 +25,8 @@ TEST(PositionableTests, Position_SetGet_Group)
 	EXPECT_EQ(positionable->GetPosition(0), 52);
 	EXPECT_EQ(positionable->GetPosition(1), 89);
 	EXPECT_EQ(positionable->GetPosition(2), -1);
+
+	delete positionable;
 }
 
 TEST(PositionableTests, Position_SetGet_Array)
@@ -37,4 +41,6 @@ TEST(PositionableTests, Position_SetGet_Array)
 
 	glm::dvec3 position = positionable->GetPosition();
 	EXPECT_EQ(position_testdata, position);
+
+	delete positionable;
 }

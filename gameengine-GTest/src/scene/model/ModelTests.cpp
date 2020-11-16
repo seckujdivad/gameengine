@@ -24,4 +24,6 @@ TEST(ModelTests, WireframeColour_SetGet)
 
 	mdl->SetCurrentWireframeIndex(0);
 	EXPECT_EQ(mdl->GetCurrentWireframeColour(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	delete mdl;
 }

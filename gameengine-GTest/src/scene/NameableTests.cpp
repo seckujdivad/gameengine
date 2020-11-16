@@ -8,4 +8,6 @@ TEST(NameableTests, Identifier_SetGet)
 
 	nameable->SetIdentifier("Hello World!");
 	EXPECT_EQ(nameable->GetIdentifier(), "Hello World!");
+
+	delete nameable;
 }
