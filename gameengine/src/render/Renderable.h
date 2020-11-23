@@ -88,6 +88,8 @@ protected:
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
+	static bool RenderModeIsModelRendering(RenderMode mode);
+
 public:
 	Renderable(Engine* engine, RenderMode mode);
 	Renderable(const Renderable&) = delete;
