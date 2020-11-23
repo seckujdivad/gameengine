@@ -2,9 +2,10 @@
 
 enum class RenderMode
 {
+	Default,
 	Normal,
 	Wireframe,
 	Shadow,
 	Postprocess,
-	Default
+	Textured
 };
