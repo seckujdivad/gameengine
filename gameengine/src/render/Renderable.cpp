@@ -914,6 +914,12 @@ void Renderable::SetRenderMode(PostProcessRenderModeData data)
 	this->ConfigureShader(RenderMode::Postprocess);
 }
 
+void Renderable::SetRenderMode(TexturedRenderModeData data)
+{
+	this->m_rendermode_data_textured = data;
+	this->ConfigureShader(RenderMode::Textured);
+}
+
 void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 {
 	if (this->m_engine->GetScene() != nullptr)
@@ -988,6 +994,18 @@ PostProcessRenderModeData& Renderable::GetPostProcessRenderModeData()
 	else
 	{
 		throw std::runtime_error("Render mode must be post process");
+	}
+}
+
+TexturedRenderModeData& Renderable::GetTexturedRenderModeData()
+{
+	if (this->GetRenderMode() == RenderMode::Textured)
+	{
+		return this->m_rendermode_data_textured;
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be textured");
 	}
 }
 

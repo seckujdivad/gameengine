@@ -41,6 +41,7 @@ private:
 	WireframeRenderModeData m_rendermode_data_wireframe;
 	ShadowRenderModeData m_rendermode_data_shadow;
 	PostProcessRenderModeData m_rendermode_data_postprocess;
+	TexturedRenderModeData m_rendermode_data_textured;
 
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
@@ -104,12 +105,14 @@ public:
 	void SetRenderMode(WireframeRenderModeData data);
 	void SetRenderMode(ShadowRenderModeData data);
 	void SetRenderMode(PostProcessRenderModeData data);
+	void SetRenderMode(TexturedRenderModeData data);
 	RenderMode GetRenderMode() const;
 
 	NormalRenderModeData& GetNormalRenderModeData();
 	WireframeRenderModeData& GetWireframeRenderModeData();
 	ShadowRenderModeData& GetShadowRenderModeData();
 	PostProcessRenderModeData& GetPostProcessRenderModeData();
+	TexturedRenderModeData& GetTexturedRenderModeData();
 
 	void SetConfig(RenderableConfig config);
 	RenderableConfig& GetConfig();
