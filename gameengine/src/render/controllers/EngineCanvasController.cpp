@@ -4,10 +4,10 @@
 #include "../EngineCanvas.h"
 #include "../RenderTexture.h"
 
-EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, RenderMode mode) : RenderController(engine, reference)
+EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, RenderMode mode)
+    : RenderController(engine, reference),
+    m_canvas(canvas)
 {
-    this->m_canvas = canvas;
-
     RenderTextureInfo info;
     info.colour = true;
     info.depth = true;
@@ -19,10 +19,26 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
         data.previous_frame = this->m_texture->GetOutputTextures();
         this->m_texture->SetRenderMode(data);
     }
+    else if (mode == RenderMode::Wireframe)
+    {
+        WireframeRenderModeData data;
+        this->m_texture->SetRenderMode(data);
+    }
+    else if (mode == RenderMode::Textured)
+    {
+        TexturedRenderModeData data;
+        this->m_texture->SetRenderMode(data);
+    }
+    else
+    {
+        throw std::invalid_argument("Unknown render mode " + std::to_string(static_cast<int>(mode)));
+    }
 
-    PostProcessRenderModeData data;
-    data.texture = this->m_texture->GetOutputTextures();
-    this->m_canvas->SetRenderMode(data);
+    {
+        PostProcessRenderModeData data;
+        data.texture = this->m_texture->GetOutputTextures();
+        this->m_canvas->SetRenderMode(data);
+    }
 }
 
 EngineCanvasController::~EngineCanvasController()
@@ -32,7 +48,6 @@ EngineCanvasController::~EngineCanvasController()
 
 void EngineCanvasController::Render()
 {
-    
     if (this->m_canvas->GetOutputSize() != this->m_dimensions_prev)
     {
         this->m_texture->SetOutputSize(this->m_canvas->GetOutputSize());
