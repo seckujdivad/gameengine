@@ -316,11 +316,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 		}
 
-		if (this->GetRenderMode() == RenderMode::Textured)
-		{
-			this->SetShaderUniform("sun_angle", this->m_rendermode_data_textured.sun_angle);
-		}
-
 		switch (this->GetRenderMode())
 		{
 		case RenderMode::Normal:
@@ -866,8 +861,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 			{
 				this->AddShaderUniformNames({
 					//fragment
-					"colourTexture",
-					"sun_angle"
+					"colourTexture"
 					});
 			}
 		}

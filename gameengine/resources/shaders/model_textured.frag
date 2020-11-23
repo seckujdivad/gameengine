@@ -25,8 +25,6 @@ in vec3 geomTangentSpaceCameraPos;
 
 uniform sampler2D colourTexture;
 
-uniform vec3 sun_angle;
-
 
 void main()
 {
