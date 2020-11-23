@@ -131,6 +131,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
 		}
 
+		if (this->GetRenderMode() == RenderMode::Postprocess)
+		{
+			recompile_required = this->SetShaderDefine("COMPOSITE_LAYER_NUM", std::to_string(this->m_rendermode_data_postprocess.textures.size())) ? true : recompile_required;
+		}
+
 		if (recompile_required)
 		{
 			this->RecompileShader();
@@ -170,12 +175,16 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		//specialised uniforms
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
-			LoadedTexture texture;
-			texture.id = this->m_rendermode_data_postprocess.texture.colour;
-			texture.type = GL_TEXTURE_2D;
-			texture.uniform_name = "render_output";
+			for (size_t i = 0; i < this->m_rendermode_data_postprocess.textures.size(); i++)
+			{
+				LoadedTexture texture;
+				texture.id = this->m_rendermode_data_postprocess.textures.at(i);
+				texture.type = GL_TEXTURE_2D;
+				texture.uniform_name = "textures[" + std::to_string(i) + "]";
 
-			this->m_shader_program->SetTexture(-1, texture);
+				this->m_shader_program->SetTexture(-1, texture);
+			}
+			
 		}
 		else if (this->GetRenderMode() == RenderMode::Shadow)
 		{
@@ -864,10 +873,6 @@ void Renderable::ConfigureShader(RenderMode mode)
 					"colourTexture"
 					});
 			}
-		}
-		else if (mode == RenderMode::Postprocess)
-		{
-			this->AddShaderUniformName("render_output");
 		}
 	}
 }

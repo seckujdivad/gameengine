@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "RenderTextureData.h"
 
 struct RenderableConfig
@@ -25,7 +27,7 @@ struct ShadowRenderModeData
 
 struct PostProcessRenderModeData
 {
-	RenderTextureGroup texture;
+	std::vector<GLuint> textures;
 };
 
 struct TexturedRenderModeData
