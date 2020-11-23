@@ -174,7 +174,7 @@ glm::vec4 Scene::GetClearColour() const
 
 std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode, std::vector<Model*> model_pool) const
 {
-	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow))
+	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow) || (mode == RenderMode::Textured))
 	{
 		std::set<Model*> visible_models;
 		std::set<VisBox*> enclosed_visboxes;
