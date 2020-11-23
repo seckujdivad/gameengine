@@ -230,7 +230,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
 	}
 
-	for (int i = 0; i < (int)this->m_texture_write.data.size(); i++)
+	for (int i = 0; i < static_cast<int>(this->m_texture_write.data.size()); i++)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
 		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);

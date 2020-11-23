@@ -278,6 +278,7 @@
     <None Include="resources\shaders\model_shadow.frag" />
     <None Include="resources\shaders\model_shadow.geom" />
     <None Include="resources\shaders\model_shadow.vert" />
+    <None Include="resources\shaders\model_textured.frag" />
     <None Include="resources\shaders\model_wireframe.frag" />
     <None Include="resources\shaders\model_wireframe.geom" />
     <None Include="resources\shaders\postprocess.frag" />

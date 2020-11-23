@@ -191,18 +191,18 @@ Engine::~Engine()
 		delete render_controller;
 	}
 
-	for (auto [reference, loaded_texture] : this->m_textures_static)
+	for (const auto& [reference, loaded_texture] : this->m_textures_static)
 	{
 		glDeleteTextures(1, &loaded_texture.id);
 	}
 
-	for (auto [reference, loaded_geometry] : this->m_model_geometry_vbos)
+	for (const auto& [reference, loaded_geometry] : this->m_model_geometry_vbos)
 	{
 		glDeleteBuffers(1, &loaded_geometry.vbo);
 		glDeleteVertexArrays(1, &loaded_geometry.vao);
 	}
 
-	for (auto [model, loaded_geometry] : this->m_temporary_vbos)
+	for (const auto& [model, loaded_geometry] : this->m_temporary_vbos)
 	{
 		glDeleteBuffers(1, &loaded_geometry.vbo);
 		glDeleteVertexArrays(1, &loaded_geometry.vao);

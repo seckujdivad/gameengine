@@ -27,3 +27,8 @@ struct PostProcessRenderModeData
 {
 	RenderTextureGroup texture;
 };
+
+struct TexturedRenderModeData
+{
+	
+};
