@@ -17,7 +17,7 @@ class Main;
 class App : public wxApp
 {
 private:
-	Main* m_frame_main;
+	Main* m_frame_main = nullptr;
 
 public:
 	bool OnInit();
