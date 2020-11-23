@@ -14,4 +14,5 @@ uniform vec3 wireframe_colour;
 void main()
 {
 	frag_out.rgb = wireframe_colour;
+	frag_out.a = 1.0f;
 }
