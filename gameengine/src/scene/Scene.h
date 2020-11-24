@@ -22,7 +22,7 @@ class Scene : public Nameable
 private:
 	//misc rendering attributes
 	glm::vec3 m_light_ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
 	//scene components - all are managed by the scene
 	std::vector<Model*> m_models;
