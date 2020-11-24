@@ -11,13 +11,11 @@
 #include "../Engine.h"
 #include "../scene/Camera.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode) : wxGLCanvas(parent, args, id), Renderable(engine, mode)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode)
+	: wxGLCanvas(parent, args, id),
+	Renderable(engine, mode),
+	m_glcontext(context)
 {
-	this->m_glcontext = context;
-	this->MakeOpenGLFocus();
-
-	//this->SetVerticalSync(false);
-
 	this->SetFramebuffer(0);
 
 	this->m_blank_cursor = wxCursor(wxCURSOR_BLANK);
@@ -61,21 +59,17 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		//get mouse info
 		wxMouseState mouse_state = wxGetMouseState();
 		int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
-		int mouse_position[2];
-		mouse_position[0] = mouse_state.GetPosition().x - this->GetScreenPosition().x;
-		mouse_position[1] = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+		int mouse_position[2] = { mouse_state.GetPosition().x - this->GetScreenPosition().x, mouse_state.GetPosition().y - this->GetScreenPosition().y };
 
 		//check mouse delta and apply
 		if (this->m_mouselook_active)
 		{
-			int mousedelta[2];
-			mousedelta[0] = mouse_position[0] - screen_centre[0];
-			mousedelta[1] = mouse_position[1] - screen_centre[1];
+			int mousedelta[2] = { mouse_position[0] - screen_centre[0], mouse_position[1] - screen_centre[1] };
 
 			float fov_fraction_x = (static_cast<float>(mousedelta[0]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().x);
 			float fov_fraction_y = (static_cast<float>(mousedelta[1]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().x);
 
-			float fov = (float)this->GetControlledCamera()->GetFOV();
+			float fov = static_cast<float>(this->GetControlledCamera()->GetFOV());
 
 			float rotation_z = fov_fraction_x * fov;
 			float rotation_x = fov_fraction_y * fov;
@@ -211,6 +205,7 @@ void EngineCanvas::SetRenderLoop(bool enable)
 {
 	this->m_loop_render = enable;
 
+	this->MakeOpenGLFocus();
 	glFlush();
 	this->SwapBuffers();
 }
