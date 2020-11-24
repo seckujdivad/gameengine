@@ -36,7 +36,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 
     {
         PostProcessRenderModeData data;
-        data.textures.push_back(this->m_texture->GetOutputTextures().colour);
+        data.layers.push_back(PostProcessRenderModeData::CompositeLayer({ this->m_texture->GetOutputTextures().colour }));
         this->m_canvas->SetRenderMode(data);
     }
 }

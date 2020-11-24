@@ -10,8 +10,6 @@
 #include <vector>
 #include <map>
 
-#include <nlohmann/json.hpp>
-
 #include "GLComponents.h"
 
 #include "scene/Referenceable.h"

@@ -27,7 +27,13 @@ struct ShadowRenderModeData
 
 struct PostProcessRenderModeData
 {
-	std::vector<GLuint> textures;
+	struct CompositeLayer
+	{
+		GLuint id = NULL;
+		glm::vec4 colour_translate = glm::vec4(0.0f);
+		glm::vec4 colour_scale = glm::vec4(1.0f);
+	};
+	std::vector<CompositeLayer> layers;
 };
 
 struct TexturedRenderModeData

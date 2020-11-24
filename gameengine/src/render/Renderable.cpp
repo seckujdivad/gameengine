@@ -133,7 +133,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
-			recompile_required = this->SetShaderDefine("COMPOSITE_LAYER_NUM", std::to_string(this->m_rendermode_data_postprocess.textures.size())) ? true : recompile_required;
+			recompile_required = this->SetShaderDefine("COMPOSITE_LAYER_NUM", std::to_string(this->m_rendermode_data_postprocess.layers.size())) ? true : recompile_required;
 		}
 
 		if (recompile_required)
@@ -175,14 +175,20 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		//specialised uniforms
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
-			for (size_t i = 0; i < this->m_rendermode_data_postprocess.textures.size(); i++)
+			for (size_t i = 0; i < this->m_rendermode_data_postprocess.layers.size(); i++)
 			{
+				const PostProcessRenderModeData::CompositeLayer& layer = this->m_rendermode_data_postprocess.layers.at(i);
+
 				LoadedTexture texture;
-				texture.id = this->m_rendermode_data_postprocess.textures.at(i);
+				texture.id = layer.id;
 				texture.type = GL_TEXTURE_2D;
-				texture.uniform_name = "textures[" + std::to_string(i) + "]";
+				texture.uniform_name = "layers_texture[" + std::to_string(i) + "]";
 
 				this->m_shader_program->SetTexture(-1, texture);
+
+				const std::string prefix = "layers[" + std::to_string(i) + "].";
+				this->SetShaderUniform(prefix + "colour_translate", layer.colour_translate);
+				this->SetShaderUniform(prefix + "colour_scale", layer.colour_scale);
 			}
 			
 		}
