@@ -216,7 +216,10 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, RenderMode::Postprocess);
 	canvas->MakeOpenGLFocus();
 
-	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
+	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
+	composite_layers.push_back(EngineCanvasController::CompositeLayer({ RenderMode::Normal }));
+
+	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, composite_layers);
 	this->AddRenderController(controller);
 
 	if (this->m_glcontext_canvas != nullptr)
