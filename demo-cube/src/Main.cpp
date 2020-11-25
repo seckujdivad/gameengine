@@ -196,8 +196,15 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 
 	if (selection_index != -1)
 	{
+		if (this->m_model_selected != nullptr)
+		{
+			this->m_model_selected->SetCurrentWireframeIndex(0);
+		}
+
 		std::vector<Model*> models = this->m_scene->GetModels();
 		this->m_model_selected = models.at(selection_index);
+
+		this->m_model_selected->SetCurrentWireframeIndex(1);
 
 		wxSlider* slider;
 		for (size_t i = 0; i < this->m_mdl_sliders.size(); i++)
