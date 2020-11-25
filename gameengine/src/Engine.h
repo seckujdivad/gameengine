@@ -17,8 +17,8 @@
 #include "render/LoadedTexture.h"
 #include "render/RenderTextureData.h"
 #include "render/RenderMode.h"
+#include "render/controllers/EngineCanvasController.h"
 
-class RenderController;
 class EngineCanvas;
 class Scene;
 class Renderable;
@@ -70,6 +70,8 @@ public:
 	Engine& operator=(Engine&&) = delete;
 	~Engine();
 
+	EngineCanvas* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvas* GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 	EngineCanvas* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();

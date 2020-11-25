@@ -14,7 +14,6 @@
 #include "render/EngineCanvas.h"
 
 #include "render/controllers/RenderController.h"
-#include "render/controllers/EngineCanvasController.h"
 #include "render/controllers/ShadowController.h"
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
@@ -211,13 +210,10 @@ Engine::~Engine()
 	delete this->m_glcontext;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
+EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, RenderMode::Postprocess);
 	canvas->MakeOpenGLFocus();
-
-	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
-	composite_layers.push_back(EngineCanvasController::CompositeLayer({ RenderMode::Normal }));
 
 	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, composite_layers);
 	this->AddRenderController(controller);
@@ -229,6 +225,24 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	}
 
 	return canvas;
+}
+
+EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id, wxWindow* parent)
+{
+	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
+	for (RenderMode mode : modes)
+	{
+		EngineCanvasController::CompositeLayer layer;
+		layer.mode = mode;
+		composite_layers.push_back(layer);
+	}
+
+	return this->GenerateNewCanvas(composite_layers, id, parent);
+}
+
+EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
+{
+	return this->GenerateNewCanvas(std::vector({ mode }), id, parent);
 }
 
 void Engine::Render()
