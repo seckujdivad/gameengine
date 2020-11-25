@@ -37,11 +37,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	std::vector<RenderableConfig> canvas_layers;
 
-	RenderableConfig textured_config = { RenderMode::Textured, RenderableConfig::Textured() };
-	canvas_layers.push_back(textured_config);
-
-	RenderableConfig wireframe_config = { RenderMode::Wireframe, RenderableConfig::Wireframe() };
-	canvas_layers.push_back(wireframe_config);
+	RenderableConfig normal_config = { RenderMode::Normal, RenderableConfig::Normal() };
+	canvas_layers.push_back(normal_config);
 
 	this->m_glcanvas = this->m_engine->GenerateNewCanvas(canvas_layers, wxID_ANY, this);
 	this->m_glcanvas->SetControlledCamera(this->m_camera);
