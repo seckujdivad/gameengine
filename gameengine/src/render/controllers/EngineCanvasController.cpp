@@ -13,66 +13,42 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
         throw std::invalid_argument("You must provide at least one composite layer");
     }
 
+    RenderableConfig postprocess_config = { RenderMode::Postprocess, RenderableConfig::PostProcess() };
+
+    for (CompositeLayer composite : composites)
     {
         RenderTextureInfo info;
         info.colour = true;
-        info.depth = false;
-        info.num_data = 0;
+        info.depth = true;
 
-        this->m_texture_final = new RenderTexture(reference, engine, RenderMode::Postprocess, info, GL_TEXTURE_2D, false);
-    }
+        RenderTexture* const render_texture = new RenderTexture(reference, engine, composite.config, info, GL_TEXTURE_2D, true);
+        this->m_textures.push_back(render_texture);
 
-    {
-        PostProcessRenderModeData postprocess_data;
-
-        for (const CompositeLayer& composite : composites)
+        if (composite.config.mode == RenderMode::Normal)
         {
-            RenderTextureInfo info;
-            info.colour = true;
-            info.depth = true;
-
-            RenderTexture* const render_texture = new RenderTexture(reference, engine, composite.mode, info, GL_TEXTURE_2D, true);
-            this->m_textures.push_back(render_texture);
-
-            if (composite.mode == RenderMode::Normal)
-            {
-                NormalRenderModeData data;
-                data.previous_frame = render_texture->GetOutputTextures();
-                render_texture->SetRenderMode(data);
-            }
-            else if (composite.mode == RenderMode::Wireframe)
-            {
-                WireframeRenderModeData data;
-                render_texture->SetRenderMode(data);
-            }
-            else if (composite.mode == RenderMode::Textured)
-            {
-                TexturedRenderModeData data;
-                render_texture->SetRenderMode(data);
-            }
-            else
-            {
-                throw std::invalid_argument("Unknown render mode " + std::to_string(static_cast<int>(composite.mode)));
-            }
-
-            PostProcessRenderModeData::CompositeLayer layer;
-            layer.id = render_texture->GetOutputTextures().colour;
-
-            postprocess_data.layers.push_back(layer);
+            std::get<RenderableConfig::Normal>(composite.config.mode_data).previous_frame = render_texture->GetOutputTextures();
+            render_texture->SetConfig(composite.config);
         }
 
-        this->m_texture_final->SetRenderMode(postprocess_data);
+        RenderableConfig::PostProcess::CompositeLayer layer;
+        layer.id = render_texture->GetOutputTextures().colour;
+        std::get<RenderableConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
     }
 
-    {
-        PostProcessRenderModeData postprocess_data;
-        PostProcessRenderModeData::CompositeLayer layer;
+    RenderTextureInfo postprocess_texture_info;
+    postprocess_texture_info.colour = true;
+    postprocess_texture_info.depth = false;
+    postprocess_texture_info.num_data = 0;
 
-        layer.id = this->m_texture_final->GetOutputTextures().colour;
+    this->m_texture_final = new RenderTexture(reference, engine, postprocess_config, postprocess_texture_info, GL_TEXTURE_2D, false);
 
-        postprocess_data.layers.push_back(layer);
-        this->m_canvas->SetRenderMode(postprocess_data);
-    }
+    RenderableConfig canvas_config = { RenderMode::Postprocess, RenderableConfig::PostProcess() };
+
+    RenderableConfig::PostProcess::CompositeLayer passthrough_layer;
+    passthrough_layer.id = this->m_texture_final->GetOutputTextures().colour;
+    std::get<RenderableConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
+
+    this->m_canvas->SetConfig(canvas_config);
 }
 
 EngineCanvasController::~EngineCanvasController()

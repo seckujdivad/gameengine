@@ -33,16 +33,6 @@ private:
 	bool m_fbo_contains_render = false;
 	GLenum m_fbo_target_type = GL_TEXTURE_2D;
 
-	//scene rendering
-	RenderMode m_rendermode = RenderMode::Default;
-	RenderableConfig m_config;
-
-	NormalRenderModeData m_rendermode_data_normal;
-	WireframeRenderModeData m_rendermode_data_wireframe;
-	ShadowRenderModeData m_rendermode_data_shadow;
-	PostProcessRenderModeData m_rendermode_data_postprocess;
-	TexturedRenderModeData m_rendermode_data_textured;
-
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
 
@@ -61,6 +51,9 @@ private:
 	void RecompileShader();
 
 protected:
+	//scene rendering
+	RenderableConfig m_config;
+
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
@@ -83,15 +76,13 @@ protected:
 	void SetShaderUniform(std::string name, glm::mat3 mat);
 	void SetShaderUniform(std::string name, glm::dmat3 mat, bool demote = true);
 
-	void ConfigureShader(RenderMode mode);
-
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 	static bool RenderModeIsModelRendering(RenderMode mode);
 
 public:
-	Renderable(Engine* engine, RenderMode mode);
+	Renderable(Engine* engine, RenderableConfig config);
 	Renderable(const Renderable&) = delete;
 	Renderable& operator=(const Renderable&) = delete;
 	Renderable(Renderable&&) = delete;
@@ -103,21 +94,9 @@ public:
 
 	Engine* GetEngine() const;
 
-	void SetRenderMode(NormalRenderModeData data);
-	void SetRenderMode(WireframeRenderModeData data);
-	void SetRenderMode(ShadowRenderModeData data);
-	void SetRenderMode(PostProcessRenderModeData data);
-	void SetRenderMode(TexturedRenderModeData data);
-	RenderMode GetRenderMode() const;
-
-	NormalRenderModeData& GetNormalRenderModeData();
-	WireframeRenderModeData& GetWireframeRenderModeData();
-	ShadowRenderModeData& GetShadowRenderModeData();
-	PostProcessRenderModeData& GetPostProcessRenderModeData();
-	TexturedRenderModeData& GetTexturedRenderModeData();
-
 	void SetConfig(RenderableConfig config);
-	RenderableConfig& GetConfig();
+	RenderableConfig GetConfig() const;
+	RenderMode GetRenderMode() const;
 
 	bool FramebufferContainsRenderOutput() const;
 

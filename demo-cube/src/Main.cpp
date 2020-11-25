@@ -35,7 +35,15 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Normal, wxID_ANY, this);
+	std::vector<RenderableConfig> canvas_layers;
+
+	RenderableConfig textured_config = { RenderMode::Textured, RenderableConfig::Textured() };
+	canvas_layers.push_back(textured_config);
+
+	RenderableConfig wireframe_config = { RenderMode::Wireframe, RenderableConfig::Wireframe() };
+	canvas_layers.push_back(wireframe_config);
+
+	this->m_glcanvas = this->m_engine->GenerateNewCanvas(canvas_layers, wxID_ANY, this);
 	this->m_glcanvas->SetControlledCamera(this->m_camera);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);

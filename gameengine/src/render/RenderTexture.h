@@ -33,7 +33,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false, bool auto_swap_buffers = true);
+	RenderTexture(RenderTextureReference reference, Engine* engine, RenderableConfig config, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false, bool auto_swap_buffers = true);
 	RenderTexture(const RenderTexture&) = delete;
 	RenderTexture& operator=(const RenderTexture&) = delete;
 	RenderTexture(RenderTexture&&) = delete;
@@ -48,4 +48,6 @@ public:
 	RenderTextureInfo GetTextureInfo() const;
 
 	void SwapBuffers();
+
+	void SetNormalModePreviousFrameToSelf();
 };

@@ -11,9 +11,9 @@
 #include "../Engine.h"
 #include "../scene/Camera.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderableConfig config)
 	: wxGLCanvas(parent, args, id),
-	Renderable(engine, mode),
+	Renderable(engine, config),
 	m_glcontext(context)
 {
 	this->SetFramebuffer(0);

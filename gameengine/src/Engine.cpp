@@ -212,7 +212,8 @@ Engine::~Engine()
 
 EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
-	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, RenderMode::Postprocess);
+	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
+	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
 
 	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, composite_layers);
@@ -227,22 +228,22 @@ EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::Comp
 	return canvas;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id, wxWindow* parent)
+EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
-	for (RenderMode mode : modes)
+	for (const RenderableConfig& config : configs)
 	{
 		EngineCanvasController::CompositeLayer layer;
-		layer.mode = mode;
+		layer.config = config;
 		composite_layers.push_back(layer);
 	}
 
 	return this->GenerateNewCanvas(composite_layers, id, parent);
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
+EngineCanvas* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
 {
-	return this->GenerateNewCanvas(std::vector({ mode }), id, parent);
+	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
 }
 
 void Engine::Render()

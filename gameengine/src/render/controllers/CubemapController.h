@@ -25,7 +25,6 @@ protected:
 
 	void DerivedClassConstructedEvent(); //this MUST be called by the derived constructor
 
-	virtual RenderMode GetRenderMode() const = 0;
 	virtual RenderTexture* GenerateRenderTexture(int layer) const = 0;
 	virtual bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const = 0;
 

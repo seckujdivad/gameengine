@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "RenderController.h"
-#include "../RenderMode.h"
+#include "../RenderableConfig.h"
 
 #include <glm/glm.hpp>
 
@@ -17,7 +17,7 @@ class EngineCanvasController : public RenderController
 public:
 	struct CompositeLayer
 	{
-		RenderMode mode;
+		RenderableConfig config;
 		glm::vec4 colour_translate = glm::vec4(0.0f);
 		glm::vec4 colour_scale = glm::vec4(1.0f);
 	};
