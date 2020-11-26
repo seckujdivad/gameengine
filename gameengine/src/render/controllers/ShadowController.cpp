@@ -4,11 +4,6 @@
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 
-RenderMode ShadowController::GetRenderMode() const
-{
-	return RenderMode::Shadow;
-}
-
 RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
 {
 	RenderTextureInfo info;
@@ -16,14 +11,15 @@ RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
 	info.depth = true;
 	info.num_data = 0;
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, this->GetRenderMode(), info, GL_TEXTURE_CUBE_MAP, false);
-	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
-
+	RenderableConfig config = { RenderMode::Shadow, RenderableConfig::Shadow() };
 	if (layer != 0)
 	{
-		render_texture->GetConfig().clear_fbo = false;
+		config.clear_fbo = false;
 	}
+
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false);
+	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
+	render_texture->SetCamera(this->m_camera);
 
 	return render_texture;
 }

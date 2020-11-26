@@ -1,13 +1,10 @@
 #include "ReflectionController.h"
 
+#include <stdexcept>
+
 #include "../RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
-
-RenderMode ReflectionController::GetRenderMode() const
-{
-	return RenderMode::Normal;
-}
 
 RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
 {
@@ -16,19 +13,18 @@ RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, this->GetRenderMode(), info, GL_TEXTURE_CUBE_MAP, true, layer != 1);
-	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
-
+	RenderableConfig config = { RenderMode::Normal, RenderableConfig::Normal() };
 	if (layer != 0)
 	{
-		render_texture->GetConfig().clear_fbo = false;
+		config.clear_fbo = false;
 	}
 
-	NormalRenderModeData render_data;
-	render_data.draw_shadows = false;
-	render_data.previous_frame = render_texture->GetOutputTextures();
-	render_texture->SetRenderMode(render_data);
+	std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = false;
+
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1);
+	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
+	render_texture->SetCamera(this->m_camera);
+	render_texture->SetNormalModePreviousFrameToSelf();
 
 	return render_texture;
 }
@@ -37,14 +33,24 @@ bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
 
-	if (render_texture->GetNormalRenderModeData().draw_shadows == reflection->GetDrawShadows())
+	if (render_texture->GetRenderMode() == RenderMode::Normal)
 	{
-		return false;
+		if (std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows())
+		{
+			return false;
+		}
+		else
+		{
+			RenderableConfig config = render_texture->GetConfig();
+			std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
+			render_texture->SetConfig(config);
+
+			return true;
+		}
 	}
 	else
 	{
-		render_texture->GetNormalRenderModeData().draw_shadows = reflection->GetDrawShadows();
-		return true;
+		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(render_texture->GetRenderMode())));
 	}
 }
 

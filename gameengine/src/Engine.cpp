@@ -14,7 +14,6 @@
 #include "render/EngineCanvas.h"
 
 #include "render/controllers/RenderController.h"
-#include "render/controllers/EngineCanvasController.h"
 #include "render/controllers/ShadowController.h"
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
@@ -211,12 +210,13 @@ Engine::~Engine()
 	delete this->m_glcontext;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
+EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
-	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, RenderMode::Postprocess);
+	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
+	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
 
-	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, mode); //need a render texture ref for this
+	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, composite_layers);
 	this->AddRenderController(controller);
 
 	if (this->m_glcontext_canvas != nullptr)
@@ -226,6 +226,24 @@ EngineCanvas* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow
 	}
 
 	return canvas;
+}
+
+EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
+{
+	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
+	for (const RenderableConfig& config : configs)
+	{
+		EngineCanvasController::CompositeLayer layer;
+		layer.config = config;
+		composite_layers.push_back(layer);
+	}
+
+	return this->GenerateNewCanvas(composite_layers, id, parent);
+}
+
+EngineCanvas* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
+{
+	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
 }
 
 void Engine::Render()

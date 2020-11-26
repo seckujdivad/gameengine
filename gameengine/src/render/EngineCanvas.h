@@ -44,7 +44,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderMode mode);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderableConfig config);
 	EngineCanvas(const EngineCanvas&) = delete;
 	EngineCanvas& operator=(const EngineCanvas&) = delete;
 	EngineCanvas(EngineCanvas&&) = delete;

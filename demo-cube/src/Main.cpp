@@ -22,7 +22,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 
 	//create glcanvas
 	this->m_scene = SceneFromJSON(this->m_scene_path, this->m_scene_filename);
-	this->m_scene->SetClearColour(glm::vec4(1.0f));
 
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
 
@@ -36,7 +35,12 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas(RenderMode::Normal, wxID_ANY, this);
+	std::vector<RenderableConfig> canvas_layers;
+
+	RenderableConfig normal_config = { RenderMode::Normal, RenderableConfig::Normal() };
+	canvas_layers.push_back(normal_config);
+
+	this->m_glcanvas = this->m_engine->GenerateNewCanvas(canvas_layers, wxID_ANY, this);
 	this->m_glcanvas->SetControlledCamera(this->m_camera);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
@@ -189,8 +193,15 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 
 	if (selection_index != -1)
 	{
+		if (this->m_model_selected != nullptr)
+		{
+			this->m_model_selected->SetCurrentWireframeIndex(0);
+		}
+
 		std::vector<Model*> models = this->m_scene->GetModels();
 		this->m_model_selected = models.at(selection_index);
+
+		this->m_model_selected->SetCurrentWireframeIndex(1);
 
 		wxSlider* slider;
 		for (size_t i = 0; i < this->m_mdl_sliders.size(); i++)

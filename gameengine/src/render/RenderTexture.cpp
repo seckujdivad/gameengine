@@ -191,9 +191,9 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderMode mode, RenderTextureInfo info, GLenum type, bool simultaneous_read_write, bool auto_swap_buffers)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderableConfig config, RenderTextureInfo info, GLenum type, bool simultaneous_read_write, bool auto_swap_buffers)
 	:
-	Renderable(engine, mode),
+	Renderable(engine, config),
 	Referenceable<RenderTextureReference>(reference),
 	m_dimensions(1, 1),
 	m_simultaneous_read_write(simultaneous_read_write),
@@ -319,5 +319,17 @@ void RenderTexture::SwapBuffers()
 	if (this->m_simultaneous_read_write)
 	{
 		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
+	}
+}
+
+void RenderTexture::SetNormalModePreviousFrameToSelf()
+{
+	if (this->GetRenderMode() == RenderMode::Normal)
+	{
+		std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
 	}
 }

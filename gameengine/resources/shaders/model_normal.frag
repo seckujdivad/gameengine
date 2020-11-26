@@ -561,6 +561,7 @@ void main()
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
 	frag_out *= vec4(1.0f - skybox_intensity, 1.0f);
 	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
+	frag_out.a = 1.0f;
 	
 	//texture usage:
 	// colour: all 4 channels assigned, alpha is currently ignored

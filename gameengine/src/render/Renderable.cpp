@@ -131,6 +131,12 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
 		}
 
+		if (this->GetRenderMode() == RenderMode::Postprocess)
+		{
+			size_t num_layers = std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.size();
+			recompile_required = this->SetShaderDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers)) ? true : recompile_required;
+		}
+
 		if (recompile_required)
 		{
 			this->RecompileShader();
@@ -170,12 +176,22 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		//specialised uniforms
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
-			LoadedTexture texture;
-			texture.id = this->m_rendermode_data_postprocess.texture.colour;
-			texture.type = GL_TEXTURE_2D;
-			texture.uniform_name = "render_output";
+			for (size_t i = 0; i < std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
+			{
+				const RenderableConfig::PostProcess::CompositeLayer& layer = std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
 
-			this->m_shader_program->SetTexture(-1, texture);
+				LoadedTexture texture;
+				texture.id = layer.id;
+				texture.type = GL_TEXTURE_2D;
+				texture.uniform_name = "layers_texture[" + std::to_string(i) + "]";
+
+				this->m_shader_program->SetTexture(-1, texture);
+
+				const std::string prefix = "layers[" + std::to_string(i) + "].";
+				this->SetShaderUniform(prefix + "colour_translate", layer.colour_translate);
+				this->SetShaderUniform(prefix + "colour_scale", layer.colour_scale);
+			}
+			
 		}
 		else if (this->GetRenderMode() == RenderMode::Shadow)
 		{
@@ -226,7 +242,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			// shadows
 			bool shadows_enabled = true;
-			if (!this->m_rendermode_data_normal.draw_shadows)
+			if (!std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_shadows)
 			{
 				shadows_enabled = false;
 			}
@@ -299,18 +315,18 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 			//load textures from the previous frame (if in normal rendering mode)
 			LoadedTexture texture;
-			texture.type = this->m_rendermode_data_normal.previous_frame.type;
-			texture.id = this->m_rendermode_data_normal.previous_frame.colour;
+			texture.type = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.type;
+			texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.colour;
 			texture.uniform_name = "render_output_colour";
 			this->m_shader_program->SetTexture(-1, texture);
 
-			texture.id = this->m_rendermode_data_normal.previous_frame.depth;
+			texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.depth;
 			texture.uniform_name = "render_output_depth";
 			this->m_shader_program->SetTexture(-1, texture);
 
-			for (int i = 0; i < static_cast<int>(this->m_rendermode_data_normal.previous_frame.data.size()); i++)
+			for (int i = 0; i < static_cast<int>(std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.data.size()); i++)
 			{
-				texture.id = this->m_rendermode_data_normal.previous_frame.data.at(i);
+				texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.data.at(i);
 				texture.uniform_name = "render_output_data[" + std::to_string(i) + "]";
 				this->m_shader_program->SetTexture(-1, texture);
 			}
@@ -714,58 +730,147 @@ void Renderable::SetShaderUniform(std::string name, glm::dmat3 mat, bool demote)
 	}
 }
 
-void Renderable::ConfigureShader(RenderMode mode)
+bool Renderable::FramebufferContainsRenderOutput() const
 {
-	if (mode != this->m_rendermode)
+	return this->m_fbo_contains_render;
+}
+
+void Renderable::PreRenderEvent()
+{
+}
+
+void Renderable::PostRenderEvent()
+{
+}
+
+bool Renderable::RenderModeIsModelRendering(RenderMode mode)
+{
+	return (mode == RenderMode::Normal)
+		|| (mode == RenderMode::Shadow)
+		|| (mode == RenderMode::Wireframe)
+		|| (mode == RenderMode::Textured);
+}
+
+Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
+{
+	this->m_engine->MakeContextCurrent();
+
+	this->m_render_function = [this](std::vector<Model*> models)
 	{
-		this->m_rendermode = mode;
-		this->m_fbo_contains_render = false;
+		this->RenderScene(models);
+	};
 
-		if (mode == RenderMode::Normal)
-		{
-			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
-			};
-		}
-		else if (mode == RenderMode::Wireframe)
-		{
-			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
-			};
-		}
-		else if (mode == RenderMode::Shadow)
-		{
-			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_GEOMSHADER), GL_GEOMETRY_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_VERTSHADER), GL_VERTEX_SHADER }
-			};
-		}
-		else if (mode == RenderMode::Postprocess)
-		{
-			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
-			};
-		}
-		else if (mode == RenderMode::Textured)
-		{
-			this->m_shaders = {
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
-				{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
-			};
-		}
+	this->SetConfig(config);
+}
 
-		this->m_shader_uniform_names.clear();
+Renderable::~Renderable()
+{
+	delete this->m_shader_program;
+}
 
-		this->RecompileShader();
+void Renderable::SetCamera(Camera* camera)
+{
+	this->m_camera = camera;
+}
 
-		if (mode != RenderMode::Postprocess)
+Camera* Renderable::GetCamera() const
+{
+	return this->m_camera;
+}
+
+Engine* Renderable::GetEngine() const
+{
+	return this->m_engine;
+}
+
+void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
+{
+	if (this->m_engine->GetScene() != nullptr)
+	{
+		if (continuous_draw)
+		{
+			this->PostRenderEvent();
+		}
+		this->PreRenderEvent();
+
+		this->m_render_function(models);
+
+		if (!continuous_draw)
+		{
+			this->PostRenderEvent();
+		}
+	}
+}
+
+void Renderable::SetRenderFunction(RenderableControllerFunction function)
+{
+	this->m_render_function = function;
+}
+
+RenderMode Renderable::GetRenderMode() const
+{
+	return this->m_config.mode;
+}
+
+void Renderable::SetConfig(RenderableConfig config)
+{
+	this->m_config = config;
+	this->m_fbo_contains_render = false;
+
+	if (this->GetRenderMode() == RenderMode::Normal)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+	else if (this->GetRenderMode() == RenderMode::Wireframe)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+	else if (this->GetRenderMode() == RenderMode::Shadow)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_GEOMSHADER), GL_GEOMETRY_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+	else if (this->GetRenderMode() == RenderMode::Postprocess)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+	else if (this->GetRenderMode() == RenderMode::Textured)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+	else if (this->GetRenderMode() == RenderMode::Default)
+	{
+		this->m_shaders = {
+			{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
+			{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
+		};
+	}
+
+	this->m_shader_uniform_names.clear();
+
+	this->RecompileShader();
+
+	if (this->GetRenderMode() != RenderMode::Default)
+	{
+		if (this->GetRenderMode() != RenderMode::Postprocess)
 		{
 			this->AddShaderUniformNames({
 				"cubemap_transform[0]",
@@ -776,13 +881,13 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"cubemap_transform[5]"
 				});
 
-			if (mode != RenderMode::Shadow)
+			if (this->GetRenderMode() != RenderMode::Shadow)
 			{
 				this->AddShaderUniformName("is_cubemap");
 			}
 		}
 
-		if (mode == RenderMode::Shadow)
+		if (this->GetRenderMode() == RenderMode::Shadow)
 		{
 			this->AddShaderUniformNames({
 				//vertex
@@ -795,7 +900,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"light_near_plane"
 				});
 		}
-		else if (this->RenderModeIsModelRendering(mode)) //shadow has already been caught
+		else if (this->RenderModeIsModelRendering(this->GetRenderMode())) //shadow has already been caught
 		{
 			this->AddShaderUniformNames({
 				//vertex
@@ -811,7 +916,7 @@ void Renderable::ConfigureShader(RenderMode mode)
 				"cam_transform_inverse",
 				});
 
-			if (mode == RenderMode::Normal)
+			if (this->GetRenderMode() == RenderMode::Normal)
 			{
 				this->AddShaderUniformNames({
 					//fragment
@@ -850,14 +955,14 @@ void Renderable::ConfigureShader(RenderMode mode)
 					this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
 				}
 			}
-			else if (mode == RenderMode::Wireframe)
+			else if (this->GetRenderMode() == RenderMode::Wireframe)
 			{
 				this->AddShaderUniformNames({
 					//fragment
 					"wireframe_colour"
 					});
 			}
-			else if (mode == RenderMode::Textured)
+			else if (this->GetRenderMode() == RenderMode::Textured)
 			{
 				this->AddShaderUniformNames({
 					//fragment
@@ -865,191 +970,10 @@ void Renderable::ConfigureShader(RenderMode mode)
 					});
 			}
 		}
-		else if (mode == RenderMode::Postprocess)
-		{
-			this->AddShaderUniformName("render_output");
-		}
 	}
 }
 
-bool Renderable::FramebufferContainsRenderOutput() const
-{
-	return this->m_fbo_contains_render;
-}
-
-void Renderable::PreRenderEvent()
-{
-}
-
-void Renderable::PostRenderEvent()
-{
-}
-
-bool Renderable::RenderModeIsModelRendering(RenderMode mode)
-{
-	return (mode == RenderMode::Normal)
-		|| (mode == RenderMode::Shadow)
-		|| (mode == RenderMode::Wireframe)
-		|| (mode == RenderMode::Textured);
-}
-
-Renderable::Renderable(Engine* engine, RenderMode mode) : m_engine(engine)
-{
-	this->m_engine->MakeContextCurrent();
-
-	this->m_render_function = [this](std::vector<Model*> models)
-	{
-		this->RenderScene(models);
-	};
-
-	this->ConfigureShader(mode);
-}
-
-Renderable::~Renderable()
-{
-	delete this->m_shader_program;
-}
-
-void Renderable::SetCamera(Camera* camera)
-{
-	this->m_camera = camera;
-}
-
-Camera* Renderable::GetCamera() const
-{
-	return this->m_camera;
-}
-
-Engine* Renderable::GetEngine() const
-{
-	return this->m_engine;
-}
-
-void Renderable::SetRenderMode(NormalRenderModeData data)
-{
-	this->m_rendermode_data_normal = data;
-	this->ConfigureShader(RenderMode::Normal);
-}
-
-void Renderable::SetRenderMode(WireframeRenderModeData data)
-{
-	this->m_rendermode_data_wireframe = data;
-	this->ConfigureShader(RenderMode::Wireframe);
-}
-
-void Renderable::SetRenderMode(ShadowRenderModeData data)
-{
-	this->m_rendermode_data_shadow = data;
-	this->ConfigureShader(RenderMode::Shadow);
-}
-
-void Renderable::SetRenderMode(PostProcessRenderModeData data)
-{
-	this->m_rendermode_data_postprocess = data;
-	this->ConfigureShader(RenderMode::Postprocess);
-}
-
-void Renderable::SetRenderMode(TexturedRenderModeData data)
-{
-	this->m_rendermode_data_textured = data;
-	this->ConfigureShader(RenderMode::Textured);
-}
-
-void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
-{
-	if (this->m_engine->GetScene() != nullptr)
-	{
-		if (continuous_draw)
-		{
-			this->PostRenderEvent();
-		}
-		this->PreRenderEvent();
-
-		this->m_render_function(models);
-
-		if (!continuous_draw)
-		{
-			this->PostRenderEvent();
-		}
-	}
-}
-
-void Renderable::SetRenderFunction(RenderableControllerFunction function)
-{
-	this->m_render_function = function;
-}
-
-RenderMode Renderable::GetRenderMode() const
-{
-	return this->m_rendermode;
-}
-
-NormalRenderModeData& Renderable::GetNormalRenderModeData()
-{
-	if (this->GetRenderMode() == RenderMode::Normal)
-	{
-		return this->m_rendermode_data_normal;
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be normal");
-	}
-}
-
-WireframeRenderModeData& Renderable::GetWireframeRenderModeData()
-{
-	if (this->GetRenderMode() == RenderMode::Wireframe)
-	{
-		return this->m_rendermode_data_wireframe;
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be wireframe");
-	}
-}
-
-ShadowRenderModeData& Renderable::GetShadowRenderModeData()
-{
-	if (this->GetRenderMode() == RenderMode::Shadow)
-	{
-		return this->m_rendermode_data_shadow;
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be shadow");
-	}
-}
-
-PostProcessRenderModeData& Renderable::GetPostProcessRenderModeData()
-{
-	if (this->GetRenderMode() == RenderMode::Postprocess)
-	{
-		return this->m_rendermode_data_postprocess;
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be post process");
-	}
-}
-
-TexturedRenderModeData& Renderable::GetTexturedRenderModeData()
-{
-	if (this->GetRenderMode() == RenderMode::Textured)
-	{
-		return this->m_rendermode_data_textured;
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be textured");
-	}
-}
-
-void Renderable::SetConfig(RenderableConfig config)
-{
-	this->m_config = config;
-}
-
-RenderableConfig& Renderable::GetConfig()
+RenderableConfig Renderable::GetConfig() const
 {
 	return this->m_config;
 }
