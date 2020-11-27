@@ -332,6 +332,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 		}
 
+		if (this->GetRenderMode() == RenderMode::Wireframe)
+		{
+			this->SetShaderUniform("draw_back_faces", std::get<RenderableConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+		}
+
 		switch (this->GetRenderMode())
 		{
 		case RenderMode::Normal:
@@ -958,6 +963,8 @@ void Renderable::SetConfig(RenderableConfig config)
 			else if (this->GetRenderMode() == RenderMode::Wireframe)
 			{
 				this->AddShaderUniformNames({
+					//geometry
+					"draw_back_faces",
 					//fragment
 					"wireframe_colour"
 					});

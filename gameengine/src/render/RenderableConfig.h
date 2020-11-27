@@ -18,7 +18,7 @@ struct RenderableConfig
 
 	struct Wireframe
 	{
-
+		bool draw_back_faces = true;
 	};
 
 	struct Shadow
