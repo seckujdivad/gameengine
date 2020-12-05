@@ -333,61 +333,67 @@ void main()
 		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)
 		{
-			if ((length(geomCamSpacePos.xyz) < mat_ssr_max_distance))
+			if (length(geomCamSpacePos.xyz) < mat_ssr_max_distance)
 			{
-				vec3 direction = normalize(reflect(-fragtocam, normal));
-				vec3 start_pos = geomSceneSpacePos.xyz;
-				vec3 end_pos = start_pos + (direction * mat_ssr_max_cast_distance);
-				start_pos = start_pos + (direction * ((mat_ssr_depth_acceptance * 1.5f) / dot(direction, normal)));
+				const vec3 direction = normalize(reflect(-fragtocam, normal));
+				const vec3 end_pos = geomSceneSpacePos.xyz + (direction * mat_ssr_max_cast_distance);
+				const vec3 start_pos = geomSceneSpacePos.xyz + (direction * ((mat_ssr_depth_acceptance * 1.01f) / dot(direction, normal)));
 
-				vec4 ss_start_pos_prediv = cam_transform * vec4(start_pos, 1.0f);
-				vec3 ss_start_pos = ss_start_pos_prediv.xyz / ss_start_pos_prediv.w;
+				const vec4 ss_start_pos_prediv = cam_transform * vec4(start_pos, 1.0f);
+				const vec3 ss_start_pos = ss_start_pos_prediv.xyz / ss_start_pos_prediv.w;
 
-				vec4 ss_depth_acceptance_prediv = cam_transform * (normalize(vec4(vec3(1.0f), 0.0f)) * mat_ssr_depth_acceptance);
-				float ss_depth_acceptance = length(ss_depth_acceptance_prediv.xyz / ss_depth_acceptance_prediv.w);
+				const vec4 ss_end_pos_prediv = cam_transform * vec4(end_pos, 1.0f);
+				const vec3 ss_end_pos = ss_end_pos_prediv.xyz / ss_end_pos_prediv.w;
 
-				vec4 ss_end_pos_prediv = cam_transform * vec4(end_pos, 1.0f);
-				vec3 ss_end_pos = ss_end_pos_prediv.xyz / ss_end_pos_prediv.w;
-
-				vec3 ss_direction = ss_end_pos - ss_start_pos;
+				const vec3 ss_direction = ss_end_pos - ss_start_pos;
 
 				int search_level = mat_ssr_refinements; //number of additional searches to carry out
 
-				float hit_increment = abs(
-					(mat_ssr_resolution * 2.0f * float(2 << (search_level - 1))) / (
-							(abs(ss_direction.x) > abs(ss_direction.y)) ? (render_output_x * ss_direction.x) : (render_output_y * ss_direction.y)
-						)
-					);
-				hit_increment = max(hit_increment, 1.0f / 500.0f);
+				const float num_searches_on_refine = 2.0f;
+				float hit_increment;
+				{
+					const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
 
-				vec3 ss_position;
+					const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
+					const float divisor = (int(x_is_most_significant_direction) * render_output_x * ss_direction.x)
+						+ (int(!x_is_most_significant_direction) + render_output_y * ss_direction.y);
+
+					hit_increment = (2.0f * initial_pixel_stride) / abs(divisor);
+				}
+
+				vec3 ss_position = ss_start_pos;
 				float hit_pos = 0.0f;
 
 				while (!ssr_reflection_applied && all(greaterThan(ss_position, vec3(-1.0f))) && all(lessThan(ss_position, vec3(1.0f))) && (hit_pos < 1.0f))
 				{
-					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
-					vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
-					ss_position.z = 1 / mix(1 / ss_start_pos.z, 1 / ss_end_pos.z, hit_pos);
+					//convert screen space position to use texture UV space coordinates
+					const vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
-					float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
+					const float sample_depth_camspace = 2.0 * cam_clip_near * cam_clip_far / (cam_clip_far + cam_clip_near - sample_depth * (cam_clip_far - cam_clip_near));
+					const float search_depth_camspace = 2.0 * cam_clip_near * cam_clip_far / (cam_clip_far + cam_clip_near - ss_position.z * (cam_clip_far - cam_clip_near));
 
-					bool hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f);
-					hit_detected = hit_detected && (texture(render_output_data[0], tex_pos.xy).r > 0.5f);
-					hit_detected = hit_detected && (abs(sample_depth - ss_position.z) * (cam_clip_far - cam_clip_near) * 0.5f < mat_ssr_depth_acceptance);
+					const bool hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f)
+						&& (texture(render_output_data[0], tex_pos.xy).r > 0.5f)
+						&& (abs(sample_depth_camspace - search_depth_camspace) < mat_ssr_depth_acceptance);
 
-					if (hit_detected && (search_level == 0))
+					if (hit_detected && (search_level == 0)) //a hit was found and the search increment is as small as is allowed, use this hit as the final location
 					{
 						reflection_colour = texture(render_output_colour, tex_pos.xy).rgb;
 						ssr_reflection_applied = true;
 					}
-					else if (hit_detected)
+					else if (hit_detected) //the search can still be made finer
 					{
-						hit_pos = hit_pos - hit_increment;
-						hit_increment = hit_increment / 2;
-						search_level--;
+						hit_pos -= hit_increment;
+						hit_increment /= num_searches_on_refine;
+						search_level -= 1;
 					}
 
+					//find screen space position of next test
 					hit_pos = hit_pos + hit_increment;
+
+					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
+					ss_position.z = 1 / mix(1 / ss_start_pos.z, 1 / ss_end_pos.z, hit_pos);
 				}
 			}
 		}
