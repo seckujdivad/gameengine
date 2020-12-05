@@ -119,7 +119,7 @@
           "clips": [ 0.1, 25 ],
           "texture": [ 2048, 2048 ],
           "dynamic draw": [ "simple cube", "blender suzanne" ],
-          "dynamic draw refresh frames": 10
+          "dynamic draw refresh frames": 2
         }
       }
     ]
