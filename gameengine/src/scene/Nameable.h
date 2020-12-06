@@ -11,5 +11,7 @@ public:
 	Nameable();
 
 	void SetIdentifier(std::string identifier);
+	void SetIdentifier(const char* identifier);
+
 	std::string GetIdentifier() const;
 };
