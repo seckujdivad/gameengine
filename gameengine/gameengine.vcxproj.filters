@@ -186,6 +186,9 @@
     <ClInclude Include="src\generic\KDTree.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\std_glm.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -294,6 +297,9 @@
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\generic\KDTree.cpp">
+      <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\std_glm.cpp">
       <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
