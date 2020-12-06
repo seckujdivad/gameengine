@@ -579,6 +579,11 @@ Scene* SceneFromJSON(std::string root_path, std::string file_name)
 	return SceneFromJSON(std::filesystem::path(root_path), std::filesystem::path(file_name));
 }
 
+Scene* SceneFromJSON(const char* root_path, const char* file_name)
+{
+	return SceneFromJSON(std::filesystem::path(root_path), std::filesystem::path(file_name));
+}
+
 LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)
 {
 	LocalTexture texture(reference);

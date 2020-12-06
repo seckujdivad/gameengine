@@ -16,6 +16,7 @@ class Cubemap;
 
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name);
 Scene* SceneFromJSON(std::string root_path, std::string file_name);
+Scene* SceneFromJSON(const char* root_path, const char* file_name);
 
 template<unsigned int dimensions>
 using dvec = glm::vec<dimensions, glm::f64, glm::packed_highp>;
