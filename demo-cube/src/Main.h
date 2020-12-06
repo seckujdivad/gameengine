@@ -1,12 +1,13 @@
 #pragma once
 
-#include <wx/wx.h>
+#include <wx/frame.h>
 
-#include <map>
+#include "VectorCtrl.h"
 
 class wxGridBagSizer;
 class wxButton;
 class wxListBox;
+class wxStaticText;
 
 class Engine;
 class EngineCanvas;
@@ -14,32 +15,38 @@ class Scene;
 class Camera;
 class Model;
 
-
 class Main : public wxFrame
 {
 private:
-	wxGridBagSizer* m_sizer;
 	Engine* m_engine;
-	EngineCanvas* m_glcanvas;
-	wxButton* m_btn_render;
-	wxListBox* m_lb_models;
-
-	std::string m_scene_path = "resources";
-	std::string m_scene_filename = "simplescene.json";
-
-	//model attributes
-	std::vector<wxSlider*> m_mdl_sliders;
-	std::map<int, std::string> m_mdl_slider_lookup;
-	Model* m_model_selected = nullptr;
-
 	Scene* m_scene;
 	Camera* m_camera;
 
-	void btn_render_OnClick(wxCommandEvent& evt);
-	void sld_OnChange(wxCommandEvent& evt);
+	Model* m_model_selected = nullptr;
+
+	wxGridBagSizer* m_sizer;
+	
+	EngineCanvas* m_glcanvas;
+	wxListBox* m_lb_models;
+
+	VectorCtrl* m_vct_position;
+	VectorCtrl* m_vct_rotation;
+	VectorCtrl* m_vct_scale;
+
+	wxStaticText* m_stxt_position;
+	wxStaticText* m_stxt_rotation;
+	wxStaticText* m_stxt_scale;
+
 	void lb_models_OnSelection(wxCommandEvent& evt);
+	void lb_models_OnChar(wxKeyEvent& evt);
+
+	void vct_position_OnChange(VectorCtrlEvent& evt);
+	void vct_rotation_OnChange(VectorCtrlEvent& evt);
+	void vct_scale_OnChange(VectorCtrlEvent& evt);
 
 public:
 	Main();
 	~Main();
+
+	void SetModel(Model* model);
 };

@@ -2,6 +2,7 @@
 
 #include <wx/gbsizer.h>
 #include <wx/listbox.h>
+#include <wx/stattext.h>
 
 #include "render/EngineCanvas.h"
 #include "Engine.h"
@@ -9,8 +10,9 @@
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
 #include "scene/Camera.h"
+#include "generic/std_glm.h"
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize(800, 600))
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxDefaultPosition, wxSize(800, 600))
 {
 	this->SetBackgroundColour(wxColor(238, 238, 238));
 	this->SetMinSize(wxSize(500, 400));
@@ -21,9 +23,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	this->m_scene = SceneFromJSON(this->m_scene_path, this->m_scene_filename);
-
-	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier() + " (" + this->m_scene_filename + ")");
+	this->m_scene = SceneFromJSON("resources", "simplescene.json");
 
 	this->m_engine = new Engine(this, this->m_scene);
 	this->m_engine->SetDebugMessageLevel(std::vector({
@@ -46,78 +46,56 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxPoint(30, 30), wxSize
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
 
-	this->m_glcanvas->MakeOpenGLFocus();
-	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(1, 3), wxEXPAND | wxALL);
+	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(4, 1), wxEXPAND | wxALL);
 
-	this->m_engine->Render();
-
-	//create rest of ui
-
-	//create attribute modifications
-	std::vector<std::string> attr_names = {
-		"Rotate X",
-		"Rotate Y",
-		"Rotate Z",
-		"Translate X",
-		"Translate Y",
-		"Translate Z",
-		"Scale X",
-		"Scale Y",
-		"Scale Z"
-	};
-
-	wxSlider* current_slider;
-	wxStaticText* current_text;
-	int min, max;
-	for (int i = 0; i < (int)attr_names.size(); i++)
-	{
-		if (attr_names.at(i).substr(0, 7) == "Rotate ")
-		{
-			min = 0;
-			max = 360;
-		}
-		else if (attr_names.at(i).substr(0, 10) == "Translate ")
-		{
-			min = -20;
-			max = 20;
-		}
-		else if (attr_names.at(i).substr(0, 6) == "Scale ")
-		{
-			min = 0;
-			max = 10;
-		}
-
-		current_text = new wxStaticText(this, wxID_ANY, attr_names.at(i));
-		
-		current_slider = new wxSlider(this, wxID_ANY, 0, min, max);
-		current_slider->Bind(wxEVT_SLIDER, &Main::sld_OnChange, this);
-
-		this->m_sizer->Add(current_slider, wxGBPosition(i + 1, 2), wxGBSpan(1, 1), wxEXPAND | wxALL);
-		this->m_sizer->Add(current_text, wxGBPosition(i + 1, 1), wxGBSpan(1, 1), wxEXPAND | wxALL);
-
-		this->m_mdl_sliders.push_back(current_slider);
-		this->m_mdl_slider_lookup.insert(std::pair<int, std::string>(current_slider->GetId(), attr_names.at(i)));
-	}
-
-	//make render button
-	this->m_btn_render = new wxButton(this, wxID_ANY, wxString("Render"));
-	this->m_btn_render->Bind(wxEVT_BUTTON, &Main::btn_render_OnClick, this);
-	this->m_sizer->Add(this->m_btn_render, wxGBPosition((int)attr_names.size(), 0), wxGBSpan(1, 1), wxEXPAND | wxALL);
-
-	//make list to hold all models
+	//make list to display all model identifiers
 	this->m_lb_models = new wxListBox(this, wxID_ANY);
 	this->m_lb_models->Bind(wxEVT_LISTBOX, &Main::lb_models_OnSelection, this);
-	this->m_sizer->Add(this->m_lb_models, wxGBPosition(1, 0), wxGBSpan((int)attr_names.size() - 1, 1), wxEXPAND | wxALL);
+	this->m_lb_models->Bind(wxEVT_CHAR, &Main::lb_models_OnChar, this);
+	this->m_sizer->Add(this->m_lb_models, wxGBPosition(0, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
-	for (auto& model : this->m_scene->GetModels())
+	for (Model* model : this->m_scene->GetModels())
 	{
 		this->m_lb_models->Append(model->GetIdentifier());
 	}
 
+	//make vector controls for modifying models
+	VectorCtrlConfig vct_cfg;
+	vct_cfg.num_fields = 3;
+
+	vct_cfg.inc = 1.0;
+	this->m_vct_position = new VectorCtrl(this, wxID_ANY, vct_cfg);
+	this->m_vct_position->Bind(EVT_VCTRCTRL_CHANGED, &Main::vct_position_OnChange, this);
+	this->m_sizer->Add(this->m_vct_position, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	vct_cfg.inc = 15.0;
+	this->m_vct_rotation = new VectorCtrl(this, wxID_ANY, vct_cfg);
+	this->m_vct_rotation->Bind(EVT_VCTRCTRL_CHANGED, &Main::vct_rotation_OnChange, this);
+	this->m_sizer->Add(this->m_vct_rotation, wxGBPosition(2, 2), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	vct_cfg.inc = 1.0;
+	this->m_vct_scale = new VectorCtrl(this, wxID_ANY, vct_cfg);
+	this->m_vct_scale->Bind(EVT_VCTRCTRL_CHANGED, &Main::vct_scale_OnChange, this);
+	this->m_sizer->Add(this->m_vct_scale, wxGBPosition(3, 2), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	//make labels for vector controls
+	this->m_stxt_position = new wxStaticText(this, wxID_ANY, "Position");
+	this->m_sizer->Add(this->m_stxt_position, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	this->m_stxt_rotation = new wxStaticText(this, wxID_ANY, "Rotation");
+	this->m_sizer->Add(this->m_stxt_rotation, wxGBPosition(2, 1), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	this->m_stxt_scale = new wxStaticText(this, wxID_ANY, "Scale");
+	this->m_sizer->Add(this->m_stxt_scale, wxGBPosition(3, 1), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	//set window title
+	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier());
+
+	this->SetModel(nullptr);
+
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
 	this->m_sizer->AddGrowableCol(0);
-	this->m_sizer->AddGrowableCol(2);
 
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
@@ -131,120 +109,91 @@ Main::~Main()
 	delete this->m_camera;
 }
 
-void Main::btn_render_OnClick(wxCommandEvent& evt)
-{
-	this->m_engine->Render();
-	evt.Skip();
-}
-
-void Main::sld_OnChange(wxCommandEvent& evt)
+void Main::SetModel(Model* model)
 {
 	if (this->m_model_selected != nullptr)
 	{
-		std::string slider_name = this->m_mdl_slider_lookup.at(evt.GetId());
-		wxSlider* slider = (wxSlider*)evt.GetEventObject();
-
-		if (slider_name == "Rotate X")
-		{
-			this->m_model_selected->SetRotation(0, slider->GetValue());
-		}
-		else if (slider_name == "Rotate Y")
-		{
-			this->m_model_selected->SetRotation(1, slider->GetValue());
-		}
-		else if (slider_name == "Rotate Z")
-		{
-			this->m_model_selected->SetRotation(2, slider->GetValue());
-		}
-		else if (slider_name == "Translate X")
-		{
-			this->m_model_selected->SetPosition(0, slider->GetValue());
-		}
-		else if (slider_name == "Translate Y")
-		{
-			this->m_model_selected->SetPosition(1, slider->GetValue());
-		}
-		else if (slider_name == "Translate Z")
-		{
-			this->m_model_selected->SetPosition(2, slider->GetValue());
-		}
-		else if (slider_name == "Scale X")
-		{
-			this->m_model_selected->SetScale(0, slider->GetValue());
-		}
-		else if (slider_name == "Scale Y")
-		{
-			this->m_model_selected->SetScale(1, slider->GetValue());
-		}
-		else if (slider_name == "Scale Z")
-		{
-			this->m_model_selected->SetScale(2, slider->GetValue());
-		}
-
-		this->m_engine->Render();
+		this->m_model_selected->SetCurrentWireframeIndex(0);
 	}
-	
-	evt.Skip();
+	this->m_model_selected = model;
+
+	if (model == nullptr)
+	{
+		this->m_lb_models->SetSelection(wxNOT_FOUND);
+
+		this->m_vct_position->SetValues({ 0.0, 0.0, 0.0 });
+		this->m_vct_rotation->SetValues({ 0.0, 0.0, 0.0 });
+		this->m_vct_scale->SetValues({ 0.0, 0.0, 0.0 });
+
+		this->m_vct_position->Disable();
+		this->m_vct_rotation->Disable();
+		this->m_vct_scale->Disable();
+	}
+	else
+	{
+		model->SetCurrentWireframeIndex(1);
+			
+		std::vector<Model*> models = this->m_scene->GetModels();
+		for (size_t i = 0; i < models.size(); i++)
+		{
+			if (models.at(i) == model)
+			{
+				this->m_lb_models->SetSelection(static_cast<int>(i));
+			}
+		}
+
+		this->m_vct_position->Enable();
+		this->m_vct_rotation->Enable();
+		this->m_vct_scale->Enable();
+
+		this->m_vct_position->SetValues(GetSTDVector(this->m_model_selected->GetPosition()));
+		this->m_vct_rotation->SetValues(GetSTDVector(this->m_model_selected->GetRotation()));
+		this->m_vct_scale->SetValues(GetSTDVector(this->m_model_selected->GetScale()));
+	}
 }
 
 void Main::lb_models_OnSelection(wxCommandEvent& evt)
 {
 	int selection_index = this->m_lb_models->GetSelection();
-
-	if (selection_index != -1)
+	if (selection_index != wxNOT_FOUND)
 	{
-		if (this->m_model_selected != nullptr)
-		{
-			this->m_model_selected->SetCurrentWireframeIndex(0);
-		}
-
 		std::vector<Model*> models = this->m_scene->GetModels();
-		this->m_model_selected = models.at(selection_index);
-
-		this->m_model_selected->SetCurrentWireframeIndex(1);
-
-		wxSlider* slider;
-		for (size_t i = 0; i < this->m_mdl_sliders.size(); i++)
-		{
-			slider = this->m_mdl_sliders.at(i);
-			std::string slider_name = this->m_mdl_slider_lookup.at(slider->GetId());
-
-			if (slider_name == "Rotate X")
-			{
-				slider->SetValue((int)this->m_model_selected->GetRotation(0));
-			}
-			else if (slider_name == "Rotate Y")
-			{
-				slider->SetValue((int)this->m_model_selected->GetRotation(1));
-			}
-			else if (slider_name == "Rotate Z")
-			{
-				slider->SetValue((int)this->m_model_selected->GetRotation(2));
-			}
-			else if (slider_name == "Translate X")
-			{
-				slider->SetValue((int)this->m_model_selected->GetPosition(0));
-			}
-			else if (slider_name == "Translate Y")
-			{
-				slider->SetValue((int)this->m_model_selected->GetPosition(1));
-			}
-			else if (slider_name == "Translate Z")
-			{
-				slider->SetValue((int)this->m_model_selected->GetPosition(2));
-			}
-			else if (slider_name == "Scale X")
-			{
-				slider->SetValue((int)this->m_model_selected->GetScale(0));
-			}
-			else if (slider_name == "Scale Y")
-			{
-				slider->SetValue((int)this->m_model_selected->GetScale(1));
-			}
-			else if (slider_name == "Scale Z")
-			{
-				slider->SetValue((int)this->m_model_selected->GetScale(2));
-			}
-		}
+		this->SetModel(models.at(selection_index));
 	}
+}
+
+void Main::lb_models_OnChar(wxKeyEvent& evt)
+{
+	if (evt.GetKeyCode() == WXK_ESCAPE)
+	{
+		this->SetModel(nullptr);
+	}
+	evt.Skip();
+}
+
+void Main::vct_position_OnChange(VectorCtrlEvent& evt)
+{
+	if (this->m_model_selected != nullptr)
+	{
+		this->m_model_selected->SetPosition(GetGLMVector<3>(this->m_vct_position->GetValues()));
+	}
+	evt.Skip();
+}
+
+void Main::vct_rotation_OnChange(VectorCtrlEvent& evt)
+{
+	if (this->m_model_selected != nullptr)
+	{
+		this->m_model_selected->SetRotation(GetGLMVector<3>(this->m_vct_rotation->GetValues()));
+	}
+	evt.Skip();
+}
+
+void Main::vct_scale_OnChange(VectorCtrlEvent& evt)
+{
+	if (this->m_model_selected != nullptr)
+	{
+		this->m_model_selected->SetScale(GetGLMVector<3>(this->m_vct_scale->GetValues()));
+	}
+	evt.Skip();
 }
