@@ -215,10 +215,12 @@
   <ItemGroup>
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Main.h" />
+    <ClInclude Include="src\VectorCtrl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\VectorCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\gameengine\gameengine.vcxproj">
