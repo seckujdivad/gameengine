@@ -71,16 +71,16 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\manual-link\gtest_maind.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\*.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\manual-link\gtest_maind.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
     <PreLinkEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" &gt; nul</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\gmockd.lib" &gt; nul</Command>
       <Message>Prevent gmock linking</Message>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib"</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\gmockd.lib"</Command>
       <Message>Clean up from preventing gmock linking</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -98,14 +98,14 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\manual-link\gtest_maind.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\*.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\manual-link\gtest_maind.lib</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" &gt; nul</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\gmockd.lib" &gt; nul</Command>
       <Message>Prevent gmock linking</Message>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\debug\lib\gmockd.lib"</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\gmockd.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\debug\lib\gmockd.lib"</Command>
       <Message>Clean up from preventing gmock linking</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -124,16 +124,16 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\manual-link\gtest_main.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\*.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib\manual-link\gtest_main.lib</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" &gt; nul</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\gmock.lib" &gt; nul</Command>
     </PreLinkEvent>
     <PreLinkEvent>
       <Message>Prevent gmock linking</Message>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib/gmock.lib"</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib/gmock.lib"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Clean up from preventing gmock linking</Message>
@@ -154,16 +154,16 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\manual-link\gtest_main.lib;$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\*.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib\manual-link\gtest_main.lib</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" &gt; nul</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\gmock.lib" &gt; nul</Command>
     </PreLinkEvent>
     <PreLinkEvent>
       <Message>Prevent gmock linking</Message>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>move "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgUserTriplet)\lib/gmock.lib"</Command>
+      <Command>move "$(VcpkgRoot)\installed\$(VcpkgTriplet)\gmock.lib" "$(VcpkgRoot)\installed\$(VcpkgTriplet)\lib/gmock.lib"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Clean up from preventing gmock linking</Message>

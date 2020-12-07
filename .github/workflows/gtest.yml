@@ -33,7 +33,7 @@ jobs:
         uses: lukka/run-vcpkg@v5
         with:
           setupOnly: true
-          vcpkgGitCommitId: 5dc53211c
+          vcpkgGitCommitId: c303dd024
       - run: $VCPKG_ROOT/vcpkg integrate install
         shell: bash
       
