@@ -5,7 +5,6 @@ on:
     branches: [ master ]
     paths-ignore:
     - 'NVIDIA Nsight/**'
-    - 'gameengine-editor/**'
     - 'demo-cube/**'
     - 'packaged-releases/**'
     - '.gitattributes'
@@ -15,7 +14,6 @@ on:
     branches: [ master ]
     paths-ignore:
     - 'NVIDIA Nsight/**'
-    - 'gameengine-editor/**'
     - 'demo-cube/**'
     - 'packaged-releases/**'
     - '.gitattributes'
