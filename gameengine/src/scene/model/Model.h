@@ -16,32 +16,10 @@
 #include "Material.h"
 #include "../Referenceable.h"
 #include "../LocalTexture.h"
+#include "geometry/Polygonal.h"
 
 class Scene;
 class Skybox;
-
-struct Face
-{
-	std::vector<int> vertices;
-	std::vector<glm::dvec2> uv;
-	glm::dvec3 normal = glm::dvec3(1.0, 0.0, 0.0);
-};
-
-struct ModelGeometry
-{
-	std::vector<Face> faces;
-	std::vector<glm::dvec3> vertices;
-};
-
-bool operator==(const ModelGeometry& first, const ModelGeometry& second);
-bool operator!=(const ModelGeometry& first, const ModelGeometry& second);
-bool operator==(const Face& first, const Face& second);
-bool operator!=(const Face& first, const Face& second);
-
-void MergeVertices(ModelGeometry& geometry, double threshold = 0.0);
-void InvertNormals(ModelGeometry& geometry);
-
-std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geometry = false);
 
 std::vector<GLfloat> DoubleToSinglePrecision(std::vector<double> vec); //utility method for changing the precision of GetTriangles before feeding to the GPU
 

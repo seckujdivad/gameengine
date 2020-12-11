@@ -64,6 +64,12 @@
     <Filter Include="Source Files\generic">
       <UniqueIdentifier>{f666e222-9035-429f-8690-71cda92cdec1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\scene\model\geometry">
+      <UniqueIdentifier>{2246773f-af99-428b-b6a0-037973f27898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\model\geometry">
+      <UniqueIdentifier>{b1c8bd5a-c50a-4f57-a43c-31df3fd380e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\EngineCanvas.h">
@@ -189,6 +195,12 @@
     <ClInclude Include="src\generic\std_glm.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\model\geometry\Geometry.h">
+      <Filter>Header Files\scene\model\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\model\geometry\Polygonal.h">
+      <Filter>Header Files\scene\model\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -301,6 +313,12 @@
     </ClCompile>
     <ClCompile Include="src\generic\std_glm.cpp">
       <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\geometry\Polygonal.cpp">
+      <Filter>Source Files\scene\model\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\geometry\Geometry.cpp">
+      <Filter>Source Files\scene\model\geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

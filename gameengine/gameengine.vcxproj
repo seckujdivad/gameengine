@@ -210,6 +210,8 @@
     <ClInclude Include="src\scene\light\PointLight.h" />
     <ClInclude Include="src\scene\LocallyMovable.h" />
     <ClInclude Include="src\scene\LocalTexture.h" />
+    <ClInclude Include="src\scene\model\geometry\Geometry.h" />
+    <ClInclude Include="src\scene\model\geometry\Polygonal.h" />
     <ClInclude Include="src\scene\model\Material.h" />
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\model\Reflection.h" />
@@ -249,6 +251,8 @@
     <ClCompile Include="src\scene\light\PointLight.cpp" />
     <ClCompile Include="src\scene\LocallyMovable.cpp" />
     <ClCompile Include="src\scene\LocalTexture.cpp" />
+    <ClCompile Include="src\scene\model\geometry\Geometry.cpp" />
+    <ClCompile Include="src\scene\model\geometry\Polygonal.cpp" />
     <ClCompile Include="src\scene\model\Material.cpp" />
     <ClCompile Include="src\scene\model\Model.cpp" />
     <ClCompile Include="src\scene\model\Reflection.cpp" />
