@@ -58,7 +58,7 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	{
 		//get mouse info
 		wxMouseState mouse_state = wxGetMouseState();
-		int screen_centre[2] = { this->GetSize().x / 2, this->GetSize().y / 2 };
+		int screen_centre[2] = { this->GetSize().GetX() / 2, this->GetSize().GetY() / 2 };
 		int mouse_position[2] = { mouse_state.GetPosition().x - this->GetScreenPosition().x, mouse_state.GetPosition().y - this->GetScreenPosition().y };
 
 		//check mouse delta and apply
@@ -66,8 +66,8 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		{
 			int mousedelta[2] = { mouse_position[0] - screen_centre[0], mouse_position[1] - screen_centre[1] };
 
-			float fov_fraction_x = (static_cast<float>(mousedelta[0]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().x);
-			float fov_fraction_y = (static_cast<float>(mousedelta[1]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().x);
+			float fov_fraction_x = (static_cast<float>(mousedelta[0]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().GetX());
+			float fov_fraction_y = (static_cast<float>(mousedelta[1]) * this->m_mouselook_multiplier) / static_cast<float>(this->GetSize().GetX());
 
 			float fov = static_cast<float>(this->GetControlledCamera()->GetFOV());
 
@@ -127,6 +127,7 @@ void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 	{
 		this->GetEngine()->Render();
 		evt.RequestMore();
+		evt.Skip();
 	}
 }
 
@@ -163,7 +164,7 @@ void EngineCanvas::PostRenderEvent()
 void EngineCanvas::PreRenderEvent()
 {
 	this->MakeOpenGLFocus();
-	this->m_camera_controlled->SetViewportDimensions(std::tuple(this->GetSize().x, this->GetSize().y));
+	this->m_camera_controlled->SetViewportDimensions(std::tuple(this->GetSize().GetX(), this->GetSize().GetY()));
 }
 
 void EngineCanvas::SetMouselookActive(bool enable)
@@ -171,7 +172,7 @@ void EngineCanvas::SetMouselookActive(bool enable)
 	if (enable)
 	{
 		this->SetCursor(this->m_blank_cursor);
-		this->WarpPointer(this->GetSize().x / 2, this->GetSize().y / 2);
+		this->WarpPointer(this->GetSize().GetX() / 2, this->GetSize().GetY() / 2);
 	}
 	else
 	{
@@ -223,7 +224,7 @@ void EngineCanvas::SetVerticalSync(bool enabled)
 
 std::tuple<int, int> EngineCanvas::GetOutputSize() const
 {
-	return std::tuple<int, int>(this->GetSize().x, this->GetSize().y);
+	return std::tuple(this->GetSize().GetX(), this->GetSize().GetY());
 }
 
 void EngineCanvas::MakeOpenGLFocus()
