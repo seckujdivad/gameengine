@@ -1,6 +1,9 @@
 #include "Scene.h"
 
 #include <set>
+#include <stdexcept>
+#include <iterator>
+#include <algorithm>
 
 #include "model/Model.h"
 #include "light/PointLight.h"
