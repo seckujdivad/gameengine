@@ -1,5 +1,7 @@
 #include "LocalTexture.h"
 
+#include <stdexcept>
+
 LocalTexture::LocalTexture(TextureReference reference) : Referenceable<TextureReference>(reference)
 {
 }
@@ -77,7 +79,7 @@ LocalTexture::~LocalTexture()
 
 void LocalTexture::SetVector(glm::vec3 colour)
 {
-	this->m_type = LocalTextureType::Vector;
+	this->m_type = Type::Vector;
 
 	if (this->m_vec_data != nullptr)
 	{
@@ -95,7 +97,7 @@ void LocalTexture::SetVector(glm::vec3 colour)
 
 void LocalTexture::SetFullTexture(unsigned char* data, std::tuple<int, int> dimensions, bool copy)
 {
-	this->m_type = LocalTextureType::FullTexture;
+	this->m_type = Type::FullTexture;
 	this->m_dimensions = dimensions;
 
 	if (this->m_full_data != nullptr)
@@ -118,37 +120,37 @@ void LocalTexture::SetFullTexture(unsigned char* data, std::tuple<int, int> dime
 
 std::tuple<int, int> LocalTexture::GetDimensions() const
 {
-	if (this->m_type == LocalTextureType::None)
+	if (this->m_type == Type::None)
 	{
 		throw std::runtime_error("Uninitialised texture accessed");
 	}
-	else if (this->m_type == LocalTextureType::FullTexture)
+	else if (this->m_type == Type::FullTexture)
 	{
 		return this->m_dimensions;
 	}
-	else if (this->m_type == LocalTextureType::Vector)
+	else if (this->m_type == Type::Vector)
 	{
-		return { 1, 1 };
+		return std::tuple(1, 1);
 	}
 	else
 	{
 		throw std::runtime_error("Unrecognised texture type");
 	}
 
-	return { -1, -1 };
+	return std::tuple(-1, -1);
 }
 
 unsigned char* LocalTexture::GetData() const
 {
-	if (this->m_type == LocalTextureType::None)
+	if (this->m_type == Type::None)
 	{
 		throw std::runtime_error("Uninitialised texture accessed");
 	}
-	else if (this->m_type == LocalTextureType::FullTexture)
+	else if (this->m_type == Type::FullTexture)
 	{
 		return this->m_full_data;
 	}
-	else if (this->m_type == LocalTextureType::Vector)
+	else if (this->m_type == Type::Vector)
 	{
 		return this->m_vec_data;
 	}
@@ -158,22 +160,81 @@ unsigned char* LocalTexture::GetData() const
 	}
 }
 
-void LocalTexture::SetMagFilter(LocalTextureFilter filter)
+void LocalTexture::SetMagFilter(Filter filter)
 {
 	this->m_filter_mag = filter;
 }
 
-LocalTextureFilter LocalTexture::GetMagFilter() const
+LocalTexture::Filter LocalTexture::GetMagFilter() const
 {
 	return this->m_filter_mag;
 }
 
-void LocalTexture::SetMinFilter(LocalTextureFilter filter)
+void LocalTexture::SetMinFilter(Filter filter)
 {
 	this->m_filter_min = filter;
 }
 
-LocalTextureFilter LocalTexture::GetMinFilter() const
+LocalTexture::Filter LocalTexture::GetMinFilter() const
 {
 	return this->m_filter_min;
+}
+
+bool LocalTexture::operator==(const LocalTexture& second) const
+{
+	if (this->m_type != second.m_type)
+	{
+		return false;
+	}
+
+	unsigned char* first_data = this->GetData();
+	unsigned char* second_data = second.GetData();
+
+	if (first_data == second_data)
+	{
+		return true;
+	}
+	else
+	{
+		if (this->m_filter_mag != second.m_filter_mag)
+		{
+			return false;
+		}
+
+		if (this->m_filter_min != second.m_filter_min)
+		{
+			return false;
+		}
+
+		std::tuple first_dimensions = this->GetDimensions();
+		std::tuple second_dimensions = second.GetDimensions();
+
+		if (first_dimensions != second_dimensions)
+		{
+			return false;
+		}
+
+		size_t num_pixels = static_cast<size_t>(std::get<0>(first_dimensions)) * static_cast<size_t>(std::get<1>(first_dimensions));
+
+		if (num_pixels <= 32 * 32)
+		{
+			for (size_t i = 0; i < num_pixels; i++)
+			{
+				if (first_data[i] != second_data[i])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		else
+		{
+			return false; //too many pixels, skip the comparison
+		}
+	}
+}
+
+bool LocalTexture::operator!=(const LocalTexture& second) const
+{
+	return !(*this == second);
 }
