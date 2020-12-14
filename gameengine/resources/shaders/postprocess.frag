@@ -7,7 +7,6 @@
 layout(location = 0) out vec4 frag_out;
 
 in vec2 globalUV;
-in vec2 globalPosition;
 
 uniform sampler2D layers_texture[COMPOSITE_LAYER_NUM];
 
