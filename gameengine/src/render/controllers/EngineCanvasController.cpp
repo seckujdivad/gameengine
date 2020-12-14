@@ -63,18 +63,15 @@ EngineCanvasController::~EngineCanvasController()
 
 void EngineCanvasController::Render()
 {
-    if (this->m_canvas->GetOutputSize() != this->m_dimensions_prev)
+    //resize textures to make sure that all textures in the chain are the same size/drawing at the same resolution
+    std::tuple new_output_size = this->m_canvas->GetOutputSize();
+    for (RenderTexture* render_texture : this->m_textures)
     {
-        for (RenderTexture* render_texture : this->m_textures)
-        {
-            render_texture->SetOutputSize(this->m_canvas->GetOutputSize());
-        }
-
-        this->m_texture_final->SetOutputSize(this->m_canvas->GetOutputSize());
-
-        this->m_dimensions_prev = this->m_canvas->GetOutputSize();
+        render_texture->SetOutputSize(new_output_size);
     }
+    this->m_texture_final->SetOutputSize(new_output_size);
 
+    //redraw all textures
     for (RenderTexture* render_texture : this->m_textures)
     {
         render_texture->SetCamera(this->m_canvas->GetControlledCamera());

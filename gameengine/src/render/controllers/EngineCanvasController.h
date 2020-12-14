@@ -28,8 +28,6 @@ private:
 	std::vector<RenderTexture*> m_textures;
 	RenderTexture* m_texture_final;
 
-	std::tuple<int, int> m_dimensions_prev = { -1, -1 };
-
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
 	EngineCanvasController(const EngineCanvasController&) = delete;
