@@ -1,6 +1,9 @@
 #include "Renderable.h"
 
+#include <stdexcept>
+
 #include "../scene/model/Model.h"
+#include "../scene/model/geometry/Polygonal.h"
 #include "../scene/Camera.h"
 #include "../scene/Scene.h"
 #include "../scene/light/PointLight.h"
@@ -53,36 +56,22 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				{
 					models.clear();
 
-					ModelGeometry geom;
-					geom.vertices = {
-						glm::dvec3(-1.0, -1.0, 0.0),
-						glm::dvec3(-1.0, 1.0, 0.0),
-						glm::dvec3(1.0, 1.0, 0.0),
-						glm::dvec3(1.0, -1.0, 0.0)
-					};
+					std::shared_ptr<Polygonal> geom = std::make_shared<Polygonal>();
 
-					geom.faces = {
-						Face(),
-						Face()
-					};
+					Polygonal::Face face = Polygonal::Face(*geom);
 
-					geom.faces.at(0).vertices = { 0, 1, 2 };
-					geom.faces.at(0).uv = {
-						glm::dvec2(0.0, 0.0),
-						glm::dvec2(0.0, 1.0),
-						glm::dvec2(1.0, 1.0)
-					};
-					geom.faces.at(0).normal = glm::dvec3(0.0, 0.0, -1.0);
+					const double vertex_size = 1.0;
+					const double uv_size = 1.0;
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, -vertex_size, 0.0), glm::dvec2(0.0, 0.0)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, vertex_size, 0.0), glm::dvec2(0.0, uv_size)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, vertex_size, 0.0), glm::dvec2(uv_size, uv_size)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, -vertex_size, 0.0), glm::dvec2(uv_size, 0.0)));
 
-					geom.faces.at(1).vertices = { 0, 3, 2 };
-					geom.faces.at(1).uv = {
-						glm::dvec2(0.0, 0.0),
-						glm::dvec2(0.1, 0.0),
-						glm::dvec2(1.0, 1.0)
-					};
-					geom.faces.at(1).normal = glm::dvec3(0.0, 0.0, -1.0);
+					face.SetNormal(glm::dvec3(0.0, 0.0, -1.0));
 
-					models.push_back(new Model(-1, geom));
+					geom->AddFace(face);
+
+					models.push_back(new Model(-1, std::vector<std::shared_ptr<Geometry>>({ geom })));
 
 					dealloc_models = true;
 				}
@@ -537,14 +526,18 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 
 			//load geometry
-			Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model);
+			std::vector<std::shared_ptr<Geometry>> geometries = model->GetGeometry();
+			for (const std::shared_ptr<Geometry>& geometry : geometries)
+			{
+				Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model, geometry);
 
-			//draw geometry
-			glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
+				//draw geometry
+				glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
+			}
 
 			if (dealloc_models) //release geometry as the models are temporary
 			{
-				this->GetEngine()->ReleaseVAO(model);
+				this->GetEngine()->ReleaseVAOs(model);
 			}
 		}
 
