@@ -41,12 +41,12 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	}
 
 	//load all models
-	std::map<std::string, ModelGeometry> geometry;
+	std::unordered_map<std::string, std::shared_ptr<Geometry>> geometry_lookup;
 	if (scene_data["models"]["ply"].is_object())
 	{
 		for (auto it = scene_data["models"]["ply"].begin(); it != scene_data["models"]["ply"].end(); it++)
 		{
-			ModelGeometry model_geometry = ModelFromPly((root_path / it.key()).string());
+			std::shared_ptr<Polygonal> model_geometry = ModelFromPly((root_path / it.value()["path"].get<std::string>()).string());
 
 			if (it.value()["merge geometry"].is_object())
 			{
@@ -57,7 +57,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 						double merge_distance = it.value()["merge geometry"]["distance"].get<double>();
 						if (merge_distance >= 0)
 						{
-							MergeVertices(model_geometry, merge_distance);
+							//model_geometry->MergeVertices(merge_distance);
 						}
 						else
 						{
@@ -75,23 +75,15 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 			{
 				if (it.value()["invert normals"].get<bool>())
 				{
-					InvertNormals(model_geometry);
+					model_geometry->InvertNormals();
 				}
 			}
 
-			std::string model_name;
-			if (it.value()["identifier"].is_string())
-			{
-				model_name = it.value()["identifier"].get<std::string>();
-			}
-			else
-			{
-				throw std::runtime_error("A string in field 'identifier' must be provided for each model load");
-			}
+			std::string model_name = it.key();
 
-			if (geometry.count(model_name) == 0)
+			if (geometry_lookup.count(model_name) == 0)
 			{
-				geometry.insert(std::pair(model_name, model_geometry));
+				geometry_lookup.insert(std::pair(model_name, model_geometry));
 			}
 			else
 			{
@@ -244,146 +236,185 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		{
 			for (auto& el : scene_data["layout"].items())
 			{
-				Model* model;
+				std::vector<std::string> geometry_names;
+				
 				if (el.value()["model"].is_string())
 				{
-					auto model_geometry = geometry.find(el.value()["model"].get<std::string>());
-					if (model_geometry == geometry.end())
+					geometry_names.push_back(el.value()["model"].get<std::string>());
+				}
+
+				if (el.value()["model"].is_array())
+				{
+					for (auto& el2 : el.value()["model"].items())
 					{
-						throw std::runtime_error("Model '" + el.value()["model"].get<std::string>() + "' has not been loaded");
-					}
-					else
-					{
-						model = new Model(scene->GetNewModelReference(), model_geometry->second, scene);
-
-						if (el.value()["identifier"].is_string())
+						if (el2.value().is_string())
 						{
-							model->SetIdentifier(el.value()["identifier"].get<std::string>());
-						}
-
-						model->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
-						model->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
-						model->SetScale(GetVector(el.value()["scale"], glm::dvec3(1.0)));
-
-						//load ssr reflections
-						model->GetMaterial().ssr = default_ssr_config;
-
-						if (el.value()["reflections"].is_object())
-						{
-							if (el.value()["reflections"]["screen space"].is_object())
-							{
-								MaterialSSRConfig ssr_config = ApplySSRConfig(default_ssr_config, el.value()["reflections"]["screen space"]);
-
-								model->GetMaterial().ssr = ssr_config;
-
-								if (el.value()["reflections"]["screen space"]["enabled"].is_boolean())
-								{
-									model->GetMaterial().ssr_enabled = el.value()["reflections"]["screen space"]["enabled"].get<bool>();
-								}
-							}
-							else if (el.value()["reflections"]["screen space"].is_boolean())
-							{
-								model->GetMaterial().ssr_enabled = el.value()["reflections"]["screen space"].get<bool>();
-							}
-
-							//don't set up the alternative fallback reflections as they will be set up once the reflections have been created
-						}
-						else if (el.value()["reflections"].is_boolean())
-						{
-							if (el.value()["reflections"].get<bool>())
-							{
-								throw std::runtime_error("If \"reflections\" is a bool, it must be false (i.e. disabling reflections). If you want to enable reflections, you must provide more configuration data");
-							}
-						}
-
-						//load textures
-						LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
-						LocalTexture normal_texture = GetTexture(el.value()["textures"]["normal"], root_path, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
-						LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-						LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-						LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-						LocalTexture displacement_texture = GetTexture(el.value()["textures"]["displacement"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-
-						model->GetColourTexture() = colour_texture;;
-						model->GetNormalTexture() = normal_texture;
-						model->GetReflectionTexture() = refl_texture;
-						model->GetSpecularTexture() = specular_texture;
-						model->GetSkyboxMaskTexture() = skybox_texture;
-						model->GetDisplacementTexture() = displacement_texture;
-
-						//load phong material
-						model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));
-						model->GetMaterial().specular = GetVector(el.value()["material"]["specular"], glm::dvec3(0.0));
-
-						if (el.value()["material"]["specular highlight"].is_number())
-						{
-							model->GetMaterial().specular_highlight = el.value()["material"]["specular highlight"].get<float>();
-						}
-
-						if (el.value()["material"]["displacement"].is_object())
-						{
-							if (el.value()["material"]["displacement"]["multiplier"].is_number())
-							{
-								model->GetMaterial().displacement.multiplier = el.value()["material"]["displacement"]["multiplier"].get<float>();
-							}
-							else
-							{
-								model->GetMaterial().displacement.multiplier = 0.0f;
-							}
-
-							if (el.value()["material"]["displacement"]["discard out of range"].is_boolean())
-							{
-								model->GetMaterial().displacement.discard_out_of_range = el.value()["material"]["displacement"]["discard out of range"].get<bool>();
-							}
-						}
-					}
-
-					//add model to potentially visible sets
-					std::vector<std::string> pvs_membership;
-					if (el.value()["visboxes"].is_array())
-					{
-						for (auto& el2 : el.value()["visboxes"].items())
-						{
-							if (el2.value().is_string())
-							{
-								pvs_membership.push_back(el2.value().get<std::string>());
-							}
-							else
-							{
-								throw std::runtime_error("Model PVS membership must be specified by either a string or an array of strings");
-							}
-						}
-					}
-					else if (el.value()["visboxes"].is_string())
-					{
-						pvs_membership.push_back(el.value()["visboxes"].get<std::string>());
-					}
-					else
-					{
-						throw std::runtime_error("Model PVS membership must be specified by either a string or an array of strings");
-					}
-
-					for (auto& el2 : pvs_membership)
-					{
-						VisBox* visbox = scene->GetVisBox(el2);
-
-						if (visbox == nullptr)
-						{
-							throw std::runtime_error("Unknown PVS identifier '" + el2 + "' used when specifying model PVS membership");
+							geometry_names.push_back(el2.value().get<std::string>());
 						}
 						else
 						{
-							visbox->AddMemberModel(model);
+							throw std::runtime_error("All elements in \"model\" must be strings");
 						}
 					}
+				}
 
-					scene->Add(model);
-					models.push_back(model);
+				if (el.value()["models"].is_string())
+				{
+					geometry_names.push_back(el.value()["models"].get<std::string>());
+				}
+
+				if (el.value()["models"].is_array())
+				{
+					for (auto& el2 : el.value()["models"].items())
+					{
+						if (el2.value().is_string())
+						{
+							geometry_names.push_back(el2.value().get<std::string>());
+						}
+						else
+						{
+							throw std::runtime_error("All elements in \"models\" must be strings");
+						}
+					}
+				}
+
+				std::vector<std::shared_ptr<Geometry>> geometries;
+				for (std::string geometry_name : geometry_names)
+				{
+					if (geometry_lookup.count(geometry_name) == 0)
+					{
+						throw std::runtime_error("Model geometry '" + geometry_name + "' has not been loaded");
+					}
+					else
+					{
+						geometries.push_back(geometry_lookup.at(geometry_name));
+					}
+				}
+
+				Model* model = new Model(scene->GetNewModelReference(), geometries, scene);
+
+				if (el.value()["identifier"].is_string())
+				{
+					model->SetIdentifier(el.value()["identifier"].get<std::string>());
+				}
+
+				model->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
+				model->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
+				model->SetScale(GetVector(el.value()["scale"], glm::dvec3(1.0)));
+
+				//load ssr reflections
+				model->GetMaterial().ssr = default_ssr_config;
+
+				if (el.value()["reflections"].is_object())
+				{
+					if (el.value()["reflections"]["screen space"].is_object())
+					{
+						MaterialSSRConfig ssr_config = ApplySSRConfig(default_ssr_config, el.value()["reflections"]["screen space"]);
+
+						model->GetMaterial().ssr = ssr_config;
+
+						if (el.value()["reflections"]["screen space"]["enabled"].is_boolean())
+						{
+							model->GetMaterial().ssr_enabled = el.value()["reflections"]["screen space"]["enabled"].get<bool>();
+						}
+					}
+					else if (el.value()["reflections"]["screen space"].is_boolean())
+					{
+						model->GetMaterial().ssr_enabled = el.value()["reflections"]["screen space"].get<bool>();
+					}
+
+					//don't set up the alternative fallback reflections as they will be set up once the reflections have been created
+				}
+				else if (el.value()["reflections"].is_boolean())
+				{
+					if (el.value()["reflections"].get<bool>())
+					{
+						throw std::runtime_error("If \"reflections\" is a bool, it must be false (i.e. disabling reflections). If you want to enable reflections, you must provide more configuration data");
+					}
+				}
+
+				//load textures
+				LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
+				LocalTexture normal_texture = GetTexture(el.value()["textures"]["normal"], root_path, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
+				LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture displacement_texture = GetTexture(el.value()["textures"]["displacement"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+
+				model->GetColourTexture() = colour_texture;;
+				model->GetNormalTexture() = normal_texture;
+				model->GetReflectionTexture() = refl_texture;
+				model->GetSpecularTexture() = specular_texture;
+				model->GetSkyboxMaskTexture() = skybox_texture;
+				model->GetDisplacementTexture() = displacement_texture;
+
+				//load phong material
+				model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));
+				model->GetMaterial().specular = GetVector(el.value()["material"]["specular"], glm::dvec3(0.0));
+
+				if (el.value()["material"]["specular highlight"].is_number())
+				{
+					model->GetMaterial().specular_highlight = el.value()["material"]["specular highlight"].get<float>();
+				}
+
+				if (el.value()["material"]["displacement"].is_object())
+				{
+					if (el.value()["material"]["displacement"]["multiplier"].is_number())
+					{
+						model->GetMaterial().displacement.multiplier = el.value()["material"]["displacement"]["multiplier"].get<float>();
+					}
+					else
+					{
+						model->GetMaterial().displacement.multiplier = 0.0f;
+					}
+
+					if (el.value()["material"]["displacement"]["discard out of range"].is_boolean())
+					{
+						model->GetMaterial().displacement.discard_out_of_range = el.value()["material"]["displacement"]["discard out of range"].get<bool>();
+					}
+				}
+
+				//add model to potentially visible sets
+				std::vector<std::string> pvs_membership;
+				if (el.value()["visboxes"].is_array())
+				{
+					for (auto& el2 : el.value()["visboxes"].items())
+					{
+						if (el2.value().is_string())
+						{
+							pvs_membership.push_back(el2.value().get<std::string>());
+						}
+						else
+						{
+							throw std::runtime_error("Model PVS membership must be specified by either a string or an array of strings");
+						}
+					}
+				}
+				else if (el.value()["visboxes"].is_string())
+				{
+					pvs_membership.push_back(el.value()["visboxes"].get<std::string>());
 				}
 				else
 				{
-					throw std::runtime_error("No model specified");
+					throw std::runtime_error("Model PVS membership must be specified by either a string or an array of strings");
 				}
+
+				for (auto& el2 : pvs_membership)
+				{
+					VisBox* visbox = scene->GetVisBox(el2);
+
+					if (visbox == nullptr)
+					{
+						throw std::runtime_error("Unknown PVS identifier '" + el2 + "' used when specifying model PVS membership");
+					}
+					else
+					{
+						visbox->AddMemberModel(model);
+					}
+				}
+
+				scene->Add(model);
+				models.push_back(model);
 			}
 		}
 	}
@@ -612,11 +643,11 @@ LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, Te
 				std::string filter = data["magnify filter"].get<std::string>();
 				if (filter == "nearest")
 				{
-					texture.SetMagFilter(LocalTextureFilter::Nearest);
+					texture.SetMagFilter(LocalTexture::Filter::Nearest);
 				}
 				else if (filter == "linear")
 				{
-					texture.SetMagFilter(LocalTextureFilter::Linear);
+					texture.SetMagFilter(LocalTexture::Filter::Linear);
 				}
 				else
 				{
@@ -629,11 +660,11 @@ LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, Te
 				std::string filter = data["shrink filter"].get<std::string>();
 				if (filter == "nearest")
 				{
-					texture.SetMinFilter(LocalTextureFilter::Nearest);
+					texture.SetMinFilter(LocalTexture::Filter::Nearest);
 				}
 				else if (filter == "linear")
 				{
-					texture.SetMinFilter(LocalTextureFilter::Linear);
+					texture.SetMinFilter(LocalTexture::Filter::Linear);
 				}
 				else
 				{
