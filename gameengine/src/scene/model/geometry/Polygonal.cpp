@@ -382,14 +382,7 @@ void Polygonal::InvertNormals()
 std::vector<double> Polygonal::GetTriangles() const
 {
 	std::vector<double> result;
-	{
-		size_t result_size = 0;
-		for (const Face& face : this->m_faces)
-		{
-			result_size += static_cast<size_t>(face.GetNumVertices() * GAMEENGINE_VALUES_PER_VERTEX);
-		}
-		result.reserve(result_size);
-	}
+	result.reserve(this->GetTrianglesNumValues());
 
 	for (const Face& face : this->m_faces)
 	{
@@ -469,6 +462,16 @@ std::vector<double> Polygonal::GetTriangles() const
 		}
 	}
 
+	return result;
+}
+
+std::size_t Polygonal::GetTrianglesNumValues() const
+{
+	std::size_t result = 0;
+	for (const Face& face : this->m_faces)
+	{
+		result += static_cast<std::size_t>(face.GetNumVertices() * GAMEENGINE_VALUES_PER_VERTEX);
+	}
 	return result;
 }
 

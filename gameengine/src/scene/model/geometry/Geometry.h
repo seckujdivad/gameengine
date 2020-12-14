@@ -10,4 +10,5 @@ public:
 	virtual ~Geometry();
 
 	virtual std::vector<double> GetTriangles() const = 0;
+	virtual std::size_t GetTrianglesNumValues() const = 0;
 };

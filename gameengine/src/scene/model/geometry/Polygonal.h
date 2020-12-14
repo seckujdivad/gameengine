@@ -137,6 +137,7 @@ public:
 	void InvertNormals();
 
 	std::vector<double> GetTriangles() const override;
+	std::size_t GetTrianglesNumValues() const override;
 
 	bool operator==(const Polygonal& second) const;
 	bool operator!=(const Polygonal& second) const;
