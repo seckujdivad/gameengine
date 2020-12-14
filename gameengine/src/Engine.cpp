@@ -24,39 +24,55 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 {
+	auto it = this->m_textures_static.find(texture.GetReference());
 	GLuint texture_id;
-	glGenTextures(1, &texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
+	if (it == this->m_textures_static.end())
+	{
+		glGenTextures(1, &texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 
-	//wrapping
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//wrapping
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	//filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.GetMinFilter() == LocalTextureFilter::Nearest ? GL_NEAREST : GL_LINEAR); //shrinking filter
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.GetMagFilter() == LocalTextureFilter::Nearest ? GL_NEAREST : GL_LINEAR); //enlarging filter
+		//filter
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.GetMinFilter() == LocalTexture::Filter::Nearest ? GL_NEAREST : GL_LINEAR); //shrinking filter
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.GetMagFilter() == LocalTexture::Filter::Nearest ? GL_NEAREST : GL_LINEAR); //enlarging filter
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, std::get<0>(texture.GetDimensions()), std::get<1>(texture.GetDimensions()), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.GetData());
+		LoadedTexture texture_data;
+		texture_data.id = texture_id;
+		texture_data.type = GL_TEXTURE_2D;
+		texture_data.uniform_name = uniform_name;
 
-	glGenerateMipmap(GL_TEXTURE_2D);
+		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(texture_data, texture)));
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, std::get<0>(it->second).id);
+	}
 
-	LoadedTexture texture_data;
-	texture_data.id = texture_id;
-	texture_data.type = GL_TEXTURE_2D;
-	texture_data.uniform_name = uniform_name;
-
-	this->m_textures_static.insert({ texture.GetReference(), texture_data });
+	if ((it == this->m_textures_static.end()) || (std::get<1>(it->second) != texture))
+	{
+		std::tuple dimensions = texture.GetDimensions();
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, std::get<0>(dimensions), std::get<1>(dimensions), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.GetData());
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
 }
 
-Engine::LoadedGeometry Engine::LoadGeometry(const ModelGeometry& geometry)
+Engine::LoadedGeometry Engine::LoadGeometry(std::shared_ptr<Geometry> geometry)
 {
 	LoadedGeometry loaded_geometry;
 
-	std::vector<double> vertices_highp = GetTriangles(geometry);
-	std::vector<GLfloat> vertices = DoubleToSinglePrecision(vertices_highp);
+	std::vector<double> vertices_highp = geometry->GetTriangles();
+	std::vector<GLfloat> vertices;
+	vertices.reserve(vertices_highp.size());
+	for (double value : vertices_highp)
+	{
+		vertices.push_back(static_cast<GLfloat>(value));
+	}
 
-	loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / Model::GetValuesPerVert();
-	loaded_geometry.geometry = geometry;
+	loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / GAMEENGINE_VALUES_PER_VERTEX;
+	loaded_geometry.data = geometry->GetTriangles();
 
 	//create vbo
 	glGenVertexArrays(1, &loaded_geometry.vao);
@@ -192,19 +208,25 @@ Engine::~Engine()
 
 	for (const auto& [reference, loaded_texture] : this->m_textures_static)
 	{
-		glDeleteTextures(1, &loaded_texture.id);
+		glDeleteTextures(1, &std::get<0>(loaded_texture).id);
 	}
 
-	for (const auto& [reference, loaded_geometry] : this->m_model_geometry_vbos)
+	for (const auto& [reference, loaded_geometries] : this->m_model_geometry_vbos)
 	{
-		glDeleteBuffers(1, &loaded_geometry.vbo);
-		glDeleteVertexArrays(1, &loaded_geometry.vao);
+		for (const LoadedGeometry& loaded_geometry : loaded_geometries)
+		{
+			glDeleteBuffers(1, &loaded_geometry.vbo);
+			glDeleteVertexArrays(1, &loaded_geometry.vao);
+		}
 	}
 
-	for (const auto& [model, loaded_geometry] : this->m_temporary_vbos)
+	for (const auto& [model, loaded_geometries] : this->m_temporary_vbos)
 	{
-		glDeleteBuffers(1, &loaded_geometry.vbo);
-		glDeleteVertexArrays(1, &loaded_geometry.vao);
+		for (const LoadedGeometry& loaded_geometry : loaded_geometries)
+		{
+			glDeleteBuffers(1, &loaded_geometry.vbo);
+			glDeleteVertexArrays(1, &loaded_geometry.vao);
+		}
 	}
 
 	delete this->m_glcontext;
@@ -231,6 +253,7 @@ EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::Comp
 EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
+	composite_layers.reserve(configs.size());
 	for (const RenderableConfig& config : configs)
 	{
 		EngineCanvasController::CompositeLayer layer;
@@ -252,58 +275,16 @@ void Engine::Render()
 	{
 		this->MakeContextCurrent();
 
-		//load unloaded static textures
+		//update static textures
 		// load model textures
-		std::vector<Model*> models = this->m_scene->GetModels();
-		for (std::vector<Model*>::iterator it = models.begin(); it != models.end(); it++)
+		for (Model* model : this->m_scene->GetModels())
 		{
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetColourTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetColourTexture(), "colourTexture");
-				}
-			}
-
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetNormalTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetNormalTexture(), "normalTexture");
-				}
-			}
-
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetSpecularTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetSpecularTexture(), "specularTexture");
-				}
-			}
-
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetReflectionTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetReflectionTexture(), "reflectionIntensityTexture");
-				}
-			}
-
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetSkyboxMaskTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetSkyboxMaskTexture(), "skyboxMaskTexture");
-				}
-			}
-
-			{
-				std::map<TextureReference, LoadedTexture>::iterator it2 = this->m_textures_static.find((*it)->GetDisplacementTexture().GetReference());
-				if (it2 == this->m_textures_static.end())
-				{
-					this->LoadTexture((*it)->GetDisplacementTexture(), "displacementTexture");
-				}
-			}
+			this->LoadTexture(model->GetColourTexture(), "colourTexture");
+			this->LoadTexture(model->GetNormalTexture(), "normalTexture");
+			this->LoadTexture(model->GetSpecularTexture(), "specularTexture");
+			this->LoadTexture(model->GetReflectionTexture(), "reflectionIntensityTexture");
+			this->LoadTexture(model->GetSkyboxMaskTexture(), "skyboxMaskTexture");
+			this->LoadTexture(model->GetDisplacementTexture(), "displacementTexture");
 		}
 
 		//load required cubemaps and unload unused ones
@@ -314,42 +295,42 @@ void Engine::Render()
 			std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
 			std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
 
-			for (int i = 0; i < (int)this->m_render_controllers.size(); i++)
+			for (RenderController* render_controller : this->m_render_controllers)
 			{
-				if (this->m_render_controllers.at(i)->GetType() == RenderControllerType::Reflection)
+				if (render_controller->GetType() == RenderControllerType::Reflection)
 				{
-					existing_cubemaps.push_back({ this->m_render_controllers.at(i)->GetReference(), CubemapType::Reflection });
+					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Reflection));
 				}
-				else if (this->m_render_controllers.at(i)->GetType() == RenderControllerType::Shadow)
+				else if (render_controller->GetType() == RenderControllerType::Shadow)
 				{
-					existing_cubemaps.push_back({ this->m_render_controllers.at(i)->GetReference(), CubemapType::Pointlight });
+					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Pointlight));
 				}
-				else if (this->m_render_controllers.at(i)->GetType() == RenderControllerType::Skybox)
+				else if (render_controller->GetType() == RenderControllerType::Skybox)
 				{
-					existing_cubemaps.push_back({ this->m_render_controllers.at(i)->GetReference(), CubemapType::Skybox });
+					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Skybox));
 				}
 			}
 
 			std::vector<std::tuple<Cubemap*, CubemapType>> required_cubemap_ptrs = this->m_scene->GetCubemaps();
-			for (int i = 0; i < (int)required_cubemap_ptrs.size(); i++)
+			for (const auto& [cubemap, cubemap_type] : required_cubemap_ptrs)
 			{
-				required_cubemaps.push_back({ std::get<0>(required_cubemap_ptrs.at(i))->GetReference(), std::get<1>(required_cubemap_ptrs.at(i)) });
+				required_cubemaps.push_back(std::tuple(cubemap->GetReference(), cubemap_type));
 			}
 
 			std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
 			std::sort(required_cubemaps.begin(), required_cubemaps.end());
 
-			enum class State
-			{
-				Both,
-				Added,
-				Removed
-			};
-
 			int i = 0;
 			int j = 0;
-			while ((i < (int)existing_cubemaps.size()) || (j < (int)required_cubemaps.size()))
+			while ((i < static_cast<int>(existing_cubemaps.size())) || (j < static_cast<int>(required_cubemaps.size())))
 			{
+				enum class State
+				{
+					Both,
+					Added,
+					Removed
+				};
+
 				State state;
 				if (i == existing_cubemaps.size())
 				{
@@ -393,20 +374,20 @@ void Engine::Render()
 		//remove old cubemap controllers
 		{
 			std::vector<int> cubemap_indices;
-			for (int i = 0; i < (int)cubemaps_to_remove.size(); i++)
+			for (const auto& [render_texture_reference, cubemap_type] : cubemaps_to_remove)
 			{
-				for (int j = 0; j < (int)this->m_render_controllers.size(); j++)
+				for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
 				{
-					if (this->m_render_controllers.at(j)->GetReference() == std::get<0>(cubemaps_to_remove.at(i)))
+					if (this->m_render_controllers.at(i)->GetReference() == render_texture_reference)
 					{
-						cubemap_indices.push_back(j);
+						cubemap_indices.push_back(i);
 					}
 				}
 			}
 
-			std::sort(cubemap_indices.begin(), cubemap_indices.end(), [](int first, int second) {return first > second; }); //order high-low
+			std::reverse(cubemap_indices.begin(), cubemap_indices.end()); //order high-low
 
-			for (int i = 0; i < (int)cubemap_indices.size(); i++)
+			for (int i = 0; i < static_cast<int>(cubemap_indices.size()); i++)
 			{
 				delete this->m_render_controllers.at(i);
 				this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
@@ -414,11 +395,8 @@ void Engine::Render()
 		}
 
 		//create new cubemap controllers
-		for (std::tuple<RenderTextureReference, CubemapType> cubemap_to_add : cubemaps_to_add)
+		for (const auto& [reference, type] : cubemaps_to_add)
 		{
-			RenderTextureReference reference = std::get<0>(cubemap_to_add);
-			CubemapType type = std::get<1>(cubemap_to_add);
-
 			if (type == CubemapType::Reflection)
 			{
 				this->AddRenderController(new ReflectionController(this, reference));
@@ -433,48 +411,88 @@ void Engine::Render()
 			}
 			else
 			{
-				throw std::runtime_error("Invalid CubemapType enum: " + std::to_string((int)type));
+				throw std::runtime_error("Invalid CubemapType enum: " + std::to_string(static_cast<int>(type)));
 			}
 		}
 
 		//remove non-existent geometry and update existing (if required)
 		{
-			std::vector<std::tuple<ModelReference, LoadedGeometry>> to_remove;
-			for (auto it = this->m_model_geometry_vbos.begin(); it != this->m_model_geometry_vbos.end(); it++)
+			std::vector<std::tuple<ModelReference, std::vector<LoadedGeometry>>> to_remove;
+			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry_vbos)
 			{
-				Model* model = this->GetScene()->GetModel(it->first);
+				Model* model = this->GetScene()->GetModel(model_reference);
 
 				if (model == nullptr)
 				{
-					to_remove.push_back(std::tuple(it->first, it->second));
+					to_remove.push_back(std::tuple(model_reference, loaded_geometries));
 				}
 				else
 				{
-					if (it->second.geometry != model->GetGeometry())
+					std::vector<std::vector<double>> model_geometries;
+					for (std::shared_ptr<Geometry> geometry : model->GetGeometry())
 					{
-						std::vector<GLfloat> vertices = DoubleToSinglePrecision(model->GetTriangles());
+						model_geometries.push_back(geometry->GetTriangles());
+					}
 
-						glBindVertexArray(it->second.vao);
-						glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
-						glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+					std::vector<std::vector<double>> old_geometries;
+					old_geometries.reserve(loaded_geometries.size());
+					for (const LoadedGeometry& loaded_geometry : loaded_geometries)
+					{
+						old_geometries.push_back(loaded_geometry.data);
+					}
 
-						it->second.geometry = model->GetGeometry();
-						it->second.num_vertices = static_cast<int>(vertices.size()) / model->GetValuesPerVert();
+					if (model_geometries != old_geometries) //check if geometry actually has changed between iterations
+					{
+						if (model_geometries.size() == loaded_geometries.size()) //changes to geometry are small, new geometry can be loaded into old arrays
+						{
+							for (int i = 0; i < static_cast<int>(loaded_geometries.size()); i++)
+							{
+								LoadedGeometry& loaded_geometry = loaded_geometries.at(i);
+								std::vector<double>& new_values = model_geometries.at(i);
+
+								std::vector<GLfloat> vertices;
+								vertices.reserve(new_values.size());
+								for (double value : new_values)
+								{
+									vertices.push_back(static_cast<GLfloat>(value)); 
+								}
+
+								glBindVertexArray(loaded_geometry.vao);
+								glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
+								glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+
+								loaded_geometry.data = new_values;
+								loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / GAMEENGINE_VALUES_PER_VERTEX;
+							}
+						}
+						else //changes are too large, remove and start again from scratch
+						{
+							to_remove.push_back(std::tuple(model_reference, loaded_geometries));
+						}
 					}
 				}
 			}
 
-			for (int i = 0; i < (int)to_remove.size(); i++)
+			for (const auto& [model_reference, loaded_geometries] : to_remove)
 			{
-				glDeleteBuffers(1, &std::get<1>(to_remove.at(i)).vbo);
-				this->m_model_geometry_vbos.erase(std::get<0>(to_remove.at(i)));
+				for (const LoadedGeometry& loaded_geometry : loaded_geometries)
+				{
+					glDeleteBuffers(1, &loaded_geometry.vbo);
+				}
+				
+				this->m_model_geometry_vbos.erase(model_reference);
 			}
 
 			for (Model* model : this->GetScene()->GetModels())
 			{
 				if (this->m_model_geometry_vbos.count(model->GetReference()) == 0)
 				{
-					this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
+					std::vector<LoadedGeometry> loaded_geometries;
+					for (std::shared_ptr<Geometry> geometry : model->GetGeometry())
+					{
+						loaded_geometries.push_back(this->LoadGeometry(geometry));
+					}
+					this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), loaded_geometries));
 				}
 			}
 		}
@@ -501,7 +519,7 @@ Scene* Engine::GetScene() const
 
 LoadedTexture Engine::GetTexture(TextureReference reference) const
 {
-	return this->m_textures_static.at(reference);
+	return std::get<0>(this->m_textures_static.at(reference));
 }
 
 RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) const
@@ -517,17 +535,40 @@ RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) co
 	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
 }
 
-Engine::LoadedGeometry Engine::BindVAO(Model* model)
+Engine::LoadedGeometry Engine::BindVAO(Model* model, std::shared_ptr<Geometry> geometry)
 {
 	LoadedGeometry loaded_geometry;
 	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //generate temporary VBO
 	{
-		loaded_geometry = this->LoadGeometry(model->GetGeometry());
-		this->m_temporary_vbos.insert(std::pair(model, loaded_geometry));
+		if (this->m_temporary_vbos.count(model) == 0)
+		{
+			loaded_geometry = this->LoadGeometry(geometry);
+			this->m_temporary_vbos.insert(std::pair(model, std::vector({ loaded_geometry })));
+		}
+		else
+		{
+			loaded_geometry = this->LoadGeometry(geometry);
+			this->m_temporary_vbos.at(model).push_back(loaded_geometry);
+		}
 	}
 	else
 	{
-		loaded_geometry = this->m_model_geometry_vbos.at(model->GetReference());
+		bool match_found = false;
+		std::vector<double> geometry_data = geometry->GetTriangles();
+		std::vector<LoadedGeometry> geometries = this->m_model_geometry_vbos.at(model->GetReference());
+		for (const LoadedGeometry& geometry_comparison : geometries)
+		{
+			if (geometry_comparison.data == geometry_data)
+			{
+				loaded_geometry = geometry_comparison;
+				match_found = true;
+			}
+		}
+
+		if (!match_found)
+		{
+			throw std::invalid_argument("Provided geometry has not been loaded for this model");
+		}
 	}
 
 	glBindVertexArray(loaded_geometry.vao);
@@ -536,16 +577,20 @@ Engine::LoadedGeometry Engine::BindVAO(Model* model)
 	return loaded_geometry;
 }
 
-void Engine::ReleaseVAO(Model* model)
+void Engine::ReleaseVAOs(Model* model)
 {
 	if (this->m_temporary_vbos.count(model) == 0)
 	{
-		throw std::runtime_error("This model has no associated temporary VBO");
+		throw std::invalid_argument("This model has no associated temporary VBO");
 	}
 	else
 	{
-		glDeleteBuffers(1, &this->m_temporary_vbos.at(model).vbo);
-		glDeleteVertexArrays(1, &this->m_temporary_vbos.at(model).vao);
+		for (LoadedGeometry& geometry : this->m_temporary_vbos.at(model))
+		{
+			glDeleteBuffers(1, &geometry.vbo);
+			glDeleteVertexArrays(1, &geometry.vao);
+		}
+		
 		this->m_temporary_vbos.erase(model);
 	}
 }
@@ -596,7 +641,7 @@ void Engine::SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
 {
-	if (first.geometry != second.geometry)
+	if (first.data != second.data)
 	{
 		return false;
 	}

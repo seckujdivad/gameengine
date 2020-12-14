@@ -8,7 +8,9 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <memory>
+#include <tuple>
 
 #include "GLComponents.h"
 
@@ -16,7 +18,6 @@
 #include "scene/model/Model.h"
 #include "render/LoadedTexture.h"
 #include "render/RenderTextureData.h"
-#include "render/RenderMode.h"
 #include "render/controllers/EngineCanvasController.h"
 
 class EngineCanvas;
@@ -28,7 +29,7 @@ class Engine
 public:
 	struct LoadedGeometry
 	{
-		ModelGeometry geometry;
+		std::vector<double> data;
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
 		int num_vertices = 0;
@@ -50,15 +51,15 @@ private:
 
 	Scene* m_scene = nullptr;
 
-	std::map<TextureReference, LoadedTexture> m_textures_static;
+	std::unordered_map<TextureReference, std::tuple<LoadedTexture, LocalTexture>> m_textures_static;
 
 	std::vector<RenderController*> m_render_controllers;
 
 	//loaded geometry
-	std::map<ModelReference, Engine::LoadedGeometry> m_model_geometry_vbos;
-	std::map<Model*, Engine::LoadedGeometry> m_temporary_vbos;
+	std::unordered_map<ModelReference, std::vector<Engine::LoadedGeometry>> m_model_geometry_vbos;
+	std::unordered_map<Model*, std::vector<Engine::LoadedGeometry>> m_temporary_vbos;
 
-	Engine::LoadedGeometry LoadGeometry(const ModelGeometry& geometry);
+	Engine::LoadedGeometry LoadGeometry(std::shared_ptr<Geometry> geometry);
 
 	void AddRenderController(RenderController* render_controller);
 
@@ -82,8 +83,8 @@ public:
 	LoadedTexture GetTexture(TextureReference reference) const;
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
 
-	Engine::LoadedGeometry BindVAO(Model* model);
-	void ReleaseVAO(Model* model);
+	Engine::LoadedGeometry BindVAO(Model* model, std::shared_ptr<Geometry> geometry);
+	void ReleaseVAOs(Model* model);
 
 	void MakeContextCurrent() const;
 
