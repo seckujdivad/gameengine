@@ -96,21 +96,29 @@ void Polygonal::Face::AddVertex(IndexedVertex vertex)
 	}
 
 	this->m_vertices.push_back(vertex);
+	this->m_parent.InvalidateTriangleCache();
 }
 
 void Polygonal::Face::AddVertex(StandaloneVertex vertex)
 {
 	this->AddVertex(this->GetIndexedVertex(vertex));
+	this->m_parent.InvalidateTriangleCache();
 }
 
 void Polygonal::Face::FilterVertices(std::function<bool(IndexedVertex vertex)> filter)
 {
-	FilterVectorInPlace(this->m_vertices, filter);
+	if (FilterVectorInPlace(this->m_vertices, filter))
+	{
+		this->m_parent.InvalidateTriangleCache();
+	}
 }
 
 void Polygonal::Face::MapVertices(std::function<IndexedVertex(IndexedVertex vertex)> map)
 {
-	MapVectorInPlace(this->m_vertices, map);
+	if (MapVectorInPlace(this->m_vertices, map))
+	{
+		this->m_parent.InvalidateTriangleCache();
+	}
 }
 
 std::vector<Polygonal::Face::IndexedVertex> Polygonal::Face::GetIndexedVertices() const
@@ -156,7 +164,11 @@ int Polygonal::Face::GetNumVertices() const
 
 void Polygonal::Face::SetNormal(glm::dvec3 normal)
 {
-	this->m_normal = normal;
+	if (this->m_normal != normal)
+	{
+		this->m_normal = normal;
+		this->m_parent.InvalidateTriangleCache();
+	}
 }
 
 glm::dvec3 Polygonal::Face::GetNormal() const
@@ -192,6 +204,7 @@ bool Polygonal::Face::operator!=(const Face& second) const
 void Polygonal::AddFace(Face face)
 {
 	this->m_faces.push_back(face);
+	this->InvalidateTriangleCache();
 }
 
 std::vector<Polygonal::Face> Polygonal::GetFaces() const
@@ -201,12 +214,18 @@ std::vector<Polygonal::Face> Polygonal::GetFaces() const
 
 void Polygonal::FilterFaces(std::function<bool(const Face& face)> filter)
 {
-	FilterVectorInPlace(this->m_faces, filter);
+	if (FilterVectorInPlace(this->m_faces, filter))
+	{
+		this->InvalidateTriangleCache();
+	}
 }
 
 void Polygonal::MapFaces(std::function<Face(const Face& face)> map)
 {
-	MapVectorInPlace(this->m_faces, map);
+	if (MapVectorInPlace(this->m_faces, map))
+	{
+		this->InvalidateTriangleCache();
+	}
 }
 
 int Polygonal::AddVertex(glm::dvec3 vertex)
@@ -259,6 +278,7 @@ std::vector<glm::dvec3> Polygonal::GetVertices() const
 
 void Polygonal::RemoveVertex(int identifier)
 {
+	//check the dependencies of this vertex to make sure it is safe to remove
 	for (const Face& face : this->m_faces)
 	{
 		for (const Face::IndexedVertex& vertex : face.GetIndexedVertices())
@@ -270,7 +290,10 @@ void Polygonal::RemoveVertex(int identifier)
 		}
 	}
 
-	this->m_vertices.erase(identifier);
+	if (this->m_vertices.erase(identifier) > 0)
+	{
+		this->InvalidateTriangleCache();
+	}
 }
 
 void Polygonal::RemoveVertex(glm::dvec3 vertex)
@@ -314,6 +337,7 @@ void Polygonal::FilterVertices(std::function<bool(int identifier, glm::dvec3 ver
 		if (!filter(identifier, vertex))
 		{
 			this->m_vertices.erase(identifier);
+			this->InvalidateTriangleCache();
 		}
 	}
 }
@@ -326,12 +350,19 @@ void Polygonal::MapVertices(std::function<std::pair<int, glm::dvec3>(int identif
 
 		if (result.first == identifier)
 		{
-			vertex = result.second;
+			if (vertex != result.second)
+			{
+				vertex = result.second;
+
+				this->InvalidateTriangleCache();
+			}
 		}
 		else
 		{
 			this->RemoveVertex(identifier); //automatically makes sure that this vertex has no face dependents
 			this->m_vertices.insert(result);
+
+			this->InvalidateTriangleCache();
 		}
 	}
 }
@@ -377,9 +408,11 @@ void Polygonal::InvertNormals()
 	{
 		face.SetNormal(0.0 - face.GetNormal());
 	}
+
+	this->InvalidateTriangleCache();
 }
 
-std::vector<double> Polygonal::GetTriangles() const
+std::vector<double> Polygonal::GetTrianglesWithoutCache() const
 {
 	std::vector<double> result;
 	result.reserve(this->GetTrianglesNumValues());
