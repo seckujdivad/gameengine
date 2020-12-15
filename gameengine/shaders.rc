@@ -4,21 +4,21 @@
 RCID_TF_POSTPROCESS_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess.frag"
 RCID_TF_POSTPROCESS_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess.vert"
 
-//normal, wireframe, textured
-RCID_TF_MODEL_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model.vert"
-
-RCID_TF_MODEL_NORMAL_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_normal.geom"
-RCID_TF_MODEL_WIREFRAME_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_wireframe.geom"
-
-RCID_TF_MODEL_NORMAL_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_normal.frag"
-RCID_TF_MODEL_WIREFRAME_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_wireframe.frag"
-RCID_TF_MODEL_TEXTURED_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_textured.frag"
-
-//shadow
-RCID_TF_MODEL_SHADOW_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.vert"
-RCID_TF_MODEL_SHADOW_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.geom"
-RCID_TF_MODEL_SHADOW_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model_shadow.frag"
-
 //default
 RCID_TF_DEFAULT_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/default.frag"
 RCID_TF_DEFAULT_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/default.vert"
+
+//model
+RCID_TF_MODEL_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/default.vert"
+
+RCID_TF_MODEL_TESSCONTROLSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/default.tesc"
+
+RCID_TF_MODEL_TESSEVALSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/default.tese"
+
+RCID_TF_MODEL_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/default.geom"
+RCID_TF_MODEL_WIREFRAME_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/wireframe.geom"
+
+RCID_TF_MODEL_NORMAL_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal.frag"
+RCID_TF_MODEL_WIREFRAME_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/wireframe.frag"
+RCID_TF_MODEL_TEXTURED_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/textured.frag"
+RCID_TF_MODEL_SHADOW_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/shadow.frag"

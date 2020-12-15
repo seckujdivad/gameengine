@@ -2,19 +2,19 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-in vec4 vertMdlSpacePos[];
-in vec4 vertSceneSpacePos[];
-in vec4 vertCamSpacePos[];
-in vec3 vertTangentSpacePos[];
+in vec4 teseMdlSpacePos[];
+in vec4 teseSceneSpacePos[];
+in vec4 teseCamSpacePos[];
+in vec3 teseTangentSpacePos[];
 
-in vec2 vertUV[];
+in vec2 teseUV[];
 
-in vec4 vertMdlSpaceNormal[];
-in vec4 vertSceneSpaceNormal[];
+in vec4 teseMdlSpaceNormal[];
+in vec4 teseSceneSpaceNormal[];
 
-in mat3 vertNormalTBN[];
+in mat3 teseNormalTBN[];
 
-in vec3 vertTangentSpaceCameraPos[];
+in vec3 teseTangentSpaceCameraPos[];
 
 
 uniform mat4 cam_rotate;
@@ -28,7 +28,7 @@ void main()
 	vec3 positions[3];
 	for (int i = 0; i < 3; i++)
 	{
-		vec4 vertex = cam_rotate * gl_in[i].gl_Position;
+		vec4 vertex = cam_rotate *  teseCamSpacePos[i];
 		positions[i] = vertex.xyz / vertex.w;
 	}
 	

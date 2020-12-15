@@ -2,19 +2,19 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 18) out;
 
-in vec4 vertMdlSpacePos[];
-in vec4 vertSceneSpacePos[];
-in vec4 vertCamSpacePos[];
-in vec3 vertTangentSpacePos[];
+in vec4 teseMdlSpacePos[];
+in vec4 teseSceneSpacePos[];
+in vec4 teseCamSpacePos[];
+in vec3 teseTangentSpacePos[];
 
-in vec2 vertUV[];
+in vec2 teseUV[];
 
-in vec4 vertMdlSpaceNormal[];
-in vec4 vertSceneSpaceNormal[];
+in vec4 teseMdlSpaceNormal[];
+in vec4 teseSceneSpaceNormal[];
 
-in mat3 vertNormalTBN[];
+in mat3 teseNormalTBN[];
 
-in vec3 vertTangentSpaceCameraPos[];
+in vec3 teseTangentSpaceCameraPos[];
 
 out vec4 geomMdlSpacePos;
 out vec4 geomSceneSpacePos;
@@ -39,26 +39,26 @@ uniform mat4 cam_persp;
 
 void set_outputs(int index)
 {
-	geomMdlSpacePos = vertMdlSpacePos[index % 3];
-	geomSceneSpacePos = vertSceneSpacePos[index % 3];
-	geomCamSpacePos = vertCamSpacePos[index % 3];
-	geomTangentSpacePos = vertTangentSpacePos[index & 3];
+	geomMdlSpacePos = teseMdlSpacePos[index % 3];
+	geomSceneSpacePos = teseSceneSpacePos[index % 3];
+	geomCamSpacePos = teseCamSpacePos[index % 3];
+	geomTangentSpacePos = teseTangentSpacePos[index & 3];
 
-	geomUV = vertUV[index % 3];
+	geomUV = teseUV[index % 3];
 
-	geomMdlSpaceNormal = vertMdlSpaceNormal[index % 3];
-	geomSceneSpaceNormal = vertSceneSpaceNormal[index % 3];
+	geomMdlSpaceNormal = teseMdlSpaceNormal[index % 3];
+	geomSceneSpaceNormal = teseSceneSpaceNormal[index % 3];
 
-	geomNormalTBN = vertNormalTBN[index % 3];
+	geomNormalTBN = teseNormalTBN[index % 3];
 
-	geomTangentSpaceCameraPos = vertTangentSpaceCameraPos[index % 3];
+	geomTangentSpaceCameraPos = teseTangentSpaceCameraPos[index % 3];
 
 	//calculate post camera transformation values (which are affected by the cubemap face)
 	geomCamSpacePos = (cubemap_transform[gl_Layer] * cam_rotate * geomCamSpacePos) / geomCamSpacePos.w;
 
 	gl_Position = cam_persp * geomCamSpacePos;
 
-	geomCamSpaceNormal = cubemap_transform[gl_Layer] * cam_rotate * vertSceneSpaceNormal[index % 3];
+	geomCamSpaceNormal = cubemap_transform[gl_Layer] * cam_rotate * teseSceneSpaceNormal[index % 3];
 }
 
 void main()

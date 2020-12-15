@@ -280,15 +280,15 @@
   <ItemGroup>
     <None Include="resources\shaders\default.frag" />
     <None Include="resources\shaders\default.vert" />
-    <None Include="resources\shaders\model.vert" />
-    <None Include="resources\shaders\model_normal.frag" />
-    <None Include="resources\shaders\model_normal.geom" />
-    <None Include="resources\shaders\model_shadow.frag" />
-    <None Include="resources\shaders\model_shadow.geom" />
-    <None Include="resources\shaders\model_shadow.vert" />
-    <None Include="resources\shaders\model_textured.frag" />
-    <None Include="resources\shaders\model_wireframe.frag" />
-    <None Include="resources\shaders\model_wireframe.geom" />
+    <None Include="resources\shaders\model\default.geom" />
+    <None Include="resources\shaders\model\default.tesc" />
+    <None Include="resources\shaders\model\default.tese" />
+    <None Include="resources\shaders\model\default.vert" />
+    <None Include="resources\shaders\model\normal.frag" />
+    <None Include="resources\shaders\model\shadow.frag" />
+    <None Include="resources\shaders\model\textured.frag" />
+    <None Include="resources\shaders\model\wireframe.frag" />
+    <None Include="resources\shaders\model\wireframe.geom" />
     <None Include="resources\shaders\postprocess.frag" />
     <None Include="resources\shaders\postprocess.vert" />
   </ItemGroup>

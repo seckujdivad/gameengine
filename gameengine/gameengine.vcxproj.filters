@@ -70,6 +70,9 @@
     <Filter Include="Source Files\scene\model\geometry">
       <UniqueIdentifier>{b1c8bd5a-c50a-4f57-a43c-31df3fd380e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\model">
+      <UniqueIdentifier>{9ea4a5d6-5493-4222-b408-1e885d7c44ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\EngineCanvas.h">
@@ -354,38 +357,38 @@
     <None Include="resources\shaders\postprocess.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="resources\shaders\model.vert">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="resources\shaders\model_shadow.frag">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="resources\shaders\model_shadow.geom">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="resources\shaders\model_shadow.vert">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
     <None Include="resources\shaders\default.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="resources\shaders\default.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="resources\shaders\model_wireframe.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="resources\shaders\model\default.geom">
+      <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model_normal.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="resources\shaders\model\default.tesc">
+      <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model_normal.geom">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="resources\shaders\model\default.tese">
+      <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model_wireframe.geom">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="resources\shaders\model\default.vert">
+      <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model_textured.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="resources\shaders\model\normal.frag">
+      <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\shaders\model\shadow.frag">
+      <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\shaders\model\textured.frag">
+      <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\shaders\model\wireframe.frag">
+      <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\shaders\model\wireframe.geom">
+      <Filter>Resource Files\shaders\model</Filter>
     </None>
   </ItemGroup>
 </Project>
