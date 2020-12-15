@@ -184,6 +184,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Engine.h" />
+    <ClInclude Include="src\generic\FunctionalVector.h" />
     <ClInclude Include="src\generic\KDTree.h" />
     <ClInclude Include="src\generic\std_glm.h" />
     <ClInclude Include="src\GLComponents.h" />
@@ -228,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\generic\FunctionalVector.cpp" />
     <ClCompile Include="src\generic\KDTree.cpp" />
     <ClCompile Include="src\generic\std_glm.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />

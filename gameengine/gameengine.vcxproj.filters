@@ -201,6 +201,9 @@
     <ClInclude Include="src\scene\model\geometry\Polygonal.h">
       <Filter>Header Files\scene\model\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\FunctionalVector.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -319,6 +322,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\model\geometry\Geometry.cpp">
       <Filter>Source Files\scene\model\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\FunctionalVector.cpp">
+      <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
