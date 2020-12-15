@@ -214,23 +214,15 @@ bool LocalTexture::operator==(const LocalTexture& second) const
 			return false;
 		}
 
-		size_t num_pixels = static_cast<size_t>(std::get<0>(first_dimensions)) * static_cast<size_t>(std::get<1>(first_dimensions));
-
-		if (num_pixels <= 32 * 32)
+		std::size_t num_pixels = static_cast<size_t>(std::get<0>(first_dimensions)) * static_cast<size_t>(std::get<1>(first_dimensions));
+		for (std::size_t i = 0; i < num_pixels; i++)
 		{
-			for (size_t i = 0; i < num_pixels; i++)
+			if (first_data[i] != second_data[i])
 			{
-				if (first_data[i] != second_data[i])
-				{
-					return false;
-				}
+				return false;
 			}
-			return true;
 		}
-		else
-		{
-			return false; //too many pixels, skip the comparison
-		}
+		return true;
 	}
 }
 
