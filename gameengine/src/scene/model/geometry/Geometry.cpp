@@ -1,24 +1,24 @@
 #include "Geometry.h"
 
-void Geometry::InvalidateTriangleCache()
+void Geometry::InvalidatePrimitivesCache()
 {
-    this->m_triangles_cache_is_valid = false;
+    this->m_primitives_cache_is_valid = false;
 }
 
 Geometry::~Geometry()
 {
 }
 
-std::vector<double> Geometry::GetTriangles()
+std::vector<double> Geometry::GetPrimitives()
 {
-    if (this->m_triangles_cache_is_valid)
+    if (this->m_primitives_cache_is_valid)
     {
-        return this->m_triangles_cache;
+        return this->m_primitives_cache;
     }
     else
     {
-        this->m_triangles_cache = this->GetTrianglesWithoutCache();
-        this->m_triangles_cache_is_valid = true;
-        return this->m_triangles_cache;
+        this->m_primitives_cache = this->GetPrimitivesWithoutCache();
+        this->m_primitives_cache_is_valid = true;
+        return this->m_primitives_cache;
     }
 }

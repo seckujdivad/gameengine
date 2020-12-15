@@ -90,7 +90,7 @@ private:
 	int m_vertices_counter = 0;
 
 protected:
-	std::vector<double> GetTrianglesWithoutCache() const override;
+	std::vector<double> GetPrimitivesWithoutCache() const override;
 
 public:
 	void AddFace(Face face);
@@ -128,7 +128,8 @@ public:
 	void MergeVertices(double threshold = 0.0);
 	void InvertNormals();
 	
-	std::size_t GetTrianglesNumValues() const override;
+	std::size_t GetPrimitivesNumValues() const override;
+	Geometry::PrimitiveType GetPrimitiveType() const override;
 
 	bool operator==(const Polygonal& second) const;
 	bool operator!=(const Polygonal& second) const;

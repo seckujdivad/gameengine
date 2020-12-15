@@ -4,6 +4,7 @@
 
 #include "../scene/model/Model.h"
 #include "../scene/model/geometry/Polygonal.h"
+#include "../scene/model/geometry/Patch.h"
 #include "../scene/Camera.h"
 #include "../scene/Scene.h"
 #include "../scene/light/PointLight.h"
@@ -532,7 +533,39 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model, geometry);
 
 				//draw geometry
-				glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
+				GLenum mode = GL_NONE; //default invalid value, should be overwritten
+
+				Geometry::PrimitiveType primitive_type = loaded_geometry.source->GetPrimitiveType();
+				if (primitive_type == Geometry::PrimitiveType::Triangles)
+				{
+					mode = GL_TRIANGLES;
+				}
+				else if (primitive_type == Geometry::PrimitiveType::Patch)
+				{
+					mode = GL_PATCHES;
+
+					std::size_t patch_size = geometry->GetPrimitivesNumValues() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX);
+
+#ifdef _DEBUG
+					GLint max_patch_size = 32; //this is the minimum value required by the standard
+					glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
+
+					//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
+					//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
+					max_patch_size--;
+
+					if (static_cast<std::size_t>(max_patch_size) < patch_size)
+					{
+						throw std::runtime_error("Patch provided has " + std::to_string(patch_size) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
+					}
+#endif
+				}
+				else
+				{
+					throw std::runtime_error("Unknown primitive type \"" + std::to_string(static_cast<int>(primitive_type)) + "\"");
+				}
+
+				glDrawArrays(mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 			}
 
 			if (dealloc_models) //release geometry as the models are temporary

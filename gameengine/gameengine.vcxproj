@@ -188,6 +188,7 @@
     <ClInclude Include="src\generic\KDTree.h" />
     <ClInclude Include="src\generic\std_glm.h" />
     <ClInclude Include="src\GLComponents.h" />
+    <ClInclude Include="src\loaders\models\BptLoader.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />
@@ -212,6 +213,7 @@
     <ClInclude Include="src\scene\LocallyMovable.h" />
     <ClInclude Include="src\scene\LocalTexture.h" />
     <ClInclude Include="src\scene\model\geometry\Geometry.h" />
+    <ClInclude Include="src\scene\model\geometry\Patch.h" />
     <ClInclude Include="src\scene\model\geometry\Polygonal.h" />
     <ClInclude Include="src\scene\model\Material.h" />
     <ClInclude Include="src\scene\model\Model.h" />
@@ -233,6 +235,7 @@
     <ClCompile Include="src\generic\KDTree.cpp" />
     <ClCompile Include="src\generic\std_glm.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
+    <ClCompile Include="src\loaders\models\BptLoader.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\loaders\SceneLoader.cpp" />
     <ClCompile Include="src\render\controllers\CubemapController.cpp" />
@@ -254,6 +257,7 @@
     <ClCompile Include="src\scene\LocallyMovable.cpp" />
     <ClCompile Include="src\scene\LocalTexture.cpp" />
     <ClCompile Include="src\scene\model\geometry\Geometry.cpp" />
+    <ClCompile Include="src\scene\model\geometry\Patch.cpp" />
     <ClCompile Include="src\scene\model\geometry\Polygonal.cpp" />
     <ClCompile Include="src\scene\model\Material.cpp" />
     <ClCompile Include="src\scene\model\Model.cpp" />

@@ -201,6 +201,12 @@
     <ClInclude Include="src\scene\model\geometry\Polygonal.h">
       <Filter>Header Files\scene\model\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\models\BptLoader.h">
+      <Filter>Header Files\loaders\models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\model\geometry\Patch.h">
+      <Filter>Header Files\scene\model\geometry</Filter>
+    </ClInclude>
     <ClInclude Include="src\generic\FunctionalVector.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
@@ -321,6 +327,12 @@
       <Filter>Source Files\scene\model\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\model\geometry\Geometry.cpp">
+      <Filter>Source Files\scene\model\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\models\BptLoader.cpp">
+      <Filter>Source Files\loaders\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\geometry\Patch.cpp">
       <Filter>Source Files\scene\model\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\generic\FunctionalVector.cpp">

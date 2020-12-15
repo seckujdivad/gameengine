@@ -64,7 +64,7 @@ Engine::LoadedGeometry Engine::LoadGeometry(std::shared_ptr<Geometry> geometry)
 {
 	LoadedGeometry loaded_geometry(geometry);
 
-	loaded_geometry.data = geometry->GetTriangles();
+	loaded_geometry.data = geometry->GetPrimitives();
 	std::vector<GLfloat> vertices;
 	vertices.reserve(loaded_geometry.data.size());
 	for (double value : loaded_geometry.data)
@@ -429,7 +429,7 @@ void Engine::Render()
 					std::vector<std::vector<double>> model_geometries;
 					for (std::shared_ptr<Geometry> geometry : model->GetGeometry())
 					{
-						model_geometries.push_back(geometry->GetTriangles());
+						model_geometries.push_back(geometry->GetPrimitives());
 					}
 
 					std::vector<std::vector<double>> old_geometries;
