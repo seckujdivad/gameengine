@@ -532,7 +532,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model, geometry);
 
 				//draw geometry
-				glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
+				glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 			}
 
 			if (dealloc_models) //release geometry as the models are temporary

@@ -29,10 +29,13 @@ class Engine
 public:
 	struct LoadedGeometry
 	{
+		LoadedGeometry(std::shared_ptr<Geometry> source);
+
+		std::shared_ptr<Geometry> source;
 		std::vector<double> data;
+
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
-		int num_vertices = 0;
 	};
 
 	struct DebugMessageConfig

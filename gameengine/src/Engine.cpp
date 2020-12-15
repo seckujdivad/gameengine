@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <optional>
 
 #include <wx/image.h>
 
@@ -61,18 +62,15 @@ void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 
 Engine::LoadedGeometry Engine::LoadGeometry(std::shared_ptr<Geometry> geometry)
 {
-	LoadedGeometry loaded_geometry;
+	LoadedGeometry loaded_geometry(geometry);
 
-	std::vector<double> vertices_highp = geometry->GetTriangles();
+	loaded_geometry.data = geometry->GetTriangles();
 	std::vector<GLfloat> vertices;
-	vertices.reserve(vertices_highp.size());
-	for (double value : vertices_highp)
+	vertices.reserve(loaded_geometry.data.size());
+	for (double value : loaded_geometry.data)
 	{
 		vertices.push_back(static_cast<GLfloat>(value));
 	}
-
-	loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / GAMEENGINE_VALUES_PER_VERTEX;
-	loaded_geometry.data = geometry->GetTriangles();
 
 	//create vbo
 	glGenVertexArrays(1, &loaded_geometry.vao);
@@ -462,7 +460,6 @@ void Engine::Render()
 								glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
 
 								loaded_geometry.data = new_values;
-								loaded_geometry.num_vertices = static_cast<int>(vertices.size()) / GAMEENGINE_VALUES_PER_VERTEX;
 							}
 						}
 						else //changes are too large, remove and start again from scratch
@@ -537,44 +534,43 @@ RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) co
 
 Engine::LoadedGeometry Engine::BindVAO(Model* model, std::shared_ptr<Geometry> geometry)
 {
-	LoadedGeometry loaded_geometry;
+	std::optional<LoadedGeometry> loaded_geometry;
 	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //generate temporary VBO
 	{
 		if (this->m_temporary_vbos.count(model) == 0)
 		{
 			loaded_geometry = this->LoadGeometry(geometry);
-			this->m_temporary_vbos.insert(std::pair(model, std::vector({ loaded_geometry })));
+			this->m_temporary_vbos.insert(std::pair(model, std::vector({ loaded_geometry.value() })));
 		}
 		else
 		{
 			loaded_geometry = this->LoadGeometry(geometry);
-			this->m_temporary_vbos.at(model).push_back(loaded_geometry);
+			this->m_temporary_vbos.at(model).push_back(loaded_geometry.value());
 		}
 	}
 	else
 	{
-		bool match_found = false;
-		std::vector<double> geometry_data = geometry->GetTriangles();
-		std::vector<LoadedGeometry> geometries = this->m_model_geometry_vbos.at(model->GetReference());
+		const std::vector<LoadedGeometry>& geometries = this->m_model_geometry_vbos.at(model->GetReference());
 		for (const LoadedGeometry& geometry_comparison : geometries)
 		{
-			if (geometry_comparison.data == geometry_data)
+			if (geometry_comparison.source == geometry)
 			{
 				loaded_geometry = geometry_comparison;
-				match_found = true;
 			}
-		}
-
-		if (!match_found)
-		{
-			throw std::invalid_argument("Provided geometry has not been loaded for this model");
 		}
 	}
 
-	glBindVertexArray(loaded_geometry.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
+	if (loaded_geometry.has_value())
+	{
+		glBindVertexArray(loaded_geometry->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry->vbo);
 
-	return loaded_geometry;
+		return loaded_geometry.value();
+	}
+	else
+	{
+		throw std::invalid_argument("Provided geometry has not been loaded for this model");
+	}
 }
 
 void Engine::ReleaseVAOs(Model* model)
@@ -642,11 +638,6 @@ void Engine::SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
 {
 	if (first.data != second.data)
-	{
-		return false;
-	}
-
-	if (first.num_vertices != second.num_vertices)
 	{
 		return false;
 	}
@@ -799,4 +790,8 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	{
 		throw std::runtime_error(message);
 	}
+}
+
+Engine::LoadedGeometry::LoadedGeometry(std::shared_ptr<Geometry> source) : source(source)
+{
 }
