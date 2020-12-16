@@ -186,6 +186,7 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\generic\FunctionalVector.h" />
     <ClInclude Include="src\generic\KDTree.h" />
+    <ClInclude Include="src\generic\SplitOnChar.h" />
     <ClInclude Include="src\generic\std_glm.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\models\BptLoader.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\generic\FunctionalVector.cpp" />
     <ClCompile Include="src\generic\KDTree.cpp" />
+    <ClCompile Include="src\generic\SplitOnChar.cpp" />
     <ClCompile Include="src\generic\std_glm.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\models\BptLoader.cpp" />

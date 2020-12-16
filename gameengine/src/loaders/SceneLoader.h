@@ -2,12 +2,9 @@
 
 #include <string>
 #include <filesystem>
-#include <map>
-#include <vector>
 
 #include <nlohmann/json.hpp>
 
-#include "models/PlyLoader.h"
 #include "../scene/LocalTexture.h"
 #include "../scene/Referenceable.h"
 

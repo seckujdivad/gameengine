@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <map>
+#include <vector>
 
 #include <wx/image.h>
 
@@ -11,6 +13,9 @@
 #include "../scene/VisBox.h"
 #include "../scene/light/PointLight.h"
 #include "../scene/Skybox.h"
+
+#include "models/PlyLoader.h"
+#include "models/BptLoader.h"
 
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name)
 {
@@ -41,7 +46,8 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	}
 
 	//load all models
-	std::unordered_map<std::string, std::shared_ptr<Geometry>> geometry_lookup;
+	std::unordered_map<std::string, std::vector<std::shared_ptr<Geometry>>> geometry_lookup;
+
 	if (scene_data["models"]["ply"].is_object())
 	{
 		for (auto it = scene_data["models"]["ply"].begin(); it != scene_data["models"]["ply"].end(); it++)
@@ -83,7 +89,33 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 
 			if (geometry_lookup.count(model_name) == 0)
 			{
-				geometry_lookup.insert(std::pair(model_name, model_geometry));
+				geometry_lookup.insert(std::pair(model_name, std::vector<std::shared_ptr<Geometry>>({ std::dynamic_pointer_cast<Geometry>(model_geometry) })));
+			}
+			else
+			{
+				throw std::runtime_error("Model identifier '" + model_name + "' is not unique");
+			}
+		}
+	}
+
+	if (scene_data["models"]["bpt"].is_object())
+	{
+		for (auto it = scene_data["models"]["bpt"].begin(); it != scene_data["models"]["bpt"].end(); it++)
+		{
+			std::string model_name = it.key();
+
+			std::vector<std::shared_ptr<Patch>> patches = PatchesFromBPT((root_path / it.value()["path"].get<std::string>()).string());
+
+			std::vector<std::shared_ptr<Geometry>> geometry;
+			geometry.reserve(patches.size());
+			for (const std::shared_ptr<Patch>& patch : patches)
+			{
+				geometry.push_back(std::dynamic_pointer_cast<Geometry>(patch));
+			}
+
+			if (geometry_lookup.count(model_name) == 0)
+			{
+				geometry_lookup.insert(std::pair(model_name, geometry));
 			}
 			else
 			{
@@ -287,7 +319,10 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 					}
 					else
 					{
-						geometries.push_back(geometry_lookup.at(geometry_name));
+						for (const std::shared_ptr<Geometry>& geometry : geometry_lookup.at(geometry_name))
+						{
+							geometries.push_back(geometry);
+						}
 					}
 				}
 

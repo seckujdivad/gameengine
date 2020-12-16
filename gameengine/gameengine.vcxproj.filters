@@ -213,6 +213,9 @@
     <ClInclude Include="src\generic\FunctionalVector.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\SplitOnChar.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -339,6 +342,9 @@
       <Filter>Source Files\scene\model\geometry</Filter>
     </ClCompile>
     <ClCompile Include="src\generic\FunctionalVector.cpp">
+      <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\SplitOnChar.cpp">
       <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
