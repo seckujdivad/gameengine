@@ -96,6 +96,7 @@ std::vector<std::shared_ptr<Patch>> PatchesFromBPT(std::string path)
 				{
 					std::shared_ptr<Patch> patch = std::make_shared<Patch>();
 					patch->SetControlPoints(patch_data);
+					patch->SetInterpolation(Patch::Interpolation::Bezier);
 					patches.push_back(patch);
 
 					patch_data.clear();

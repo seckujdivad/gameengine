@@ -17,8 +17,16 @@ public:
 		glm::dvec2 uv;
 	};
 
+	enum class Interpolation
+	{
+		None,
+		Bezier
+	};
+
 private:
 	std::vector<std::vector<ControlPoint>> m_control_points;
+
+	Interpolation m_interp_mode;
 
 protected:
 	std::vector<double> GetPrimitivesWithoutCache() const override;
@@ -28,4 +36,7 @@ public:
 	Geometry::PrimitiveType GetPrimitiveType() const override;
 
 	void SetControlPoints(std::vector<std::vector<ControlPoint>> control_points);
+
+	void SetInterpolation(Interpolation mode);
+	Interpolation GetInterpolation() const;
 };
