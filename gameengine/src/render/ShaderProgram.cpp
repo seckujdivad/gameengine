@@ -1,5 +1,7 @@
 #include "ShaderProgram.h"
 
+#include "../Engine.h"
+
 #include <fstream>
 
 ShaderProgram::ShaderProgram()
@@ -51,6 +53,9 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 		glGetProgramInfoLog(this->m_program_id, 512, &err_len, err_info);
 		std::string errmsg = std::string(err_info);
 		errmsg = errmsg.substr(0, err_len);
+
+		LogMessage("Shader link exception: " + errmsg);
+
 		throw std::runtime_error("Shader link exception: " + errmsg);
 	}
 }
@@ -127,7 +132,20 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 		glGetShaderInfoLog(shader_id, 512, &err_len, err_info);
 		std::string errmsg = std::string(err_info);
 		errmsg = errmsg.substr(0, err_len);
-		throw std::runtime_error("Shader compile exception (" + path + "): " + errmsg);
+
+		std::string final_message;
+		if (string_is_path)
+		{
+			final_message = "Shader compile exception (" + path + "): " + errmsg;
+		}
+		else
+		{
+			final_message = "Shader compile exception: " + errmsg;
+		}
+
+		LogMessage(final_message);
+
+		throw std::runtime_error(final_message);
 	}
 
 	//return id
