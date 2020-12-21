@@ -29,6 +29,11 @@
       "flat plane": {
         "path": "models/flat plane.ply"
       }
+    },
+    "bpt": {
+      "teapot": {
+        "path": "models/teapotCGA.bpt"
+      }
     }
   },
   "layout": [
@@ -107,6 +112,30 @@
         "specular": 1
       },
       "visboxes": [ "level section 3" ]
+    },
+    {
+      "model": "teapot",
+      "identifier": "utah teapot",
+      "position": [ -1, 4, -1 ],
+      "material": {
+        "diffuse": 0.2,
+        "specular": 0.1,
+        "specular highlight": 32
+      },
+      "reflections": {
+        "screen space": {
+          "appear in ssr": true,
+          "enabled": false
+        },
+        "alternative": {
+          "reflection": "level section 2",
+          "mode": "iterative sampling"
+        }
+      },
+      "textures": {
+        "colour": 0.2
+      },
+      "visboxes": [ "level section 2" ]
     }
   ],
   "lighting": {

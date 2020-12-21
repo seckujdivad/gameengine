@@ -37,7 +37,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxDefaultPosition, wxSi
 
 	std::vector<RenderableConfig> canvas_layers;
 
-	RenderableConfig normal_config = { RenderMode::Normal, RenderableConfig::Normal() };
+	RenderableConfig normal_config = { RenderMode::Wireframe, RenderableConfig::Wireframe() };
 	canvas_layers.push_back(normal_config);
 
 	this->m_glcanvas = this->m_engine->GenerateNewCanvas(canvas_layers, wxID_ANY, this);
