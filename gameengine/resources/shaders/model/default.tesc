@@ -1,5 +1,5 @@
 #version 400 core
-layout(vertices = 3) out;
+layout(vertices = 16) out;
 
 in vec4 vertMdlSpacePos[];
 in vec4 vertSceneSpacePos[];
@@ -49,13 +49,13 @@ void main()
 
 	if (tess_enable)
 	{
-		gl_TessLevelOuter[0] = 2.0f;
-		gl_TessLevelOuter[1] = 4.0f;
-		gl_TessLevelOuter[2] = 6.0f;
-		gl_TessLevelOuter[3] = 8.0f;
+		gl_TessLevelOuter[0] = 4.0f;
+		gl_TessLevelOuter[1] = 2.0f;
+		gl_TessLevelOuter[2] = 9.0f;
+		gl_TessLevelOuter[3] = 3.0f;
 
-		gl_TessLevelInner[0] = 8.0f;
-		gl_TessLevelInner[1] = 8.0f;
+		gl_TessLevelInner[0] = 6.0f;
+		gl_TessLevelInner[1] = 7.0f;
 	}
 	else
 	{

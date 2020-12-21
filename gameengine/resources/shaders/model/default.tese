@@ -1,5 +1,5 @@
 #version 400 core
-layout(triangles, equal_spacing, ccw) in;
+layout(quads, equal_spacing, ccw) in;
 
 in vec4 tescMdlSpacePos[];
 in vec4 tescSceneSpacePos[];
@@ -29,34 +29,101 @@ out mat3 teseNormalTBN;
 
 out vec3 teseTangentSpaceCameraPos;
 
-vec4 interpolate(vec4 values[gl_MaxPatchVertices])
+uniform bool tess_enable;
+
+const int patch_size = 4;
+const int patch_degree = patch_size - 1;
+
+int Factorial(const int n)
 {
-	return vec4(gl_TessCoord.x) * values[0] + vec4(gl_TessCoord.y) * values[1] + vec4(gl_TessCoord.z) * values[2];
+	int product = 1;
+	for (int i = n; i > 1; i--)
+	{
+		product *= i;
+	}
+	return product;
 }
 
-vec3 interpolate(vec3 values[gl_MaxPatchVertices])
+int BinomialCoefficient(const int n, const int k)
 {
-	return vec3(gl_TessCoord.x) * values[0] + vec3(gl_TessCoord.y) * values[1] + vec3(gl_TessCoord.z) * values[2];
+	return Factorial(n) / (Factorial(k) * Factorial(n - k));
 }
 
-vec2 interpolate(vec2 values[gl_MaxPatchVertices])
+float BezierBasisMult(const int i, const int n, const float t)
 {
-	return vec2(gl_TessCoord.x) * values[0] + vec2(gl_TessCoord.y) * values[1] + vec2(gl_TessCoord.z) * values[2];
+	return float(BinomialCoefficient(n, i)) * pow(1.0f - t, n - i) * pow(t, i);
+}
+
+vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
+{
+	vec4 sum = vec4(0.0f);
+	for (int i = 0; i < patch_size; i++)
+	{
+		float basis_x = BezierBasisMult(i, patch_degree, gl_TessCoord.x);
+		vec4 inner_sum = vec4(0.0f);
+		for (int j = 0; j < patch_size; j++)
+		{
+			inner_sum += BezierBasisMult(j, patch_degree, gl_TessCoord.y) * values[(i * patch_size) + j];
+		}
+
+		sum += inner_sum * basis_x;
+	}
+
+	return sum;
+}
+
+vec3 interpolate(const vec3 values[gl_MaxPatchVertices])
+{
+	vec4 values_vec4[gl_MaxPatchVertices];
+	for (int i = 0; i < gl_MaxPatchVertices; i++)
+	{
+		values_vec4[i] = vec4(values[i], 0.0f);
+	}
+	return interpolate(values_vec4).xyz;
+}
+
+vec2 interpolate(const vec2 values[gl_MaxPatchVertices])
+{
+	vec4 values_vec4[gl_MaxPatchVertices];
+	for (int i = 0; i < gl_MaxPatchVertices; i++)
+	{
+		values_vec4[i] = vec4(values[i], 0.0f, 0.0f);
+	}
+	return interpolate(values_vec4).xy;
 }
 
 void main()
 {
-	teseMdlSpacePos = interpolate(tescMdlSpacePos);
-	teseSceneSpacePos = interpolate(tescSceneSpacePos);
-	teseCamSpacePos = interpolate(tescCamSpacePos);
-	teseTangentSpacePos = interpolate(tescTangentSpacePos);
+	if (tess_enable)
+	{
+		teseMdlSpacePos = interpolate(tescMdlSpacePos);
+		teseSceneSpacePos = interpolate(tescSceneSpacePos);
+		teseCamSpacePos = interpolate(tescCamSpacePos);
+		teseTangentSpacePos = interpolate(tescTangentSpacePos);
 
-	teseUV = interpolate(tescUV);
+		teseUV = interpolate(tescUV);
 
-	teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
-	teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
+		teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
+		teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
 
-	teseNormalTBN = tescNormalTBN[0];
+		teseNormalTBN = tescNormalTBN[0];
 
-	teseTangentSpaceCameraPos = interpolate(tescTangentSpaceCameraPos);
+		teseTangentSpaceCameraPos = interpolate(tescTangentSpaceCameraPos);
+	}
+	else
+	{
+		teseMdlSpacePos = tescMdlSpacePos[0];
+		teseSceneSpacePos = tescSceneSpacePos[0];
+		teseCamSpacePos = tescCamSpacePos[0];
+		teseTangentSpacePos = tescTangentSpacePos[0];
+
+		teseUV = tescUV[0];
+
+		teseMdlSpaceNormal = tescMdlSpaceNormal[0];
+		teseSceneSpaceNormal = tescSceneSpaceNormal[0];
+
+		teseNormalTBN = tescNormalTBN[0];
+
+		teseTangentSpaceCameraPos = tescTangentSpaceCameraPos[0];
+	}
 }
