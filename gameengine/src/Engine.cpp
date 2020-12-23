@@ -226,7 +226,7 @@ Engine::~Engine()
 	delete this->m_glcontext;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
 	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
@@ -241,10 +241,10 @@ EngineCanvas* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::Comp
 		this->m_glcontext_canvas = nullptr;
 	}
 
-	return canvas;
+	return controller;
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
 	composite_layers.reserve(configs.size());
@@ -258,7 +258,7 @@ EngineCanvas* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, w
 	return this->GenerateNewCanvas(composite_layers, id, parent);
 }
 
-EngineCanvas* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
 {
 	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
 }

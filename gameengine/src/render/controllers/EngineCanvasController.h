@@ -28,6 +28,8 @@ private:
 	std::vector<RenderTexture*> m_textures;
 	RenderTexture* m_texture_final;
 
+	RenderableConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
+
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
 	EngineCanvasController(const EngineCanvasController&) = delete;
@@ -42,4 +44,8 @@ public:
 	RenderControllerType GetType() const override;
 
 	EngineCanvas* GetEngineCanvas() const;
+
+	void SetRenderLayers(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
+	void SetRenderLayers(std::vector<RenderableConfig> configs);
+	void SetRenderLayers(RenderableConfig config);
 };
