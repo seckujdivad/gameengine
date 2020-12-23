@@ -103,6 +103,16 @@ std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::vector<int> indices)
         throw std::runtime_error("Unreachable case");
     }
 
+    //quads are actually drawn as 2x2 linearly interpolated patches, change winding appropriately
+    //for a quad:
+    //01
+    //23
+    //the perimeter is 0132 but the patch is 0123, so the 3rd and 4th vertices should be swapped
+    for (std::array<int, 4>& quad : result)
+    {
+        std::swap(quad.at(2), quad.at(3));
+    }
+
     return result;
 }
 
