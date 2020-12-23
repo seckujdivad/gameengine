@@ -47,26 +47,11 @@ void main()
 
 	tescTangentSpaceCameraPos[gl_InvocationID] = vertTangentSpaceCameraPos[gl_InvocationID];
 
-	if (tess_enable)
-	{
-		gl_TessLevelOuter[0] = 4.0f;
-		gl_TessLevelOuter[1] = 2.0f;
-		gl_TessLevelOuter[2] = 9.0f;
-		gl_TessLevelOuter[3] = 3.0f;
+	gl_TessLevelOuter[0] = 5.0f;
+	gl_TessLevelOuter[1] = 5.0f;
+	gl_TessLevelOuter[2] = 5.0f;
+	gl_TessLevelOuter[3] = 5.0f;
 
-		gl_TessLevelInner[0] = 6.0f;
-		gl_TessLevelInner[1] = 7.0f;
-	}
-	else
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			gl_TessLevelOuter[i] = 1.0f;
-		}
-
-		for (int i = 0; i < 2; i++)
-		{
-			gl_TessLevelInner[i] = 1.0f;
-		}
-	}
+	gl_TessLevelInner[0] = 5.0f;
+	gl_TessLevelInner[1] = 5.0f;
 }

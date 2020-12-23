@@ -41,7 +41,8 @@ int Factorial(const int n)
 	{
 		product *= i;
 	}
-	return product;
+
+	return max(product, 1);
 }
 
 int BinomialCoefficient(const int n, const int k)
@@ -51,7 +52,19 @@ int BinomialCoefficient(const int n, const int k)
 
 float BezierBasisMult(const int i, const int n, const float t)
 {
-	return float(BinomialCoefficient(n, i)) * pow(1.0f - t, n - i) * pow(t, i);
+	float start_mult = 1.0f; //pow(0, 0) is undefined behaviour according to the spec, but is a condition hit by this algorithm - give the contextually correct value of 1
+	if (!((t == 0.0f) && (i == 0)))
+	{
+		start_mult = pow(t, i);
+	}
+
+	float end_mult = 1.0f;
+	if (!((t - 1.0f == 0.0f) && (n - i == 0)))
+	{
+		end_mult = pow(1.0f - t, n - i);
+	}
+
+	return float(BinomialCoefficient(n, i)) * start_mult * end_mult;
 }
 
 vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
@@ -94,36 +107,17 @@ vec2 interpolate(const vec2 values[gl_MaxPatchVertices])
 
 void main()
 {
-	if (tess_enable)
-	{
-		teseMdlSpacePos = interpolate(tescMdlSpacePos);
-		teseSceneSpacePos = interpolate(tescSceneSpacePos);
-		teseCamSpacePos = interpolate(tescCamSpacePos);
-		teseTangentSpacePos = interpolate(tescTangentSpacePos);
+	teseMdlSpacePos = interpolate(tescMdlSpacePos);
+	teseSceneSpacePos = interpolate(tescSceneSpacePos);
+	teseCamSpacePos = interpolate(tescCamSpacePos);
+	teseTangentSpacePos = interpolate(tescTangentSpacePos);
 
-		teseUV = interpolate(tescUV);
+	teseUV = interpolate(tescUV);
 
-		teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
-		teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
+	teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
+	teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
 
-		teseNormalTBN = tescNormalTBN[0];
+	teseNormalTBN = tescNormalTBN[0];
 
-		teseTangentSpaceCameraPos = interpolate(tescTangentSpaceCameraPos);
-	}
-	else
-	{
-		teseMdlSpacePos = tescMdlSpacePos[0];
-		teseSceneSpacePos = tescSceneSpacePos[0];
-		teseCamSpacePos = tescCamSpacePos[0];
-		teseTangentSpacePos = tescTangentSpacePos[0];
-
-		teseUV = tescUV[0];
-
-		teseMdlSpaceNormal = tescMdlSpaceNormal[0];
-		teseSceneSpaceNormal = tescSceneSpaceNormal[0];
-
-		teseNormalTBN = tescNormalTBN[0];
-
-		teseTangentSpaceCameraPos = tescTangentSpaceCameraPos[0];
-	}
+	teseTangentSpaceCameraPos = interpolate(tescTangentSpaceCameraPos);
 }
