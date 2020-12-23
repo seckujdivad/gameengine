@@ -8,9 +8,11 @@ class wxGridBagSizer;
 class wxButton;
 class wxListBox;
 class wxStaticText;
+class wxRadioBox;
 
 class Engine;
 class EngineCanvas;
+class EngineCanvasController;
 class Scene;
 class Camera;
 class Model;
@@ -27,6 +29,8 @@ private:
 	wxGridBagSizer* m_sizer;
 	
 	EngineCanvas* m_glcanvas;
+	EngineCanvasController* m_glcanvas_controller;
+
 	wxListBox* m_lb_models;
 
 	VectorCtrl* m_vct_position;
@@ -37,8 +41,11 @@ private:
 	wxStaticText* m_stxt_rotation;
 	wxStaticText* m_stxt_scale;
 
+	wxRadioBox* m_rdobx_render_mode;
+
 	void lb_models_OnSelection(wxCommandEvent& evt);
 	void lb_models_OnChar(wxKeyEvent& evt);
+	void rdobx_render_mode_OnChanged(wxCommandEvent& evt);
 
 	void vct_position_OnChange(VectorCtrlEvent& evt);
 	void vct_rotation_OnChange(VectorCtrlEvent& evt);
