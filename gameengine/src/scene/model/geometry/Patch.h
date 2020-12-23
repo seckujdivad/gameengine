@@ -32,11 +32,14 @@ protected:
 	std::vector<double> GetPrimitivesWithoutCache() const override;
 
 public:
-	std::size_t GetPrimitivesNumValues() const override;
+	std::size_t GetPrimitivesNumVertices() const override;
 	Geometry::PrimitiveType GetPrimitiveType() const override;
+	std::size_t GetPrimitiveSize() const override;
 
 	void SetControlPoints(std::vector<std::vector<ControlPoint>> control_points);
 
 	void SetInterpolation(Interpolation mode);
 	Interpolation GetInterpolation() const;
+
+	glm::ivec2 GetDimensions() const;
 };

@@ -9,27 +9,21 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 	if (this->m_interp_mode == Interpolation::None)
 	{
 		std::vector<glm::ivec2> indices;
-		result.reserve(this->GetPrimitivesNumValues());
-		indices.reserve(this->GetPrimitivesNumValues() / GAMEENGINE_VALUES_PER_VERTEX);
+		indices.reserve(this->GetPrimitivesNumVertices());
+		result.reserve(this->GetPrimitivesNumVertices());
 
 		for (int u = 0; u < static_cast<int>(this->m_control_points.size()) - 1; u++)
 		{
-			for (int v = 0; v < static_cast<int>(this->m_control_points.size()) - 1; v++)
+			for (int v = 0; v < static_cast<int>(this->m_control_points.at(0).size()) - 1; v++)
 			{
-				//generate triangle from the quads, assume that the patch starts in the bottom left
-				//first triangle
 				indices.push_back(glm::ivec2(u, v));
-				indices.push_back(glm::ivec2(u + 1, v));
-				indices.push_back(glm::ivec2(u + 1, v + 1));
-
-				//second triangle
-				indices.push_back(glm::ivec2(u, v));
-				indices.push_back(glm::ivec2(u + 1, v + 1));
 				indices.push_back(glm::ivec2(u, v + 1));
+				indices.push_back(glm::ivec2(u + 1, v + 1));
+				indices.push_back(glm::ivec2(u + 1, v));
 			}
 		}
 
-		for (const glm::ivec2& index : indices)
+		for (const glm::ivec2 index : indices)
 		{
 			const ControlPoint& control_point = this->m_control_points.at(index.x).at(index.y);
 
@@ -37,25 +31,18 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 			result.push_back(control_point.vertex.y);
 			result.push_back(control_point.vertex.z);
 
+			//TODO: calculate proper surface normals
 			result.push_back(1.0);
 			result.push_back(0.0);
 			result.push_back(0.0);
 
 			result.push_back(control_point.uv.x);
 			result.push_back(control_point.uv.y);
-
-			result.push_back(1.0);
-			result.push_back(0.0);
-			result.push_back(0.0);
-
-			result.push_back(1.0);
-			result.push_back(0.0);
-			result.push_back(0.0);
 		}
 	}
 	else
 	{
-		result.reserve(this->GetPrimitivesNumValues());
+		result.reserve(this->GetPrimitivesNumVertices() * std::size_t(GAMEENGINE_VALUES_PER_VERTEX));
 
 		for (const std::vector<ControlPoint>& control_point_line : this->m_control_points)
 		{
@@ -65,20 +52,13 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 				result.push_back(control_point.vertex.y);
 				result.push_back(control_point.vertex.z);
 
+				//TODO: calculate proper surface normals
 				result.push_back(1.0);
 				result.push_back(0.0);
 				result.push_back(0.0);
 
 				result.push_back(control_point.uv.x);
 				result.push_back(control_point.uv.y);
-
-				result.push_back(1.0);
-				result.push_back(0.0);
-				result.push_back(0.0);
-
-				result.push_back(1.0);
-				result.push_back(0.0);
-				result.push_back(0.0);
 			}
 		}
 	}
@@ -86,15 +66,15 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 	return result;
 }
 
-std::size_t Patch::GetPrimitivesNumValues() const
+std::size_t Patch::GetPrimitivesNumVertices() const
 {
 	if (this->m_interp_mode == Interpolation::None)
 	{
-		return 6 * (this->m_control_points.size() - 1) * (this->m_control_points.at(0).size() - 1) * GAMEENGINE_VALUES_PER_VERTEX;
+		return GetNumQuadsFromPolygon(4) * (this->m_control_points.size() - 1) * (this->m_control_points.at(0).size() - 1);
 	}
 	else
 	{
-		return this->m_control_points.size() * this->m_control_points.at(0).size() * GAMEENGINE_VALUES_PER_VERTEX;
+		return this->m_control_points.size() * this->m_control_points.at(0).size();
 	}
 }
 
@@ -102,11 +82,11 @@ Geometry::PrimitiveType Patch::GetPrimitiveType() const
 {
 	if (this->m_interp_mode == Interpolation::None)
 	{
-		return Geometry::PrimitiveType::Triangles;
+		return Geometry::PrimitiveType::Quads;
 	}
 	else
 	{
-		return Geometry::PrimitiveType::Patch;
+		return Geometry::PrimitiveType::Patches;
 	}
 }
 
@@ -141,6 +121,18 @@ void Patch::SetControlPoints(std::vector<std::vector<ControlPoint>> control_poin
 	}
 }
 
+std::size_t Patch::GetPrimitiveSize() const
+{
+	if (this->m_interp_mode == Interpolation::None)
+	{
+		return 4;
+	}
+	else
+	{
+		return this->m_control_points.size() * this->m_control_points.at(0).size();
+	}
+}
+
 void Patch::SetInterpolation(Interpolation mode)
 {
 	if (mode != this->m_interp_mode)
@@ -158,6 +150,14 @@ void Patch::SetInterpolation(Interpolation mode)
 Patch::Interpolation Patch::GetInterpolation() const
 {
 	return this->m_interp_mode;
+}
+
+glm::ivec2 Patch::GetDimensions() const
+{
+	return glm::ivec2(
+		static_cast<int>(this->m_control_points.size()),
+		static_cast<int>(this->m_control_points.at(0).size())
+	);
 }
 
 Patch::ControlPoint::ControlPoint(glm::dvec3 vertex, glm::dvec2 uv) : vertex(vertex), uv(uv)

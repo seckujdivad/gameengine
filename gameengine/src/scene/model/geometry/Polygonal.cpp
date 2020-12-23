@@ -1,7 +1,7 @@
 #include "Polygonal.h"
 
 #include <stdexcept>
-#include <array>
+#include <string>
 
 #include <glm/ext.hpp>
 
@@ -159,7 +159,7 @@ Polygonal::Face::IndexedVertex Polygonal::Face::GetIndexedVertex(const Standalon
 
 int Polygonal::Face::GetNumVertices() const
 {
-	return static_cast<int>(this->m_vertices.size());
+	return static_cast<int>(GetNumQuadsFromPolygon(this->m_vertices.size()));
 }
 
 void Polygonal::Face::SetNormal(glm::dvec3 normal)
@@ -415,102 +415,118 @@ void Polygonal::InvertNormals()
 std::vector<double> Polygonal::GetPrimitivesWithoutCache() const
 {
 	std::vector<double> result;
-	result.reserve(this->GetPrimitivesNumValues());
+	result.reserve(this->GetPrimitivesNumVertices() * std::size_t(GAMEENGINE_VALUES_PER_VERTEX));
 
 	for (const Face& face : this->m_faces)
 	{
 		const std::vector<Face::StandaloneVertex> vertices = face.GetStandaloneVertices();
-		if (vertices.size() > 2) //lines aren't faces, don't draw them
+
+		if (this->m_output_primitive == PrimitiveType::Quads)
 		{
-			//split the polygon into a number of triangles - generate the vertex indices of these triangles
-			std::vector<glm::ivec3> tri_indices;
-			for (int i = 0; i < static_cast<int>(vertices.size()) - 2; i++)
+			std::vector<std::array<int, 4>> quads = GetQuadsFromPolygon(vertices.size());
+
+			for (const std::array<int, 4>& quad : quads)
 			{
-				tri_indices.push_back(glm::ivec3(0, i + 1, i + 2));
-			}
-
-			//add each generated triangle's data to the resulting vector of doubles
-			for (const glm::ivec3& indices : tri_indices)
-			{
-				//resolve the triangle generated from the polygon
-				std::array<Face::StandaloneVertex, 3> triangle = {
-					vertices.at(indices[0]),
-					vertices.at(indices[1]),
-					vertices.at(indices[2])
-				};
-
-				//calculate ccw normal
-				const glm::dvec3 ccw_normal = glm::cross(triangle.at(1).vertex - triangle.at(0).vertex, triangle.at(2).vertex - triangle.at(0).vertex); //follows right hand rule
-				const double normal_angle_diff = std::abs(std::fmod(
-					std::acos(glm::dot(ccw_normal, face.GetNormal()) / (glm::length(ccw_normal) * glm::length(face.GetNormal()))) + glm::pi<double>(),
-					glm::pi<double>() * 2.0f) - glm::pi<double>());
-
-				//reverse the vertex winding if the normal derived by assuming counter-clockwise winding is too far from the surface normal - this is how opengl will derive it
-				if (normal_angle_diff > (glm::pi<double>() * 0.5))
+				for (int index : quad)
 				{
-					std::reverse(triangle.begin(), triangle.end());
-				}
-
-				//calculate tangent and bitangent
-				const glm::dvec3 edge1 = triangle.at(1).vertex - triangle.at(0).vertex;
-				const glm::dvec3 edge2 = triangle.at(2).vertex - triangle.at(0).vertex;
-				const glm::dvec2 edgeuv1 = triangle.at(1).uv - triangle.at(0).uv;
-				const glm::dvec2 edgeuv2 = triangle.at(2).uv - triangle.at(0).uv;
-
-				const glm::dvec3 tangent = glm::dvec3(
-					(edgeuv2.y * edge1.x) - (edgeuv1.y * edge2.x),
-					(edgeuv2.y * edge1.y) - (edgeuv1.y * edge2.y),
-					(edgeuv2.y * edge1.z) - (edgeuv1.y * edge2.z)
-				);
-
-				const glm::dvec3 bitangent = glm::dvec3(
-					(edgeuv1.x * edge2.x) - (edgeuv2.x * edge1.x),
-					(edgeuv1.x * edge2.y) - (edgeuv2.x * edge1.y),
-					(edgeuv1.x * edge2.z) - (edgeuv2.x * edge1.z)
-				);
-
-				//push data to gl-ready vector
-				for (const Face::StandaloneVertex& vertex : triangle)
-				{
-					result.push_back(vertex.vertex.x);
-					result.push_back(vertex.vertex.y);
-					result.push_back(vertex.vertex.z);
-
+					result.push_back(vertices.at(index).vertex.x);
+					result.push_back(vertices.at(index).vertex.y);
+					result.push_back(vertices.at(index).vertex.z);
+					
 					result.push_back(face.GetNormal().x);
 					result.push_back(face.GetNormal().y);
 					result.push_back(face.GetNormal().z);
 
-					result.push_back(vertex.uv.x);
-					result.push_back(vertex.uv.y);
-
-					result.push_back(tangent.x);
-					result.push_back(tangent.y);
-					result.push_back(tangent.z);
-
-					result.push_back(bitangent.x);
-					result.push_back(bitangent.y);
-					result.push_back(bitangent.z);
+					result.push_back(vertices.at(index).uv.x);
+					result.push_back(vertices.at(index).uv.y);
 				}
 			}
+		}
+		else if (this->m_output_primitive == PrimitiveType::Triangles)
+		{
+			if (vertices.size() > 2) //lines aren't faces, don't draw them
+			{
+				//split the polygon into a number of triangles - generate the vertex indices of these triangles
+				std::vector<glm::ivec3> tri_indices;
+				for (int i = 0; i < static_cast<int>(vertices.size()) - 2; i++)
+				{
+					tri_indices.push_back(glm::ivec3(0, i + 1, i + 2));
+				}
+
+				//add each generated triangle's data to the resulting vector of doubles
+				for (const glm::ivec3& indices : tri_indices)
+				{
+					//resolve the triangle generated from the polygon
+					std::array<Face::StandaloneVertex, 3> triangle = {
+						vertices.at(indices[0]),
+						vertices.at(indices[1]),
+						vertices.at(indices[2])
+					};
+
+					//calculate ccw normal
+					const glm::dvec3 ccw_normal = glm::cross(triangle.at(1).vertex - triangle.at(0).vertex, triangle.at(2).vertex - triangle.at(0).vertex); //follows right hand rule
+					const double normal_angle_diff = std::abs(std::fmod(
+						std::acos(glm::dot(ccw_normal, face.GetNormal()) / (glm::length(ccw_normal) * glm::length(face.GetNormal()))) + glm::pi<double>(),
+						glm::pi<double>() * 2.0f) - glm::pi<double>());
+
+					//reverse the vertex winding if the normal derived by assuming counter-clockwise winding is too far from the surface normal - this is how opengl will derive it
+					if (normal_angle_diff > (glm::pi<double>() * 0.5))
+					{
+						std::reverse(triangle.begin(), triangle.end());
+					}
+
+					//push data to gl-ready vector
+					for (const Face::StandaloneVertex& vertex : triangle)
+					{
+						result.push_back(vertex.vertex.x);
+						result.push_back(vertex.vertex.y);
+						result.push_back(vertex.vertex.z);
+
+						result.push_back(face.GetNormal().x);
+						result.push_back(face.GetNormal().y);
+						result.push_back(face.GetNormal().z);
+
+						result.push_back(vertex.uv.x);
+						result.push_back(vertex.uv.y);
+					}
+				}
+			}
+		}
+		else
+		{
+			throw std::runtime_error("Unsupported primitive type - can't generate primitives of type " + std::to_string(static_cast<int>(this->m_output_primitive)));
 		}
 	}
 
 	return result;
 }
 
-std::size_t Polygonal::GetPrimitivesNumValues() const
+std::size_t Polygonal::GetPrimitivesNumVertices() const
 {
 	std::size_t result = 0;
 	for (const Face& face : this->m_faces)
 	{
-		result += static_cast<std::size_t>(face.GetNumVertices() * GAMEENGINE_VALUES_PER_VERTEX);
+		result += static_cast<std::size_t>(face.GetNumVertices());
 	}
 	return result;
 }
 
 Geometry::PrimitiveType Polygonal::GetPrimitiveType() const
 {
-	return Geometry::PrimitiveType::Triangles;
+	return this->m_output_primitive;
+}
+
+void Polygonal::SetPrimitiveType(Geometry::PrimitiveType type)
+{
+	if ((type == PrimitiveType::Quads)
+		|| (type == PrimitiveType::Triangles))
+	{
+		this->m_output_primitive = type;
+	}
+	else
+	{
+		throw std::invalid_argument("Primitive type " + std::to_string(static_cast<int>(type)) + " can't be generated");
+	}
 }
 
 bool Polygonal::operator==(const Polygonal& second) const

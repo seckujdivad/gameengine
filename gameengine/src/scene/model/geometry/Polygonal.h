@@ -89,6 +89,8 @@ private:
 	std::unordered_map<int, glm::dvec3> m_vertices;
 	int m_vertices_counter = 0;
 
+	PrimitiveType m_output_primitive = PrimitiveType::Quads;
+
 protected:
 	std::vector<double> GetPrimitivesWithoutCache() const override;
 
@@ -128,8 +130,10 @@ public:
 	void MergeVertices(double threshold = 0.0);
 	void InvertNormals();
 	
-	std::size_t GetPrimitivesNumValues() const override;
+	std::size_t GetPrimitivesNumVertices() const override;
 	Geometry::PrimitiveType GetPrimitiveType() const override;
+
+	void SetPrimitiveType(Geometry::PrimitiveType type);
 
 	bool operator==(const Polygonal& second) const;
 	bool operator!=(const Polygonal& second) const;

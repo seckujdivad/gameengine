@@ -4,35 +4,25 @@ layout(quads, equal_spacing, ccw) in;
 in vec4 tescMdlSpacePos[];
 in vec4 tescSceneSpacePos[];
 in vec4 tescCamSpacePos[];
-in vec3 tescTangentSpacePos[];
 
 in vec2 tescUV[];
 
 in vec4 tescMdlSpaceNormal[];
 in vec4 tescSceneSpaceNormal[];
 
-in mat3 tescNormalTBN[];
-
-in vec3 tescTangentSpaceCameraPos[];
-
 out vec4 teseMdlSpacePos;
 out vec4 teseSceneSpacePos;
 out vec4 teseCamSpacePos;
-out vec3 teseTangentSpacePos;
 
 out vec2 teseUV;
 
 out vec4 teseMdlSpaceNormal;
 out vec4 teseSceneSpaceNormal;
 
-out mat3 teseNormalTBN;
-
-out vec3 teseTangentSpaceCameraPos;
-
 uniform bool tess_enable;
 
-const int patch_size = 4;
-const int patch_degree = patch_size - 1;
+uniform int patch_size_u;
+uniform int patch_size_v;
 
 int Factorial(const int n)
 {
@@ -70,13 +60,13 @@ float BezierBasisMult(const int i, const int n, const float t)
 vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
 {
 	vec4 sum = vec4(0.0f);
-	for (int i = 0; i < patch_size; i++)
+	for (int i = 0; i < patch_size_u; i++)
 	{
-		float basis_x = BezierBasisMult(i, patch_degree, gl_TessCoord.x);
+		float basis_x = BezierBasisMult(i, patch_size_u - 1, gl_TessCoord.x);
 		vec4 inner_sum = vec4(0.0f);
-		for (int j = 0; j < patch_size; j++)
+		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_degree, gl_TessCoord.y) * values[(i * patch_size) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, gl_TessCoord.y) * values[(i * patch_size_u) + j];
 		}
 
 		sum += inner_sum * basis_x;
@@ -110,14 +100,9 @@ void main()
 	teseMdlSpacePos = interpolate(tescMdlSpacePos);
 	teseSceneSpacePos = interpolate(tescSceneSpacePos);
 	teseCamSpacePos = interpolate(tescCamSpacePos);
-	teseTangentSpacePos = interpolate(tescTangentSpacePos);
 
 	teseUV = interpolate(tescUV);
 
 	teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
 	teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
-
-	teseNormalTBN = tescNormalTBN[0];
-
-	teseTangentSpaceCameraPos = interpolate(tescTangentSpaceCameraPos);
 }

@@ -12,10 +12,6 @@ in vec2 teseUV[];
 in vec4 teseMdlSpaceNormal[];
 in vec4 teseSceneSpaceNormal[];
 
-in mat3 teseNormalTBN[];
-
-in vec3 teseTangentSpaceCameraPos[];
-
 
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;

@@ -80,6 +80,7 @@ protected:
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 	static bool RenderModeIsModelRendering(RenderMode mode);
+	bool RenderModeIsModelRendering();
 
 public:
 	Renderable(Engine* engine, RenderableConfig config);

@@ -58,6 +58,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					models.clear();
 
 					std::shared_ptr<Polygonal> geom = std::make_shared<Polygonal>();
+					geom->SetPrimitiveType(Geometry::PrimitiveType::Triangles);
 
 					Polygonal::Face face = Polygonal::Face(*geom);
 
@@ -512,25 +513,41 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				Geometry::PrimitiveType primitive_type = loaded_geometry.source->GetPrimitiveType();
 				if (primitive_type == Geometry::PrimitiveType::Triangles)
 				{
-					this->SetShaderUniform("tess_enable", false);
+					if (this->GetRenderMode() != RenderMode::Postprocess)
+					{
+						throw std::runtime_error("The only supported render mode for triangles is Postprocess");
+					}
 
-					if (this->RenderModeIsModelRendering(this->GetRenderMode()))
-					{
-						mode = GL_PATCHES;
-						glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(3));
-					}
-					else
-					{
-						mode = GL_TRIANGLES;
-					}
+					mode = GL_TRIANGLES;
 				}
-				else if (primitive_type == Geometry::PrimitiveType::Patch)
+				else if ((primitive_type == Geometry::PrimitiveType::Patches) || (primitive_type == Geometry::PrimitiveType::Quads))
 				{
-					this->SetShaderUniform("tess_enable", true);
+					if (!this->RenderModeIsModelRendering())
+					{
+						throw std::runtime_error("The only supported render modes for patches and quads are the model-oriented ones");
+					}
 
 					mode = GL_PATCHES;
 
-					std::size_t patch_size = geometry->GetPrimitivesNumValues() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX);
+					this->SetShaderUniform("tess_enable", primitive_type == Geometry::PrimitiveType::Patches);
+
+					glm::ivec2 dimensions = glm::ivec2(2, 2);
+					if (primitive_type == Geometry::PrimitiveType::Patches) //only Patch produces patches
+					{
+						dimensions = std::dynamic_pointer_cast<Patch>(geometry)->GetDimensions();
+					}
+
+					this->SetShaderUniform("patch_size_u", dimensions.x);
+					this->SetShaderUniform("patch_size_v", dimensions.y);
+				}
+				else
+				{
+					throw std::runtime_error("Unknown primitive type \"" + std::to_string(static_cast<int>(primitive_type)) + "\"");
+				}
+
+				//set patch size
+				{
+					std::size_t patch_size = geometry->GetPrimitiveSize();
 
 #ifdef _DEBUG
 					GLint max_patch_size = 32; //this is the minimum value required by the standard
@@ -548,10 +565,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
 				}
-				else
-				{
-					throw std::runtime_error("Unknown primitive type \"" + std::to_string(static_cast<int>(primitive_type)) + "\"");
-				}
+				
 
 				glDrawArrays(mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 			}
@@ -770,6 +784,11 @@ bool Renderable::RenderModeIsModelRendering(RenderMode mode)
 		|| (mode == RenderMode::Textured);
 }
 
+bool Renderable::RenderModeIsModelRendering()
+{
+	return this->RenderModeIsModelRendering(this->GetRenderMode());
+}
+
 Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
 {
 	this->m_engine->MakeContextCurrent();
@@ -899,6 +918,8 @@ void Renderable::SetConfig(RenderableConfig config)
 			"cam_transform_inverse",
 			//tesselation
 			"tess_enable",
+			"patch_size_u",
+			"patch_size_v",
 			//geometry
 			"cubemap_transform[0]",
 			"cubemap_transform[1]",
