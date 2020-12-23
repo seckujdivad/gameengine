@@ -1,24 +1,23 @@
 #version 400 core
 layout(vertices = 16) out;
 
-in vec4 vertMdlSpacePos[];
-in vec4 vertSceneSpacePos[];
-in vec4 vertCamSpacePos[];
-in vec3 vertTangentSpacePos[];
+in vec3 vertMdlSpacePos[];
+in vec3 vertSceneSpacePos[];
+in vec3 vertCamSpacePos[];
 
 in vec2 vertUV[];
 
-in vec4 vertMdlSpaceNormal[];
-in vec4 vertSceneSpaceNormal[];
+in vec3 vertMdlSpaceNormal[];
+in vec3 vertSceneSpaceNormal[];
 
-out vec4 tescMdlSpacePos[];
-out vec4 tescSceneSpacePos[];
-out vec4 tescCamSpacePos[];
+out vec3 tescMdlSpacePos[];
+out vec3 tescSceneSpacePos[];
+out vec3 tescCamSpacePos[];
 
 out vec2 tescUV[];
 
-out vec4 tescMdlSpaceNormal[];
-out vec4 tescSceneSpaceNormal[];
+out vec3 tescMdlSpaceNormal[];
+out vec3 tescSceneSpaceNormal[];
 
 uniform bool tess_enable;
 

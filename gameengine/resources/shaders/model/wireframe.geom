@@ -2,30 +2,32 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-in vec4 teseMdlSpacePos[];
-in vec4 teseSceneSpacePos[];
-in vec4 teseCamSpacePos[];
+in vec3 teseMdlSpacePos[];
+in vec3 teseSceneSpacePos[];
+in vec3 teseCamSpacePos[];
 in vec3 teseTangentSpacePos[];
 
 in vec2 teseUV[];
 
-in vec4 teseMdlSpaceNormal[];
-in vec4 teseSceneSpaceNormal[];
+in vec3 teseMdlSpaceNormal[];
+in vec3 teseSceneSpaceNormal[];
 
 
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 
-uniform bool draw_back_faces;
 
+vec3 persp_div(vec4 vec)
+{
+	return vec.xyz / vec.w;
+}
 
 void main()
 {
 	vec3 positions[3];
 	for (int i = 0; i < 3; i++)
 	{
-		vec4 vertex = cam_rotate *  teseCamSpacePos[i];
-		positions[i] = vertex.xyz / vertex.w;
+		vec3 vertex = persp_div(cam_rotate * vec4(teseCamSpacePos[i], 1.0f));
 	}
 	
 	bool draw_tri = true;

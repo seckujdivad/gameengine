@@ -1,23 +1,23 @@
 #version 400 core
 layout(quads, equal_spacing, ccw) in;
 
-in vec4 tescMdlSpacePos[];
-in vec4 tescSceneSpacePos[];
-in vec4 tescCamSpacePos[];
+in vec3 tescMdlSpacePos[];
+in vec3 tescSceneSpacePos[];
+in vec3 tescCamSpacePos[];
 
 in vec2 tescUV[];
 
-in vec4 tescMdlSpaceNormal[];
-in vec4 tescSceneSpaceNormal[];
+in vec3 tescMdlSpaceNormal[];
+in vec3 tescSceneSpaceNormal[];
 
-out vec4 teseMdlSpacePos;
-out vec4 teseSceneSpacePos;
-out vec4 teseCamSpacePos;
+out vec3 teseMdlSpacePos;
+out vec3 teseSceneSpacePos;
+out vec3 teseCamSpacePos;
 
 out vec2 teseUV;
 
-out vec4 teseMdlSpaceNormal;
-out vec4 teseSceneSpaceNormal;
+out vec3 teseMdlSpaceNormal;
+out vec3 teseSceneSpaceNormal;
 
 uniform bool tess_enable;
 

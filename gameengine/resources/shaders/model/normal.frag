@@ -25,16 +25,16 @@
 layout(location = 0) out vec4 frag_out;
 layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
 
-in vec4 geomMdlSpacePos;
-in vec4 geomSceneSpacePos;
-in vec4 geomCamSpacePos;
+in vec3 geomMdlSpacePos;
+in vec3 geomSceneSpacePos;
+in vec3 geomCamSpacePos;
 in vec3 geomTangentSpacePos;
 
 in vec2 geomUV;
 
-in vec4 geomMdlSpaceNormal;
-in vec4 geomSceneSpaceNormal;
-in vec4 geomCamSpaceNormal;
+in vec3 geomMdlSpaceNormal;
+in vec3 geomSceneSpaceNormal;
+in vec3 geomCamSpaceNormal;
 
 in mat3 geomNormalTBN;
 
@@ -301,14 +301,14 @@ void main()
 	//sample specular map
 	vec3 sample_specular = texture(specularTexture, parallax_uv).rgb * mat_specular;
 
-	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos.xyz); //get direction from the fragment to the camera
+	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos); //get direction from the fragment to the camera
 
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
 		//calculate light
 		vec3 light_change = vec3(0.0f);
 
-		vec3 fragtolight = normalize(light_points[i].position - geomSceneSpacePos.xyz); //get direction from the fragment to the light source
+		vec3 fragtolight = normalize(light_points[i].position - geomSceneSpacePos); //get direction from the fragment to the light source
 
 		// diffuse
 		float diffuse_intensity = max(dot(normal, fragtolight), 0.0f); //calculate diffuse intensity, floor = 0
@@ -320,7 +320,7 @@ void main()
 		light_change += specular_intensity * sample_specular * light_points[i].intensity; //apply specular intensity and material specular colour to fragment intensity
 
 		//apply light to fragment
-		frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos.xyz, i));
+		frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos, i));
 	}
 
 	//apply lighting to fragment
@@ -333,11 +333,11 @@ void main()
 		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)
 		{
-			if (length(geomCamSpacePos.xyz) < mat_ssr_max_distance)
+			if (length(geomCamSpacePos) < mat_ssr_max_distance)
 			{
 				const vec3 direction = normalize(reflect(-fragtocam, normal));
-				const vec3 end_pos = geomSceneSpacePos.xyz + (direction * mat_ssr_max_cast_distance);
-				const vec3 start_pos = geomSceneSpacePos.xyz + (direction * ((mat_ssr_depth_acceptance * 1.01f) / dot(direction, normal)));
+				const vec3 end_pos = geomSceneSpacePos + (direction * mat_ssr_max_cast_distance);
+				const vec3 start_pos = geomSceneSpacePos + (direction * ((mat_ssr_depth_acceptance * 1.01f) / dot(direction, normal)));
 
 				const vec4 ss_start_pos_prediv = cam_transform * vec4(start_pos, 1.0f);
 				const vec3 ss_start_pos = ss_start_pos_prediv.xyz / ss_start_pos_prediv.w;
@@ -407,7 +407,7 @@ void main()
 				int reflection_index;
 				for (int i = 0; i < reflection_count; i++)
 				{
-					float current_distance = length(reflections[i].position - geomSceneSpacePos.xyz);
+					float current_distance = length(reflections[i].position - geomSceneSpacePos);
 
 					bool condition = (refl_distance == 0.0f) || (current_distance < refl_distance);
 					reflection_index = condition ? i : reflection_index;
@@ -418,7 +418,7 @@ void main()
 				{
 					vec3 sample_vector = reflect(-fragtocam, normal);
 					float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
-					vec3 offset = geomSceneSpacePos.xyz - reflections[reflection_index].position;
+					vec3 offset = geomSceneSpacePos - reflections[reflection_index].position;
 
 					for (int i = 0; i < reflections[reflection_index].iterations; i++)
 					{
@@ -447,7 +447,7 @@ void main()
 					{
 						bool is_valid; //whether or not the line segment is junk data
 						vec3 intersections[2]; //start and end of line segment
-						GetFirstOBBIntersection(geomSceneSpacePos.xyz, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
+						GetFirstOBBIntersection(geomSceneSpacePos, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
 
 						//make sure that the line segment is aligned with the reflection vector (i.e. 0 -> 1 is aligned)
 						if (dot(intersections[1] - intersections[0], refl_dir) < 0.0f)
@@ -468,8 +468,8 @@ void main()
 							//check if the line segment overlaps the reflection point (i.e. starts on one side and ends on the other)
 							const float tolerance = 0.01f;
 							const vec3 tolerance_vec = tolerance * refl_dir;
-							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos.xyz - tolerance_vec, refl_dir) < 0.0f;
-							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos.xyz + tolerance_vec, refl_dir) > 0.0f;
+							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos - tolerance_vec, refl_dir) < 0.0f;
+							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos + tolerance_vec, refl_dir) > 0.0f;
 
 							if (intersection_0_before_point && intersection_1_after_point)
 							{
@@ -566,7 +566,7 @@ void main()
 	//apply skybox
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
 	frag_out *= vec4(1.0f - skybox_intensity, 1.0f);
-	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos.xyz + cam_translate.xyz).rgb, 0.0f);
+	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos + cam_translate.xyz).rgb, 0.0f);
 	frag_out.a = 1.0f;
 	
 	//texture usage:
