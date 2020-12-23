@@ -35,22 +35,28 @@ void main()
 	
 	if (tess_enable)
 	{
-		gl_TessLevelOuter[0] = 5.0f;
-		gl_TessLevelOuter[1] = 5.0f;
-		gl_TessLevelOuter[2] = 5.0f;
-		gl_TessLevelOuter[3] = 5.0f;
+		const float outer_level = 5.0f;
+		const float inner_level = 5.0f;
 
-		gl_TessLevelInner[0] = 5.0f;
-		gl_TessLevelInner[1] = 5.0f;
+		gl_TessLevelOuter[0] = outer_level;
+		gl_TessLevelOuter[1] = outer_level;
+		gl_TessLevelOuter[2] = outer_level;
+		gl_TessLevelOuter[3] = outer_level;
+		
+		gl_TessLevelInner[0] = inner_level;
+		gl_TessLevelInner[1] = inner_level;
 	}
 	else
 	{
-		gl_TessLevelOuter[0] = 1.0f;
-		gl_TessLevelOuter[1] = 1.0f;
-		gl_TessLevelOuter[2] = 1.0f;
-		gl_TessLevelOuter[3] = 1.0f;
+		const float outer_level = 1.0f;
+		const float inner_level = 1.0f;
 
-		gl_TessLevelInner[0] = 1.0f;
-		gl_TessLevelInner[1] = 1.0f;
+		gl_TessLevelOuter[0] = outer_level;
+		gl_TessLevelOuter[1] = outer_level;
+		gl_TessLevelOuter[2] = outer_level;
+		gl_TessLevelOuter[3] = outer_level;
+		
+		gl_TessLevelInner[0] = inner_level;
+		gl_TessLevelInner[1] = inner_level;
 	}
 }

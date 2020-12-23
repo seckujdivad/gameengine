@@ -49,7 +49,7 @@ float BezierBasisMult(const int i, const int n, const float t)
 	}
 
 	float end_mult = 1.0f;
-	if (!((t - 1.0f == 0.0f) && (n - i == 0)))
+	if (!((1.0f - t == 0.0f) && (n - i == 0)))
 	{
 		end_mult = pow(1.0f - t, n - i);
 	}
@@ -62,14 +62,13 @@ vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
 	vec4 sum = vec4(0.0f);
 	for (int i = 0; i < patch_size_u; i++)
 	{
-		float basis_x = BezierBasisMult(i, patch_size_u - 1, gl_TessCoord.x);
 		vec4 inner_sum = vec4(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
 			inner_sum += BezierBasisMult(j, patch_size_v - 1, gl_TessCoord.y) * values[(i * patch_size_u) + j];
 		}
 
-		sum += inner_sum * basis_x;
+		sum += inner_sum * BezierBasisMult(i, patch_size_u - 1, gl_TessCoord.x);
 	}
 
 	return sum;
