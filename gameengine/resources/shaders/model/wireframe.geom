@@ -29,29 +29,15 @@ void main()
 	{
 		vec3 vertex = persp_div(cam_rotate * vec4(teseCamSpacePos[i], 1.0f));
 	}
-	
-	bool draw_tri = true;
-	if (!draw_back_faces)
+
+	for (int i = 0; i < 3; i++)
 	{
-		//ccw winding is default
-		vec3 first = positions[1] - positions[0];
-		vec3 second = positions[2] - positions[0];
-		vec3 normal = cross(first, second);
+		gl_Position = cam_persp * vec4(positions[i], 1.0f);
+		EmitVertex();
 
-		draw_tri = dot(normal, positions[0]) < 0.0f;
-	}
+		gl_Position = cam_persp * vec4(positions[(i + 1) % 3], 1.0f);
+		EmitVertex();
 
-	if (draw_tri)
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			gl_Position = cam_persp * vec4(positions[i], 1.0f);
-			EmitVertex();
-
-			gl_Position = cam_persp * vec4(positions[(i + 1) % 3], 1.0f);
-			EmitVertex();
-
-			EndPrimitive();
-		}
+		EndPrimitive();
 	}
 }
