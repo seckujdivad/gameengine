@@ -26,6 +26,7 @@ out mat3 geomNormalTBN;
 
 out vec3 geomTangentSpaceCameraPos;
 
+
 uniform mat4 cubemap_transform[6];
 uniform bool is_cubemap;
 
@@ -34,6 +35,9 @@ uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 
 uniform mat4 mdl_rotate;
+
+uniform bool tess_enable;
+
 
 const int NUM_VERTICES = 3;
 
@@ -98,9 +102,13 @@ void main()
 	{
 		gl_Layer = layer;
 
-		vec3 ccw_normal = cross(teseSceneSpacePos[1] - teseSceneSpacePos[0], teseSceneSpacePos[2] - teseSceneSpacePos[0]);
-		vec3 supplied_normal = normalize(teseSceneSpaceNormal[0] + teseSceneSpaceNormal[1] + teseSceneSpaceNormal[2]);
-		bool flip_winding = length(normalize(ccw_normal) + supplied_normal) < 1.0f;
+		bool flip_winding = true;
+		if (!tess_enable)
+		{
+			vec3 ccw_normal = cross(teseSceneSpacePos[1] - teseSceneSpacePos[0], teseSceneSpacePos[2] - teseSceneSpacePos[0]);
+			vec3 supplied_normal = normalize(teseSceneSpaceNormal[0] + teseSceneSpaceNormal[1] + teseSceneSpaceNormal[2]);
+			flip_winding = length(normalize(ccw_normal) + supplied_normal) < 1.0f;
+		}
 
 		for (int i = 0; i < NUM_VERTICES; i++)
 		{
