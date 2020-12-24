@@ -49,29 +49,27 @@ int BinomialCoefficient(const int n, const int k)
 	return Factorial(n) / (Factorial(k) * Factorial(n - k));
 }
 
-float BezierBasisMult(const int i, const int n, const float t)
+float Power(const float a, const int b) //pow(0, 0) is undefined behaviour according to the spec, but is a condition hit by this algorithm - give the contextually correct value of 1
 {
-	float start_mult = 1.0f; //pow(0, 0) is undefined behaviour according to the spec, but is a condition hit by this algorithm - give the contextually correct value of 1
-	if (!((t == 0.0f) && (i == 0)))
+	float result = 1.0f;
+	if (!((a == 0.0f) && (b == 0)))
 	{
-		start_mult = pow(t, i);
+		result = pow(a, b);
 	}
-
-	float end_mult = 1.0f;
-	if (!((1.0f - t == 0.0f) && (n - i == 0)))
-	{
-		end_mult = pow(1.0f - t, n - i);
-	}
-
-	return float(BinomialCoefficient(n, i)) * start_mult * end_mult;
+	return result;
 }
 
-vec4 interpolate(const vec4 values[gl_MaxPatchVertices], const vec3 position)
+float BezierBasisMult(const int i, const int n, const float t)
 {
-	vec4 sum = vec4(0.0f);
+	return float(BinomialCoefficient(n, i)) * Power(t, i) * Power(1.0f - t, n - i);
+}
+
+vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
+{
+	vec3 sum = vec3(0.0f);
 	for (int i = 0; i < patch_size_u; i++)
 	{
-		vec4 inner_sum = vec4(0.0f);
+		vec3 inner_sum = vec3(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
 			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_u) + j];
@@ -83,24 +81,51 @@ vec4 interpolate(const vec4 values[gl_MaxPatchVertices], const vec3 position)
 	return sum;
 }
 
-vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
-{
-	vec4 values_vec4[gl_MaxPatchVertices];
-	for (int i = 0; i < gl_MaxPatchVertices; i++)
-	{
-		values_vec4[i] = vec4(values[i], 0.0f);
-	}
-	return interpolate(values_vec4, position).xyz;
-}
-
 vec2 interpolate(const vec2 values[gl_MaxPatchVertices], const vec3 position)
 {
-	vec4 values_vec4[gl_MaxPatchVertices];
+	vec3 values_vec3[gl_MaxPatchVertices];
 	for (int i = 0; i < gl_MaxPatchVertices; i++)
 	{
-		values_vec4[i] = vec4(values[i], 0.0f, 0.0f);
+		values_vec3[i] = vec3(values[i], 0.0f);
 	}
-	return interpolate(values_vec4, position).xy;
+	return interpolate(values_vec3, position).xy;
+}
+
+float BezierDerivativeMult(const int i, const int n, const float t)
+{
+	return float(BinomialCoefficient(n, i)) * Power(t, i) * Power(1.0f - t, n - i) * ((float(i) / t) + (float(i - n) / (1.0f - t)));
+}
+
+vec3 derivative_u(const vec3 values[gl_MaxPatchVertices], const vec3 position)
+{
+	vec3 sum = vec3(0.0f);
+	for (int i = 0; i < patch_size_u; i++)
+	{
+		vec3 inner_sum = vec3(0.0f);
+		for (int j = 0; j < patch_size_v; j++)
+		{
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_u) + j];
+		}
+		sum += inner_sum * BezierDerivativeMult(i, patch_size_u - 1, position.x);
+	}
+
+	return sum;
+}
+
+vec3 derivative_v(const vec3 values[gl_MaxPatchVertices], const vec3 position)
+{
+	vec3 sum = vec3(0.0f);
+	for (int j = 0; j < patch_size_v; j++)
+	{
+		vec3 inner_sum = vec3(0.0f);
+		for (int i = 0; i < patch_size_u; i++)
+		{
+			inner_sum += BezierBasisMult(i, patch_size_u - 1, position.x) * values[(i * patch_size_u) + j];
+		}
+		sum += inner_sum * BezierDerivativeMult(j, patch_size_v - 1, position.y);
+	}
+
+	return sum;
 }
 
 void main()
@@ -113,12 +138,8 @@ void main()
 
 	if (tess_enable)
 	{
-		//approximate the normals using the adjacent tangents and bitangents
-		vec3 u_increment = vec3(1.0f / gl_TessLevelInner[0], 0.0f, 0.0f);
-		vec3 v_increment = vec3(0.0f, 1.0f / gl_TessLevelInner[1], 0.0f);
-
-		vec3 tangent = interpolate(tescMdlSpacePos, min(gl_TessCoord + u_increment, vec3(1.0f))) - interpolate(tescMdlSpacePos, max(gl_TessCoord - u_increment, vec3(0.0f)));
-		vec3 bitangent = interpolate(tescMdlSpacePos, min(gl_TessCoord + v_increment, vec3(1.0f))) - interpolate(tescMdlSpacePos, max(gl_TessCoord - v_increment, vec3(0.0f)));
+		vec3 tangent = derivative_u(tescMdlSpacePos, gl_TessCoord);
+		vec3 bitangent = derivative_v(tescMdlSpacePos, gl_TessCoord);
 
 		teseMdlSpaceNormal = 0.0f - normalize(cross(tangent, bitangent));
 		teseSceneSpaceNormal = persp_div(mdl_rotate * vec4(teseMdlSpaceNormal, 1.0f));
