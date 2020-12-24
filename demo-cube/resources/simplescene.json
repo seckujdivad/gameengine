@@ -118,8 +118,8 @@
       "identifier": "utah teapot",
       "position": [ -1, 4, -1 ],
       "material": {
-        "diffuse": 0.2,
-        "specular": 0.1,
+        "diffuse": 1.0,
+        "specular": 1.0,
         "specular highlight": 32
       },
       "reflections": {
@@ -133,7 +133,7 @@
         }
       },
       "textures": {
-        "colour": 0.2
+        "colour": [ 0.5, 0.5, 1.0 ]
       },
       "visboxes": [ "level section 2" ]
     }
@@ -147,7 +147,7 @@
         "shadows": {
           "clips": [ 0.1, 25 ],
           "texture": [ 2048, 2048 ],
-          "dynamic draw": [ "simple cube", "blender suzanne" ],
+          "dynamic draw": [ "simple cube", "blender suzanne", "utah teapot" ],
           "dynamic draw refresh frames": 2
         }
       }
