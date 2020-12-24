@@ -99,7 +99,8 @@ void main()
 		gl_Layer = layer;
 
 		vec3 ccw_normal = cross(teseSceneSpacePos[1] - teseSceneSpacePos[0], teseSceneSpacePos[2] - teseSceneSpacePos[0]);
-		bool flip_winding = length(normalize(ccw_normal) + normalize(teseSceneSpaceNormal[0])) < 1.0f;
+		vec3 supplied_normal = normalize(teseSceneSpaceNormal[0] + teseSceneSpaceNormal[1] + teseSceneSpaceNormal[2]);
+		bool flip_winding = length(normalize(ccw_normal) + supplied_normal) < 1.0f;
 
 		for (int i = 0; i < NUM_VERTICES; i++)
 		{
