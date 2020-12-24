@@ -26,6 +26,39 @@ uniform int patch_size_v;
 uniform bool tess_enable;
 
 
+float CalcMinCosine(const int array_start, const int array_step, const int num_items)
+{
+	vec3 values[4];
+	for (int i = 0; i < num_items; i++)
+	{
+		values[i] = normalize(vertCamSpacePos[array_start + (array_step * i)]);
+	}
+
+	float cosines[12];
+	int array_index = 0;
+	for (int i = 0; i < num_items; i++)
+	{
+		for (int j = 0; j < num_items; j++)
+		{
+			if (i != j)
+			{
+				cosines[array_index] = dot(values[i], values[j]);
+				array_index++;
+			}
+		}
+	}
+
+	float min_cosine = 1.0f;
+	for (int i = 0; i < num_items * (num_items - 1); i++)
+	{
+		if (abs(min_cosine) > abs(cosines[i]))
+		{
+			min_cosine = cosines[i];
+		}
+	}
+	return min_cosine;
+}
+
 void main()
 {
 	tescMdlSpacePos[gl_InvocationID] = vertMdlSpacePos[gl_InvocationID];
@@ -39,23 +72,21 @@ void main()
 	
 	if (tess_enable)
 	{
-		vec3 corner_directions[4];
-		corner_directions[0] = normalize(vertCamSpacePos[0]);
-		corner_directions[1] = normalize(vertCamSpacePos[patch_size_v - 1]);
-		corner_directions[2] = normalize(vertCamSpacePos[(patch_size_u - 1) * patch_size_v]);
-		corner_directions[3] = normalize(vertCamSpacePos[((patch_size_u - 1) * patch_size_v) + patch_size_u - 1]);
-
-		float val = dot(corner_directions[0], corner_directions[1]);
+		int corners[4]; //indices of the four corners of the patch
+		corners[0] = 0;
+		corners[1] = patch_size_v - 1;
+		corners[2] = (patch_size_u - 1) * patch_size_v;
+		corners[3] = ((patch_size_u - 1) * patch_size_v) + patch_size_u - 1;
 
 		float edge_angle_cosines[4];
-		edge_angle_cosines[0] = dot(corner_directions[0], corner_directions[1]); //top
-		edge_angle_cosines[1] = dot(corner_directions[0], corner_directions[2]); //right
-		edge_angle_cosines[2] = dot(corner_directions[3], corner_directions[2]); //bottom
-		edge_angle_cosines[3] = dot(corner_directions[3], corner_directions[1]);; //left
+		edge_angle_cosines[0] = CalcMinCosine(corners[0], 1, patch_size_v); //0, 1 - top
+		edge_angle_cosines[1] = CalcMinCosine(corners[0], patch_size_v, patch_size_u); //0, 2 - right
+		edge_angle_cosines[2] = CalcMinCosine(corners[2], 1, patch_size_v); //3, 2 - bottom
+		edge_angle_cosines[3] = CalcMinCosine(corners[1], patch_size_v, patch_size_u); //3, 1 - left
 
 		for (int i = 0; i < 4; i++)
 		{
-			gl_TessLevelOuter[i] = max(30.0f * abs(sin(acos(edge_angle_cosines[i]))), 1.0f);
+			gl_TessLevelOuter[i] = 1.0f + max(20.0f * sin(acos(edge_angle_cosines[i])), 0.0f);
 		}
 		
 		gl_TessLevelInner[0] = (gl_TessLevelOuter[1] + gl_TessLevelOuter[3]) / 2;
