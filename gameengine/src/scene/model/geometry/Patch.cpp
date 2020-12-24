@@ -164,10 +164,17 @@ bool Patch::GetTesselationEnabled() const
 
 glm::ivec2 Patch::GetPrimitiveDimensions() const
 {
-	return glm::ivec2(
-		static_cast<int>(this->m_control_points.size()),
-		static_cast<int>(this->m_control_points.at(0).size())
-	);
+	if (this->GetPrimitiveType() == PrimitiveType::Quads)
+	{
+		return glm::ivec2(2, 2);
+	}
+	else
+	{
+		return glm::ivec2(
+			static_cast<int>(this->m_control_points.size()),
+			static_cast<int>(this->m_control_points.at(0).size())
+		);
+	}
 }
 
 Patch::ControlPoint::ControlPoint(glm::dvec3 vertex, glm::dvec2 uv) : vertex(vertex), uv(uv)
