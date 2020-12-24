@@ -74,7 +74,7 @@ vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_u) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_v) + j];
 		}
 
 		sum += inner_sum * BezierBasisMult(i, patch_size_u - 1, position.x);
@@ -107,7 +107,7 @@ vec3 derivative_u(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_u) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_v) + j];
 		}
 		sum += inner_sum * BezierDerivativeMult(i, patch_size_u - 1, position.x);
 	}
@@ -123,7 +123,7 @@ vec3 derivative_v(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int i = 0; i < patch_size_u; i++)
 		{
-			inner_sum += BezierBasisMult(i, patch_size_u - 1, position.x) * values[(i * patch_size_u) + j];
+			inner_sum += BezierBasisMult(i, patch_size_u - 1, position.x) * values[(i * patch_size_v) + j];
 		}
 		sum += inner_sum * BezierDerivativeMult(j, patch_size_v - 1, position.y);
 	}
