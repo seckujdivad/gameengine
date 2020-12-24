@@ -49,14 +49,16 @@ int BinomialCoefficient(const int n, const int k)
 	return Factorial(n) / (Factorial(k) * Factorial(n - k));
 }
 
-float Power(const float a, const int b) //pow(0, 0) is undefined behaviour according to the spec, but is a condition hit by this algorithm - give the contextually correct value of 1
+float Power(const float a, const int b) //pow(0, 0) is undefined behaviour according to the spec, but is a condition hit by these algorithms - give the contextually correct value of 1
 {
-	float result = 1.0f;
-	if (!((a == 0.0f) && (b == 0)))
+	if ((a == 0.0f) && (b == 0))
 	{
-		result = pow(a, b);
+		return 1.0f;
 	}
-	return result;
+	else
+	{
+		return pow(a, float(b));
+	}
 }
 
 float BezierBasisMult(const int i, const int n, const float t)
@@ -91,8 +93,9 @@ vec2 interpolate(const vec2 values[gl_MaxPatchVertices], const vec3 position)
 	return interpolate(values_vec3, position).xy;
 }
 
-float BezierDerivativeMult(const int i, const int n, const float t)
+float BezierDerivativeMult(const int i, const int n, float t)
 {
+	t = clamp(t, 0.001f, 0.999f); //this function divides by zero at t=0 and t=1, workaround is just to ensure it never quite reaches those values
 	return float(BinomialCoefficient(n, i)) * Power(t, i) * Power(1.0f - t, n - i) * ((float(i) / t) + (float(i - n) / (1.0f - t)));
 }
 
