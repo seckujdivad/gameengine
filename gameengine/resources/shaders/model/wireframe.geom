@@ -16,6 +16,8 @@ in vec3 teseSceneSpaceNormal[];
 uniform mat4 cam_rotate;
 uniform mat4 cam_persp;
 
+uniform bool draw_back_faces;
+
 
 vec3 persp_div(vec4 vec)
 {
@@ -24,20 +26,23 @@ vec3 persp_div(vec4 vec)
 
 void main()
 {
-	vec3 positions[3];
-	for (int i = 0; i < 3; i++)
+	if (draw_back_faces || dot(teseSceneSpaceNormal[0], 0.0f - teseCamSpacePos[0]) > 0.0f)
 	{
-		vec3 vertex = persp_div(cam_rotate * vec4(teseCamSpacePos[i], 1.0f));
-	}
+		vec4 positions[3];
+		for (int i = 0; i < 3; i++)
+		{
+			positions[i] = cam_persp * cam_rotate * vec4(teseCamSpacePos[i], 1.0f);
+		}
 
-	for (int i = 0; i < 3; i++)
-	{
-		gl_Position = cam_persp * vec4(positions[i], 1.0f);
-		EmitVertex();
+		for (int i = 0; i < 3; i++)
+		{
+			gl_Position = positions[i];
+			EmitVertex();
 
-		gl_Position = cam_persp * vec4(positions[(i + 1) % 3], 1.0f);
-		EmitVertex();
+			gl_Position = positions[(i + 1) % 3];
+			EmitVertex();
 
-		EndPrimitive();
+			EndPrimitive();
+		}
 	}
 }
