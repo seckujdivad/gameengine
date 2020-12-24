@@ -19,10 +19,19 @@ out vec2 teseUV;
 out vec3 teseMdlSpaceNormal;
 out vec3 teseSceneSpaceNormal;
 
+
+uniform mat4 mdl_rotate;
+
 uniform bool tess_enable;
 
 uniform int patch_size_u;
 uniform int patch_size_v;
+
+
+vec3 persp_div(vec4 vec)
+{
+	return vec.xyz / vec.w;
+}
 
 int Factorial(const int n)
 {
@@ -57,7 +66,7 @@ float BezierBasisMult(const int i, const int n, const float t)
 	return float(BinomialCoefficient(n, i)) * start_mult * end_mult;
 }
 
-vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
+vec4 interpolate(const vec4 values[gl_MaxPatchVertices], const vec3 position)
 {
 	vec4 sum = vec4(0.0f);
 	for (int i = 0; i < patch_size_u; i++)
@@ -65,43 +74,58 @@ vec4 interpolate(const vec4 values[gl_MaxPatchVertices])
 		vec4 inner_sum = vec4(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_size_v - 1, gl_TessCoord.y) * values[(i * patch_size_u) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_u) + j];
 		}
 
-		sum += inner_sum * BezierBasisMult(i, patch_size_u - 1, gl_TessCoord.x);
+		sum += inner_sum * BezierBasisMult(i, patch_size_u - 1, position.x);
 	}
 
 	return sum;
 }
 
-vec3 interpolate(const vec3 values[gl_MaxPatchVertices])
+vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 {
 	vec4 values_vec4[gl_MaxPatchVertices];
 	for (int i = 0; i < gl_MaxPatchVertices; i++)
 	{
 		values_vec4[i] = vec4(values[i], 0.0f);
 	}
-	return interpolate(values_vec4).xyz;
+	return interpolate(values_vec4, position).xyz;
 }
 
-vec2 interpolate(const vec2 values[gl_MaxPatchVertices])
+vec2 interpolate(const vec2 values[gl_MaxPatchVertices], const vec3 position)
 {
 	vec4 values_vec4[gl_MaxPatchVertices];
 	for (int i = 0; i < gl_MaxPatchVertices; i++)
 	{
 		values_vec4[i] = vec4(values[i], 0.0f, 0.0f);
 	}
-	return interpolate(values_vec4).xy;
+	return interpolate(values_vec4, position).xy;
 }
 
 void main()
 {
-	teseMdlSpacePos = interpolate(tescMdlSpacePos);
-	teseSceneSpacePos = interpolate(tescSceneSpacePos);
-	teseCamSpacePos = interpolate(tescCamSpacePos);
+	teseMdlSpacePos = interpolate(tescMdlSpacePos, gl_TessCoord);
+	teseSceneSpacePos = interpolate(tescSceneSpacePos, gl_TessCoord);
+	teseCamSpacePos = interpolate(tescCamSpacePos, gl_TessCoord);
 
-	teseUV = interpolate(tescUV);
+	teseUV = interpolate(tescUV, gl_TessCoord);
 
-	teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal);
-	teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal);
+	if (tess_enable)
+	{
+		//approximate the normals using the adjacent tangents and bitangents
+		vec3 u_increment = vec3(1.0f / gl_TessLevelInner[0], 0.0f, 0.0f);
+		vec3 v_increment = vec3(0.0f, 1.0f / gl_TessLevelInner[1], 0.0f);
+
+		vec3 tangent = interpolate(tescMdlSpacePos, min(gl_TessCoord + u_increment, vec3(1.0f))) - interpolate(tescMdlSpacePos, max(gl_TessCoord - u_increment, vec3(0.0f)));
+		vec3 bitangent = interpolate(tescMdlSpacePos, min(gl_TessCoord + v_increment, vec3(1.0f))) - interpolate(tescMdlSpacePos, max(gl_TessCoord - v_increment, vec3(0.0f)));
+
+		teseMdlSpaceNormal = 0.0f - normalize(cross(tangent, bitangent));
+		teseSceneSpaceNormal = persp_div(mdl_rotate * vec4(teseMdlSpaceNormal, 1.0f));
+	}
+	else
+	{
+		teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal, gl_TessCoord);
+		teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal, gl_TessCoord);
+	}
 }
