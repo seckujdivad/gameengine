@@ -19,7 +19,12 @@ out vec2 tescUV[];
 out vec3 tescMdlSpaceNormal[];
 out vec3 tescSceneSpaceNormal[];
 
+
+uniform int patch_size_u;
+uniform int patch_size_v;
+
 uniform bool tess_enable;
+
 
 void main()
 {
@@ -34,16 +39,27 @@ void main()
 	
 	if (tess_enable)
 	{
-		const float outer_level = 5.0f;
-		const float inner_level = 5.0f;
+		vec3 corner_directions[4];
+		corner_directions[0] = normalize(vertCamSpacePos[0]);
+		corner_directions[1] = normalize(vertCamSpacePos[patch_size_v - 1]);
+		corner_directions[2] = normalize(vertCamSpacePos[(patch_size_u - 1) * patch_size_v]);
+		corner_directions[3] = normalize(vertCamSpacePos[((patch_size_u - 1) * patch_size_v) + patch_size_u - 1]);
 
-		gl_TessLevelOuter[0] = outer_level;
-		gl_TessLevelOuter[1] = outer_level;
-		gl_TessLevelOuter[2] = outer_level;
-		gl_TessLevelOuter[3] = outer_level;
+		float val = dot(corner_directions[0], corner_directions[1]);
+
+		float edge_angle_cosines[4];
+		edge_angle_cosines[0] = dot(corner_directions[0], corner_directions[1]); //top
+		edge_angle_cosines[1] = dot(corner_directions[0], corner_directions[2]); //right
+		edge_angle_cosines[2] = dot(corner_directions[3], corner_directions[2]); //bottom
+		edge_angle_cosines[3] = dot(corner_directions[3], corner_directions[1]);; //left
+
+		for (int i = 0; i < 4; i++)
+		{
+			gl_TessLevelOuter[i] = max(30.0f * abs(sin(acos(edge_angle_cosines[i]))), 1.0f);
+		}
 		
-		gl_TessLevelInner[0] = inner_level;
-		gl_TessLevelInner[1] = inner_level;
+		gl_TessLevelInner[0] = (gl_TessLevelOuter[1] + gl_TessLevelOuter[3]) / 2;
+		gl_TessLevelInner[1] = (gl_TessLevelOuter[0] + gl_TessLevelOuter[2]) / 2;
 	}
 	else
 	{
