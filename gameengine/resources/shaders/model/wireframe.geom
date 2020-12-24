@@ -26,7 +26,14 @@ vec3 persp_div(vec4 vec)
 
 void main()
 {
-	if (draw_back_faces || dot(teseSceneSpaceNormal[0], 0.0f - teseCamSpacePos[0]) > 0.0f)
+	bool draw = true;
+	if (!draw_back_faces)
+	{
+		vec3 normal = normalize(teseSceneSpaceNormal[0] + teseSceneSpaceNormal[1] + teseSceneSpaceNormal[2]);
+		draw = dot(normal, 0.0f - teseCamSpacePos[0]) > 0.0f;
+	}
+
+	if (draw)
 	{
 		vec4 positions[3];
 		for (int i = 0; i < 3; i++)
