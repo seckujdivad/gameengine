@@ -133,6 +133,8 @@ public:
 	std::size_t GetPrimitivesNumVertices() const override;
 	Geometry::PrimitiveType GetPrimitiveType() const override;
 
+	glm::ivec2 GetPrimitiveDimensions() const override;
+
 	void SetPrimitiveType(Geometry::PrimitiveType type);
 
 	bool operator==(const Polygonal& second) const;

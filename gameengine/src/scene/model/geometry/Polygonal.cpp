@@ -516,6 +516,22 @@ Geometry::PrimitiveType Polygonal::GetPrimitiveType() const
 	return this->m_output_primitive;
 }
 
+glm::ivec2 Polygonal::GetPrimitiveDimensions() const
+{
+	if (this->m_output_primitive == PrimitiveType::Quads)
+	{
+		return glm::ivec2(2, 2);
+	}
+	else if (this->m_output_primitive == PrimitiveType::Triangles)
+	{
+		return glm::ivec2(2, 1);
+	}
+	else
+	{
+		throw std::runtime_error("Unknown primitive type " + std::to_string(static_cast<int>(this->m_output_primitive)));
+	}
+}
+
 void Polygonal::SetPrimitiveType(Geometry::PrimitiveType type)
 {
 	if ((type == PrimitiveType::Quads)

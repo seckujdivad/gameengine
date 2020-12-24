@@ -511,41 +511,43 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				GLenum mode = GL_NONE; //default invalid value, should be overwritten
 
 				Geometry::PrimitiveType primitive_type = loaded_geometry.source->GetPrimitiveType();
-				if (primitive_type == Geometry::PrimitiveType::Triangles)
-				{
-					if (this->GetRenderMode() != RenderMode::Postprocess)
-					{
-						throw std::runtime_error("The only supported render mode for triangles is Postprocess");
-					}
 
-					mode = GL_TRIANGLES;
+				if (this->RenderModeIsModelRendering())
+				{
+					if ((primitive_type == Geometry::PrimitiveType::Patches) || (primitive_type == Geometry::PrimitiveType::Quads))
+					{
+						mode = GL_PATCHES;
+
+						this->SetShaderUniform("tess_enable", geometry->GetTesselationEnabled());
+						this->SetShaderUniform("tess_interp_mode", static_cast<int>(geometry->GetInterpolationMode()));
+
+						glm::ivec2 dimensions = geometry->GetPrimitiveDimensions();
+						this->SetShaderUniform("patch_size_u", dimensions.x);
+						this->SetShaderUniform("patch_size_v", dimensions.y);
+					}
+					else
+					{
+						throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(primitive_type)) + " is not supported by model-oriented rendering modes");
+					}
 				}
-				else if ((primitive_type == Geometry::PrimitiveType::Patches) || (primitive_type == Geometry::PrimitiveType::Quads))
+				else if (this->GetRenderMode() == RenderMode::Postprocess)
 				{
-					if (!this->RenderModeIsModelRendering())
+					if (primitive_type == Geometry::PrimitiveType::Triangles)
 					{
-						throw std::runtime_error("The only supported render modes for patches and quads are the model-oriented ones");
+						mode = GL_TRIANGLES;
 					}
-
-					mode = GL_PATCHES;
-
-					this->SetShaderUniform("tess_enable", primitive_type == Geometry::PrimitiveType::Patches);
-
-					glm::ivec2 dimensions = glm::ivec2(2, 2);
-					if (primitive_type == Geometry::PrimitiveType::Patches) //only Patch produces patches
+					else
 					{
-						dimensions = std::dynamic_pointer_cast<Patch>(geometry)->GetDimensions();
+						throw std::runtime_error("The only primitive type supported by postprocess rendering is triangles");
 					}
-
-					this->SetShaderUniform("patch_size_u", dimensions.x);
-					this->SetShaderUniform("patch_size_v", dimensions.y);
 				}
 				else
 				{
-					throw std::runtime_error("Unknown primitive type \"" + std::to_string(static_cast<int>(primitive_type)) + "\"");
+					throw std::runtime_error("Render mode " + std::to_string(static_cast<int>(this->GetRenderMode())) + " can't render geometry");
 				}
 
 				//set patch size
+				if (mode == GL_PATCHES)
 				{
 					std::size_t patch_size = geometry->GetPrimitiveSize();
 
@@ -918,6 +920,7 @@ void Renderable::SetConfig(RenderableConfig config)
 			"cam_transform_inverse",
 			//tesselation
 			"tess_enable",
+			"tess_interp_mode",
 			"patch_size_u",
 			"patch_size_v",
 			//geometry

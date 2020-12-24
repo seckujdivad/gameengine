@@ -3,6 +3,8 @@
 #include <vector>
 #include <array>
 
+#include <glm/glm.hpp>
+
 const int GAMEENGINE_VALUES_PER_VERTEX = 3 + 3 + 2;
 
 class Geometry
@@ -13,6 +15,12 @@ public:
 		Triangles,
 		Quads,
 		Patches
+	};
+
+	enum class Interpolation
+	{
+		Linear,
+		Bezier
 	};
 
 private:
@@ -33,6 +41,12 @@ public:
 	
 	virtual Geometry::PrimitiveType GetPrimitiveType() const = 0;
 	virtual std::size_t GetPrimitiveSize() const;
+
+	virtual glm::ivec2 GetPrimitiveDimensions() const = 0;
+
+	virtual Interpolation GetInterpolationMode() const;
+
+	virtual bool GetTesselationEnabled() const;
 };
 
 std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::size_t vertices);

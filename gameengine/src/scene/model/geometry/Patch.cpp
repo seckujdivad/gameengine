@@ -6,7 +6,7 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 {
 	std::vector<double> result;
 
-	if (this->m_interp_mode == Interpolation::None)
+	if (this->m_interp_mode == Interpolation::Linear)
 	{
 		std::vector<glm::ivec2> indices;
 		indices.reserve(this->GetPrimitivesNumVertices());
@@ -52,7 +52,7 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 				result.push_back(control_point.vertex.y);
 				result.push_back(control_point.vertex.z);
 
-				//TODO: calculate proper surface normals
+				//placeholder normals - they will be calculated from the surface in the tessellation evaluation shader
 				result.push_back(1.0);
 				result.push_back(0.0);
 				result.push_back(0.0);
@@ -68,7 +68,7 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 
 std::size_t Patch::GetPrimitivesNumVertices() const
 {
-	if (this->m_interp_mode == Interpolation::None)
+	if (this->m_interp_mode == Interpolation::Linear)
 	{
 		return GetNumQuadsFromPolygon(4) * (this->m_control_points.size() - 1) * (this->m_control_points.at(0).size() - 1);
 	}
@@ -80,7 +80,7 @@ std::size_t Patch::GetPrimitivesNumVertices() const
 
 Geometry::PrimitiveType Patch::GetPrimitiveType() const
 {
-	if (this->m_interp_mode == Interpolation::None)
+	if (this->m_interp_mode == Interpolation::Linear)
 	{
 		return Geometry::PrimitiveType::Quads;
 	}
@@ -121,9 +121,14 @@ void Patch::SetControlPoints(std::vector<std::vector<ControlPoint>> control_poin
 	}
 }
 
+Patch::ControlPoint Patch::GetControlPoint(glm::ivec2 index) const
+{
+	return this->m_control_points.at(index.x).at(index.y);
+}
+
 std::size_t Patch::GetPrimitiveSize() const
 {
-	if (this->m_interp_mode == Interpolation::None)
+	if (this->m_interp_mode == Interpolation::Linear)
 	{
 		return 4;
 	}
@@ -133,12 +138,12 @@ std::size_t Patch::GetPrimitiveSize() const
 	}
 }
 
-void Patch::SetInterpolation(Interpolation mode)
+void Patch::SetInterpolationMode(Interpolation mode)
 {
 	if (mode != this->m_interp_mode)
 	{
-		if (((mode == Interpolation::None) && (this->m_interp_mode != Interpolation::None))
-			|| ((mode != Interpolation::None) && (this->m_interp_mode == Interpolation::None)))
+		if (((mode == Interpolation::Linear) && (this->m_interp_mode != Interpolation::Linear))
+			|| ((mode != Interpolation::Linear) && (this->m_interp_mode == Interpolation::Linear)))
 		{
 			this->InvalidatePrimitivesCache();
 		}
@@ -147,12 +152,17 @@ void Patch::SetInterpolation(Interpolation mode)
 	}
 }
 
-Patch::Interpolation Patch::GetInterpolation() const
+Patch::Interpolation Patch::GetInterpolationMode() const
 {
 	return this->m_interp_mode;
 }
 
-glm::ivec2 Patch::GetDimensions() const
+bool Patch::GetTesselationEnabled() const
+{
+	return this->m_interp_mode != Interpolation::Linear;
+}
+
+glm::ivec2 Patch::GetPrimitiveDimensions() const
 {
 	return glm::ivec2(
 		static_cast<int>(this->m_control_points.size()),

@@ -17,16 +17,12 @@ public:
 		glm::dvec2 uv;
 	};
 
-	enum class Interpolation
-	{
-		None,
-		Bezier
-	};
-
 private:
 	std::vector<std::vector<ControlPoint>> m_control_points;
 
-	Interpolation m_interp_mode;
+	Interpolation m_interp_mode = Interpolation::Linear;
+
+	ControlPoint GetControlPoint(glm::ivec2 index) const;
 
 protected:
 	std::vector<double> GetPrimitivesWithoutCache() const override;
@@ -38,8 +34,10 @@ public:
 
 	void SetControlPoints(std::vector<std::vector<ControlPoint>> control_points);
 
-	void SetInterpolation(Interpolation mode);
-	Interpolation GetInterpolation() const;
+	glm::ivec2 GetPrimitiveDimensions() const override;
 
-	glm::ivec2 GetDimensions() const;
+	void SetInterpolationMode(Interpolation mode);
+	Interpolation GetInterpolationMode() const override;
+
+	bool GetTesselationEnabled() const override;
 };

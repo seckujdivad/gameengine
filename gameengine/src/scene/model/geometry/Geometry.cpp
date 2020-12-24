@@ -39,6 +39,16 @@ std::size_t Geometry::GetPrimitiveSize() const
     throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(this->GetPrimitiveType())) + " does not have a default size. You must override this method");
 }
 
+Geometry::Interpolation Geometry::GetInterpolationMode() const
+{
+    return Interpolation::Linear;
+}
+
+bool Geometry::GetTesselationEnabled() const
+{
+    return false;
+}
+
 std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::size_t vertices)
 {
     std::vector<int> indices;

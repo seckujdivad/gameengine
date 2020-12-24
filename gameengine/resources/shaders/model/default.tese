@@ -23,10 +23,15 @@ out vec3 teseSceneSpaceNormal;
 uniform mat4 mdl_rotate;
 
 uniform bool tess_enable;
+uniform int tess_interp_mode;
 
 uniform int patch_size_u;
 uniform int patch_size_v;
 
+
+//fake Interpolation enum
+const int InterpolationLinear = 0;
+const int InterpolationBezier = 1;
 
 vec3 persp_div(vec4 vec)
 {
@@ -139,7 +144,7 @@ void main()
 
 	teseUV = interpolate(tescUV, gl_TessCoord);
 
-	if (tess_enable)
+	if (tess_interp_mode == InterpolationBezier)
 	{
 		vec3 tangent = derivative_u(tescMdlSpacePos, gl_TessCoord);
 		vec3 bitangent = derivative_v(tescMdlSpacePos, gl_TessCoord);
