@@ -8,36 +8,64 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 
 	if (this->m_interp_mode == Interpolation::Linear)
 	{
-		std::vector<glm::ivec2> indices;
-		indices.reserve(this->GetPrimitivesNumVertices());
+		std::vector<std::array<glm::ivec2, 4>> indices;
+		indices.reserve(this->GetPrimitivesNumVertices() / 4);
 		result.reserve(this->GetPrimitivesNumVertices());
 
 		for (int u = 0; u < static_cast<int>(this->m_control_points.size()) - 1; u++)
 		{
 			for (int v = 0; v < static_cast<int>(this->m_control_points.at(0).size()) - 1; v++)
 			{
-				indices.push_back(glm::ivec2(u, v));
-				indices.push_back(glm::ivec2(u, v + 1));
-				indices.push_back(glm::ivec2(u + 1, v + 1));
-				indices.push_back(glm::ivec2(u + 1, v));
+				std::array<glm::ivec2, 4> quad;
+				quad.at(0) = glm::ivec2(u, v);
+				quad.at(1) = glm::ivec2(u, v + 1);
+				quad.at(2) = glm::ivec2(u + 1, v);
+				quad.at(3) = glm::ivec2(u + 1, v + 1);
+				
+				indices.push_back(quad);
 			}
 		}
 
-		for (const glm::ivec2 index : indices)
+		for (const std::array<glm::ivec2, 4>& quad : indices)
 		{
-			const ControlPoint& control_point = this->m_control_points.at(index.x).at(index.y);
+			glm::dvec3 normal = glm::dvec3(0.0);
+			{
+				//calculate tangent and bitangent
+				const glm::dvec3 edge1 = this->GetControlPoint(quad.at(1)).vertex - this->GetControlPoint(quad.at(0)).vertex;
+				const glm::dvec3 edge2 = this->GetControlPoint(quad.at(2)).vertex - this->GetControlPoint(quad.at(0)).vertex;
+				const glm::dvec2 edgeuv1 = this->GetControlPoint(quad.at(1)).uv - this->GetControlPoint(quad.at(0)).uv;
+				const glm::dvec2 edgeuv2 = this->GetControlPoint(quad.at(2)).uv - this->GetControlPoint(quad.at(0)).uv;
 
-			result.push_back(control_point.vertex.x);
-			result.push_back(control_point.vertex.y);
-			result.push_back(control_point.vertex.z);
+				const glm::dvec3 tangent = glm::dvec3(
+					(edgeuv2.y * edge1.x) - (edgeuv1.y * edge2.x),
+					(edgeuv2.y * edge1.y) - (edgeuv1.y * edge2.y),
+					(edgeuv2.y * edge1.z) - (edgeuv1.y * edge2.z)
+				);
 
-			//TODO: calculate proper surface normals
-			result.push_back(1.0);
-			result.push_back(0.0);
-			result.push_back(0.0);
+				const glm::dvec3 bitangent = glm::dvec3(
+					(edgeuv1.x * edge2.x) - (edgeuv2.x * edge1.x),
+					(edgeuv1.x * edge2.y) - (edgeuv2.x * edge1.y),
+					(edgeuv1.x * edge2.z) - (edgeuv2.x * edge1.z)
+				);
 
-			result.push_back(control_point.uv.x);
-			result.push_back(control_point.uv.y);
+				normal = glm::normalize(glm::cross(tangent, bitangent));
+			}
+
+			for (const glm::ivec2& index : quad)
+			{
+				const ControlPoint& control_point = this->GetControlPoint(index);
+
+				result.push_back(control_point.vertex.x);
+				result.push_back(control_point.vertex.y);
+				result.push_back(control_point.vertex.z);
+
+				result.push_back(normal.x);
+				result.push_back(normal.y);
+				result.push_back(normal.z);
+
+				result.push_back(control_point.uv.x);
+				result.push_back(control_point.uv.y);
+			}
 		}
 	}
 	else
@@ -128,14 +156,8 @@ Patch::ControlPoint Patch::GetControlPoint(glm::ivec2 index) const
 
 std::size_t Patch::GetPrimitiveSize() const
 {
-	if (this->m_interp_mode == Interpolation::Linear)
-	{
-		return 4;
-	}
-	else
-	{
-		return this->m_control_points.size() * this->m_control_points.at(0).size();
-	}
+	glm::ivec2 dimensions = this->GetPrimitiveDimensions();
+	return dimensions.x * dimensions.y;
 }
 
 void Patch::SetInterpolationMode(Interpolation mode)
