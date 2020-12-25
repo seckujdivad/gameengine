@@ -61,6 +61,17 @@ std::vector<std::shared_ptr<Patch>> PatchesFromBPT(std::string path)
 					std::vector<std::string> control_point_values = SplitOnChar(line, ' ');
 					if (control_point_values.size() == 3)
 					{
+						bool add_new_line = (num_patch_lines == 0) || (num_patch_line_control_points == target_patch_line_length);
+						if (add_new_line)
+						{
+							num_patch_line_control_points = 1;
+							num_patch_lines++;
+						}
+						else
+						{
+							num_patch_line_control_points++;
+						}
+
 						glm::dvec3 vertex = glm::dvec3(
 							std::stod(control_point_values.at(0)),
 							std::stod(control_point_values.at(1)),
@@ -68,22 +79,19 @@ std::vector<std::shared_ptr<Patch>> PatchesFromBPT(std::string path)
 						);
 
 						glm::dvec2 uv = glm::dvec2(
-							(num_patch_line_control_points + 1) / target_patch_line_length,
-							(num_patch_lines + 1) / target_patch_lines
+							static_cast<double>(num_patch_line_control_points) / static_cast<double>(target_patch_line_length),
+							static_cast<double>(num_patch_lines) / static_cast<double>(target_patch_lines)
 						);
 
 						Patch::ControlPoint control_point(vertex, uv);
 
-						if ((num_patch_lines == 0) || (num_patch_line_control_points == target_patch_line_length))
+						if (add_new_line)
 						{
 							patch_data.push_back(std::vector({ control_point }));
-							num_patch_line_control_points = 1;
-							num_patch_lines++;
 						}
 						else
 						{
 							patch_data.at(num_patch_lines - 1).push_back(control_point);
-							num_patch_line_control_points++;
 						}
 					}
 					else
