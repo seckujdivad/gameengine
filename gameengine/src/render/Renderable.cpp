@@ -510,8 +510,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				//draw geometry
 				GLenum mode = GL_NONE; //default invalid value, should be overwritten
 
-				Geometry::PrimitiveType primitive_type = loaded_geometry.source->GetPrimitiveType();
-
+				Geometry::PrimitiveType primitive_type = geometry->GetPrimitiveType();
 				if (this->RenderModeIsModelRendering())
 				{
 					if ((primitive_type == Geometry::PrimitiveType::Patches) || (primitive_type == Geometry::PrimitiveType::Quads))
@@ -567,7 +566,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 					glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
 				}
-				
 
 				glDrawArrays(mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 			}
