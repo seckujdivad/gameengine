@@ -24,10 +24,11 @@ class Camera;
 class ShaderProgram;
 class Renderable;
 
-using RenderableControllerFunction = std::function<void(std::vector<Model*>)>;
-
 class Renderable
 {
+public:
+	using ControllerFunction = std::function<void(std::vector<Model*>)>;
+
 private:
 	GLuint m_fbo = -1;
 	bool m_fbo_contains_render = false;
@@ -43,7 +44,7 @@ private:
 
 	std::map<int, LoadedTexture> m_textures;
 
-	RenderableControllerFunction m_render_function;
+	ControllerFunction m_render_function;
 
 	void RecompileShader();
 
@@ -103,5 +104,5 @@ public:
 
 	virtual std::tuple<int, int> GetOutputSize() const = 0;
 
-	void SetRenderFunction(RenderableControllerFunction function);
+	void SetRenderFunction(ControllerFunction function);
 };

@@ -808,7 +808,7 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 	}
 }
 
-void Renderable::SetRenderFunction(RenderableControllerFunction function)
+void Renderable::SetRenderFunction(ControllerFunction function)
 {
 	this->m_render_function = function;
 }
