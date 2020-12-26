@@ -86,11 +86,12 @@ std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::vector<int> indices)
 	}
 	if (indices.size() == 2) //line
 	{
-		std::array<int, 4> quad;
-		quad.at(0) = indices.at(0);
-		quad.at(1) = indices.at(0);
-		quad.at(2) = indices.at(1);
-		quad.at(3) = indices.at(1);
+		std::array<int, 4> quad = {
+			indices.at(0),
+			indices.at(0),
+			indices.at(1),
+			indices.at(1)
+		};
 
 		result.push_back(quad);
 	}
@@ -99,22 +100,24 @@ std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::vector<int> indices)
 		int num_non_degenerate_quads = (static_cast<int>(indices.size()) - 2) / 2;
 		for (int i = 0; i < num_non_degenerate_quads; i++)
 		{
-			std::array<int, 4> quad;
-			quad.at(0) = indices.at(0);
-			quad.at(1) = indices.at((i * 2) + 1);
-			quad.at(2) = indices.at((i * 2) + 2);
-			quad.at(3) = indices.at((i * 2) + 3);
+			std::array<int, 4> quad = {
+				indices.at(0),
+				indices.at((i * 2) + 1),
+				indices.at((i * 2) + 2),
+				indices.at((i * 2) + 3)
+			};
 
 			result.push_back(quad);
 		}
 
 		if (static_cast<int>(indices.size()) % 2 == 1) //there is a single vertex not included, add it as a triangle (degenerate quad)
 		{
-			std::array<int, 4> quad;
-			quad.at(0) = indices.at(0);
-			quad.at(1) = indices.at(indices.size() - 2);
-			quad.at(2) = indices.at(indices.size() - 1);
-			quad.at(3) = indices.at(0);
+			std::array<int, 4> quad = {
+				indices.at(0),
+				indices.at(indices.size() - 2),
+				indices.at(indices.size() - 1),
+				indices.at(0)
+			};
 
 			result.push_back(quad);
 		}

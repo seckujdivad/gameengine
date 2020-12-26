@@ -16,11 +16,12 @@ std::vector<double> Patch::GetPrimitivesWithoutCache() const
 		{
 			for (int v = 0; v < static_cast<int>(this->m_control_points.at(0).size()) - 1; v++)
 			{
-				std::array<glm::ivec2, 4> quad;
-				quad.at(0) = glm::ivec2(u, v);
-				quad.at(1) = glm::ivec2(u, v + 1);
-				quad.at(2) = glm::ivec2(u + 1, v);
-				quad.at(3) = glm::ivec2(u + 1, v + 1);
+				std::array<glm::ivec2, 4> quad = {
+					glm::ivec2(u, v),
+					glm::ivec2(u, v + 1),
+					glm::ivec2(u + 1, v),
+					glm::ivec2(u + 1, v + 1)
+				};
 				
 				indices.push_back(quad);
 			}
