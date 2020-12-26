@@ -219,6 +219,9 @@
     <ClInclude Include="src\scene\SceneChild.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\model\geometry\PresetGeometry.h">
+      <Filter>Header Files\scene\model\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -352,6 +355,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\SceneChild.cpp">
       <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\model\geometry\PresetGeometry.cpp">
+      <Filter>Source Files\scene\model\geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

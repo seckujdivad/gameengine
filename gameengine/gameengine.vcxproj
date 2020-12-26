@@ -216,6 +216,7 @@
     <ClInclude Include="src\scene\model\geometry\Geometry.h" />
     <ClInclude Include="src\scene\model\geometry\Patch.h" />
     <ClInclude Include="src\scene\model\geometry\Polygonal.h" />
+    <ClInclude Include="src\scene\model\geometry\PresetGeometry.h" />
     <ClInclude Include="src\scene\model\Material.h" />
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\model\Reflection.h" />
@@ -262,6 +263,7 @@
     <ClCompile Include="src\scene\model\geometry\Geometry.cpp" />
     <ClCompile Include="src\scene\model\geometry\Patch.cpp" />
     <ClCompile Include="src\scene\model\geometry\Polygonal.cpp" />
+    <ClCompile Include="src\scene\model\geometry\PresetGeometry.cpp" />
     <ClCompile Include="src\scene\model\Material.cpp" />
     <ClCompile Include="src\scene\model\Model.cpp" />
     <ClCompile Include="src\scene\model\Reflection.cpp" />
