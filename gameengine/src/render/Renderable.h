@@ -36,9 +36,6 @@ private:
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
 
-	GLuint m_vao;
-	std::map<ModelReference, GLuint> m_vbos;
-
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
 	std::map<std::string, std::string> m_shader_defines;
@@ -80,6 +77,7 @@ protected:
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 	static bool RenderModeIsModelRendering(RenderMode mode);
+	bool RenderModeIsModelRendering();
 
 public:
 	Renderable(Engine* engine, RenderableConfig config);

@@ -1,6 +1,10 @@
 #include "Renderable.h"
 
+#include <stdexcept>
+
 #include "../scene/model/Model.h"
+#include "../scene/model/geometry/Polygonal.h"
+#include "../scene/model/geometry/Patch.h"
 #include "../scene/Camera.h"
 #include "../scene/Scene.h"
 #include "../scene/light/PointLight.h"
@@ -53,36 +57,23 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				{
 					models.clear();
 
-					ModelGeometry geom;
-					geom.vertices = {
-						glm::dvec3(-1.0, -1.0, 0.0),
-						glm::dvec3(-1.0, 1.0, 0.0),
-						glm::dvec3(1.0, 1.0, 0.0),
-						glm::dvec3(1.0, -1.0, 0.0)
-					};
+					std::shared_ptr<Polygonal> geom = std::make_shared<Polygonal>();
+					geom->SetPrimitiveType(Geometry::PrimitiveType::Triangles);
 
-					geom.faces = {
-						Face(),
-						Face()
-					};
+					Polygonal::Face face = Polygonal::Face(*geom);
 
-					geom.faces.at(0).vertices = { 0, 1, 2 };
-					geom.faces.at(0).uv = {
-						glm::dvec2(0.0, 0.0),
-						glm::dvec2(0.0, 1.0),
-						glm::dvec2(1.0, 1.0)
-					};
-					geom.faces.at(0).normal = glm::dvec3(0.0, 0.0, -1.0);
+					const double vertex_size = 1.0;
+					const double uv_size = 1.0;
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, -vertex_size, 0.0), glm::dvec2(0.0, 0.0)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, vertex_size, 0.0), glm::dvec2(0.0, uv_size)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, vertex_size, 0.0), glm::dvec2(uv_size, uv_size)));
+					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, -vertex_size, 0.0), glm::dvec2(uv_size, 0.0)));
 
-					geom.faces.at(1).vertices = { 0, 3, 2 };
-					geom.faces.at(1).uv = {
-						glm::dvec2(0.0, 0.0),
-						glm::dvec2(0.1, 0.0),
-						glm::dvec2(1.0, 1.0)
-					};
-					geom.faces.at(1).normal = glm::dvec3(0.0, 0.0, -1.0);
+					face.SetNormal(glm::dvec3(0.0, 0.0, -1.0));
 
-					models.push_back(new Model(-1, geom));
+					geom->AddFace(face);
+
+					models.push_back(new Model(-1, std::vector<std::shared_ptr<Geometry>>({ geom })));
 
 					dealloc_models = true;
 				}
@@ -193,33 +184,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 			
 		}
-		else if (this->GetRenderMode() == RenderMode::Shadow)
-		{
-			glm::vec3 translate = this->GetCamera()->GetPosition();
-			glm::mat4 projection = this->GetCamera()->GetPerspectiveMatrix();
-
-			std::vector<glm::mat4> transforms;
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(projection * glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-			for (int i = 0; i < static_cast<int>(transforms.size()); i++)
-			{
-				this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
-			}
-
-			this->SetShaderUniform("is_cubemap", true);
-
-			this->SetShaderUniform("light_position", this->GetCamera()->GetPosition());
-			this->SetShaderUniform("light_far_plane", std::get<1>(this->GetCamera()->GetClips()));
-			this->SetShaderUniform("light_near_plane", std::get<0>(this->GetCamera()->GetClips()));
-		}
-		else if ((this->GetRenderMode() == RenderMode::Normal)
-			|| (this->GetRenderMode() == RenderMode::Wireframe)
-			|| (this->GetRenderMode() == RenderMode::Textured))
+		else if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 		{
 			// camera
 			this->SetShaderUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
@@ -536,16 +501,47 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 			}
 
-			//load geometry
-			Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model);
-
-			//draw geometry
-			glDrawArrays(GL_TRIANGLES, 0, loaded_geometry.num_vertices);
-
-			if (dealloc_models) //release geometry as the models are temporary
+			std::function<GLenum(Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)
 			{
-				this->GetEngine()->ReleaseVAO(model);
-			}
+				GLenum mode = GL_NONE; //default invalid value, should be overwritten
+
+				if (this->RenderModeIsModelRendering())
+				{
+					if ((info.primitive_type == Geometry::PrimitiveType::Patches) || (info.primitive_type == Geometry::PrimitiveType::Quads))
+					{
+						mode = GL_PATCHES;
+
+						this->SetShaderUniform("tess_enable", info.tesselation_enabled);
+						this->SetShaderUniform("tess_interp_mode", static_cast<int>(info.interpolation_mode));
+
+						this->SetShaderUniform("patch_size_u", info.primitive_dimensions.x);
+						this->SetShaderUniform("patch_size_v", info.primitive_dimensions.y);
+					}
+					else
+					{
+						throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
+					}
+				}
+				else if (this->GetRenderMode() == RenderMode::Postprocess)
+				{
+					if (info.primitive_type == Geometry::PrimitiveType::Triangles)
+					{
+						mode = GL_TRIANGLES;
+					}
+					else
+					{
+						throw std::runtime_error("The only primitive type supported by postprocess rendering is triangles");
+					}
+				}
+				else
+				{
+					throw std::runtime_error("Render mode " + std::to_string(static_cast<int>(this->GetRenderMode())) + " can't render geometry");
+				}
+
+				return mode;
+			};
+
+			this->GetEngine()->DrawModel(model, predraw);
 		}
 
 		this->m_fbo_contains_render = true;
@@ -756,6 +752,11 @@ bool Renderable::RenderModeIsModelRendering(RenderMode mode)
 		|| (mode == RenderMode::Textured);
 }
 
+bool Renderable::RenderModeIsModelRendering()
+{
+	return this->RenderModeIsModelRendering(this->GetRenderMode());
+}
+
 Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
 {
 	this->m_engine->MakeContextCurrent();
@@ -822,43 +823,39 @@ void Renderable::SetConfig(RenderableConfig config)
 	this->m_config = config;
 	this->m_fbo_contains_render = false;
 
-	if (this->GetRenderMode() == RenderMode::Normal)
+	this->m_shaders.clear();
+	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
-		};
-	}
-	else if (this->GetRenderMode() == RenderMode::Wireframe)
-	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
-		};
-	}
-	else if (this->GetRenderMode() == RenderMode::Shadow)
-	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_GEOMSHADER), GL_GEOMETRY_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_VERTSHADER), GL_VERTEX_SHADER }
-		};
+		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER));
+		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
+		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
+
+		if (this->GetRenderMode() == RenderMode::Normal)
+		{
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
+		else if (this->GetRenderMode() == RenderMode::Wireframe)
+		{
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
+		else if (this->GetRenderMode() == RenderMode::Shadow)
+		{
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
+		else if (this->GetRenderMode() == RenderMode::Textured)
+		{
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
 	}
 	else if (this->GetRenderMode() == RenderMode::Postprocess)
 	{
 		this->m_shaders = {
 			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER },
 			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
-		};
-	}
-	else if (this->GetRenderMode() == RenderMode::Textured)
-	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER }
 		};
 	}
 	else if (this->GetRenderMode() == RenderMode::Default)
@@ -873,109 +870,89 @@ void Renderable::SetConfig(RenderableConfig config)
 
 	this->RecompileShader();
 
-	if (this->GetRenderMode() != RenderMode::Default)
+	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 	{
-		if (this->GetRenderMode() != RenderMode::Postprocess)
+		this->AddShaderUniformNames({
+			//vertex
+			"mdl_translate",
+			"mdl_rotate",
+			"mdl_scale",
+			"cam_translate",
+			"cam_rotate",
+			"cam_persp",
+			"cam_clip_near",
+			"cam_clip_far",
+			"cam_transform",
+			"cam_transform_inverse",
+			//tesselation
+			"tess_enable",
+			"tess_interp_mode",
+			"patch_size_u",
+			"patch_size_v",
+			//geometry
+			"cubemap_transform[0]",
+			"cubemap_transform[1]",
+			"cubemap_transform[2]",
+			"cubemap_transform[3]",
+			"cubemap_transform[4]",
+			"cubemap_transform[5]",
+			"is_cubemap"
+			});
+
+		if (this->GetRenderMode() == RenderMode::Normal)
 		{
 			this->AddShaderUniformNames({
-				"cubemap_transform[0]",
-				"cubemap_transform[1]",
-				"cubemap_transform[2]",
-				"cubemap_transform[3]",
-				"cubemap_transform[4]",
-				"cubemap_transform[5]"
-				});
-
-			if (this->GetRenderMode() != RenderMode::Shadow)
-			{
-				this->AddShaderUniformName("is_cubemap");
-			}
-		}
-
-		if (this->GetRenderMode() == RenderMode::Shadow)
-		{
-			this->AddShaderUniformNames({
-				//vertex
-				"mdl_translate",
-				"mdl_rotate",
-				"mdl_scale",
 				//fragment
-				"light_position",
-				"light_far_plane",
-				"light_near_plane"
+				"mat_diffuse",
+				"mat_specular",
+				"mat_specular_highlight",
+				"mat_displacement_multiplier",
+				"mat_displacement_discard_out_of_range",
+				"mat_ssr_enabled",
+				"mat_ssr_resolution",
+				"mat_ssr_max_distance",
+				"mat_ssr_max_cast_distance",
+				"mat_ssr_depth_acceptance",
+				"mat_ssr_show_this",
+				"mat_ssr_refinements",
+				"colourTexture",
+				"normalTexture",
+				"specularTexture",
+				"reflectionIntensityTexture",
+				"displacementTexture",
+				"light_ambient",
+				"light_shadow_draw",
+				"reflections_enabled",
+				"reflection_count",
+				"skyboxMaskTexture",
+				"skyboxTexture",
+				"render_output_valid",
+				"render_output_colour",
+				"render_output_depth",
+				"render_output_x",
+				"render_output_y"
 				});
+
+			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			{
+				this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
+			}
 		}
-		else if (this->RenderModeIsModelRendering(this->GetRenderMode())) //shadow has already been caught
+		else if (this->GetRenderMode() == RenderMode::Wireframe)
 		{
 			this->AddShaderUniformNames({
-				//vertex
-				"mdl_translate",
-				"mdl_rotate",
-				"mdl_scale",
-				"cam_translate",
-				"cam_rotate",
-				"cam_persp",
-				"cam_clip_near",
-				"cam_clip_far",
-				"cam_transform",
-				"cam_transform_inverse",
+				//geometry
+				"draw_back_faces",
+				//fragment
+				"wireframe_colour"
 				});
-
-			if (this->GetRenderMode() == RenderMode::Normal)
-			{
-				this->AddShaderUniformNames({
-					//fragment
-					"mat_diffuse",
-					"mat_specular",
-					"mat_specular_highlight",
-					"mat_displacement_multiplier",
-					"mat_displacement_discard_out_of_range",
-					"mat_ssr_enabled",
-					"mat_ssr_resolution",
-					"mat_ssr_max_distance",
-					"mat_ssr_max_cast_distance",
-					"mat_ssr_depth_acceptance",
-					"mat_ssr_show_this",
-					"mat_ssr_refinements",
-					"colourTexture",
-					"normalTexture",
-					"specularTexture",
-					"reflectionIntensityTexture",
-					"displacementTexture",
-					"light_ambient",
-					"light_shadow_draw",
-					"reflections_enabled",
-					"reflection_count",
-					"skyboxMaskTexture",
-					"skyboxTexture",
-					"render_output_valid",
-					"render_output_colour",
-					"render_output_depth",
-					"render_output_x",
-					"render_output_y"
-					});
-
-				for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
-				{
-					this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
-				}
-			}
-			else if (this->GetRenderMode() == RenderMode::Wireframe)
-			{
-				this->AddShaderUniformNames({
-					//geometry
-					"draw_back_faces",
-					//fragment
-					"wireframe_colour"
-					});
-			}
-			else if (this->GetRenderMode() == RenderMode::Textured)
-			{
-				this->AddShaderUniformNames({
-					//fragment
-					"colourTexture"
-					});
-			}
+		}
+		else if (this->GetRenderMode() == RenderMode::Textured)
+		{
+			this->AddShaderUniformNames({
+				//fragment
+				"colourTexture"
+				});
 		}
 	}
 }

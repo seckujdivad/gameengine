@@ -3,29 +3,29 @@
 #include <glm/glm.hpp>
 
 #include <tuple>
-#include <stdexcept>
 
 #include "Referenceable.h"
 
-enum class LocalTextureType
-{
-	None,
-	FullTexture,
-	Vector
-};
-
-enum class LocalTextureFilter
-{
-	Nearest,
-	Linear
-};
-
 class LocalTexture : public Referenceable<TextureReference>
 {
+public:
+	enum class Type
+	{
+		None,
+		FullTexture,
+		Vector
+	};
+
+	enum class Filter
+	{
+		Nearest,
+		Linear
+	};
+
 private:
-	LocalTextureType m_type = LocalTextureType::None;
-	LocalTextureFilter m_filter_mag = LocalTextureFilter::Nearest;
-	LocalTextureFilter m_filter_min = LocalTextureFilter::Nearest;
+	Type m_type = Type::None;
+	Filter m_filter_mag = Filter::Nearest;
+	Filter m_filter_min = Filter::Nearest;
 
 	//full texture
 	unsigned char* m_full_data = nullptr;
@@ -50,8 +50,11 @@ public:
 	std::tuple<int, int> GetDimensions() const;
 	unsigned char* GetData() const;
 
-	void SetMagFilter(LocalTextureFilter filter);
-	LocalTextureFilter GetMagFilter() const;
-	void SetMinFilter(LocalTextureFilter filter);
-	LocalTextureFilter GetMinFilter() const;
+	void SetMagFilter(Filter filter);
+	Filter GetMagFilter() const;
+	void SetMinFilter(Filter filter);
+	Filter GetMinFilter() const;
+
+	bool operator==(const LocalTexture& second) const;
+	bool operator!=(const LocalTexture& second) const;
 };

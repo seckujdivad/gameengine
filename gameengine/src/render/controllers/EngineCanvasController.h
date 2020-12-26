@@ -28,7 +28,7 @@ private:
 	std::vector<RenderTexture*> m_textures;
 	RenderTexture* m_texture_final;
 
-	std::tuple<int, int> m_dimensions_prev = { -1, -1 };
+	RenderableConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
 
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
@@ -44,4 +44,8 @@ public:
 	RenderControllerType GetType() const override;
 
 	EngineCanvas* GetEngineCanvas() const;
+
+	void SetRenderLayers(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
+	void SetRenderLayers(std::vector<RenderableConfig> configs);
+	void SetRenderLayers(RenderableConfig config);
 };

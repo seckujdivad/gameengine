@@ -3,6 +3,7 @@
 #include <wx/gbsizer.h>
 #include <wx/listbox.h>
 #include <wx/stattext.h>
+#include <wx/radiobox.h>
 
 #include "render/EngineCanvas.h"
 #include "Engine.h"
@@ -35,18 +36,16 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxDefaultPosition, wxSi
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	std::vector<RenderableConfig> canvas_layers;
-
 	RenderableConfig normal_config = { RenderMode::Normal, RenderableConfig::Normal() };
-	canvas_layers.push_back(normal_config);
+	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(normal_config, wxID_ANY, this);
 
-	this->m_glcanvas = this->m_engine->GenerateNewCanvas(canvas_layers, wxID_ANY, this);
+	this->m_glcanvas = this->m_glcanvas_controller->GetEngineCanvas();
 	this->m_glcanvas->SetControlledCamera(this->m_camera);
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
 
-	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(4, 1), wxEXPAND | wxALL);
+	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(5, 1), wxEXPAND | wxALL);
 
 	//make list to display all model identifiers
 	this->m_lb_models = new wxListBox(this, wxID_ANY);
@@ -87,6 +86,16 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxDefaultPosition, wxSi
 
 	this->m_stxt_scale = new wxStaticText(this, wxID_ANY, "Scale");
 	this->m_sizer->Add(this->m_stxt_scale, wxGBPosition(3, 1), wxGBSpan(1, 1), wxEXPAND | wxALL);
+
+	//make render mode radio box
+	wxArrayString render_modes = wxArrayString();
+	render_modes.Add("Normal");
+	render_modes.Add("Wireframe");
+	render_modes.Add("Textured");
+
+	this->m_rdobx_render_mode = new wxRadioBox(this, wxID_ANY, "Render Mode", wxDefaultPosition, wxDefaultSize, render_modes);
+	this->m_rdobx_render_mode->Bind(wxEVT_RADIOBOX, &Main::rdobx_render_mode_OnChanged, this);
+	this->m_sizer->Add(this->m_rdobx_render_mode, wxGBPosition(4, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
 	//set window title
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier());
@@ -168,6 +177,36 @@ void Main::lb_models_OnChar(wxKeyEvent& evt)
 	{
 		this->SetModel(nullptr);
 	}
+	evt.Skip();
+}
+
+void Main::rdobx_render_mode_OnChanged(wxCommandEvent& evt)
+{
+	int render_mode_index = evt.GetInt();
+
+	RenderableConfig config;
+	if (render_mode_index == 0)
+	{
+		config.mode = RenderMode::Normal;
+		config.mode_data = RenderableConfig::Normal();
+	}
+	else if(render_mode_index == 1)
+	{
+		config.mode = RenderMode::Wireframe;
+		config.mode_data = RenderableConfig::Wireframe();
+	}
+	else if(render_mode_index == 2)
+	{
+		config.mode = RenderMode::Textured;
+		config.mode_data = RenderableConfig::Textured();
+	}
+	else
+	{
+		throw std::runtime_error("Unknown render mode selection (index: " + std::to_string(render_mode_index) + ", label: " + evt.GetString() + ")");
+	}
+
+	this->m_glcanvas_controller->SetRenderLayers(config);
+
 	evt.Skip();
 }
 

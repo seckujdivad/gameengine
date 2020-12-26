@@ -1,13 +1,9 @@
 #pragma once
 
-#include "../../GLComponents.h"
+#include <vector>
+#include <memory>
 
 #include <glm/glm.hpp>
-#include <glm/ext.hpp>
-
-#include <string>
-#include <vector>
-#include <tuple>
 
 #include "../Positionable.h"
 #include "../Rotatable.h"
@@ -17,40 +13,17 @@
 #include "../Referenceable.h"
 #include "../LocalTexture.h"
 
+#include "geometry/Geometry.h"
+
 class Scene;
 class Skybox;
-
-struct Face
-{
-	std::vector<int> vertices;
-	std::vector<glm::dvec2> uv;
-	glm::dvec3 normal = glm::dvec3(1.0, 0.0, 0.0);
-};
-
-struct ModelGeometry
-{
-	std::vector<Face> faces;
-	std::vector<glm::dvec3> vertices;
-};
-
-bool operator==(const ModelGeometry& first, const ModelGeometry& second);
-bool operator!=(const ModelGeometry& first, const ModelGeometry& second);
-bool operator==(const Face& first, const Face& second);
-bool operator!=(const Face& first, const Face& second);
-
-void MergeVertices(ModelGeometry& geometry, double threshold = 0.0);
-void InvertNormals(ModelGeometry& geometry);
-
-std::vector<double> GetTriangles(const ModelGeometry& geometry, bool only_geometry = false);
-
-std::vector<GLfloat> DoubleToSinglePrecision(std::vector<double> vec); //utility method for changing the precision of GetTriangles before feeding to the GPU
 
 class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>
 {
 private:
 	Scene* m_scene;
 
-	ModelGeometry m_geometry;
+	std::vector<std::shared_ptr<Geometry>> m_geometry;
 	Material m_material;
 
 	//textures - all need to be replaced before they can be used
@@ -69,15 +42,11 @@ private:
 	Skybox* m_skybox = nullptr;
 
 public:
-	Model(ModelReference reference, ModelGeometry geometry, Scene* scene = nullptr);
-
-	std::vector<std::vector<double>> GetTriFans() const; //not implemented
-	std::vector<std::vector<double>> GetTriStrips() const; //not implemented
-	std::vector<double> GetTriangles(bool only_geometry = false) const;
+	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene = nullptr);
 
 	Material& GetMaterial();
 
-	const ModelGeometry& GetGeometry() const;
+	std::vector<std::shared_ptr<Geometry>> GetGeometry();
 
 	LocalTexture& GetColourTexture();
 	LocalTexture& GetReflectionTexture();
@@ -90,8 +59,6 @@ public:
 	void SetCurrentWireframeIndex(int index);
 	void SetCurrentWireframeColour(glm::vec3 colour);
 	glm::vec3 GetCurrentWireframeColour() const;
-
-	static constexpr int GetValuesPerVert() { return 14; };
 
 	void SetSkybox(Skybox* skybox);
 	Skybox* GetSkybox() const;

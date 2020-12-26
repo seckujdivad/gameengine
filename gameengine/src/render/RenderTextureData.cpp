@@ -59,7 +59,7 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 		glCopyImageSubData(source.depth, source.type, 0, 0, 0, 0, destination.depth, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}
 
-	for (int i = 0; i < (int)source.data.size(); i++)
+	for (int i = 0; i < static_cast<int>(source.data.size()); i++)
 	{
 		glCopyImageSubData(source.data.at(i), source.type, 0, 0, 0, 0, destination.data.at(i), destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}

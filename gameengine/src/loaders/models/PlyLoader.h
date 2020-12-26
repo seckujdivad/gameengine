@@ -2,12 +2,8 @@
 
 #include <vector>
 #include <string>
-#include <map>
+#include <memory>
 
-#include "../../scene/model/Model.h"
+#include "../../scene/model/geometry/Polygonal.h"
 
-ModelGeometry ModelFromPly(std::string path);
-bool IsPlyInt(std::string type_name);
-
-std::vector<std::string> SplitOnChar(std::string string, char splitter);
-std::vector<std::string> SplitOnChar(std::string string, std::string splitter);
+std::shared_ptr<Polygonal> ModelFromPly(std::string path);

@@ -1,9 +1,15 @@
 #include "pch.h"
+
+#include <vector>
+#include <memory>
+
 #include "scene/model/Model.h"
+#include "scene/model/geometry/Polygonal.h"
 
 TEST(ModelTests, WireframeColour_SetGet)
 {
-	Model* mdl = new Model(0, ModelGeometry());
+	std::vector<std::shared_ptr<Geometry>> geometry({ std::make_shared<Polygonal>() });
+	Model* mdl = new Model(0, geometry);
 
 	mdl->SetWireframeColours({
 		glm::vec3(0.0f),

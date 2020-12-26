@@ -1,6 +1,9 @@
 #include "PlyLoader.h"
 
 #include <fstream>
+#include <unordered_map>
+
+#include "../../generic/SplitOnChar.h"
 
 struct PlyType
 {
@@ -14,7 +17,7 @@ struct PlyElement
 	int num_elements = 0;
 	std::vector<PlyType> types;
 	std::vector<std::string> field_names;
-	std::map<std::string, int> field_name_map;
+	std::unordered_map<std::string, int> field_name_map;
 };
 
 struct PlyValueList
@@ -24,7 +27,37 @@ struct PlyValueList
 	std::vector<int> values_ints;
 };
 
-ModelGeometry ModelFromPly(std::string path)
+bool IsPlyInt(std::string type_name)
+{
+	if ((type_name == "char")
+		|| (type_name == "uchar")
+		|| (type_name == "int")
+		|| (type_name == "uint")
+		|| (type_name == "int8")
+		|| (type_name == "uint8")
+		|| (type_name == "int16")
+		|| (type_name == "uint16")
+		|| (type_name == "int32")
+		|| (type_name == "uint32"))
+	{
+		return true;
+	}
+	else if ((type_name == "short")
+		|| (type_name == "ushort")
+		|| (type_name == "float")
+		|| (type_name == "double")
+		|| (type_name == "float32")
+		|| (type_name == "float64"))
+	{
+		return false;
+	}
+	else
+	{
+		throw std::invalid_argument("Not a valid float or int type");
+	}
+}
+
+std::shared_ptr<Polygonal> ModelFromPly(std::string path)
 {
 	//ply files could (in theory) contain pretty much any kind of data
 	//I have restricted this parser to work with Blender-style properties
@@ -33,7 +66,7 @@ ModelGeometry ModelFromPly(std::string path)
 
 	PlyElement* current_element = nullptr;
 	std::vector<PlyElement*> header_layout;
-	PlyType current_type;
+	PlyType current_type = PlyType();
 
 	bool in_header = true; //cursor is in header
 	int element_index = -1;
@@ -46,13 +79,14 @@ ModelGeometry ModelFromPly(std::string path)
 	std::vector<glm::dvec3> face_normals;
 	std::vector<glm::dvec2> vertex_uvs;
 	std::vector<glm::dvec2> face_uvs;
-	glm::dvec3 face_normal;
 
 	std::vector<std::string> sliced_string;
 
-	std::map<std::string, PlyValueList> values;
+	std::unordered_map<std::string, PlyValueList> values;
 
-	ModelGeometry result;
+	std::vector<int> vertex_id_lookup;
+
+	std::shared_ptr<Polygonal> result = std::make_shared<Polygonal>();
 
 	file.open(path);
 	if (file.is_open())
@@ -77,7 +111,6 @@ ModelGeometry ModelFromPly(std::string path)
 				{
 					if (line == "end_header")
 					{
-						
 						for (int i = 0; i < (int)header_layout.size(); i++)
 						{
 							current_element = header_layout.at(i);
@@ -145,11 +178,11 @@ ModelGeometry ModelFromPly(std::string path)
 
 					if (header_layout.at(pattern_index)->name == "vertex")
 					{
-						result.vertices.push_back(glm::dvec3(
+						vertex_id_lookup.push_back(result->AddVertex(glm::dvec3(
 							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
 							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
 							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
-						));
+						)));
 						vertex_normals.push_back(glm::dvec3(
 							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
 							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
@@ -173,20 +206,22 @@ ModelGeometry ModelFromPly(std::string path)
 							face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
 						}
 
-						//vertex_uvs.clear();
-
-						face_normal = glm::vec3(0.0f, 0.0f, 0.0f);
+						glm::dvec3 face_normal = glm::dvec3(0.0f, 0.0f, 0.0f);
 						for (size_t i = 0; i < face_normals.size(); i++)
 						{
 							face_normal = face_normal + face_normals.at(i);
 						}
 
-						Face face;
-						face.normal = glm::normalize(face_normal);
-						face.uv = face_uvs;
-						face.vertices = vertex_indices;
+						Polygonal::Face face = Polygonal::Face(*result);
+						face.SetNormal(glm::normalize(face_normal));
 
-						result.faces.push_back(face);
+						for (int i = 0; i < static_cast<int>(vertex_indices.size()); i++)
+						{
+							Polygonal::Face::IndexedVertex vertex = Polygonal::Face::IndexedVertex(vertex_id_lookup.at(vertex_indices.at(i)), face_uvs.at(i));
+							face.AddVertex(vertex);
+						}
+
+						result->AddFace(face);
 					}
 
 					//move to next subpattern
@@ -217,75 +252,3 @@ ModelGeometry ModelFromPly(std::string path)
 	}
 }
 
-bool IsPlyInt(std::string type_name)
-{
-	if ((type_name == "char")
-		|| (type_name == "uchar")
-		|| (type_name == "int")
-		|| (type_name == "uint")
-		|| (type_name == "int8")
-		|| (type_name == "uint8")
-		|| (type_name == "int16")
-		|| (type_name == "uint16")
-		|| (type_name == "int32")
-		|| (type_name == "uint32"))
-	{
-		return true;
-	}
-	else if ((type_name == "short")
-		|| (type_name == "ushort")
-		|| (type_name == "float")
-		|| (type_name == "double")
-		|| (type_name == "float32")
-		|| (type_name == "float64"))
-	{
-		return false;
-	}
-	else
-	{
-		throw std::runtime_error("Not a valid float or int type");
-	}
-}
-
-std::vector<std::string> SplitOnChar(std::string string, char splitter)
-{
-	std::vector<std::string> result;
-	std::string current_slice = "";
-	int prev_slice = 0;
-
-	for (int i = 0; i < (int)string.size(); i++)
-	{
-		if (string.at(i) == splitter)
-		{
-			current_slice = string.substr(prev_slice, (size_t)(i - prev_slice));
-			if (current_slice != "")
-			{
-				result.push_back(current_slice);
-			}
-			prev_slice = i + 1;
-		}
-	}
-
-	if (prev_slice != (int)string.size())
-	{
-		current_slice = string.substr(prev_slice, string.size() - prev_slice);
-		if (current_slice != "")
-		{
-			result.push_back(current_slice);
-		}
-	}
-
-	return result;
-}
-
-std::vector<std::string> SplitOnChar(std::string string, std::string splitter)
-{
-	if (splitter.size() == 1)
-	{
-		return SplitOnChar(string, splitter.at(0));
-	}
-	else
-	{
-		throw std::runtime_error("Splitter must have length 1");
-	}
-}

@@ -1,4 +1,4 @@
-#version 430 core
+#version 400 core
 
 //directives to avoid editor showing errors
 #if !defined(DATA_TEX_NUM)

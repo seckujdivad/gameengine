@@ -1,5 +1,7 @@
 #include "RenderTexture.h"
 
+#include <stdexcept>
+
 #include "../Engine.h"
 
 void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
@@ -71,13 +73,16 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, filtering);
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, filtering);
 
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	if (do_create) //these parameters don't change
+	{
+		glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	glTexParameteri(type, GL_TEXTURE_BASE_LEVEL, 0);
-	glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, 0);
-	glGenerateMipmap(type);
+		glTexParameteri(type, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, 0);
+		glGenerateMipmap(type);
+	}
 
 #ifdef _DEBUG
 	if (do_create)
@@ -240,7 +245,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
-		throw std::runtime_error("Framebuffer is not complete: " + std::to_string((int)glGetError()) + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
+		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

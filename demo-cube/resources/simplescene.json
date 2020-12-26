@@ -4,30 +4,35 @@
   },
   "models": {
     "ply": {
-      "models/cube.ply": {
-        "identifier": "cube",
+      "cube": {
+        "path": "models/cube.ply",
         "merge geometry": {
           "enable": true,
           "distance": 0.01
         }
       },
-      "models/level.ply": {
-        "identifier": "level",
+      "level": {
+        "path": "models/level.ply",
         "invert normals": true,
         "merge geometry": {
           "enable": true,
           "distance": 0.01
         }
       },
-      "models/suzanne.ply": {
-        "identifier": "suzanne",
+      "suzanne": {
+        "path": "models/suzanne.ply",
         "merge geometry": {
           "enable": true,
           "distance": 0.01
         }
       },
-      "models/flat plane.ply": {
-        "identifier": "flat plane"
+      "flat plane": {
+        "path": "models/flat plane.ply"
+      }
+    },
+    "bpt": {
+      "teapot": {
+        "path": "models/teapotCGA.bpt"
       }
     }
   },
@@ -107,6 +112,30 @@
         "specular": 1
       },
       "visboxes": [ "level section 3" ]
+    },
+    {
+      "model": "teapot",
+      "identifier": "utah teapot",
+      "position": [ -1, 4, -1 ],
+      "material": {
+        "diffuse": 1.0,
+        "specular": 1.0,
+        "specular highlight": 32
+      },
+      "reflections": {
+        "screen space": {
+          "appear in ssr": true,
+          "enabled": false
+        },
+        "alternative": {
+          "reflection": "level section 2",
+          "mode": "iterative sampling"
+        }
+      },
+      "textures": {
+        "colour": [ 0.5, 0.5, 1.0 ]
+      },
+      "visboxes": [ "level section 2" ]
     }
   ],
   "lighting": {
@@ -118,7 +147,7 @@
         "shadows": {
           "clips": [ 0.1, 25 ],
           "texture": [ 2048, 2048 ],
-          "dynamic draw": [ "simple cube", "blender suzanne" ],
+          "dynamic draw": [ "simple cube", "blender suzanne", "utah teapot" ],
           "dynamic draw refresh frames": 2
         }
       }

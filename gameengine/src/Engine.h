@@ -8,7 +8,10 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <memory>
+#include <tuple>
+#include <functional>
 
 #include "GLComponents.h"
 
@@ -16,7 +19,6 @@
 #include "scene/model/Model.h"
 #include "render/LoadedTexture.h"
 #include "render/RenderTextureData.h"
-#include "render/RenderMode.h"
 #include "render/controllers/EngineCanvasController.h"
 
 class EngineCanvas;
@@ -28,10 +30,12 @@ class Engine
 public:
 	struct LoadedGeometry
 	{
-		ModelGeometry geometry;
+		std::vector<GLfloat> data;
+
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
-		int num_vertices = 0;
+
+		void FreeGL();
 	};
 
 	struct DebugMessageConfig
@@ -50,15 +54,23 @@ private:
 
 	Scene* m_scene = nullptr;
 
-	std::map<TextureReference, LoadedTexture> m_textures_static;
+	std::unordered_map<TextureReference, std::tuple<LoadedTexture, LocalTexture>> m_textures_static;
 
 	std::vector<RenderController*> m_render_controllers;
 
 	//loaded geometry
-	std::map<ModelReference, Engine::LoadedGeometry> m_model_geometry_vbos;
-	std::map<Model*, Engine::LoadedGeometry> m_temporary_vbos;
+	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry_vbos;
+	std::unordered_map<Model*, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_temporary_vbos;
 
-	Engine::LoadedGeometry LoadGeometry(const ModelGeometry& geometry);
+	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
+	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
+	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices);
+
+	Engine::LoadedGeometry BindVAO(Model* model, Geometry::RenderInfo render_info);
+
+	bool IsTemporaryGeometryRequired(Model* model);
+	void CreateTemporaryGeometry(Model* model);
+	void ReleaseTemporaryGeometry(Model* model);
 
 	void AddRenderController(RenderController* render_controller);
 
@@ -70,9 +82,9 @@ public:
 	Engine& operator=(Engine&&) = delete;
 	~Engine();
 
-	EngineCanvas* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvas* GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvas* GenerateNewCanvas(RenderableConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(RenderableConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
 
@@ -82,8 +94,7 @@ public:
 	LoadedTexture GetTexture(TextureReference reference) const;
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
 
-	Engine::LoadedGeometry BindVAO(Model* model);
-	void ReleaseVAO(Model* model);
+	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
 
 	void MakeContextCurrent() const;
 
