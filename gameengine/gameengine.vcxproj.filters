@@ -216,6 +216,9 @@
     <ClInclude Include="src\generic\SplitOnChar.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\SceneChild.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -346,6 +349,9 @@
     </ClCompile>
     <ClCompile Include="src\generic\SplitOnChar.cpp">
       <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\SceneChild.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,17 +12,16 @@
 #include "Material.h"
 #include "../Referenceable.h"
 #include "../LocalTexture.h"
+#include "../SceneChild.h"
 
 #include "geometry/Geometry.h"
 
 class Scene;
 class Skybox;
 
-class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>
+class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>, public SceneChild
 {
 private:
-	Scene* m_scene;
-
 	std::vector<std::shared_ptr<Geometry>> m_geometry;
 	Material m_material;
 

@@ -143,7 +143,7 @@ void Engine::AddRenderController(RenderController* render_controller)
 	this->m_render_controllers.insert(this->m_render_controllers.begin() + insert_index, render_controller);
 }
 
-Engine::Engine(wxWindow* parent, Scene* scene) : m_scene(scene), m_parent(parent)
+Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(parent)
 {
 	{
 		bool display_supported = false;
@@ -270,7 +270,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
 
-	EngineCanvasController* controller = new EngineCanvasController(this, this->m_scene->GetNewRenderTextureReference(), canvas, composite_layers);
+	EngineCanvasController* controller = new EngineCanvasController(this, this->GetScene()->GetNewRenderTextureReference(), canvas, composite_layers);
 	this->AddRenderController(controller);
 
 	if (this->m_glcontext_canvas != nullptr)
@@ -303,13 +303,13 @@ EngineCanvasController* Engine::GenerateNewCanvas(RenderableConfig config, wxWin
 
 void Engine::Render()
 {
-	if (this->m_scene != nullptr)
+	if (this->GetScene() != nullptr)
 	{
 		this->MakeContextCurrent();
 
 		//update static textures
 		// load model textures
-		for (Model* model : this->m_scene->GetModels())
+		for (Model* model : this->GetScene()->GetModels())
 		{
 			this->LoadTexture(model->GetColourTexture(), "colourTexture");
 			this->LoadTexture(model->GetNormalTexture(), "normalTexture");
@@ -343,7 +343,7 @@ void Engine::Render()
 				}
 			}
 
-			std::vector<std::tuple<Cubemap*, CubemapType>> required_cubemap_ptrs = this->m_scene->GetCubemaps();
+			std::vector<std::tuple<Cubemap*, CubemapType>> required_cubemap_ptrs = this->GetScene()->GetCubemaps();
 			for (const auto& [cubemap, cubemap_type] : required_cubemap_ptrs)
 			{
 				required_cubemaps.push_back(std::tuple(cubemap->GetReference(), cubemap_type));
@@ -546,11 +546,6 @@ void Engine::Render()
 	}
 
 	glFlush();
-}
-
-Scene* Engine::GetScene() const
-{
-	return this->m_scene;
 }
 
 LoadedTexture Engine::GetTexture(TextureReference reference) const

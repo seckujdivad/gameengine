@@ -20,12 +20,13 @@
 #include "render/LoadedTexture.h"
 #include "render/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
+#include "scene/SceneChild.h"
 
 class EngineCanvas;
 class Scene;
 class Renderable;
 
-class Engine
+class Engine : public SceneChild
 {
 public:
 	struct LoadedGeometry
@@ -51,8 +52,6 @@ private:
 	wxWindow* m_parent;
 	wxGLAttributes m_canvas_args;
 	wxGLCanvas* m_glcontext_canvas;
-
-	Scene* m_scene = nullptr;
 
 	std::unordered_map<TextureReference, std::tuple<LoadedTexture, LocalTexture>> m_textures_static;
 
@@ -87,8 +86,6 @@ public:
 	EngineCanvasController* GenerateNewCanvas(RenderableConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
-
-	Scene* GetScene() const;
 
 	void LoadTexture(LocalTexture texture, std::string uniform_name);
 	LoadedTexture GetTexture(TextureReference reference) const;

@@ -15,8 +15,8 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 	Nameable(),
 	Scalable(),
 	Referenceable<ModelReference>(reference),
-	m_geometry(geometry),
-	m_scene(scene)
+	SceneChild(scene),
+	m_geometry(geometry)
 {
 	if (scene == nullptr)
 	{
