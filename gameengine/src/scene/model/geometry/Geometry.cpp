@@ -56,6 +56,7 @@ Geometry::RenderInfo Geometry::GetRenderInfo() const
 	result.interpolation_mode = this->GetInterpolationMode();
 	result.primitive_type = this->GetPrimitiveType();
 	result.primitive_dimensions = this->GetPrimitiveDimensions();
+	result.primitive_size = this->GetPrimitiveSize();
 
 	return result;
 }
@@ -195,6 +196,11 @@ bool Geometry::RenderInfo::operator==(const RenderInfo& second) const
 		return false;
 	}
 
+	if (this->primitive_size != second.primitive_size)
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -211,7 +217,7 @@ std::size_t Geometry::RenderInfo::Hash::operator()(const RenderInfo& target) con
 	* 0			tesselation_enabled
 	* 1			interpolation_mode
 	* 2, 3		primitive_type
-	* 4+		primitive_dimensions (x+y)
+	* 4+		primitive_size
 	*/
 
 	int interpolation_mode = static_cast<int>(target.interpolation_mode);
@@ -232,7 +238,7 @@ std::size_t Geometry::RenderInfo::Hash::operator()(const RenderInfo& target) con
 	std::size_t result = std::size_t(target.tesselation_enabled);
 	result += std::size_t(interpolation_mode) << 1;
 	result += std::size_t(primitive_type) << 2;
-	result += std::size_t(target.primitive_dimensions.x + target.primitive_dimensions.y) << 4;
+	result += std::size_t(target.primitive_size) << 4;
 
 	return result;
 }

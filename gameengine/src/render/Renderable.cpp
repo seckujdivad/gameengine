@@ -501,37 +501,30 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 			}
 
-			//load geometry
-			std::vector<std::shared_ptr<Geometry>> geometries = model->GetGeometry();
-			for (const std::shared_ptr<Geometry>& geometry : geometries)
+			std::function<GLenum(Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)
 			{
-				Engine::LoadedGeometry loaded_geometry = this->GetEngine()->BindVAO(model, geometry);
-
-				//draw geometry
 				GLenum mode = GL_NONE; //default invalid value, should be overwritten
 
-				Geometry::PrimitiveType primitive_type = geometry->GetPrimitiveType();
 				if (this->RenderModeIsModelRendering())
 				{
-					if ((primitive_type == Geometry::PrimitiveType::Patches) || (primitive_type == Geometry::PrimitiveType::Quads))
+					if ((info.primitive_type == Geometry::PrimitiveType::Patches) || (info.primitive_type == Geometry::PrimitiveType::Quads))
 					{
 						mode = GL_PATCHES;
 
-						this->SetShaderUniform("tess_enable", geometry->GetTesselationEnabled());
-						this->SetShaderUniform("tess_interp_mode", static_cast<int>(geometry->GetInterpolationMode()));
+						this->SetShaderUniform("tess_enable", info.tesselation_enabled);
+						this->SetShaderUniform("tess_interp_mode", static_cast<int>(info.interpolation_mode));
 
-						glm::ivec2 dimensions = geometry->GetPrimitiveDimensions();
-						this->SetShaderUniform("patch_size_u", dimensions.x);
-						this->SetShaderUniform("patch_size_v", dimensions.y);
+						this->SetShaderUniform("patch_size_u", info.primitive_dimensions.x);
+						this->SetShaderUniform("patch_size_v", info.primitive_dimensions.y);
 					}
 					else
 					{
-						throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(primitive_type)) + " is not supported by model-oriented rendering modes");
+						throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
 					}
 				}
 				else if (this->GetRenderMode() == RenderMode::Postprocess)
 				{
-					if (primitive_type == Geometry::PrimitiveType::Triangles)
+					if (info.primitive_type == Geometry::PrimitiveType::Triangles)
 					{
 						mode = GL_TRIANGLES;
 					}
@@ -545,35 +538,10 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					throw std::runtime_error("Render mode " + std::to_string(static_cast<int>(this->GetRenderMode())) + " can't render geometry");
 				}
 
-				//set patch size
-				if (mode == GL_PATCHES)
-				{
-					std::size_t patch_size = geometry->GetPrimitiveSize();
+				return mode;
+			};
 
-#ifdef _DEBUG
-					GLint max_patch_size = 32; //this is the minimum value required by the standard
-					glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
-
-					//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
-					//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
-					max_patch_size--;
-
-					if (static_cast<std::size_t>(max_patch_size) < patch_size)
-					{
-						throw std::runtime_error("Patch provided has " + std::to_string(patch_size) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
-					}
-#endif
-
-					glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
-				}
-
-				glDrawArrays(mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
-			}
-
-			if (dealloc_models) //release geometry as the models are temporary
-			{
-				this->GetEngine()->ReleaseVAOs(model);
-			}
+			this->GetEngine()->DrawModel(model, predraw);
 		}
 
 		this->m_fbo_contains_render = true;

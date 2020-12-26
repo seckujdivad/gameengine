@@ -30,6 +30,7 @@ public:
 
 		PrimitiveType primitive_type = PrimitiveType::Quads;
 		glm::ivec2 primitive_dimensions = glm::ivec2(2, 2);
+		std::size_t primitive_size = 4;
 
 		bool operator==(const RenderInfo& second) const;
 		bool operator!=(const RenderInfo& second) const;

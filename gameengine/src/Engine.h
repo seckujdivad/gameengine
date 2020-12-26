@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <memory>
 #include <tuple>
+#include <functional>
 
 #include "GLComponents.h"
 
@@ -29,13 +30,12 @@ class Engine
 public:
 	struct LoadedGeometry
 	{
-		LoadedGeometry(std::shared_ptr<Geometry> source);
-
-		std::shared_ptr<Geometry> source;
-		std::vector<double> data;
+		std::vector<GLfloat> data;
 
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
+
+		void FreeGL();
 	};
 
 	struct DebugMessageConfig
@@ -59,10 +59,18 @@ private:
 	std::vector<RenderController*> m_render_controllers;
 
 	//loaded geometry
-	std::unordered_map<ModelReference, std::vector<Engine::LoadedGeometry>> m_model_geometry_vbos;
-	std::unordered_map<Model*, std::vector<Engine::LoadedGeometry>> m_temporary_vbos;
+	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry_vbos;
+	std::unordered_map<Model*, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_temporary_vbos;
 
-	Engine::LoadedGeometry LoadGeometry(std::shared_ptr<Geometry> geometry);
+	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
+	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
+	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices);
+
+	Engine::LoadedGeometry BindVAO(Model* model, Geometry::RenderInfo render_info);
+
+	bool IsTemporaryGeometryRequired(Model* model);
+	void CreateTemporaryGeometry(Model* model);
+	void ReleaseTemporaryGeometry(Model* model);
 
 	void AddRenderController(RenderController* render_controller);
 
@@ -86,8 +94,7 @@ public:
 	LoadedTexture GetTexture(TextureReference reference) const;
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
 
-	Engine::LoadedGeometry BindVAO(Model* model, std::shared_ptr<Geometry> geometry);
-	void ReleaseVAOs(Model* model);
+	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
 
 	void MakeContextCurrent() const;
 
