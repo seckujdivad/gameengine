@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <optional>
 
 #include <wx/image.h>
 
@@ -66,26 +65,29 @@ std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderI
 
 	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
 	{
-		Geometry::RenderInfo render_info = inner_geometry->GetRenderInfo();
-		std::vector<double> data_highp = inner_geometry->GetPrimitives();
+		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
+		{
+			Geometry::RenderInfo render_info = inner_geometry->GetRenderInfo();
+			std::vector<double> data_highp = inner_geometry->GetPrimitives();
 
-		std::vector<GLfloat> vertices;
-		vertices.reserve(data_highp.size());
-		for (double value : data_highp)
-		{
-			vertices.push_back(static_cast<GLfloat>(value));
-		}
-
-		auto it = result.find(render_info);
-		if (it == result.end())
-		{
-			result.insert(std::pair(render_info, vertices));
-		}
-		else
-		{
-			for (GLfloat value : vertices)
+			std::vector<GLfloat> vertices;
+			vertices.reserve(data_highp.size());
+			for (double value : data_highp)
 			{
-				it->second.push_back(value);
+				vertices.push_back(static_cast<GLfloat>(value));
+			}
+
+			auto it = result.find(render_info);
+			if (it == result.end())
+			{
+				result.insert(std::pair(render_info, vertices));
+			}
+			else
+			{
+				for (GLfloat value : vertices)
+				{
+					it->second.push_back(value);
+				}
 			}
 		}
 	}
@@ -243,22 +245,17 @@ Engine::~Engine()
 		glDeleteTextures(1, &std::get<0>(loaded_texture).id);
 	}
 
-	for (const auto& [reference, loaded_geometries] : this->m_model_geometry_vbos)
+	for (const auto& [reference, loaded_geometries] : this->m_model_geometry)
 	{
 		for (auto& [render_info, loaded_geometry] : loaded_geometries)
 		{
-			glDeleteBuffers(1, &loaded_geometry.vbo);
-			glDeleteVertexArrays(1, &loaded_geometry.vao);
+			loaded_geometry.FreeGL();
 		}
 	}
 
-	for (const auto& [model, loaded_geometries] : this->m_temporary_vbos)
+	for (const auto& [geometry_type, render_data] : this->m_geometry_presets)
 	{
-		for (auto& [render_info, loaded_geometry] : loaded_geometries)
-		{
-			glDeleteBuffers(1, &loaded_geometry.vbo);
-			glDeleteVertexArrays(1, &loaded_geometry.vao);
-		}
+		std::get<1>(render_data).FreeGL();
 	}
 
 	delete this->m_glcontext;
@@ -450,7 +447,7 @@ void Engine::Render()
 		//remove non-existent geometry and update existing (if required)
 		{
 			std::vector<ModelReference> to_remove;
-			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry_vbos)
+			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry)
 			{
 				Model* model = this->GetScene()->GetModel(model_reference);
 
@@ -515,20 +512,20 @@ void Engine::Render()
 			//remove old geometry
 			for (ModelReference model_reference : to_remove)
 			{
-				for (auto& [render_info, loaded_geometry] : this->m_model_geometry_vbos.at(model_reference))
+				for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model_reference))
 				{
 					loaded_geometry.FreeGL();
 				}
 				
-				this->m_model_geometry_vbos.erase(model_reference);
+				this->m_model_geometry.erase(model_reference);
 			}
 
 			//add new geometry
 			for (Model* model : this->GetScene()->GetModels())
 			{
-				if (this->m_model_geometry_vbos.count(model->GetReference()) == 0)
+				if (this->m_model_geometry.count(model->GetReference()) == 0)
 				{
-					this->m_model_geometry_vbos.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
+					this->m_model_geometry.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
 				}
 			}
 		}
@@ -568,25 +565,46 @@ RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) co
 
 void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw)
 {
-	bool using_temp_geometry = this->IsTemporaryGeometryRequired(model);
-	if (using_temp_geometry)
+	std::vector<std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> geometry;
+
+	if (this->IsChildOfSameScene(model))
 	{
-		this->CreateTemporaryGeometry(model);
+		for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model->GetReference()))
+		{
+			geometry.push_back(std::tuple(render_info, loaded_geometry));
+		}
 	}
 
-	//ugly conditional reference creation
-	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>* geometries_ptr = nullptr;
-	if (using_temp_geometry)
+	for (std::shared_ptr<Geometry>& geom : model->GetGeometry())
 	{
-		geometries_ptr = &this->m_temporary_vbos.at(model);
-	}
-	else
-	{
-		geometries_ptr = &this->m_model_geometry_vbos.at(model->GetReference());
-	}
-	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>& geometries = *geometries_ptr;
+		std::shared_ptr<PresetGeometry> preset_geom = std::dynamic_pointer_cast<PresetGeometry>(geom);
 
-	for (auto& [render_info, loaded_geometry] : geometries)
+		if (preset_geom.get() != nullptr)
+		{
+			auto it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
+			if (it == this->m_geometry_presets.end())
+			{
+				std::vector<GLfloat> vertices;
+				std::vector<double> vertices_highp = preset_geom->GetPrimitives();
+				vertices.reserve(vertices_highp.size());
+				for (double value : vertices_highp)
+				{
+					vertices.push_back(static_cast<GLfloat>(value));
+				}
+
+				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), this->CreateLoadedGeometry(vertices));
+
+				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
+				geometry.push_back(data);
+			}
+			else
+			{
+				geometry.push_back(it->second);
+			}
+		}
+	}
+
+	for (auto& [render_info, loaded_geometry] : geometry)
 	{
 		GLenum render_mode = predraw(render_info, loaded_geometry);
 
@@ -612,60 +630,25 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
 		}
 
-		this->BindVAO(model, render_info);
+		this->BindVAO(loaded_geometry);
 
 		glDrawArrays(render_mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 	}
-
-	if (using_temp_geometry)
-	{
-		this->ReleaseTemporaryGeometry(model);
-	}
 }
 
-Engine::LoadedGeometry Engine::BindVAO(Model* model, Geometry::RenderInfo render_info)
+void Engine::BindVAO(LoadedGeometry loaded_geometry)
 {
-	LoadedGeometry loaded_geometry;
-	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //is temporary VBO
-	{
-		loaded_geometry = this->m_temporary_vbos.at(model).at(render_info);
-	}
-	else
-	{
-		loaded_geometry = this->m_model_geometry_vbos.at(model->GetReference()).at(render_info);
-	}
-
 	glBindVertexArray(loaded_geometry.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
-
-	return loaded_geometry;
 }
 
-bool Engine::IsTemporaryGeometryRequired(Model* model)
+void Engine::PrunePresetGeometry(PresetGeometry::GeometryType type)
 {
-	return !this->IsChildOfSameScene(model);
-}
-
-void Engine::CreateTemporaryGeometry(Model* model)
-{
-	this->m_temporary_vbos.insert(std::pair(model, this->LoadGeometry(model->GetGeometry())));
-}
-
-void Engine::ReleaseTemporaryGeometry(Model* model)
-{
-	if (this->m_temporary_vbos.count(model) == 0)
+	auto it = this->m_geometry_presets.find(type);
+	if (it != this->m_geometry_presets.end())
 	{
-		throw std::invalid_argument("This model has no associated temporary VBO");
-	}
-	else
-	{
-		for (auto& [render_info, loaded_geometry] : this->m_temporary_vbos.at(model))
-		{
-			glDeleteBuffers(1, &loaded_geometry.vbo);
-			glDeleteVertexArrays(1, &loaded_geometry.vao);
-		}
-		
-		this->m_temporary_vbos.erase(model);
+		std::get<1>(it->second).FreeGL();
+		this->m_geometry_presets.erase(it);
 	}
 }
 
@@ -870,7 +853,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	}
 }
 
-void Engine::LoadedGeometry::FreeGL()
+void Engine::LoadedGeometry::FreeGL() const
 {
 	glDeleteBuffers(1, &this->vbo);
 	glDeleteVertexArrays(1, &this->vao);

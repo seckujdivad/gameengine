@@ -21,6 +21,7 @@
 #include "render/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
 #include "scene/SceneChild.h"
+#include "scene/model/geometry/PresetGeometry.h"
 
 class EngineCanvas;
 class Scene;
@@ -36,7 +37,7 @@ public:
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
 
-		void FreeGL();
+		void FreeGL() const;
 	};
 
 	struct DebugMessageConfig
@@ -58,18 +59,16 @@ private:
 	std::vector<RenderController*> m_render_controllers;
 
 	//loaded geometry
-	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry_vbos;
-	std::unordered_map<Model*, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_temporary_vbos;
+	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry;
+	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> m_geometry_presets;
 
 	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
-	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices);
+	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 
-	Engine::LoadedGeometry BindVAO(Model* model, Geometry::RenderInfo render_info);
+	void BindVAO(Engine::LoadedGeometry loaded_geometry);
 
-	bool IsTemporaryGeometryRequired(Model* model);
-	void CreateTemporaryGeometry(Model* model);
-	void ReleaseTemporaryGeometry(Model* model);
+	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
 	void AddRenderController(RenderController* render_controller);
 

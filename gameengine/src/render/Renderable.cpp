@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include "../scene/model/Model.h"
-#include "../scene/model/geometry/Polygonal.h"
+#include "../scene/model/geometry/PresetGeometry.h"
 #include "../scene/model/geometry/Patch.h"
 #include "../scene/Camera.h"
 #include "../scene/Scene.h"
@@ -57,23 +57,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				{
 					models.clear();
 
-					std::shared_ptr<Polygonal> geom = std::make_shared<Polygonal>();
-					geom->SetPrimitiveType(Geometry::PrimitiveType::Triangles);
-
-					Polygonal::Face face = Polygonal::Face(*geom);
-
-					const double vertex_size = 1.0;
-					const double uv_size = 1.0;
-					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, -vertex_size, 0.0), glm::dvec2(0.0, 0.0)));
-					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(-vertex_size, vertex_size, 0.0), glm::dvec2(0.0, uv_size)));
-					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, vertex_size, 0.0), glm::dvec2(uv_size, uv_size)));
-					face.AddVertex(Polygonal::Face::StandaloneVertex(glm::dvec3(vertex_size, -vertex_size, 0.0), glm::dvec2(uv_size, 0.0)));
-
-					face.SetNormal(glm::dvec3(0.0, 0.0, -1.0));
-
-					geom->AddFace(face);
-
-					models.push_back(new Model(-1, std::vector<std::shared_ptr<Geometry>>({ geom })));
+					models.push_back(new Model(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) })));
 
 					dealloc_models = true;
 				}
