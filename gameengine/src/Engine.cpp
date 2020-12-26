@@ -612,6 +612,8 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
 		}
 
+		this->BindVAO(model, render_info);
+
 		glDrawArrays(render_mode, 0, static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX)));
 	}
 
@@ -624,7 +626,7 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 Engine::LoadedGeometry Engine::BindVAO(Model* model, Geometry::RenderInfo render_info)
 {
 	LoadedGeometry loaded_geometry;
-	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //generate temporary VBO
+	if (this->m_model_geometry_vbos.count(model->GetReference()) == 0) //is temporary VBO
 	{
 		loaded_geometry = this->m_temporary_vbos.at(model).at(render_info);
 	}
@@ -641,7 +643,7 @@ Engine::LoadedGeometry Engine::BindVAO(Model* model, Geometry::RenderInfo render
 
 bool Engine::IsTemporaryGeometryRequired(Model* model)
 {
-	return this->m_temporary_vbos.count(model) == 0;
+	return !this->IsChildOfSameScene(model);
 }
 
 void Engine::CreateTemporaryGeometry(Model* model)
