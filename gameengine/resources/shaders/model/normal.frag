@@ -350,6 +350,8 @@ void main()
 				int search_level = mat_ssr_refinements; //number of additional searches to carry out
 
 				const float num_searches_on_refine = 2.0f;
+				float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, mat_ssr_refinements);
+				
 				float hit_increment;
 				{
 					const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
@@ -375,7 +377,7 @@ void main()
 
 					const bool hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f)
 						&& (texture(render_output_data[0], tex_pos.xy).r > 0.5f)
-						&& (abs(sample_depth_camspace - search_depth_camspace) < mat_ssr_depth_acceptance);
+						&& (abs(sample_depth_camspace - search_depth_camspace) < depth_acceptance);
 
 					if (hit_detected && (search_level == 0)) //a hit was found and the search increment is as small as is allowed, use this hit as the final location
 					{
@@ -386,6 +388,7 @@ void main()
 					{
 						hit_pos -= hit_increment;
 						hit_increment /= num_searches_on_refine;
+						depth_acceptance /= num_searches_on_refine;
 						search_level -= 1;
 					}
 
