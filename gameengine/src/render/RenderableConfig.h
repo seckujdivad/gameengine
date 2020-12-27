@@ -14,6 +14,7 @@ struct RenderableConfig
 	{
 		RenderTextureGroup previous_frame;
 		bool draw_shadows = true;
+		bool draw_reflections = true;
 	};
 
 	struct Wireframe

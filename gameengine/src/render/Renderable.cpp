@@ -407,7 +407,14 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 					//reflections
-					this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
+					if (this->GetRenderMode() == RenderMode::Normal && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_reflections)
+					{
+						this->SetShaderUniform("reflections_enabled", false);
+					}
+					else
+					{
+						this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
+					}
 
 					std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
 					for (int i = 0; i < static_cast<int>(reflections.size()); i++)
@@ -808,7 +815,7 @@ std::unordered_set<RenderTextureReference> Renderable::GetRenderTextureDependenc
 			Cubemap* cubemap = std::get<0>(cubemap_data);
 			CubemapType cubemap_type = std::get<1>(cubemap_data);
 
-			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_shadows))
+			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_reflections))
 			{
 				result.insert(cubemap->GetReference());
 			}
