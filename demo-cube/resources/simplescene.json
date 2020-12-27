@@ -175,6 +175,7 @@
       "identifier": "level section 1",
       "clips": [ 0.1, 100 ],
       "draw shadows": false,
+      "draw reflections": false,
       "corrections": {
         "iterative sampling": {
           "iterations": 0
@@ -188,6 +189,7 @@
       "identifier": "level section 2",
       "clips": [ 0.1, 100 ],
       "draw shadows": false,
+      "draw reflections": false,
       "corrections": {
         "iterative sampling": {
           "iterations": 0
@@ -201,6 +203,7 @@
       "identifier": "level section 3",
       "clips": [ 0.1, 100 ],
       "draw shadows": false,
+      "draw reflections": false,
       "corrections": {
         "iterative sampling": {
           "iterations": 0
