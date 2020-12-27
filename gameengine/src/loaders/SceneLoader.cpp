@@ -227,7 +227,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		{
 			if (data.is_object())
 			{
-				if (data.is_number())
+				if (data["acceptable depth distance"].is_number())
 				{
 					config.depth_acceptance = data["acceptable depth distance"].get<float>();
 				}
