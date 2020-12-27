@@ -2,13 +2,8 @@
 layout(quads, equal_spacing, ccw) in;
 
 in vec3 tescMdlSpacePos[];
-in vec3 tescSceneSpacePos[];
-in vec3 tescCamSpacePos[];
-
 in vec2 tescUV[];
-
 in vec3 tescMdlSpaceNormal[];
-in vec3 tescSceneSpaceNormal[];
 
 out vec3 teseMdlSpacePos;
 out vec3 teseSceneSpacePos;
@@ -20,7 +15,11 @@ out vec3 teseMdlSpaceNormal;
 out vec3 teseSceneSpaceNormal;
 
 
+uniform vec4 mdl_translate;
 uniform mat4 mdl_rotate;
+uniform mat4 mdl_scale;
+
+uniform vec4 cam_translate;
 
 uniform bool tess_enable;
 uniform int tess_interp_mode;
@@ -139,8 +138,8 @@ vec3 derivative_v(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 void main()
 {
 	teseMdlSpacePos = interpolate(tescMdlSpacePos, gl_TessCoord);
-	teseSceneSpacePos = interpolate(tescSceneSpacePos, gl_TessCoord);
-	teseCamSpacePos = interpolate(tescCamSpacePos, gl_TessCoord);
+	teseSceneSpacePos = persp_div(mdl_rotate * mdl_scale * vec4(teseMdlSpacePos, 1.0f)) + mdl_translate.xyz;
+	teseCamSpacePos = teseSceneSpacePos + cam_translate.xyz;
 
 	teseUV = interpolate(tescUV, gl_TessCoord);
 
@@ -150,11 +149,11 @@ void main()
 		vec3 bitangent = derivative_v(tescMdlSpacePos, gl_TessCoord);
 
 		teseMdlSpaceNormal = 0.0f - normalize(cross(tangent, bitangent));
-		teseSceneSpaceNormal = persp_div(mdl_rotate * vec4(teseMdlSpaceNormal, 1.0f));
 	}
 	else
 	{
 		teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal, gl_TessCoord);
-		teseSceneSpaceNormal = interpolate(tescSceneSpaceNormal, gl_TessCoord);
 	}
+
+	teseSceneSpaceNormal = persp_div(mdl_rotate * vec4(teseMdlSpaceNormal, 1.0f));
 }
