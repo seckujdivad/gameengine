@@ -559,7 +559,7 @@ void Renderable::RecompileShader()
 		false
 	);
 
-	for (std::set<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
+	for (std::unordered_set<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
 	{
 		this->m_shader_program->RegisterUniform(*it);
 	}
@@ -604,7 +604,7 @@ bool Renderable::SetShaderDefine(std::string key, std::string value)
 
 void Renderable::AddShaderUniformName(std::string name)
 {
-	std::pair<std::set<std::string>::iterator, bool> insert_result = this->m_shader_uniform_names.insert(name);
+	std::pair<std::unordered_set<std::string>::iterator, bool> insert_result = this->m_shader_uniform_names.insert(name);
 
 	if (insert_result.second && (this->m_shader_program != nullptr))
 	{
@@ -795,6 +795,27 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 void Renderable::SetRenderFunction(ControllerFunction function)
 {
 	this->m_render_function = function;
+}
+
+std::unordered_set<RenderTextureReference> Renderable::GetRenderTextureDependencies() const
+{
+	std::unordered_set<RenderTextureReference> result;
+
+	if (this->GetRenderMode() == RenderMode::Normal)
+	{
+		for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetEngine()->GetScene()->GetCubemaps())
+		{
+			Cubemap* cubemap = std::get<0>(cubemap_data);
+			CubemapType cubemap_type = std::get<1>(cubemap_data);
+
+			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_shadows))
+			{
+				result.insert(cubemap->GetReference());
+			}
+		}
+	}
+
+	return result;
 }
 
 RenderMode Renderable::GetRenderMode() const

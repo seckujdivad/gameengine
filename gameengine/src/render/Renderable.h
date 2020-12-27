@@ -11,7 +11,7 @@
 #include <tuple>
 #include <map>
 #include <functional>
-#include <set>
+#include <unordered_set>
 
 #include "../scene/Referenceable.h"
 #include "RenderMode.h"
@@ -40,7 +40,7 @@ private:
 	ShaderProgram* m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
 	std::map<std::string, std::string> m_shader_defines;
-	std::set<std::string> m_shader_uniform_names;
+	std::unordered_set<std::string> m_shader_uniform_names;
 
 	std::map<int, LoadedTexture> m_textures;
 
@@ -105,4 +105,6 @@ public:
 	virtual std::tuple<int, int> GetOutputSize() const = 0;
 
 	void SetRenderFunction(ControllerFunction function);
+
+	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const;
 };
