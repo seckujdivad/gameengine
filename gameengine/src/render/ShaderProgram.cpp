@@ -39,12 +39,15 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 	//clean up shaders as they have already been linked
 	for (GLuint shader_id : shader_ids)
 	{
+		glDetachShader(this->m_program_id, shader_id);
 		glDeleteShader(shader_id);
 	}
 
+	glValidateProgram(this->m_program_id);
+
 	//check for errors
 	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
-	glValidateProgram(this->m_program_id);
+	
 	glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
 	if (link_was_successful != GL_TRUE) //get error message from GPU
 	{
@@ -58,6 +61,8 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 		throw std::runtime_error("Shader link exception: " + errmsg);
 	}
+
+	
 }
 
 ShaderProgram::~ShaderProgram()
@@ -121,6 +126,19 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 	GLuint shader_id = glCreateShader(type);
 	glShaderSource(shader_id, 1, &shader_src, NULL);
 	glCompileShader(shader_id);
+
+	//get log
+	{
+		GLint buffer_len = NULL;
+		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &buffer_len);
+		if (buffer_len > 1)
+		{
+			std::unique_ptr<GLchar[]> log_string = std::make_unique<GLchar[]>(buffer_len + 1);
+			glGetShaderInfoLog(shader_id, buffer_len, 0, log_string.get());
+
+			LogMessage("Shader log: " + std::string(log_string.get()));
+		}
+	}
 
 	//check for errors
 	GLint compile_was_successful; //should be glboolean in my opinion but that's what the function takes
