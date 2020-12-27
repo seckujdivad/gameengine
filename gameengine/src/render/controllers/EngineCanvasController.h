@@ -40,7 +40,6 @@ public:
 
 	void Render() override;
 	RenderTextureGroup GetRenderTexture() const override;
-	double GetRenderGroup() const override;
 	RenderControllerType GetType() const override;
 
 	EngineCanvas* GetEngineCanvas() const;
@@ -48,4 +47,7 @@ public:
 	void SetRenderLayers(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
 	void SetRenderLayers(std::vector<RenderableConfig> configs);
 	void SetRenderLayers(RenderableConfig config);
+
+	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
+	bool IsEssentialDraw() const override;
 };

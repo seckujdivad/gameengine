@@ -14,3 +14,8 @@ RenderController::~RenderController()
 void RenderController::PostRender()
 {
 }
+
+bool RenderController::IsEssentialDraw() const
+{
+	return false;
+}

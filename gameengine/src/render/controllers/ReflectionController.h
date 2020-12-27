@@ -12,8 +12,7 @@ public:
 	ReflectionController(Engine* engine, RenderTextureReference reference);
 
 	void PostRender() override;
-	
-	double GetRenderGroup() const override;
+
 	RenderControllerType GetType() const override;
 
 	CubemapType GetCubemapType() const override;

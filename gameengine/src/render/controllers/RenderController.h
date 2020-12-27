@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "../../scene/Referenceable.h"
 #include "../RenderTextureData.h"
 
@@ -26,6 +28,8 @@ public:
 	virtual void PostRender();
 
 	virtual RenderTextureGroup GetRenderTexture() const = 0;
-	virtual double GetRenderGroup() const = 0;
 	virtual RenderControllerType GetType() const = 0;
+
+	virtual std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const = 0;
+	virtual bool IsEssentialDraw() const;
 };

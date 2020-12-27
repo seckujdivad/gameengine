@@ -38,9 +38,9 @@ public:
 
 	void Render() override;
 	RenderTextureGroup GetRenderTexture() const override;
+	virtual RenderControllerType GetType() const = 0;
 
 	virtual CubemapType GetCubemapType() const = 0;
 
-	virtual double GetRenderGroup() const = 0;
-	virtual RenderControllerType GetType() const = 0;
+	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
 };

@@ -64,11 +64,6 @@ void ReflectionController::PostRender()
 	this->m_render_textures.at(1)->SwapBuffers();
 }
 
-double ReflectionController::GetRenderGroup() const
-{
-	return 0.5;
-}
-
 RenderControllerType ReflectionController::GetType() const
 {
 	return RenderControllerType::Reflection;

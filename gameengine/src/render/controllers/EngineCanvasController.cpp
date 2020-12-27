@@ -99,11 +99,6 @@ RenderTextureGroup EngineCanvasController::GetRenderTexture() const
 	return this->m_texture_final->GetOutputTextures();
 }
 
-double EngineCanvasController::GetRenderGroup() const
-{
-	return 1.0; //last render
-}
-
 RenderControllerType EngineCanvasController::GetType() const
 {
 	return RenderControllerType::EngineCanvas;
@@ -136,4 +131,33 @@ void EngineCanvasController::SetRenderLayers(std::vector<RenderableConfig> confi
 void EngineCanvasController::SetRenderLayers(RenderableConfig config)
 {
 	return this->SetRenderLayers(std::vector({ config }));
+}
+
+std::unordered_set<RenderTextureReference> EngineCanvasController::GetRenderTextureDependencies() const
+{
+	std::unordered_set<RenderTextureReference> result;
+	for (RenderTexture* render_texture : this->m_textures)
+	{
+		for (RenderTextureReference reference : render_texture->GetRenderTextureDependencies())
+		{
+			result.insert(reference);
+		}
+	}
+
+	for (RenderTextureReference reference : this->m_texture_final->GetRenderTextureDependencies())
+	{
+		result.insert(reference);
+	}
+
+	for (RenderTextureReference reference : this->m_canvas->GetRenderTextureDependencies())
+	{
+		result.insert(reference);
+	}
+
+	return result;
+}
+
+bool EngineCanvasController::IsEssentialDraw() const
+{
+	return true;
 }

@@ -37,11 +37,6 @@ SkyboxController::SkyboxController(Engine* engine, RenderTextureReference refere
 	this->DerivedClassConstructedEvent();
 }
 
-double SkyboxController::GetRenderGroup() const
-{
-	return 0.75;
-}
-
 RenderControllerType SkyboxController::GetType() const
 {
 	return RenderControllerType::Skybox;

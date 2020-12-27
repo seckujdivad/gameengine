@@ -133,16 +133,41 @@ Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertice
 
 void Engine::AddRenderController(RenderController* render_controller)
 {
-	int insert_index = 0;
-	for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
+	this->m_render_controllers.push_back(render_controller);
+}
+
+RenderController* Engine::GetRenderController(RenderTextureReference reference)
+{
+	for (RenderController* render_controller : this->m_render_controllers)
 	{
-		if (this->m_render_controllers.at(i)->GetRenderGroup() <= render_controller->GetRenderGroup())
+		if (render_controller->GetReference() == reference)
 		{
-			insert_index = i;
+			return render_controller;
+		}
+	}
+	return nullptr;
+}
+
+std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn)
+{
+	std::vector<RenderTextureReference> result;
+
+	for (RenderTextureReference inner_ref : direct_dependencies.at(reference))
+	{
+		if (!is_drawn.at(inner_ref))
+		{
+			is_drawn.at(inner_ref) = true;
+
+			for (RenderTextureReference inner_inner_ref : this->CollateRenderTextureDependencies(inner_ref, direct_dependencies, is_drawn))
+			{
+				result.push_back(inner_inner_ref);
+			}
+
+			result.push_back(inner_ref);
 		}
 	}
 
-	this->m_render_controllers.insert(this->m_render_controllers.begin() + insert_index, render_controller);
+	return result;
 }
 
 Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(parent)
@@ -530,15 +555,44 @@ void Engine::Render()
 			}
 		}
 
-		//tell controllers to redraw themselves (if required)
-		for (RenderController* render_controller : this->m_render_controllers)
+		//draw required render controllers
 		{
-			render_controller->Render();
-		}
+			std::unordered_map<RenderTextureReference, bool> draw_required;
+			std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>> reference_direct_dependencies;
+			std::vector<RenderController*> essential_draws;
 
-		for (RenderController* render_controller : this->m_render_controllers)
-		{
-			render_controller->PostRender();
+			for (RenderController* render_controller : this->m_render_controllers)
+			{
+				bool is_essential_draw = render_controller->IsEssentialDraw();
+				draw_required.insert(std::pair(render_controller->GetReference(), is_essential_draw));
+				reference_direct_dependencies.insert(std::pair(render_controller->GetReference(), render_controller->GetRenderTextureDependencies()));
+
+				if (is_essential_draw)
+				{
+					essential_draws.push_back(render_controller);
+				}
+			}
+			
+			std::vector<RenderController*> to_draw;
+			for (RenderController* render_controller : essential_draws)
+			{
+				for (RenderTextureReference ref : this->CollateRenderTextureDependencies(render_controller->GetReference(), reference_direct_dependencies, draw_required))
+				{
+					to_draw.push_back(this->GetRenderController(ref));
+				}
+				to_draw.push_back(render_controller);
+			}
+
+			//tell controllers to redraw themselves (if required)
+			for (RenderController* render_controller : to_draw)
+			{
+				render_controller->Render();
+			}
+
+			for (RenderController* render_controller : to_draw)
+			{
+				render_controller->PostRender();
+			}
 		}
 	}
 

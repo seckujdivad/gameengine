@@ -71,6 +71,9 @@ private:
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
 	void AddRenderController(RenderController* render_controller);
+	RenderController* GetRenderController(RenderTextureReference reference);
+
+	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
 public:
 	Engine(wxWindow* parent, Scene* scene);

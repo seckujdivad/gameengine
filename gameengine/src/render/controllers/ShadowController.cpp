@@ -34,11 +34,6 @@ ShadowController::ShadowController(Engine* engine, RenderTextureReference refere
 	this->DerivedClassConstructedEvent();
 }
 
-double ShadowController::GetRenderGroup() const
-{
-	return 0.0;
-}
-
 RenderControllerType ShadowController::GetType() const
 {
 	return RenderControllerType::Shadow;

@@ -161,3 +161,17 @@ RenderTextureGroup CubemapController::GetRenderTexture() const
 {
 	return this->m_cumulative_texture.GetOutput()->GetOutputTextures();
 }
+
+std::unordered_set<RenderTextureReference> CubemapController::GetRenderTextureDependencies() const
+{
+	std::unordered_set<RenderTextureReference> result;
+	for (RenderTexture* render_texture : this->m_render_textures)
+	{
+		for (RenderTextureReference reference : render_texture->GetRenderTextureDependencies())
+		{
+			result.insert(reference);
+		}
+	}
+
+	return result;
+}

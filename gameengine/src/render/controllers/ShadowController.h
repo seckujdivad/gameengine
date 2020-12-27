@@ -11,7 +11,6 @@ private:
 public:
 	ShadowController(Engine* engine, RenderTextureReference reference);
 
-	double GetRenderGroup() const override;
 	RenderControllerType GetType() const override;
 
 	CubemapType GetCubemapType() const override;
