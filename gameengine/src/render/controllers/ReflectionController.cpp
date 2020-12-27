@@ -19,8 +19,6 @@ RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
 		config.clear_fbo = false;
 	}
 
-	std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = false;
-
 	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera);
@@ -35,7 +33,8 @@ bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render
 
 	if (render_texture->GetRenderMode() == RenderMode::Normal)
 	{
-		if (std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows())
+		if (std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows()
+			&& std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_reflections == reflection->GetDrawReflections())
 		{
 			return false;
 		}
@@ -43,6 +42,7 @@ bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render
 		{
 			RenderableConfig config = render_texture->GetConfig();
 			std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
+			std::get<RenderableConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
 			render_texture->SetConfig(config);
 
 			return true;

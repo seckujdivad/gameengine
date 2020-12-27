@@ -23,3 +23,13 @@ bool Reflection::GetDrawShadows() const
 {
 	return this->m_draw_shadows;
 }
+
+void Reflection::SetDrawReflections(bool value)
+{
+	this->m_draw_reflections = value;
+}
+
+bool Reflection::GetDrawReflections() const
+{
+	return this->m_draw_reflections;
+}
