@@ -147,6 +147,7 @@
         "shadows": {
           "clips": [ 0.1, 25 ],
           "texture": [ 2048, 2048 ],
+          "static draw": [ "level" ],
           "dynamic draw": [ "simple cube", "blender suzanne", "utah teapot" ],
           "dynamic draw refresh frames": 2
         }
