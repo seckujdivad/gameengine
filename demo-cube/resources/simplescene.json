@@ -220,7 +220,7 @@
     "appear in ssr": false,
     "distance limit": 5,
     "max camera distance": 25,
-    "refinements": 2,
+    "refinements": 4,
     "resolution": 1
   },
   "visboxes": {
