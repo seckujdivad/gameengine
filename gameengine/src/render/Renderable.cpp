@@ -379,7 +379,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					this->SetShaderUniform("mat_ssr_resolution", material.ssr.resolution);
 					this->SetShaderUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
 					this->SetShaderUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
-					this->SetShaderUniform("mat_ssr_depth_acceptance", material.ssr .depth_acceptance);
+					this->SetShaderUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);
 					this->SetShaderUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
 					this->SetShaderUniform("mat_ssr_refinements", material.ssr.refinements);
 
