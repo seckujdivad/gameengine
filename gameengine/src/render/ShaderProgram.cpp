@@ -112,6 +112,10 @@ GLuint ShaderProgram::LoadShader(std::string path, GLenum type, std::vector<std:
 
 	}
 
+	shader_file_contents = "#pragma optionNV(strict on)\n" + shader_file_contents;
+	shader_file_contents = "#define __GL_ShaderPortabilityWarnings 1\n" + shader_file_contents;
+	shader_file_contents = "#define __GL_WriteInfoLog 1\n" + shader_file_contents;
+
 	//add preprocessor defines
 	for (std::tuple<std::string, std::string> preprocessor_define : preprocessor_defines)
 	{
