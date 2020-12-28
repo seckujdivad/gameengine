@@ -185,6 +185,12 @@ void main()
 
 		teseMdlSpaceNormal = normalize(InterpolateLinear(tescMdlSpaceNormal, gl_TessCoord));
 	}
+	else
+	{
+		teseMdlSpacePos = vec3(0.0f);
+		teseUV = vec2(0.0f);
+		teseMdlSpaceNormal = vec3(0.0f);
+	}
 	
 	teseSceneSpacePos = persp_div((mdl_rotate * mdl_scale * vec4(teseMdlSpacePos, 1.0f)) + mdl_translate);
 	teseCamSpacePos = teseSceneSpacePos + cam_translate.xyz;

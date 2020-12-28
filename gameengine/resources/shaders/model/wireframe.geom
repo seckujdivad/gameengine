@@ -18,11 +18,6 @@ uniform mat4 cam_persp;
 uniform bool draw_back_faces;
 
 
-vec3 persp_div(vec4 vec)
-{
-	return vec.xyz / vec.w;
-}
-
 void main()
 {
 	bool draw = true;

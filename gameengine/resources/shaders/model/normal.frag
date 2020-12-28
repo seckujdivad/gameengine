@@ -407,7 +407,7 @@ void main()
 			{
 				//find reflection to use
 				float refl_distance = 0.0f;
-				int reflection_index;
+				int reflection_index = 0;
 				for (int i = 0; i < reflection_count; i++)
 				{
 					float current_distance = length(reflections[i].position - geomSceneSpacePos);
