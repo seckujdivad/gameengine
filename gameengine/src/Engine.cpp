@@ -669,6 +669,13 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 
 		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
 
+#ifdef _DEBUG
+		if (loaded_geometry.data.size() % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
+		{
+			throw std::runtime_error("Incomplete vertices provided");
+		}
+#endif
+
 		//set patch size
 		if (render_mode == GL_PATCHES)
 		{
