@@ -58,17 +58,17 @@ void main()
 	
 	if (tess_enable)
 	{
-		int corners[4]; //indices of the four corners of the patch
-		corners[0] = 0;
-		corners[1] = patch_size_v - 1;
-		corners[2] = (patch_size_u - 1) * patch_size_v;
-		corners[3] = ((patch_size_u - 1) * patch_size_v) + patch_size_u - 1;
+		int corners[4] = int[4](
+			0,
+			patch_size_v - 1,
+			(patch_size_u - 1) * patch_size_v,
+			((patch_size_u - 1) * patch_size_v) + patch_size_u - 1);//indices of the four corners of the patch
 
-		float edge_angle_cosines[4];
-		edge_angle_cosines[0] = CalcMinCosine(corners[0], 1, patch_size_v); //0, 1 - top
-		edge_angle_cosines[1] = CalcMinCosine(corners[0], patch_size_v, patch_size_u); //0, 2 - right
-		edge_angle_cosines[2] = CalcMinCosine(corners[2], 1, patch_size_v); //3, 2 - bottom
-		edge_angle_cosines[3] = CalcMinCosine(corners[1], patch_size_v, patch_size_u); //3, 1 - left
+		float edge_angle_cosines[4] = float[4](
+			CalcMinCosine(corners[0], 1, patch_size_v), //0, 1 - top
+			CalcMinCosine(corners[0], patch_size_v, patch_size_u), //0, 2 - right
+			CalcMinCosine(corners[2], 1, patch_size_v), //3, 2 - bottom
+			CalcMinCosine(corners[1], patch_size_v, patch_size_u)); //3, 1 - left
 
 		for (int i = 0; i < 4; i++)
 		{
