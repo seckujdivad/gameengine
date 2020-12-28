@@ -531,7 +531,11 @@ void Engine::Render()
 
 							glBindVertexArray(loaded_geometry.vao);
 							glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
+
 							glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* loaded_geometry.data.size(), loaded_geometry.data.data(), GL_DYNAMIC_DRAW);
+
+							glBindVertexArray(NULL);
+							glBindBuffer(GL_ARRAY_BUFFER, NULL);
 						}
 					}
 				}
