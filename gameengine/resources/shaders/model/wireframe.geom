@@ -5,7 +5,6 @@ layout (line_strip, max_vertices = 6) out;
 in vec3 teseMdlSpacePos[];
 in vec3 teseSceneSpacePos[];
 in vec3 teseCamSpacePos[];
-in vec3 teseTangentSpacePos[];
 
 in vec2 teseUV[];
 
@@ -46,7 +45,7 @@ void main()
 			gl_Position = positions[i];
 			EmitVertex();
 
-			gl_Position = positions[i + 1 % 3];
+			gl_Position = positions[(i + 1) % 3];
 			EmitVertex();
 
 			EndPrimitive();

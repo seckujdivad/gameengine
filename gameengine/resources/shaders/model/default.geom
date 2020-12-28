@@ -114,7 +114,7 @@ void main()
 		{
 			if (flip_winding)
 			{
-				set_outputs(2 - i % NUM_VERTICES);
+				set_outputs((2 - i) % NUM_VERTICES);
 			}
 			else
 			{
