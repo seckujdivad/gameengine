@@ -32,6 +32,18 @@ uniform int patch_size_v;
 const int InterpolationLinear = 0;
 const int InterpolationBezier = 1;
 
+vec3 FetchVertex(const vec3 values[gl_MaxPatchVertices], vec2 uv)
+{
+	if (any(lessThan(uv, vec2(0.0f))) || any(greaterThan(uv, vec2(patch_size_u - 1, patch_size_v - 1))))
+	{
+		return vec3(0.0f);
+	}
+	else
+	{
+		return values[(int(uv.x) * patch_size_v) + int(uv.y)];
+	}
+}
+
 vec3 persp_div(vec4 vec)
 {
 	return vec.xyz / vec.w;
@@ -70,7 +82,7 @@ float BezierBasisMult(const int i, const int n, const float t)
 	return float(BinomialCoefficient(n, i)) * Power(t, i) * Power(1.0f - t, n - i);
 }
 
-vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
+vec3 InterpolateBezier(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 {
 	vec3 sum = vec3(0.0f);
 	for (int i = 0; i < patch_size_u; i++)
@@ -78,7 +90,7 @@ vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_v) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * FetchVertex(values, vec2(i, j));
 		}
 
 		sum += inner_sum * BezierBasisMult(i, patch_size_u - 1, position.x);
@@ -87,14 +99,14 @@ vec3 interpolate(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 	return sum;
 }
 
-vec2 interpolate(const vec2 values[gl_MaxPatchVertices], const vec3 position)
+vec2 InterpolateBezier(const vec2 values[gl_MaxPatchVertices], const vec3 position)
 {
 	vec3 values_vec3[gl_MaxPatchVertices];
 	for (int i = 0; i < gl_MaxPatchVertices; i++)
 	{
 		values_vec3[i] = vec3(values[i], 0.0f);
 	}
-	return interpolate(values_vec3, position).xy;
+	return InterpolateBezier(values_vec3, position).xy;
 }
 
 float BezierDerivativeMult(const int i, const int n, float t)
@@ -111,7 +123,7 @@ vec3 derivative_u(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int j = 0; j < patch_size_v; j++)
 		{
-			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * values[(i * patch_size_v) + j];
+			inner_sum += BezierBasisMult(j, patch_size_v - 1, position.y) * FetchVertex(values, vec2(i, j));
 		}
 		sum += inner_sum * BezierDerivativeMult(i, patch_size_u - 1, position.x);
 	}
@@ -127,7 +139,7 @@ vec3 derivative_v(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 		vec3 inner_sum = vec3(0.0f);
 		for (int i = 0; i < patch_size_u; i++)
 		{
-			inner_sum += BezierBasisMult(i, patch_size_u - 1, position.x) * values[(i * patch_size_v) + j];
+			inner_sum += BezierBasisMult(i, patch_size_u - 1, position.x) * FetchVertex(values, vec2(i, j));
 		}
 		sum += inner_sum * BezierDerivativeMult(j, patch_size_v - 1, position.y);
 	}
@@ -135,25 +147,47 @@ vec3 derivative_v(const vec3 values[gl_MaxPatchVertices], const vec3 position)
 	return sum;
 }
 
+vec3 InterpolateLinear(const vec3 values[gl_MaxPatchVertices], const vec3 position)
+{
+	vec2 index = vec2(position.x * (patch_size_u - 1), position.y * (patch_size_v - 1));
+	return mix(
+		mix(FetchVertex(values, floor(index)), FetchVertex(values, ceil(index)), 0.5f),
+		mix(FetchVertex(values, vec2(floor(index.x), ceil(index.y))), FetchVertex(values, vec2(ceil(index.x), floor(index.y))), 0.5f),
+		0.5f);
+}
+
+vec2 InterpolateLinear(const vec2 values[gl_MaxPatchVertices], const vec3 position)
+{
+	vec3 values_vec3[gl_MaxPatchVertices];
+	for (int i = 0; i < gl_MaxPatchVertices; i++)
+	{
+		values_vec3[i] = vec3(values[i], 0.0f);
+	}
+	return InterpolateLinear(values_vec3, position).xy;
+}
+
 void main()
 {
-	teseMdlSpacePos = interpolate(tescMdlSpacePos, gl_TessCoord);
-	teseSceneSpacePos = persp_div(mdl_rotate * mdl_scale * vec4(teseMdlSpacePos, 1.0f)) + mdl_translate.xyz;
-	teseCamSpacePos = teseSceneSpacePos + cam_translate.xyz;
-
-	teseUV = interpolate(tescUV, gl_TessCoord);
-
 	if (tess_interp_mode == InterpolationBezier)
 	{
+		teseMdlSpacePos = InterpolateBezier(tescMdlSpacePos, gl_TessCoord);
+		teseUV = InterpolateBezier(tescUV, gl_TessCoord);
+
 		vec3 tangent = derivative_u(tescMdlSpacePos, gl_TessCoord);
 		vec3 bitangent = derivative_v(tescMdlSpacePos, gl_TessCoord);
 
 		teseMdlSpaceNormal = 0.0f - normalize(cross(tangent, bitangent));
 	}
-	else
+	else if (tess_interp_mode == InterpolationLinear)
 	{
-		teseMdlSpaceNormal = interpolate(tescMdlSpaceNormal, gl_TessCoord);
+		teseMdlSpacePos = InterpolateLinear(tescMdlSpacePos, gl_TessCoord);
+		teseUV = InterpolateLinear(tescUV, gl_TessCoord);
+
+		teseMdlSpaceNormal = normalize(InterpolateLinear(tescMdlSpaceNormal, gl_TessCoord));
 	}
+	
+	teseSceneSpacePos = persp_div((mdl_rotate * mdl_scale * vec4(teseMdlSpacePos, 1.0f)) + mdl_translate);
+	teseCamSpacePos = teseSceneSpacePos + cam_translate.xyz;
 
 	teseSceneSpaceNormal = persp_div(mdl_rotate * vec4(teseMdlSpaceNormal, 1.0f));
 }

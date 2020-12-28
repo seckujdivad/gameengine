@@ -46,24 +46,24 @@ vec3 persp_div(vec4 vec)
 	return vec.xyz / vec.w;
 }
 
-void set_outputs(int index)
+void set_outputs(const int index)
 {
 	//select correct values for the index
-	geomMdlSpacePos = teseMdlSpacePos[index % NUM_VERTICES];
-	geomSceneSpacePos = teseSceneSpacePos[index % NUM_VERTICES];
-	geomCamSpacePos = teseCamSpacePos[index % NUM_VERTICES];
+	geomMdlSpacePos = teseMdlSpacePos[index];
+	geomSceneSpacePos = teseSceneSpacePos[index];
+	geomCamSpacePos = teseCamSpacePos[index];
 
-	geomUV = teseUV[index % NUM_VERTICES];
+	geomUV = teseUV[index];
 
-	geomMdlSpaceNormal = teseMdlSpaceNormal[index % NUM_VERTICES];
-	geomSceneSpaceNormal = teseSceneSpaceNormal[index % NUM_VERTICES];
+	geomMdlSpaceNormal = teseMdlSpaceNormal[index];
+	geomSceneSpaceNormal = teseSceneSpaceNormal[index];
 
 	//calculate post camera transformation values (which are affected by the cubemap face)
 	geomCamSpacePos = persp_div(cubemap_transform[gl_Layer] * cam_rotate * vec4(geomCamSpacePos, 1.0f));
 
 	gl_Position = cam_persp * vec4(geomCamSpacePos, 1.0f);
 
-	geomCamSpaceNormal = persp_div(cubemap_transform[gl_Layer] * cam_rotate * vec4(teseSceneSpaceNormal[index % NUM_VERTICES], 0.0f));
+	geomCamSpaceNormal = persp_div(cubemap_transform[gl_Layer] * cam_rotate * vec4(geomSceneSpaceNormal, 1.0f));
 
 	//calculate per-vertex values for the index
 	// calculate tangent and bitangent
@@ -114,7 +114,7 @@ void main()
 		{
 			if (flip_winding)
 			{
-				set_outputs(- 1 - i);
+				set_outputs(2 - i % NUM_VERTICES);
 			}
 			else
 			{
