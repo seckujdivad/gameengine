@@ -128,6 +128,9 @@ Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertice
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
+	glBindVertexArray(NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+
 	return loaded_geometry;
 }
 
@@ -662,6 +665,10 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 	{
 		GLenum render_mode = predraw(render_info, loaded_geometry);
 
+		this->BindVAO(loaded_geometry);
+
+		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
+
 		//set patch size
 		if (render_mode == GL_PATCHES)
 		{
@@ -679,16 +686,25 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			{
 				throw std::runtime_error("Patch provided has " + std::to_string(patch_size) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
 			}
+			else if (patch_size == 0)
+			{
+				throw std::runtime_error("Patch size must be greater than zero");
+			}
+
+			if (num_elements % patch_size != 0)
+			{
+				throw std::runtime_error("Incomplete patches provided");
+			}
 #endif
 
 			glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
 		}
-
-		this->BindVAO(loaded_geometry);
-
-		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
+		
 		glDrawArrays(render_mode, 0, num_elements);
 	}
+
+	glBindVertexArray(NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 }
 
 void Engine::BindVAO(LoadedGeometry loaded_geometry)
