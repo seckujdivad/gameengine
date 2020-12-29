@@ -573,11 +573,10 @@ void main()
 							for (int i = 1; i < reflection_count; i++)
 							{
 								float new_length = length(reflections[i].position - line_end);
-								if (new_length < current_length)
-								{
-									reflection_index = i;
-									current_length = new_length;
-								}
+								bool condition = new_length < current_length;
+								
+								reflection_index = condition ? i : reflection_index;
+								current_length = condition ? new_length : current_length;
 							}
 						}
 				
