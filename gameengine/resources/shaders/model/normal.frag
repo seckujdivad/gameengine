@@ -143,6 +143,11 @@ const int ReflectionModeOBB = 1;
 
 //functions
 
+vec3 PerspDiv(const vec4 vec)
+{
+	return vec.xyz / vec.w;
+}
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
@@ -336,14 +341,49 @@ void main()
 			if (length(geomCamSpacePos) < mat_ssr_max_distance)
 			{
 				const vec3 direction = normalize(reflect(-fragtocam, normal));
-				const vec3 end_pos = geomSceneSpacePos + (direction * mat_ssr_max_cast_distance);
-				const vec3 start_pos = geomSceneSpacePos + (direction * ((mat_ssr_depth_acceptance * 1.01f) / dot(direction, normal)));
+				const vec3 start_pos = geomSceneSpacePos;
 
-				const vec4 ss_start_pos_prediv = cam_transform * vec4(start_pos, 1.0f);
-				const vec3 ss_start_pos = ss_start_pos_prediv.xyz / ss_start_pos_prediv.w;
+				//find end pos - this is where the ray leaves the
+				vec3 end_pos;
+				{
+					const vec4 start = vec4(start_pos, 1.0f);
+					const vec4 translate = vec4(direction, 0.0f);
 
-				const vec4 ss_end_pos_prediv = cam_transform * vec4(end_pos, 1.0f);
-				const vec3 ss_end_pos = ss_end_pos_prediv.xyz / ss_end_pos_prediv.w;
+					const vec4 transformed_start = cam_transform * start;
+					const vec4 transformed_direction = cam_transform * translate;
+
+					float lambdas[2] = float[2](-1.0f, -1.0f);
+					int intersection_index = 0;
+
+					for (int i = 0; i < 3; i++)
+					{
+						for (int j = 0; j < 2; j++)
+						{
+							float pinned_value = (j == 0) ? -1.0f : 1.0f;
+
+							float lambda = ((pinned_value * transformed_start.w) - transformed_start[i])
+								/ (transformed_direction[i] - (pinned_value * transformed_direction.w));
+
+							vec3 position = PerspDiv(transformed_start + (lambda * transformed_direction));
+
+							if ((position[(i + 1) % 3] > -1.0f)
+								&& (position[(i + 1) % 3] < 1.0f)
+								&& (position[(i + 2) % 3] > -1.0f)
+								&& (position[(i + 2) % 3] < 1.0f))
+							{
+								lambdas[intersection_index] = lambda;
+								intersection_index++;
+							}
+						}
+					}
+
+					float lambda = mix(lambdas[0], lambdas[1], lambdas[0] < lambdas[1]);
+					lambda = min(lambda, mat_ssr_max_cast_distance);
+					end_pos = start.xyz + (lambda * direction.xyz);
+				}
+
+				const vec3 ss_start_pos = PerspDiv(cam_transform * vec4(start_pos, 1.0f));
+				const vec3 ss_end_pos = PerspDiv(cam_transform * vec4(end_pos, 1.0f));
 
 				const vec3 ss_direction = ss_end_pos - ss_start_pos;
 
@@ -357,8 +397,8 @@ void main()
 					const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
 
 					const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
-					const float divisor = (int(x_is_most_significant_direction) * render_output_x * ss_direction.x)
-						+ (int(!x_is_most_significant_direction) + render_output_y * ss_direction.y);
+					const float divisor = (float(int(x_is_most_significant_direction) * render_output_x) * ss_direction.x)
+						+ (float(int(!x_is_most_significant_direction) * render_output_y) * ss_direction.y);
 
 					hit_increment = (2.0f * initial_pixel_stride) / abs(divisor);
 				}
@@ -366,26 +406,23 @@ void main()
 				vec3 ss_position = ss_start_pos;
 				float hit_pos = 0.0f;
 
-				while (!ssr_reflection_applied && all(greaterThan(ss_position, vec3(-1.0f))) && all(lessThan(ss_position, vec3(1.0f))) && (hit_pos < 1.0f))
+				while (!ssr_reflection_applied && hit_pos < 1.0f)
 				{
 					//convert screen space position to use texture UV space coordinates
 					const vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
-					const float sample_depth_camspace = 2.0 * cam_clip_near * cam_clip_far / (cam_clip_far + cam_clip_near - sample_depth * (cam_clip_far - cam_clip_near));
-					const float search_depth_camspace = 2.0 * cam_clip_near * cam_clip_far / (cam_clip_far + cam_clip_near - ss_position.z * (cam_clip_far - cam_clip_near));
+					const vec3 scene_space_search = PerspDiv(cam_transform_inverse * vec4(ss_position, 1.0f));
+					const vec3 scene_space_sample = PerspDiv(cam_transform_inverse * vec4(ss_position.xy, sample_depth, 1.0f));
+					const float depth_diff = length(scene_space_sample - scene_space_search);
 
-					const bool hit_detected = (-1.0f < sample_depth) && (sample_depth < 1.0f)
-						&& (texture(render_output_data[0], tex_pos.xy).r > 0.5f)
-						&& (abs(sample_depth_camspace - search_depth_camspace) < depth_acceptance);
+					if ((depth_diff < depth_acceptance) && (texture(render_output_data[0], tex_pos.xy).r > 0.5f)) //a hit was found
+					{
+						//if the search increment is as small as is allowed then use this hit as the final location
+						ssr_reflection_applied = search_level == 0;
+						reflection_colour = float(search_level == 0) * texture(render_output_colour, tex_pos.xy).rgb;
 
-					if (hit_detected && (search_level == 0)) //a hit was found and the search increment is as small as is allowed, use this hit as the final location
-					{
-						reflection_colour = texture(render_output_colour, tex_pos.xy).rgb;
-						ssr_reflection_applied = true;
-					}
-					else if (hit_detected) //the search can still be made finer
-					{
+						//make the search finer
 						hit_pos -= hit_increment;
 						hit_increment /= num_searches_on_refine;
 						depth_acceptance /= num_searches_on_refine;
@@ -393,10 +430,10 @@ void main()
 					}
 
 					//find screen space position of next test
-					hit_pos = hit_pos + hit_increment;
+					hit_pos += hit_increment;
 
 					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
-					ss_position.z = 1 / mix(1 / ss_start_pos.z, 1 / ss_end_pos.z, hit_pos);
+					ss_position.z = 1.0f / mix(1.0f / ss_start_pos.z, 1.0f / ss_end_pos.z, hit_pos);
 				}
 			}
 		}
