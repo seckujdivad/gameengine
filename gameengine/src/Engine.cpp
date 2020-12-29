@@ -312,7 +312,7 @@ Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(par
 		+ std::string("Active GLSL version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
 
-	//patches - AMD doesn't let the same shader take different sized patches
+	//patches - the standard doesn't let the same shader take different sized patches (even if NVIDIA does)
 	glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(GAMEENGINE_PATCH_SIZE));
 
 #ifdef _DEBUG
