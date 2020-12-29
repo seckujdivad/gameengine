@@ -216,10 +216,10 @@
     }
   ],
   "ssr defaults": {
-    "acceptable depth distance": 0.02,
+    "acceptable depth distance": 0.05,
     "appear in ssr": false,
-    "distance limit": 5,
-    "max camera distance": 25,
+    "distance limit": 20,
+    "max camera distance": 10,
     "refinements": 4,
     "resolution": 1
   },
