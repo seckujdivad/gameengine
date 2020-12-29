@@ -579,15 +579,20 @@ void main()
 								current_length = condition ? new_length : current_length;
 							}
 						}
-				
+
 						//sample using the final values
 						{
-							vec3 sample_vector = line_end - reflections[reflection_index].position;
-							vec4 reflection_sample = texture(reflection_cubemaps[reflection_index], sample_vector);
+							//we want to access texture reflection_index, but all texture array accesses must be dynamically uniform (i.e. the same in all invocations) so we access all of them but immediately discard all but reflection_index
+							vec3 reflection_sample = vec3(0.0f);
+							bool sample_is_skybox = false;
+							for (int i = 0; i < reflection_count; i++)
+							{
+								vec3 sample_vector = line_end - reflections[i].position;
+								reflection_sample += float(i == reflection_index) * texture(reflection_cubemaps[i], sample_vector).rgb;
+								sample_is_skybox = sample_is_skybox || texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f;
+							}
 
-							reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f)
-							? texture(skyboxTexture,  refl_dir).rgb
-							: reflection_sample.rgb;
+							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;
 						}
 					}
 				}
