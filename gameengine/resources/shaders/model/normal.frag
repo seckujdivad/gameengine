@@ -443,15 +443,15 @@ void main()
 			if (reflections_enabled)
 			{
 				//find reflection to use
-				float refl_distance = 0.0f;
+				float refl_distance = length(reflections[0].position - geomSceneSpacePos);
 				int reflection_index = 0;
-				for (int i = 0; i < reflection_count; i++)
+				for (int i = 1; i < reflection_count; i++)
 				{
 					float current_distance = length(reflections[i].position - geomSceneSpacePos);
 
-					bool condition = (refl_distance == 0.0f) || (current_distance < refl_distance);
+					bool condition = current_distance < refl_distance;
 					reflection_index = condition ? i : reflection_index;
-					refl_distance = mix(int(condition), refl_distance, current_distance);
+					refl_distance = mix(refl_distance, current_distance, condition);
 				}
 			
 				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
