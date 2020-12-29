@@ -20,6 +20,8 @@
 
 const char GAMEENGINE_LOG_PATH[] = "gameengine_GL.log";
 
+const std::size_t GAMEENGINE_PATCH_SIZE = 16;
+
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
@@ -101,16 +103,65 @@ std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::Rende
 
 	for (auto& [render_info, vertices] : this->GenerateGeometryGroups(geometry))
 	{
-		result.insert(std::pair(render_info, this->CreateLoadedGeometry(vertices)));
+		result.insert(std::pair(render_info, this->CreateLoadedGeometry(vertices, render_info.primitive_size, render_info.primitive_type)));
 	}
 
 	return result;
 }
 
-Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertices)
+Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
 {
 	LoadedGeometry loaded_geometry;
 	loaded_geometry.data = vertices;
+
+	std::vector<GLfloat> padded_vertices;
+
+	if (primitive_size > GAMEENGINE_PATCH_SIZE)
+	{
+		throw std::invalid_argument("Primitives must have less than " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices");
+	}
+
+#ifdef _DEBUG
+	if (loaded_geometry.data.size() % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
+	{
+		throw std::runtime_error("Incomplete vertices provided");
+	}
+#endif
+
+	if ((primitive_type == Geometry::PrimitiveType::Patches || primitive_type == Geometry::PrimitiveType::Quads)
+		&& primitive_size != GAMEENGINE_PATCH_SIZE)
+	{
+		std::size_t num_primitives = vertices.size() / (primitive_size * GAMEENGINE_VALUES_PER_VERTEX);
+		padded_vertices.reserve(num_primitives * GAMEENGINE_PATCH_SIZE * GAMEENGINE_VALUES_PER_VERTEX);
+		for (std::size_t i = 0; i < num_primitives; i++)
+		{
+			for (std::size_t j = 0; j < primitive_size * GAMEENGINE_VALUES_PER_VERTEX; j++)
+			{
+				padded_vertices.push_back(vertices.at((i * primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j));
+			}
+
+			for (std::size_t j = 0; j < GAMEENGINE_PATCH_SIZE - primitive_size; j++)
+			{
+				for (std::size_t k = 0; k < std::size_t(GAMEENGINE_VALUES_PER_VERTEX); k++)
+				{
+					padded_vertices.push_back(0.0f);
+				}
+			}
+		}
+	}
+	else
+	{
+		padded_vertices = vertices;
+	}
+
+	loaded_geometry.buffer_len = padded_vertices.size();
+
+#ifdef _DEBUG
+	if (loaded_geometry.buffer_len % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
+	{
+		throw std::runtime_error("Incomplete vertices generated");
+	}
+#endif
 
 	//create vao and vbo
 	glGenVertexArrays(1, &loaded_geometry.vao);
@@ -118,7 +169,7 @@ Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertice
 
 	glGenBuffers(1, &loaded_geometry.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * loaded_geometry.data.size(), loaded_geometry.data.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * padded_vertices.size(), padded_vertices.data(), GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
@@ -259,6 +310,30 @@ Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(par
 	LogMessage(std::string("Renderer: ") + reinterpret_cast<const char*>(glGetString(GL_RENDERER)) + " (" + reinterpret_cast<const char*>(glGetString(GL_VENDOR)) + ")" + '\n'
 		+ std::string("Active OpenGL version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)) + '\n'
 		+ std::string("Active GLSL version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+
+
+	//patches - AMD doesn't let the same shader take different sized patches
+	glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(GAMEENGINE_PATCH_SIZE));
+
+#ifdef _DEBUG
+	{
+		GLint max_patch_size = 32; //this is the minimum value required by the standard
+		glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
+
+		//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
+		//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
+		max_patch_size--;
+
+		if (static_cast<std::size_t>(max_patch_size) < GAMEENGINE_PATCH_SIZE)
+		{
+			throw std::runtime_error("Patch size has been set to " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
+		}
+		else if (GAMEENGINE_PATCH_SIZE == 0)
+		{
+			throw std::runtime_error("Patch size must be greater than zero");
+		}
+	}
+#endif
 }
 
 Engine::~Engine()
@@ -519,7 +594,7 @@ void Engine::Render()
 					//add new geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_add)
 					{
-						loaded_geometries.insert(std::pair(render_info, this->CreateLoadedGeometry(geometry_groups.at(render_info))));
+						loaded_geometries.insert(std::pair(render_info, this->CreateLoadedGeometry(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
 
 					//update existing geometry if required
@@ -653,7 +728,7 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 					vertices.push_back(static_cast<GLfloat>(value));
 				}
 
-				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), this->CreateLoadedGeometry(vertices));
+				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), this->CreateLoadedGeometry(vertices, preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
 
 				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
 				geometry.push_back(data);
@@ -671,46 +746,7 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 
 		this->BindVAO(loaded_geometry);
 
-		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.data.size() / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
-
-#ifdef _DEBUG
-		if (loaded_geometry.data.size() % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
-		{
-			throw std::runtime_error("Incomplete vertices provided");
-		}
-#endif
-
-		//set patch size
-		if (render_mode == GL_PATCHES)
-		{
-			std::size_t patch_size = render_info.primitive_size;
-
-#ifdef _DEBUG
-			GLint max_patch_size = 32; //this is the minimum value required by the standard
-			glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
-
-			//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
-			//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
-			max_patch_size--;
-
-			if (static_cast<std::size_t>(max_patch_size) < patch_size)
-			{
-				throw std::runtime_error("Patch provided has " + std::to_string(patch_size) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
-			}
-			else if (patch_size == 0)
-			{
-				throw std::runtime_error("Patch size must be greater than zero");
-			}
-
-			if (num_elements % patch_size != 0)
-			{
-				throw std::runtime_error("Incomplete patches provided");
-			}
-#endif
-
-			glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(patch_size));
-		}
-		
+		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.buffer_len / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
 		glDrawArrays(render_mode, 0, num_elements);
 	}
 

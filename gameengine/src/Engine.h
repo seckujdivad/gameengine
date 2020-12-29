@@ -34,6 +34,7 @@ public:
 	{
 		std::vector<GLfloat> data;
 
+		GLsizei buffer_len = 0;
 		GLuint vao = NULL;
 		GLuint vbo = NULL;
 
@@ -63,7 +64,7 @@ private:
 	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> m_geometry_presets;
 
 	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
-	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices);
+	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
 	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 
 	void BindVAO(Engine::LoadedGeometry loaded_geometry);
