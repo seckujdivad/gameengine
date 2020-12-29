@@ -154,7 +154,7 @@ Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertice
 		padded_vertices = vertices;
 	}
 
-	loaded_geometry.buffer_len = padded_vertices.size();
+	loaded_geometry.buffer_len = static_cast<GLsizei>(padded_vertices.size());
 
 #ifdef _DEBUG
 	if (loaded_geometry.buffer_len % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
