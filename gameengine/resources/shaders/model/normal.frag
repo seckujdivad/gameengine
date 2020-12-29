@@ -343,7 +343,7 @@ void main()
 				const vec3 direction = normalize(reflect(-fragtocam, normal));
 				const vec3 start_pos = geomSceneSpacePos;
 
-				//find end pos - this is where the ray leaves the
+				//find end pos - this is where the ray leaves the screen
 				vec3 end_pos;
 				{
 					const vec4 start = vec4(start_pos, 1.0f);
