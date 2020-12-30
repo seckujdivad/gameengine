@@ -2,6 +2,10 @@
 
 #include <stdexcept>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 LocalTexture::LocalTexture(TextureReference reference) : Referenceable<TextureReference>(reference)
 {
 }
@@ -214,8 +218,35 @@ bool LocalTexture::operator==(const LocalTexture& second) const
 			return false;
 		}
 
-		std::size_t num_pixels = static_cast<size_t>(std::get<0>(first_dimensions)) * static_cast<size_t>(std::get<1>(first_dimensions));
-		for (std::size_t i = 0; i < num_pixels; i++)
+		const std::size_t num_pixels = static_cast<size_t>(std::get<0>(first_dimensions)) * static_cast<size_t>(std::get<1>(first_dimensions));
+
+#ifdef _MSC_VER
+		const std::size_t vector_size = 16;
+		const std::size_t leftover_values = num_pixels % vector_size;
+		const std::size_t num_vectors = num_pixels / vector_size;
+#else
+		const std::size_t vector_size = 0;
+		const std::size_t leftover_values = num_pixels;
+		const std::size_t num_vectors = 0;
+#endif
+
+#ifdef _MSC_VER
+		for (std::size_t i = 0; i < num_vectors; i++)
+		{
+			const std::size_t pointer_offset = sizeof(unsigned char) * vector_size * i;
+			__m128i first_vec = _mm_loadu_si128(reinterpret_cast<__m128i*>(first_data + pointer_offset));
+			__m128i second_vec = _mm_loadu_si128(reinterpret_cast<__m128i*>(second_data + pointer_offset));
+
+			__m128i eq_comparison = _mm_cmpeq_epi8(first_vec, second_vec);
+			int comparison_mask = _mm_movemask_epi8(eq_comparison);
+			if ((~comparison_mask) > 0)
+			{
+				return false;
+			}
+		}
+#endif
+		
+		for (std::size_t i = num_pixels - leftover_values; i < num_pixels; i++)
 		{
 			if (first_data[i] != second_data[i])
 			{
