@@ -43,6 +43,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\scene\CameraTests.cpp" />
+    <ClCompile Include="src\scene\light\PointLightTests.cpp" />
     <ClCompile Include="src\scene\model\ModelTests.cpp" />
     <ClCompile Include="src\scene\NameableTests.cpp" />
     <ClCompile Include="src\scene\PositionableTests.cpp" />

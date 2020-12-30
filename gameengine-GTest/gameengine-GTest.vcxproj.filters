@@ -20,6 +20,9 @@
     <ClCompile Include="src\scene\PositionableTests.cpp">
       <Filter>tests\scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\light\PointLightTests.cpp">
+      <Filter>tests\scene\light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
