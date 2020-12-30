@@ -13,10 +13,12 @@
 #include "scene/Camera.h"
 #include "generic/std_glm.h"
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test", wxDefaultPosition, wxSize(800, 600))
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
 	this->SetBackgroundColour(wxColor(238, 238, 238));
-	this->SetMinSize(wxSize(500, 400));
+
+	this->SetSize(this->FromDIP(wxSize(800, 600)));
+	this->SetMinSize(this->FromDIP(wxSize(500, 400)));
 
 	//make sizer
 	this->m_sizer = new wxGridBagSizer(0, 0);
