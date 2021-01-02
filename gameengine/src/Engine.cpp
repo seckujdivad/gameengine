@@ -29,9 +29,20 @@ void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 	this->MakeContextCurrent();
 
 	auto it = this->m_textures_static.find(texture.GetReference());
-	GLuint texture_id;
-	if (it == this->m_textures_static.end())
+	bool texture_found = it != this->m_textures_static.end();
+	
+	bool reload_texture_data = false;
+	if (texture_found)
 	{
+		reload_texture_data = std::get<1>(it->second) != texture;
+		if (reload_texture_data)
+		{
+			glBindTexture(GL_TEXTURE_2D, std::get<0>(it->second).id);
+		}
+	}
+	else
+	{
+		GLuint texture_id;
 		glGenTextures(1, &texture_id);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 
@@ -49,17 +60,16 @@ void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 		texture_data.uniform_name = uniform_name;
 
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(texture_data, texture)));
-	}
-	else
-	{
-		glBindTexture(GL_TEXTURE_2D, std::get<0>(it->second).id);
+
+		reload_texture_data = true;
 	}
 
-	if ((it == this->m_textures_static.end()) || (std::get<1>(it->second) != texture))
+	if (reload_texture_data)
 	{
 		std::tuple dimensions = texture.GetDimensions();
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, std::get<0>(dimensions), std::get<1>(dimensions), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.GetData());
 		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, NULL);
 	}
 }
 

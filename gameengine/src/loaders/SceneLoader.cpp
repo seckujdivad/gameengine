@@ -670,7 +670,7 @@ LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, Te
 			throw std::runtime_error("Error while loading image at '" + img_path.string() + "'");
 		}
 
-		texture.SetFullTexture(image.GetData(), { image.GetWidth(), image.GetHeight() }, true);
+		texture.SetFullTexture(image.GetData(), { image.GetWidth(), image.GetHeight() });
 	}
 	else if (data.is_object())
 	{

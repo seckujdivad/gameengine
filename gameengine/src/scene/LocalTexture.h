@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <tuple>
+#include <vector>
 
 #include "Referenceable.h"
 
@@ -27,28 +28,23 @@ private:
 	Filter m_filter_mag = Filter::Nearest;
 	Filter m_filter_min = Filter::Nearest;
 
+	std::vector<unsigned char> m_data;
+
 	//full texture
-	unsigned char* m_full_data = nullptr;
 	std::tuple<int, int> m_dimensions = { -1, -1 };
 
 	//vector
 	glm::vec3 m_vec_colour = glm::vec3(0.0f);
-	unsigned char* m_vec_data = nullptr;
 
 public:
 	LocalTexture(TextureReference reference);
-	LocalTexture(const LocalTexture& copy_from);
-	LocalTexture& operator=(const LocalTexture& copy_from);
-	LocalTexture(LocalTexture&& move_from) noexcept;
-	LocalTexture& operator=(LocalTexture&& move_from) noexcept;
-	~LocalTexture();
 
 	void SetVector(glm::vec3 colour);
 
-	void SetFullTexture(unsigned char* data, std::tuple<int, int> dimensions, bool copy = false);
+	void SetFullTexture(const unsigned char* data, std::tuple<int, int> dimensions);
 
 	std::tuple<int, int> GetDimensions() const;
-	unsigned char* GetData() const;
+	const unsigned char* GetData() const;
 
 	void SetMagFilter(Filter filter);
 	Filter GetMagFilter() const;
