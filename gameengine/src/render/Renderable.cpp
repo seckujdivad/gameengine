@@ -750,7 +750,7 @@ bool Renderable::RenderModeIsModelRendering()
 
 Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
 {
-	this->m_engine->MakeContextCurrent(true);
+	this->m_engine->MakeContextCurrent(true); //this is necessary when constructing the first EngineCanvas - call it every time as construction is infrequent and already expensive
 
 	this->m_render_function = [this](std::vector<Model*> models)
 	{
