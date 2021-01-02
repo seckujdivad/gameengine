@@ -750,7 +750,7 @@ bool Renderable::RenderModeIsModelRendering()
 
 Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
 {
-	this->m_engine->MakeContextCurrent();
+	this->m_engine->MakeContextCurrent(true);
 
 	this->m_render_function = [this](std::vector<Model*> models)
 	{

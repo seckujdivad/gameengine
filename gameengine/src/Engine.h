@@ -55,6 +55,8 @@ private:
 	wxGLAttributes m_canvas_args;
 	wxGLCanvas* m_glcontext_canvas;
 
+	bool m_single_context_mode = false;
+
 	std::unordered_map<TextureReference, std::tuple<LoadedTexture, LocalTexture>> m_textures_static;
 
 	std::vector<RenderController*> m_render_controllers;
@@ -77,7 +79,7 @@ private:
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
 public:
-	Engine(wxWindow* parent, Scene* scene);
+	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 	Engine(Engine&&) = delete;
@@ -96,7 +98,7 @@ public:
 
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
 
-	void MakeContextCurrent() const;
+	void MakeContextCurrent(bool force = false) const;
 
 	void SetDebugMessageLevel(Engine::DebugMessageConfig config) const;
 	void SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config) const;

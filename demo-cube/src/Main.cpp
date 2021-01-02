@@ -28,7 +28,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	//create glcanvas
 	this->m_scene = SceneFromJSON("resources", "simplescene.json");
 
-	this->m_engine = new Engine(this, this->m_scene);
+	this->m_engine = new Engine(this, this->m_scene, true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
 		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
 		}));

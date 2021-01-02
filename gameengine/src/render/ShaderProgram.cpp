@@ -61,8 +61,6 @@ ShaderProgram::ShaderProgram(std::vector<std::tuple<std::string, GLenum>> shader
 
 		throw std::runtime_error("Shader link exception: " + errmsg);
 	}
-
-	
 }
 
 ShaderProgram::~ShaderProgram()

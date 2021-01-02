@@ -26,6 +26,8 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 {
+	this->MakeContextCurrent();
+
 	auto it = this->m_textures_static.find(texture.GetReference());
 	GLuint texture_id;
 	if (it == this->m_textures_static.end())
@@ -224,7 +226,7 @@ std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(Ren
 	return result;
 }
 
-Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(parent)
+Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : SceneChild(scene), m_parent(parent), m_single_context_mode(single_context_mode)
 {
 	{
 		bool display_supported = false;
@@ -311,29 +313,26 @@ Engine::Engine(wxWindow* parent, Scene* scene) : SceneChild(scene), m_parent(par
 		+ std::string("Active OpenGL version: ") + reinterpret_cast<const char*>(glGetString(GL_VERSION)) + '\n'
 		+ std::string("Active GLSL version: ") + reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
+	GLint max_patch_size = 32; //this is the minimum value required by the standard
+	glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
+
+	//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
+	//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
+	max_patch_size--;
+
+	if (static_cast<std::size_t>(max_patch_size) < GAMEENGINE_PATCH_SIZE)
+	{
+		throw std::runtime_error("Patch size has been set to " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
+	}
+	else if (GAMEENGINE_PATCH_SIZE == 0)
+	{
+		throw std::runtime_error("Patch size must be greater than zero");
+	}
 
 	//patches - the standard doesn't let the same shader take different sized patches (even if NVIDIA does)
 	glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(GAMEENGINE_PATCH_SIZE));
 
-#ifdef _DEBUG
-	{
-		GLint max_patch_size = 32; //this is the minimum value required by the standard
-		glGetIntegerv(GL_MAX_PATCH_VERTICES, &max_patch_size);
-
-		//the range is open at this end, so the size of the patch must always be at least 1 less than the value returned
-		//I just decrement the returned value so that it behaves "as it should" instead of dealing with this
-		max_patch_size--;
-
-		if (static_cast<std::size_t>(max_patch_size) < GAMEENGINE_PATCH_SIZE)
-		{
-			throw std::runtime_error("Patch size has been set to " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices, but the implementation defined maximum is " + std::to_string(static_cast<int>(max_patch_size)));
-		}
-		else if (GAMEENGINE_PATCH_SIZE == 0)
-		{
-			throw std::runtime_error("Patch size must be greater than zero");
-		}
-	}
-#endif
+	this->MakeContextCurrent(true);
 }
 
 Engine::~Engine()
@@ -366,6 +365,8 @@ Engine::~Engine()
 
 EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
+	this->MakeContextCurrent();
+
 	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
@@ -701,6 +702,8 @@ RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) co
 
 void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw)
 {
+	this->MakeContextCurrent();
+
 	std::vector<std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> geometry;
 
 	if (this->IsChildOfSameScene(model))
@@ -770,32 +773,35 @@ void Engine::PrunePresetGeometry(PresetGeometry::GeometryType type)
 	}
 }
 
-void Engine::MakeContextCurrent() const
+void Engine::MakeContextCurrent(bool force) const
 {
-	if (this->m_glcontext_canvas == nullptr)
+	if (force || !this->m_single_context_mode)
 	{
-		bool context_set = false;
-		for (RenderController* render_controller : this->m_render_controllers)
+		if (this->m_glcontext_canvas == nullptr)
 		{
-			if (!context_set)
+			bool context_set = false;
+			for (RenderController* render_controller : this->m_render_controllers)
 			{
-				if (render_controller->GetType() == RenderControllerType::EngineCanvas)
+				if (!context_set)
 				{
-					EngineCanvasController* engine_canvas_controller = dynamic_cast<EngineCanvasController*>(render_controller);
-					engine_canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
-					context_set = true;
+					if (render_controller->GetType() == RenderControllerType::EngineCanvas)
+					{
+						EngineCanvasController* engine_canvas_controller = dynamic_cast<EngineCanvasController*>(render_controller);
+						engine_canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
+						context_set = true;
+					}
 				}
 			}
-		}
 
-		if (!context_set)
-		{
-			throw std::runtime_error("Unable to set context as current");
+			if (!context_set)
+			{
+				throw std::runtime_error("Unable to set context as current");
+			}
 		}
-	}
-	else
-	{
-		this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+		else
+		{
+			this->m_glcontext_canvas->SetCurrent(*this->m_glcontext);
+		}
 	}
 }
 

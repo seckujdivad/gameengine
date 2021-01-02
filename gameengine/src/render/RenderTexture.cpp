@@ -206,8 +206,6 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 	m_type(type),
 	m_auto_swap_buffers(auto_swap_buffers)
 {
-	this->GetEngine()->MakeContextCurrent();
-
 	this->SetTargetType(type);
 
 	this->InitialiseTextureGroup(this->m_texture_write, this->m_type);
