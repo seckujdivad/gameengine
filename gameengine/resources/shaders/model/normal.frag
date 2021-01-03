@@ -158,7 +158,7 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 		float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
 		float frag_depth = length(lighttofrag);
 
-		bool frag_in_range = depth_sample != 1.0f;
+		bool frag_in_range = depth_sample < 1.0f;
 		bool frag_obscured = (frag_depth - light_points[lightindex].shadow_bias) > corrected_depth_sample;
 		bool frag_in_shadow = frag_in_range && frag_obscured;
 
