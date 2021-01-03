@@ -3,24 +3,46 @@
 #include <stdexcept>
 #include <map>
 #include <vector>
+#include <string>
 
 #include <wx/image.h>
 
+#include <nlohmann/json.hpp>
+
+#include "../scene/LocalTexture.h"
+#include "../scene/Referenceable.h"
 #include "../scene/Scene.h"
-#include "../scene/model/Model.h"
 #include "../scene/Cubemap.h"
 #include "../scene/VisBox.h"
-#include "../scene/light/PointLight.h"
 #include "../scene/Skybox.h"
+#include "../scene/light/PointLight.h"
+#include "../scene/model/Model.h"
 #include "../generic/LoadFile.h"
 
 #include "models/PlyLoader.h"
 #include "models/BptLoader.h"
 
-Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name)
+template<unsigned int dimensions>
+using dvec = glm::vec<dimensions, glm::f64, glm::packed_highp>;
+
+template<unsigned int dimensions>
+dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value);
+
+LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value);
+
+void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene);
+
+Scene* SceneFromJSON(SceneLoaderConfig config)
 {
-	//load json
-	nlohmann::json scene_data = nlohmann::json::parse(LoadFile(root_path / file_name));
+	//load scene json
+	nlohmann::json scene_data = nlohmann::json::parse(LoadFile(config.path.root / config.path.file));
+
+	//load performance settings json
+	nlohmann::json perf_data;
+	{
+		std::filesystem::path perf_profile_path = scene_data["metadata"]["performance profiles"][config.performance.index].get<std::string>();
+		perf_data = nlohmann::json::parse(LoadFile(config.path.root / perf_profile_path));
+	}
 
 	//load all models
 	std::unordered_map<std::string, std::vector<std::shared_ptr<Geometry>>> geometry_lookup;
@@ -29,7 +51,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	{
 		for (auto it = scene_data["models"]["ply"].begin(); it != scene_data["models"]["ply"].end(); it++)
 		{
-			std::shared_ptr<Polygonal> model_geometry = ModelFromPly((root_path / it.value()["path"].get<std::string>()).string());
+			std::shared_ptr<Polygonal> model_geometry = ModelFromPly((config.path.root / it.value()["path"].get<std::string>()).string());
 
 			if (it.value()["merge geometry"].is_object())
 			{
@@ -81,7 +103,7 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 		{
 			std::string model_name = it.key();
 
-			std::vector<std::shared_ptr<Patch>> patches = PatchesFromBPT((root_path / it.value()["path"].get<std::string>()).string());
+			std::vector<std::shared_ptr<Patch>> patches = PatchesFromBPT((config.path.root / it.value()["path"].get<std::string>()).string());
 
 			std::vector<std::shared_ptr<Geometry>> geometry;
 			geometry.reserve(patches.size());
@@ -346,12 +368,12 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 				}
 
 				//load textures
-				LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], root_path, scene->GetNewTextureReference(), glm::vec3(1.0f));
-				LocalTexture normal_texture = GetTexture(el.value()["textures"]["normal"], root_path, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
-				LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-				LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-				LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
-				LocalTexture displacement_texture = GetTexture(el.value()["textures"]["displacement"], root_path, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture colour_texture = GetTexture(el.value()["textures"]["colour"], config.path.root, scene->GetNewTextureReference(), glm::vec3(1.0f));
+				LocalTexture normal_texture = GetTexture(el.value()["textures"]["normal"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f));
+				LocalTexture refl_texture = GetTexture(el.value()["textures"]["reflection intensity"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture specular_texture = GetTexture(el.value()["textures"]["specular"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture skybox_texture = GetTexture(el.value()["textures"]["skybox mask"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f));
+				LocalTexture displacement_texture = GetTexture(el.value()["textures"]["displacement"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f));
 
 				model->GetColourTexture() = colour_texture;;
 				model->GetNormalTexture() = normal_texture;
@@ -620,16 +642,6 @@ Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file
 	}
 
 	return scene;
-}
-
-Scene* SceneFromJSON(std::string root_path, std::string file_name)
-{
-	return SceneFromJSON(std::filesystem::path(root_path), std::filesystem::path(file_name));
-}
-
-Scene* SceneFromJSON(const char* root_path, const char* file_name)
-{
-	return SceneFromJSON(std::filesystem::path(root_path), std::filesystem::path(file_name));
 }
 
 LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)

@@ -221,6 +221,8 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="resources\models\teapotCGA.bpt" />
+    <None Include="resources\perfprofiles\high.json" />
+    <None Include="resources\perfprofiles\low.json" />
     <None Include="resources\settings.default.json" />
     <None Include="resources\settings.json" />
     <None Include="resources\simplescene.json">

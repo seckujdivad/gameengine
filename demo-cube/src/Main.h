@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include <wx/frame.h>
 
 #include <nlohmann/json.hpp>
+
+#include "loaders/SceneLoader.h"
 
 #include "VectorCtrl.h"
 
@@ -22,13 +26,14 @@ class Model;
 class Main : public wxFrame
 {
 private:
+	//gameengine
 	Engine* m_engine;
 	Scene* m_scene;
 	Camera* m_camera;
 
 	Model* m_model_selected = nullptr;
 
-	nlohmann::json m_settings;
+	static SceneLoaderConfig GetSceneLoaderConfig();
 
 	//wxwidgets
 	wxGridBagSizer* m_sizer;

@@ -51,6 +51,12 @@
     <None Include="resources\settings.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\perfprofiles\high.json">
+      <Filter>Resource Files\perfprofiles</Filter>
+    </None>
+    <None Include="resources\perfprofiles\low.json">
+      <Filter>Resource Files\perfprofiles</Filter>
+    </None>
     <None Include="resources\settings.default.json">
       <Filter>Resource Files</Filter>
     </None>

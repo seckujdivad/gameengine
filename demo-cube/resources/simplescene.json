@@ -1,6 +1,10 @@
 {
   "metadata": {
-    "identifier": "Simple Scene"
+    "identifier": "Simple Scene",
+    "performance profiles": [
+      "perfprofiles/high.json",
+      "perfprofiles/low.json"
+    ]
   },
   "models": {
     "ply": {

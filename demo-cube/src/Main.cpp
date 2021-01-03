@@ -9,8 +9,7 @@
 
 #include "Engine.h"
 #include "generic/std_glm.h"
-#include "generic//LoadFile.h"
-#include "loaders/SceneLoader.h"
+#include "generic/LoadFile.h"
 #include "render/EngineCanvas.h"
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
@@ -18,54 +17,6 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
-	//load settings
-	{
-		std::string settings_file = "";
-
-		try
-		{
-			settings_file = LoadFile("resources/settings.json");
-		}
-		catch (std::invalid_argument&)
-		{
-			settings_file = "";
-		}
-
-		if (settings_file == "")
-		{
-			try
-			{
-				std::filesystem::copy_file(
-					std::filesystem::path("resources/settings.default.json"),
-					std::filesystem::path("resources/settings.json"),
-					std::filesystem::copy_options::overwrite_existing
-				);
-			}
-			catch (std::filesystem::filesystem_error&)
-			{
-				throw std::runtime_error("Couldn't copy default settings file into current settings file");
-			}
-			
-			try
-			{
-				settings_file = LoadFile("resources/settings.json");
-			}
-			catch (std::invalid_argument&)
-			{
-				settings_file = "";
-			}
-		}
-
-		if (settings_file == "")
-		{
-			throw std::runtime_error("Couldn't open a settings file");
-		}
-		else
-		{
-			this->m_settings = nlohmann::json::parse(settings_file);
-		}
-	}
-
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));
 
@@ -78,7 +29,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	this->m_scene = SceneFromJSON("resources", this->m_settings["scene"].get<std::string>());
+	this->m_scene = SceneFromJSON(this->GetSceneLoaderConfig());
 
 	this->m_engine = new Engine(this, this->m_scene, true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
@@ -213,6 +164,67 @@ void Main::SetModel(Model* model)
 		this->m_vct_rotation->SetValues(GetSTDVector(this->m_model_selected->GetRotation()));
 		this->m_vct_scale->SetValues(GetSTDVector(this->m_model_selected->GetScale()));
 	}
+}
+
+SceneLoaderConfig Main::GetSceneLoaderConfig()
+{
+	SceneLoaderConfig config;
+	
+	//load settings
+	nlohmann::json settings;
+	{
+		std::string settings_file = "";
+
+		try
+		{
+			settings_file = LoadFile("resources/settings.json");
+		}
+		catch (std::invalid_argument&)
+		{
+			settings_file = "";
+		}
+
+		if (settings_file == "")
+		{
+			try
+			{
+				std::filesystem::copy_file(
+					std::filesystem::path("resources/settings.default.json"),
+					std::filesystem::path("resources/settings.json"),
+					std::filesystem::copy_options::overwrite_existing
+				);
+			}
+			catch (std::filesystem::filesystem_error&)
+			{
+				throw std::runtime_error("Couldn't copy default settings file into current settings file");
+			}
+
+			try
+			{
+				settings_file = LoadFile("resources/settings.json");
+			}
+			catch (std::invalid_argument&)
+			{
+				settings_file = "";
+			}
+		}
+
+		if (settings_file == "")
+		{
+			throw std::runtime_error("Couldn't open a settings file");
+		}
+		else
+		{
+			settings = nlohmann::json::parse(settings_file);
+		}
+	}
+
+	config.path.root = "resources";
+	config.path.file = "simplescene.json";
+
+	config.performance.index = settings["performance level"].get<int>();
+
+	return config;
 }
 
 void Main::lb_models_OnSelection(wxCommandEvent& evt)
