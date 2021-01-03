@@ -3,9 +3,19 @@
     "cubemap": {
       "texture": [
         [ 512, 512 ],
-        [ 128, 128 ],
-        [ 32, 32 ]
+        [ 256, 256 ]
       ]
+    },
+    "model": {
+      "material": {
+        "ssr": {
+          "acceptable depth distance": [ 0.1 ],
+          "distance limit": [ 10 ],
+          "max camera distance": [ 8 ],
+          "refinements": [ 4 ],
+          "resolution": [ 3 ]
+        }
+      }
     }
   }
 }

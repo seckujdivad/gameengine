@@ -220,12 +220,12 @@
     }
   ],
   "ssr defaults": {
-    "acceptable depth distance": 0.05,
+    "acceptable depth distance": 0,
     "appear in ssr": false,
-    "distance limit": 20,
-    "max camera distance": 10,
-    "refinements": 4,
-    "resolution": 1
+    "distance limit": 0,
+    "max camera distance": 0,
+    "refinements": 0,
+    "resolution": 0
   },
   "visboxes": {
     "level section 1": {

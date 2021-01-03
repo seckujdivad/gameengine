@@ -435,38 +435,38 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 	std::vector<Model*> models; //models stored in the order that they appear in in the scene file
 	{
 		//function to apply an ssr config specified in json to a MaterialSSRConfig struct
-		auto ApplySSRConfig = [](MaterialSSRConfig config, nlohmann::json data)
+		auto ApplySSRConfig = [&perf_data](MaterialSSRConfig config, const nlohmann::json& data)
 		{
 			if (data.is_object())
 			{
-				if (data["acceptable depth distance"].is_number())
+				if (data.contains("acceptable depth distance") && data["acceptable depth distance"].is_number())
 				{
-					config.depth_acceptance = data["acceptable depth distance"].get<float>();
+					config.depth_acceptance = perf_data["scene"]["model"]["material"]["ssr"]["acceptable depth distance"][data["acceptable depth distance"].get<int>()].get<float>();
 				}
 
-				if (data["appear in ssr"].is_boolean())
+				if (data.contains("appear in ssr") && data["appear in ssr"].is_boolean())
 				{
 					config.appear_in_ssr = data["appear in ssr"].get<bool>();
 				}
 
-				if (data["distance limit"].is_number())
+				if (data.contains("distance limit") && data["distance limit"].is_number())
 				{
-					config.cast_distance_limit = data["distance limit"].get<float>();
+					config.cast_distance_limit = perf_data["scene"]["model"]["material"]["ssr"]["distance limit"][data["distance limit"].get<int>()].get<float>();
 				}
 
-				if (data["max camera distance"].is_number())
+				if (data.contains("max camera distance") && data["max camera distance"].is_number())
 				{
-					config.max_cam_distance = data["max camera distance"].get<float>();
+					config.max_cam_distance = perf_data["scene"]["model"]["material"]["ssr"]["max camera distance"][data["max camera distance"].get<int>()].get<float>();
 				}
 
-				if (data["refinements"].is_number_integer())
+				if (data.contains("refinements") && data["refinements"].is_number_integer())
 				{
-					config.refinements = data["refinements"].get<int>();
+					config.refinements = perf_data["scene"]["model"]["material"]["ssr"]["refinements"][data["refinements"].get<int>()].get<int>();
 				}
 
-				if (data["resolution"].is_number())
+				if (data.contains("resolution") && data["resolution"].is_number())
 				{
-					config.resolution = data["resolution"].get<float>();
+					config.resolution = perf_data["scene"]["model"]["material"]["ssr"]["resolution"][data["resolution"].get<int>()].get<float>();
 				}
 			}
 
