@@ -15,17 +15,20 @@
 
 #include "GLComponents.h"
 
-#include "scene/Referenceable.h"
-#include "scene/model/Model.h"
 #include "render/LoadedTexture.h"
 #include "render/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
+
+#include "scene/Referenceable.h"
 #include "scene/SceneChild.h"
+#include "scene/LocalTexture.h"
+#include "scene/model/geometry/Geometry.h"
 #include "scene/model/geometry/PresetGeometry.h"
 
 class EngineCanvas;
 class Scene;
 class Renderable;
+class Model;
 
 class Engine : public SceneChild
 {
@@ -78,6 +81,8 @@ private:
 
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
+	void LoadTexture(LocalTexture texture, std::string uniform_name);
+
 public:
 	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
 	Engine(const Engine&) = delete;
@@ -92,7 +97,6 @@ public:
 
 	void Render();
 
-	void LoadTexture(LocalTexture texture, std::string uniform_name);
 	LoadedTexture GetTexture(TextureReference reference) const;
 	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
 

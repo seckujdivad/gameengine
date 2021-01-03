@@ -18,6 +18,8 @@
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
 
+#include "scene/model/Model.h"
+
 const char GAMEENGINE_LOG_PATH[] = "gameengine_GL.log";
 
 const std::size_t GAMEENGINE_PATCH_SIZE = 16;
