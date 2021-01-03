@@ -1,7 +1,6 @@
 #include "SceneLoader.h"
 
 #include <stdexcept>
-#include <fstream>
 #include <map>
 #include <vector>
 
@@ -13,6 +12,7 @@
 #include "../scene/VisBox.h"
 #include "../scene/light/PointLight.h"
 #include "../scene/Skybox.h"
+#include "../generic/LoadFile.h"
 
 #include "models/PlyLoader.h"
 #include "models/BptLoader.h"
@@ -20,30 +20,7 @@
 Scene* SceneFromJSON(std::filesystem::path root_path, std::filesystem::path file_name)
 {
 	//load json
-	nlohmann::json scene_data;
-	{
-		std::ifstream file_stream;
-		std::string file_contents;
-		std::string line_contents;
-
-		std::filesystem::path json_path = root_path;
-		json_path += file_name;
-
-		file_stream.open(root_path / file_name);
-		if (file_stream.is_open())
-		{
-			while (std::getline(file_stream, line_contents))
-			{
-				file_contents = file_contents + line_contents + '\n';
-			}
-		}
-		else
-		{
-			throw std::invalid_argument("Can't open file at " + (root_path / file_name).string());
-		}
-
-		scene_data = nlohmann::json::parse(file_contents);
-	}
+	nlohmann::json scene_data = nlohmann::json::parse(LoadFile(root_path / file_name));
 
 	//load all models
 	std::unordered_map<std::string, std::vector<std::shared_ptr<Geometry>>> geometry_lookup;

@@ -342,3 +342,5 @@ healthchecksdb
 # solution-specific
 packaged-releases/packages/*
 packaged-releases/package sources/*
+
+demo-cube/resources/settings.json

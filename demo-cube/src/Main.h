@@ -2,6 +2,8 @@
 
 #include <wx/frame.h>
 
+#include <nlohmann/json.hpp>
+
 #include "VectorCtrl.h"
 
 class wxGridBagSizer;
@@ -26,6 +28,9 @@ private:
 
 	Model* m_model_selected = nullptr;
 
+	nlohmann::json m_settings;
+
+	//wxwidgets
 	wxGridBagSizer* m_sizer;
 	
 	EngineCanvas* m_glcanvas;

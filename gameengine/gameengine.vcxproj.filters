@@ -222,6 +222,9 @@
     <ClInclude Include="src\scene\model\geometry\PresetGeometry.h">
       <Filter>Header Files\scene\model\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\LoadFile.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -358,6 +361,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\model\geometry\PresetGeometry.cpp">
       <Filter>Source Files\scene\model\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\LoadFile.cpp">
+      <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

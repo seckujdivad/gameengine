@@ -19,6 +19,9 @@
     <Filter Include="Resource Files\textures">
       <UniqueIdentifier>{4e4dfcae-8c1b-425b-887a-d260bea5e6ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\perfprofiles">
+      <UniqueIdentifier>{c6f12367-3b9d-4670-847b-6c79c7d22210}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\simplescene.json">
@@ -44,6 +47,12 @@
     </None>
     <None Include="resources\models\teapotCGA.bpt">
       <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="resources\settings.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\settings.default.json">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
