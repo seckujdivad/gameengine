@@ -99,11 +99,11 @@ LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_p
 	}
 	else if (data.is_object())
 	{
-		if (data["texture"].is_string())
+		if (data.contains("texture") && data["texture"].is_string())
 		{
 			texture = GetTexture(data["texture"], root_path, reference, default_value);
 
-			if (data["magnify filter"].is_string())
+			if (data.contains("magnify filter") && data["magnify filter"].is_string())
 			{
 				std::string filter = data["magnify filter"].get<std::string>();
 				if (filter == "nearest")
@@ -120,7 +120,7 @@ LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_p
 				}
 			}
 
-			if (data["shrink filter"].is_string())
+			if (data.contains("shrink filter") && data["shrink filter"].is_string())
 			{
 				std::string filter = data["shrink filter"].get<std::string>();
 				if (filter == "nearest")
