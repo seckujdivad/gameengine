@@ -151,9 +151,9 @@ LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_p
 	return texture;
 }
 
-void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
+void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, Scene* scene)
 {
-	if (data["clips"].is_array())
+	if (data.contains("clips") && data["clips"].is_array())
 	{
 		if (data["clips"].size() == 2)
 		{
@@ -165,19 +165,27 @@ void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
 		}
 	}
 
-	if (data["texture"].is_array())
+	if (data.contains("texture") && data["texture"].is_number_integer())
 	{
-		if (data["texture"].size() == 2)
+		const nlohmann::json& texture_dimensions = perf_data["scene"]["cubemap"]["texture"][data["texture"].get<int>()];
+		if (texture_dimensions.is_array())
 		{
-			cubemap->SetTextureDimensions({ data["texture"][0].get<int>(), data["texture"][1].get<int>() });
-		}
-		else
-		{
-			throw std::runtime_error("Texture dimensions for cubemaps must contain exactly 2 values");
+			if (texture_dimensions.size() == 2)
+			{
+				cubemap->SetTextureDimensions({ texture_dimensions[0].get<int>(), texture_dimensions[1].get<int>() });
+			}
+			else
+			{
+				throw std::runtime_error("Texture dimensions for cubemaps must contain exactly 2 values");
+			}
 		}
 	}
+	else
+	{
+		throw std::runtime_error("An index must be provided for the texture dimensions");
+	}
 
-	if (data["static draw"].is_array())
+	if (data.contains("static draw") && data["static draw"].is_array())
 	{
 		for (auto& el2 : data["static draw"].items())
 		{
@@ -200,7 +208,7 @@ void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
 		}
 	}
 
-	if (data["dynamic draw"].is_array())
+	if (data.contains("dynamic draw") && data["dynamic draw"].is_array())
 	{
 		for (auto& el2 : data["dynamic draw"].items())
 		{
@@ -223,7 +231,7 @@ void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
 		}
 	}
 
-	if (data["dynamic draw refresh frames"].is_number())
+	if (data.contains("dynamic draw refresh frames") && data["dynamic draw refresh frames"].is_number())
 	{
 		if (data["dynamic draw refresh frames"].is_number_integer())
 		{
@@ -691,7 +699,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 			reflection->SetDrawReflections(el.value()["draw reflections"].get<bool>());
 		}
 
-		ConfigureCubemap(el.value(), reflection, scene);
+		ConfigureCubemap(el.value(), perf_data, reflection, scene);
 
 		scene->Add(reflection);
 	}
@@ -793,7 +801,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 						pointlight->SetShadowBias(el.value()["shadows"]["acceptance bias"].get<double>());
 					}
 
-					ConfigureCubemap(el.value()["shadows"], pointlight, scene);
+					ConfigureCubemap(el.value()["shadows"], perf_data, pointlight, scene);
 				}
 
 				scene->Add(pointlight);
@@ -814,7 +822,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 				Skybox* skybox = new Skybox(scene->GetNewRenderTextureReference());
 				skybox->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 
-				ConfigureCubemap(el.value(), skybox, scene);
+				ConfigureCubemap(el.value(), perf_data, skybox, scene);
 
 				scene->Add(skybox);
 
