@@ -26,11 +26,221 @@ template<unsigned int dimensions>
 using dvec = glm::vec<dimensions, glm::f64, glm::packed_highp>;
 
 template<unsigned int dimensions>
-dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value);
+dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
+{
+	static_assert(dimensions > 0, "Dimensions must be greater than zero");
+	static_assert(dimensions < 5, "Dimensions must be 4 or below");
 
-LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value);
+	if (data.is_array())
+	{
+		if (data.size() == dimensions)
+		{
+			bool is_nums = true;
+			for (unsigned int i = 0; i < dimensions; i++)
+			{
+				if (!data.at(i).is_number())
+				{
+					is_nums = false;
+				}
+			}
 
-void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene);
+			if (is_nums)
+			{
+				std::vector<double> values;
+				for (auto& el : data.items())
+				{
+					values.push_back(el.value().get<double>());
+				}
+
+				dvec<dimensions> result = default_value;
+				for (int i = 0; i < (int)std::min(static_cast<unsigned int>(values.size()), dimensions); i++)
+				{
+					result[i] = values.at(i);
+				}
+
+				return result;
+			}
+			else
+			{
+				throw std::runtime_error("All values in a vector must be numbers");
+			}
+		}
+		else
+		{
+			throw std::runtime_error("Dimensions (" + std::to_string(dimensions) + ") are not equal to the number of given values (" + std::to_string(data.size()) + ")");
+		}
+	}
+	else if (data.is_number())
+	{
+		return dvec<dimensions>(data.get<double>());
+	}
+	else
+	{
+		return default_value;
+	}
+}
+
+template dvec<1> GetVector<1>(nlohmann::json, dvec<1>);
+template dvec<2> GetVector<2>(nlohmann::json, dvec<2>);
+template dvec<3> GetVector<3>(nlohmann::json, dvec<3>);
+template dvec<4> GetVector<4>(nlohmann::json, dvec<4>);
+
+LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)
+{
+	LocalTexture texture(reference);
+
+	if (data.is_string())
+	{
+		wxImage image;
+		std::filesystem::path img_path = root_path / data.get<std::string>();
+		image.LoadFile(img_path.string());
+
+		if (!image.IsOk())
+		{
+			throw std::runtime_error("Error while loading image at '" + img_path.string() + "'");
+		}
+
+		texture.SetFullTexture(image.GetData(), { image.GetWidth(), image.GetHeight() });
+	}
+	else if (data.is_object())
+	{
+		if (data["texture"].is_string())
+		{
+			texture = GetTexture(data["texture"], root_path, reference, default_value);
+
+			if (data["magnify filter"].is_string())
+			{
+				std::string filter = data["magnify filter"].get<std::string>();
+				if (filter == "nearest")
+				{
+					texture.SetMagFilter(LocalTexture::Filter::Nearest);
+				}
+				else if (filter == "linear")
+				{
+					texture.SetMagFilter(LocalTexture::Filter::Linear);
+				}
+				else
+				{
+					throw std::runtime_error("Magnify filter must be either 'linear' or 'nearest', not '" + filter + "'");
+				}
+			}
+
+			if (data["shrink filter"].is_string())
+			{
+				std::string filter = data["shrink filter"].get<std::string>();
+				if (filter == "nearest")
+				{
+					texture.SetMinFilter(LocalTexture::Filter::Nearest);
+				}
+				else if (filter == "linear")
+				{
+					texture.SetMinFilter(LocalTexture::Filter::Linear);
+				}
+				else
+				{
+					throw std::runtime_error("Shrink filter must be either 'linear' or 'nearest', not '" + filter + "'");
+				}
+			}
+		}
+		else
+		{
+			throw std::runtime_error("No texture specified");
+		}
+
+	}
+	else
+	{
+		texture.SetVector(GetVector(data, glm::dvec3(default_value)));
+	}
+
+	return texture;
+}
+
+void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
+{
+	if (data["clips"].is_array())
+	{
+		if (data["clips"].size() == 2)
+		{
+			cubemap->SetClips({ data["clips"][0].get<double>(), data["clips"][1].get<double>() });
+		}
+		else
+		{
+			throw std::runtime_error("Clips for cubemaps must contain exactly 2 values");
+		}
+	}
+
+	if (data["texture"].is_array())
+	{
+		if (data["texture"].size() == 2)
+		{
+			cubemap->SetTextureDimensions({ data["texture"][0].get<int>(), data["texture"][1].get<int>() });
+		}
+		else
+		{
+			throw std::runtime_error("Texture dimensions for cubemaps must contain exactly 2 values");
+		}
+	}
+
+	if (data["static draw"].is_array())
+	{
+		for (auto& el2 : data["static draw"].items())
+		{
+			if (el2.value().is_string())
+			{
+				Model* model = scene->GetModel(el2.value().get<std::string>());
+				if (model == nullptr)
+				{
+					throw std::runtime_error("Cubemap static draw target '" + el2.value().get<std::string>() + "' does not exist");
+				}
+				else
+				{
+					cubemap->AddStaticModel(model->GetReference());
+				}
+			}
+			else
+			{
+				throw std::runtime_error("Cubemap static draw targets must be provided as string identifiers");
+			}
+		}
+	}
+
+	if (data["dynamic draw"].is_array())
+	{
+		for (auto& el2 : data["dynamic draw"].items())
+		{
+			if (el2.value().is_string())
+			{
+				Model* model = scene->GetModel(el2.value().get<std::string>());
+				if (model == nullptr)
+				{
+					throw std::runtime_error("Cubemap dynamic draw target '" + el2.value().get<std::string>() + "' does not exist");
+				}
+				else
+				{
+					cubemap->AddDynamicModel(model->GetReference());
+				}
+			}
+			else
+			{
+				throw std::runtime_error("Cubemap dynamic draw targets must be provided as string identifiers");
+			}
+		}
+	}
+
+	if (data["dynamic draw refresh frames"].is_number())
+	{
+		if (data["dynamic draw refresh frames"].is_number_integer())
+		{
+			cubemap->SetDynamicRedrawFrames(data["dynamic draw refresh frames"].get<int>());
+		}
+		else
+		{
+			throw std::runtime_error("Cubemap dynamic redraw frames must be a positive integer");
+		}
+	}
+}
+
 
 Scene* SceneFromJSON(SceneLoaderConfig config)
 {
@@ -643,219 +853,3 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 
 	return scene;
 }
-
-LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)
-{
-	LocalTexture texture(reference);
-
-	if (data.is_string())
-	{
-		wxImage image;
-		std::filesystem::path img_path = root_path / data.get<std::string>();
-		image.LoadFile(img_path.string());
-
-		if (!image.IsOk())
-		{
-			throw std::runtime_error("Error while loading image at '" + img_path.string() + "'");
-		}
-
-		texture.SetFullTexture(image.GetData(), { image.GetWidth(), image.GetHeight() });
-	}
-	else if (data.is_object())
-	{
-		if (data["texture"].is_string())
-		{
-			texture = GetTexture(data["texture"], root_path, reference, default_value);
-			
-			if (data["magnify filter"].is_string())
-			{
-				std::string filter = data["magnify filter"].get<std::string>();
-				if (filter == "nearest")
-				{
-					texture.SetMagFilter(LocalTexture::Filter::Nearest);
-				}
-				else if (filter == "linear")
-				{
-					texture.SetMagFilter(LocalTexture::Filter::Linear);
-				}
-				else
-				{
-					throw std::runtime_error("Magnify filter must be either 'linear' or 'nearest', not '" + filter + "'");
-				}
-			}
-
-			if (data["shrink filter"].is_string())
-			{
-				std::string filter = data["shrink filter"].get<std::string>();
-				if (filter == "nearest")
-				{
-					texture.SetMinFilter(LocalTexture::Filter::Nearest);
-				}
-				else if (filter == "linear")
-				{
-					texture.SetMinFilter(LocalTexture::Filter::Linear);
-				}
-				else
-				{
-					throw std::runtime_error("Shrink filter must be either 'linear' or 'nearest', not '" + filter + "'");
-				}
-			}
-		}
-		else
-		{
-			throw std::runtime_error("No texture specified");
-		}
-		
-	}
-	else
-	{
-		texture.SetVector(GetVector(data, glm::dvec3(default_value)));
-	}
-
-	return texture;
-}
-
-void ConfigureCubemap(nlohmann::json& data, Cubemap* cubemap, Scene* scene)
-{
-	if (data["clips"].is_array())
-	{
-		if (data["clips"].size() == 2)
-		{
-			cubemap->SetClips({ data["clips"][0].get<double>(), data["clips"][1].get<double>() });
-		}
-		else
-		{
-			throw std::runtime_error("Clips for cubemaps must contain exactly 2 values");
-		}
-	}
-
-	if (data["texture"].is_array())
-	{
-		if (data["texture"].size() == 2)
-		{
-			cubemap->SetTextureDimensions({ data["texture"][0].get<int>(), data["texture"][1].get<int>() });
-		}
-		else
-		{
-			throw std::runtime_error("Texture dimensions for cubemaps must contain exactly 2 values");
-		}
-	}
-
-	if (data["static draw"].is_array())
-	{
-		for (auto& el2 : data["static draw"].items())
-		{
-			if (el2.value().is_string())
-			{
-				Model* model = scene->GetModel(el2.value().get<std::string>());
-				if (model == nullptr)
-				{
-					throw std::runtime_error("Cubemap static draw target '" + el2.value().get<std::string>() + "' does not exist");
-				}
-				else
-				{
-					cubemap->AddStaticModel(model->GetReference());
-				}
-			}
-			else
-			{
-				throw std::runtime_error("Cubemap static draw targets must be provided as string identifiers");
-			}
-		}
-	}
-
-	if (data["dynamic draw"].is_array())
-	{
-		for (auto& el2 : data["dynamic draw"].items())
-		{
-			if (el2.value().is_string())
-			{
-				Model* model = scene->GetModel(el2.value().get<std::string>());
-				if (model == nullptr)
-				{
-					throw std::runtime_error("Cubemap dynamic draw target '" + el2.value().get<std::string>() + "' does not exist");
-				}
-				else
-				{
-					cubemap->AddDynamicModel(model->GetReference());
-				}
-			}
-			else
-			{
-				throw std::runtime_error("Cubemap dynamic draw targets must be provided as string identifiers");
-			}
-		}
-	}
-
-	if (data["dynamic draw refresh frames"].is_number())
-	{
-		if (data["dynamic draw refresh frames"].is_number_integer())
-		{
-			cubemap->SetDynamicRedrawFrames(data["dynamic draw refresh frames"].get<int>());
-		}
-		else
-		{
-			throw std::runtime_error("Cubemap dynamic redraw frames must be a positive integer");
-		}
-	}
-}
-
-template<unsigned int dimensions>
-dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
-{
-	static_assert(dimensions > 0, "Dimensions must be greater than zero");
-	static_assert(dimensions < 5, "Dimensions must be 4 or below");
-
-	if (data.is_array())
-	{
-		if (data.size() == dimensions)
-		{
-			bool is_nums = true;
-			for (unsigned int i = 0; i < dimensions; i++)
-			{
-				if (!data.at(i).is_number())
-				{
-					is_nums = false;
-				}
-			}
-
-			if (is_nums)
-			{
-				std::vector<double> values;
-				for (auto& el : data.items())
-				{
-					values.push_back(el.value().get<double>());
-				}
-
-				dvec<dimensions> result = default_value;
-				for (int i = 0; i < (int)std::min(static_cast<unsigned int>(values.size()), dimensions); i++)
-				{
-					result[i] = values.at(i);
-				}
-
-				return result;
-			}
-			else
-			{
-				throw std::runtime_error("All values in a vector must be numbers");
-			}
-		}
-		else
-		{
-			throw std::runtime_error("Dimensions (" + std::to_string(dimensions) + ") are not equal to the number of given values (" + std::to_string(data.size()) + ")");
-		}
-	}
-	else if (data.is_number())
-	{
-		return dvec<dimensions>(data.get<double>());
-	}
-	else
-	{
-		return default_value;
-	}
-}
-
-template dvec<1> GetVector<1>(nlohmann::json, dvec<1>);
-template dvec<2> GetVector<2>(nlohmann::json, dvec<2>);
-template dvec<3> GetVector<3>(nlohmann::json, dvec<3>);
-template dvec<4> GetVector<4>(nlohmann::json, dvec<4>);
