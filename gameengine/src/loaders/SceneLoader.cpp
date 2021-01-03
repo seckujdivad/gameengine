@@ -26,7 +26,7 @@ template<unsigned int dimensions>
 using dvec = glm::vec<dimensions, glm::f64, glm::packed_highp>;
 
 template<unsigned int dimensions>
-dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
+dvec<dimensions> GetVector(const nlohmann::json& data, dvec<dimensions> default_value)
 {
 	static_assert(dimensions > 0, "Dimensions must be greater than zero");
 	static_assert(dimensions < 5, "Dimensions must be 4 or below");
@@ -80,12 +80,7 @@ dvec<dimensions> GetVector(nlohmann::json data, dvec<dimensions> default_value)
 	}
 }
 
-template dvec<1> GetVector<1>(nlohmann::json, dvec<1>);
-template dvec<2> GetVector<2>(nlohmann::json, dvec<2>);
-template dvec<3> GetVector<3>(nlohmann::json, dvec<3>);
-template dvec<4> GetVector<4>(nlohmann::json, dvec<4>);
-
-LocalTexture GetTexture(nlohmann::json data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)
+LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value)
 {
 	LocalTexture texture(reference);
 
