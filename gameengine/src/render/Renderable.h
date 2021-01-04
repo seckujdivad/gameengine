@@ -47,6 +47,8 @@ private:
 
 	ControllerFunction m_render_function;
 
+	std::unique_ptr<Model> m_postprocess_model = nullptr;
+
 	void RecompileShader();
 
 protected:

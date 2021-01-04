@@ -34,7 +34,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 
 		//resolve models
-		bool dealloc_models = false;
 		{
 			bool models_provided = !((models.size() == 1) && (models.at(0) == nullptr));
 			if (!models_provided)
@@ -56,10 +55,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				if (!models_provided) //default state
 				{
 					models.clear();
-
-					models.push_back(new Model(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) })));
-
-					dealloc_models = true;
+					models.push_back(this->m_postprocess_model.get());
 				}
 			}
 			else
@@ -536,14 +532,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		}
 
 		this->m_fbo_contains_render = true;
-
-		if (dealloc_models)
-		{
-			for (size_t i = 0; i < models.size(); i++)
-			{
-				delete models.at(i);
-			}
-		}
 	}
 }
 
@@ -739,7 +727,7 @@ bool Renderable::RenderModeIsModelRendering()
 	return this->RenderModeIsModelRendering(this->GetRenderMode());
 }
 
-Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine), m_config(config)
+Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine)
 {
 	this->m_engine->MakeContextCurrent(true); //this is necessary when constructing the first EngineCanvas - call it every time as construction is infrequent and already expensive
 
@@ -822,6 +810,18 @@ RenderMode Renderable::GetRenderMode() const
 
 void Renderable::SetConfig(RenderableConfig config)
 {
+	if (this->m_config.mode != config.mode)
+	{
+		if (config.mode == RenderMode::Postprocess)
+		{
+			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
+		}
+		else
+		{
+			this->m_postprocess_model.reset();
+		}
+	}
+
 	this->m_config = config;
 	this->m_fbo_contains_render = false;
 
