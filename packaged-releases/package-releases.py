@@ -26,22 +26,35 @@ if os.path.exists(os.path.join(sys.path[0], "package sources")):
     shutil.rmtree(os.path.join(sys.path[0], "package sources"))
 os.mkdir(os.path.join(sys.path[0], "package sources"))
 
-def copy_file(source_path, dest_path):
-    if "*" in source_path:
-        for match_name in fnmatch.filter(os.listdir(os.path.dirname(source_path)), os.path.basename(source_path)):
-            source_full_path = os.path.join(os.path.dirname(source_path), match_name)
-            destination_full_path = os.path.join(os.path.dirname(dest_path), match_name)
-
-            if os.path.isdir(source_path):
-                shutil.copytree(source_full_path, destination_full_path)
-            else:
-                shutil.copy(source_full_path, destination_full_path)
-
+def apply_to_all(path, func):
+    if "*" in path:
+        for match_name in fnmatch.filter(os.listdir(os.path.dirname(path)), os.path.basename(path)):
+            func(os.path.basename(match_name))
     else:
-        if os.path.isdir(source_path):
-            shutil.copytree(source_path, dest_path)
+        func(os.path.basename(path))
+
+def copy_file(source_path, dest_path):
+    def inner_func(basename):
+        source_full_path = os.path.join(os.path.dirname(source_path), basename)
+        destination_full_path = os.path.join(os.path.dirname(dest_path), basename)
+
+        if os.path.isdir(source_full_path):
+            shutil.copytree(source_full_path, destination_full_path)
         else:
-            shutil.copy(source_path, dest_path)
+            shutil.copy(source_full_path, destination_full_path)
+
+    apply_to_all(source_path, inner_func)
+
+def remove_file(path):
+    def inner_func(basename):
+        to_remove_path = os.path.join(os.path.dirname(path), basename)
+
+        if os.path.isdir(to_remove_path):
+            shutil.rmtree(to_remove_path)
+        elif os.path.isfile(to_remove_path):
+            os.remove(to_remove_path)
+
+    apply_to_all(path, inner_func)
 
 #interpret package config
 for project_name in packages_config["projects"]:
@@ -68,11 +81,7 @@ for project_name in packages_config["projects"]:
         #remove excluded files that have been included
         print("Removing excluded files...", end = "")
         for to_remove in build_config["remove"]:
-            to_remove_path = os.path.join(package_path, to_remove)
-            if os.path.isdir(to_remove_path):
-                shutil.rmtree(to_remove_path)
-            elif os.path.isfile(to_remove_path):
-                os.remove(to_remove_path)
+            remove_file(os.path.join(package_path, to_remove))
         print(" done")
 
         #package the collected files into a zip file
