@@ -6,8 +6,9 @@
 #include <vector>
 
 #include "Referenceable.h"
+#include "RevisableResource.h"
 
-class LocalTexture : public Referenceable<TextureReference>
+class LocalTexture : public Referenceable<TextureReference>, public RevisableResource
 {
 public:
 	enum class Type

@@ -10,15 +10,19 @@ LocalTexture::LocalTexture(TextureReference reference) : Referenceable<TextureRe
 
 void LocalTexture::SetVector(glm::vec3 colour)
 {
-	this->m_type = Type::Vector;
-
-	this->m_vec_colour = colour;
-
-	this->m_data.clear();
-	this->m_data.reserve(NUM_TEXTURE_CHANNELS);
-	for (int i = 0; i < NUM_TEXTURE_CHANNELS; i++)
+	if (this->m_type != Type::Vector || this->m_vec_colour != colour)
 	{
-		this->m_data.push_back(static_cast<unsigned char>(this->m_vec_colour[i] * ((2 << 7) - 1)));
+		this->IncrementRevisionIndex();
+
+		this->m_type = Type::Vector;
+		this->m_vec_colour = colour;
+
+		this->m_data.clear();
+		this->m_data.reserve(NUM_TEXTURE_CHANNELS);
+		for (int i = 0; i < NUM_TEXTURE_CHANNELS; i++)
+		{
+			this->m_data.push_back(static_cast<unsigned char>(this->m_vec_colour[i] * ((2 << 7) - 1)));
+		}
 	}
 }
 
@@ -28,6 +32,8 @@ void LocalTexture::SetFullTexture(const unsigned char* data, std::tuple<int, int
 	{
 		throw std::invalid_argument("Texture dimensions must be greater than 1 in both axes");
 	}
+
+	this->IncrementRevisionIndex();
 
 	this->m_type = Type::FullTexture;
 	this->m_dimensions = dimensions;
@@ -75,7 +81,12 @@ const unsigned char* LocalTexture::GetData() const
 
 void LocalTexture::SetMagFilter(Filter filter)
 {
-	this->m_filter_mag = filter;
+	if (filter != this->m_filter_mag)
+	{
+		this->IncrementRevisionIndex();
+
+		this->m_filter_mag = filter;
+	}
 }
 
 LocalTexture::Filter LocalTexture::GetMagFilter() const
@@ -85,7 +96,12 @@ LocalTexture::Filter LocalTexture::GetMagFilter() const
 
 void LocalTexture::SetMinFilter(Filter filter)
 {
-	this->m_filter_min = filter;
+	if (filter != this->m_filter_min)
+	{
+		this->IncrementRevisionIndex();
+
+		this->m_filter_min = filter;
+	}
 }
 
 LocalTexture::Filter LocalTexture::GetMinFilter() const
@@ -96,6 +112,11 @@ LocalTexture::Filter LocalTexture::GetMinFilter() const
 bool LocalTexture::operator==(const LocalTexture& second) const
 {
 	if (this == &second)
+	{
+		return true;
+	}
+
+	if (this->GetRevisionIndex() == second.GetRevisionIndex())
 	{
 		return true;
 	}
