@@ -28,8 +28,6 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 
 void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 {
-	this->MakeContextCurrent();
-
 	auto it = this->m_textures_static.find(texture.GetReference());
 	bool texture_found = it != this->m_textures_static.end();
 	
