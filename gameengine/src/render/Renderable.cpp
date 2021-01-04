@@ -549,26 +549,17 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 void Renderable::RecompileShader()
 {
-	if (this->m_shader_program != nullptr)
-	{
-		delete this->m_shader_program;
-	}
-
 	std::vector<std::tuple<std::string, std::string>> shader_defines;
 	for (std::map<std::string, std::string>::iterator it = this->m_shader_defines.begin(); it != this->m_shader_defines.end(); it++)
 	{
 		shader_defines.push_back({ it->first, it->second });
 	}
 
-	this->m_shader_program = new ShaderProgram(
-		this->m_shaders,
-		shader_defines,
-		false
-	);
+	this->m_shader_program = std::make_unique<ShaderProgram>(this->m_shaders, shader_defines, false);
 
-	for (std::unordered_set<std::string>::iterator it = this->m_shader_uniform_names.begin(); it != this->m_shader_uniform_names.end(); it++)
+	for (std::string uniform_name : this->m_shader_uniform_names)
 	{
-		this->m_shader_program->RegisterUniform(*it);
+		this->m_shader_program->RegisterUniform(uniform_name);
 	}
 }
 
@@ -762,7 +753,6 @@ Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engin
 
 Renderable::~Renderable()
 {
-	delete this->m_shader_program;
 }
 
 void Renderable::SetCamera(Camera* camera)

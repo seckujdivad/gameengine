@@ -12,6 +12,7 @@
 #include <map>
 #include <functional>
 #include <unordered_set>
+#include <memory>
 
 #include "../scene/Referenceable.h"
 #include "RenderMode.h"
@@ -37,7 +38,7 @@ private:
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
 
-	ShaderProgram* m_shader_program = nullptr;
+	std::unique_ptr<ShaderProgram> m_shader_program = nullptr;
 	std::vector<std::tuple<std::string, GLenum>> m_shaders;
 	std::map<std::string, std::string> m_shader_defines;
 	std::unordered_set<std::string> m_shader_uniform_names;
@@ -82,10 +83,6 @@ protected:
 
 public:
 	Renderable(Engine* engine, RenderableConfig config);
-	Renderable(const Renderable&) = delete;
-	Renderable& operator=(const Renderable&) = delete;
-	Renderable(Renderable&&) = delete;
-	Renderable& operator=(Renderable&&) = delete;
 	virtual ~Renderable();
 	
 	void SetCamera(Camera* camera);
