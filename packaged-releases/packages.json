@@ -6,14 +6,20 @@
           "Release/demo-cube.exe": "demo-cube.exe",
           "Release/*.dll": "",
           "demo-cube/resources/": "resources/"
-        }
+        },
+        "remove": [
+          "resources/settings.json"
+        ]
       },
       "win-x64": {
         "include": {
           "x64/Release/demo-cube.exe": "demo-cube.exe",
           "x64/Release/*.dll": "",
           "demo-cube/resources/": "resources/"
-        }
+        },
+        "remove": [
+          "resources/settings.json"
+        ]
       }
     }
   },

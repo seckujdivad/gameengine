@@ -47,6 +47,8 @@ def copy_file(source_path, dest_path):
 for project_name in packages_config["projects"]:
     for build_type in packages_config["projects"][project_name]:
         build_name = "{}-{}".format(project_name, build_type)
+
+        #collect included files
         print("Collecting " + build_name + "...", end = "")
 
         build_config = packages_config["projects"][project_name][build_type]
@@ -62,7 +64,18 @@ for project_name in packages_config["projects"]:
 
         except FileNotFoundError:
             print(" failed (one or more files not found, has this package been built?)")
+        
+        #remove excluded files that have been included
+        print("Removing excluded files...", end = "")
+        for to_remove in build_config["remove"]:
+            to_remove_path = os.path.join(package_path, to_remove)
+            if os.path.isdir(to_remove_path):
+                shutil.rmtree(to_remove_path)
+            elif os.path.isfile(to_remove_path):
+                os.remove(to_remove_path)
+        print(" done")
 
+        #package the collected files into a zip file
         print("Archiving " + build_name + "...", end = "")
         shutil.make_archive(package_path, 'zip', os.path.join(sys.path[0], "package sources", build_name))
         shutil.move(os.path.join(sys.path[0], "package sources", build_name + ".zip"), os.path.join(sys.path[0], "packages", build_name + ".zip"))
