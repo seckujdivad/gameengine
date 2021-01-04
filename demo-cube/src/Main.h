@@ -27,9 +27,9 @@ class Main : public wxFrame
 {
 private:
 	//gameengine
-	Engine* m_engine;
-	Scene* m_scene;
-	Camera* m_camera;
+	std::unique_ptr<Engine> m_engine;
+	std::unique_ptr<Scene> m_scene;
+	std::unique_ptr<Camera> m_camera;
 
 	Model* m_model_selected = nullptr;
 
@@ -63,7 +63,6 @@ private:
 
 public:
 	Main();
-	~Main();
 
 	void SetModel(Model* model);
 };

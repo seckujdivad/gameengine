@@ -29,14 +29,14 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	this->m_scene = SceneFromJSON(this->GetSceneLoaderConfig());
+	this->m_scene = std::unique_ptr<Scene>(SceneFromJSON(this->GetSceneLoaderConfig()));
 
-	this->m_engine = new Engine(this, this->m_scene, true);
+	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
 		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
 		}));
 
-	this->m_camera = new Camera();
+	this->m_camera = std::make_unique<Camera>();
 	this->m_camera->SetFOV(90.0);
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
@@ -45,7 +45,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(normal_config, wxID_ANY, this);
 
 	this->m_glcanvas = this->m_glcanvas_controller->GetEngineCanvas();
-	this->m_glcanvas->SetControlledCamera(this->m_camera);
+	this->m_glcanvas->SetControlledCamera(this->m_camera.get());
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
 	this->m_glcanvas->SetRenderLoop(true);
@@ -114,13 +114,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
 	this->Layout();
-}
-
-Main::~Main()
-{
-	delete this->m_engine;
-	delete this->m_scene;
-	delete this->m_camera;
 }
 
 void Main::SetModel(Model* model)
