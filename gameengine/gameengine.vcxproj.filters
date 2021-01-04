@@ -225,6 +225,9 @@
     <ClInclude Include="src\generic\LoadFile.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\RevisableResource.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\render\EngineCanvas.cpp">
@@ -364,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="src\generic\LoadFile.cpp">
       <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\RevisableResource.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

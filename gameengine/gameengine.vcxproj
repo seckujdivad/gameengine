@@ -225,6 +225,7 @@
     <ClInclude Include="src\scene\OrientedBoundingBox.h" />
     <ClInclude Include="src\scene\Positionable.h" />
     <ClInclude Include="src\scene\Referenceable.h" />
+    <ClInclude Include="src\scene\RevisableResource.h" />
     <ClInclude Include="src\scene\Rotatable.h" />
     <ClInclude Include="src\scene\Scalable.h" />
     <ClInclude Include="src\scene\Scene.h" />
@@ -273,6 +274,7 @@
     <ClCompile Include="src\scene\OrientedBoundingBox.cpp" />
     <ClCompile Include="src\scene\Positionable.cpp" />
     <ClCompile Include="src\scene\Referenceable.cpp" />
+    <ClCompile Include="src\scene\RevisableResource.cpp" />
     <ClCompile Include="src\scene\Rotatable.cpp" />
     <ClCompile Include="src\scene\Scalable.cpp" />
     <ClCompile Include="src\scene\Scene.cpp" />
