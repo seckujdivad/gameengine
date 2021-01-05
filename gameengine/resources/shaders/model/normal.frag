@@ -490,32 +490,23 @@ void main()
 						GetFirstOBBIntersection(geomSceneSpacePos, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
 
 						//make sure that the line segment is aligned with the reflection vector (i.e. 0 -> 1 is aligned)
-						if (dot(intersections[1] - intersections[0], refl_dir) < 0.0f)
-						{
-							vec3 swap = intersections[0];
-							intersections[0] = intersections[1];
-							intersections[1] = swap;
-						}
+						const bool swap_intersection_positions = dot(intersections[1] - intersections[0], refl_dir) < 0.0f;
+						int first_intersection = swap_intersection_positions ? 1 : 0;
+						int second_intersection = swap_intersection_positions ? 0 : 1;
 
 						//write OBB intersection info into proper storage locations
-						all_intersections[i * 2] = intersections[0];
-						all_intersections[(i * 2) + 1] = intersections[1];
+						all_intersections[i * 2] = intersections[first_intersection];
+						all_intersections[(i * 2) + 1] = intersections[second_intersection];
 
 						valid_segments[i] = is_valid;
 
-						if (is_valid)
-						{
-							//check if the line segment overlaps the reflection point (i.e. starts on one side and ends on the other)
-							const float tolerance = 0.01f;
-							const vec3 tolerance_vec = tolerance * refl_dir;
-							const bool intersection_0_before_point = dot(intersections[0] - geomSceneSpacePos - tolerance_vec, refl_dir) < 0.0f;
-							const bool intersection_1_after_point = dot(intersections[1] - geomSceneSpacePos + tolerance_vec, refl_dir) > 0.0f;
+						//check if the line segment is both valid and overlaps the reflection point (i.e. starts on one side and ends on the other)
+						const float tolerance = 0.01f;
+						const vec3 tolerance_vec = tolerance * refl_dir;
+						const bool intersection_0_before_point = dot(intersections[first_intersection] - geomSceneSpacePos - tolerance_vec, refl_dir) < 0.0f;
+						const bool intersection_1_after_point = dot(intersections[second_intersection] - geomSceneSpacePos + tolerance_vec, refl_dir) > 0.0f;
 
-							if (intersection_0_before_point && intersection_1_after_point)
-							{
-								search_index = i;
-							}
-						}
+						search_index = is_valid && intersection_0_before_point && intersection_1_after_point ? i : search_index;
 					}
 				
 					if (search_index == -1)
