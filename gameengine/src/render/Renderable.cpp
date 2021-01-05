@@ -70,13 +70,13 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		if (this->GetRenderMode() == RenderMode::Normal)
 		{
 			//point lights
-			recompile_required = this->SetShaderDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
+			recompile_required = this->m_shader_program->SetDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
 
 			//OBB approximations
-			recompile_required = this->SetShaderDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) ? true : recompile_required;
+			recompile_required = this->m_shader_program->SetDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) ? true : recompile_required;
 
 			//reflections
-			recompile_required = this->SetShaderDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) ? true : recompile_required;
+			recompile_required = this->m_shader_program->SetDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) ? true : recompile_required;
 
 			//determine if any models might need to discard fragments
 			{
@@ -90,7 +90,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					}
 				}
 
-				recompile_required = this->SetShaderDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0") ? true : recompile_required;
+				recompile_required = this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0") ? true : recompile_required;
 			}
 		}
 
@@ -99,18 +99,18 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			|| (this->GetRenderMode() == RenderMode::Textured))
 		{
 			//data textures
-			recompile_required = this->SetShaderDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
+			recompile_required = this->m_shader_program->SetDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
 		}
 
 		if (this->GetRenderMode() == RenderMode::Postprocess)
 		{
 			size_t num_layers = std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.size();
-			recompile_required = this->SetShaderDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers)) ? true : recompile_required;
+			recompile_required = this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers)) ? true : recompile_required;
 		}
 
 		if (recompile_required)
 		{
-			this->RecompileShader();
+			this->m_shader_program->Recompile();
 		}
 
 		this->m_shader_program->Select();
@@ -119,7 +119,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		// cubemap uniforms
 		{
 			bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
-			this->SetShaderUniform("is_cubemap", is_cubemap);
+			this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
 
 			if (is_cubemap)
 			{
@@ -135,12 +135,12 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				for (int i = 0; i < static_cast<int>(transforms.size()); i++)
 				{
-					this->SetShaderUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
+					this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
 				}
 			}
 			else
 			{
-				this->SetShaderUniform("cubemap_transform[0]", glm::mat4(1.0f));
+				this->m_shader_program->SetUniform("cubemap_transform[0]", glm::mat4(1.0f));
 			}
 		}
 
@@ -159,21 +159,21 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				this->m_shader_program->SetTexture(-1, texture);
 
 				const std::string prefix = "layers[" + std::to_string(i) + "].";
-				this->SetShaderUniform(prefix + "colour_translate", layer.colour_translate);
-				this->SetShaderUniform(prefix + "colour_scale", layer.colour_scale);
+				this->m_shader_program->SetUniform(prefix + "colour_translate", layer.colour_translate);
+				this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 			}
 			
 		}
 		else if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 		{
 			// camera
-			this->SetShaderUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
-			this->SetShaderUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
-			this->SetShaderUniform("cam_persp", this->GetCamera()->GetPerspectiveMatrix());
-			this->SetShaderUniform("cam_clip_near", std::get<0>(this->GetCamera()->GetClips()));
-			this->SetShaderUniform("cam_clip_far", std::get<1>(this->GetCamera()->GetClips()));
-			this->SetShaderUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
-			this->SetShaderUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
+			this->m_shader_program->SetUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
+			this->m_shader_program->SetUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
+			this->m_shader_program->SetUniform("cam_persp", this->GetCamera()->GetPerspectiveMatrix());
+			this->m_shader_program->SetUniform("cam_clip_near", std::get<0>(this->GetCamera()->GetClips()));
+			this->m_shader_program->SetUniform("cam_clip_far", std::get<1>(this->GetCamera()->GetClips()));
+			this->m_shader_program->SetUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
+			this->m_shader_program->SetUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
 		}
 		else
 		{
@@ -183,7 +183,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 		if (this->GetRenderMode() == RenderMode::Normal)
 		{
 			// ambient light
-			this->SetShaderUniform("light_ambient", scene->GetAmbientLight());
+			this->m_shader_program->SetUniform("light_ambient", scene->GetAmbientLight());
 
 			// shadows
 			bool shadows_enabled = true;
@@ -191,7 +191,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			{
 				shadows_enabled = false;
 			}
-			this->SetShaderUniform("light_shadow_draw", shadows_enabled);
+			this->m_shader_program->SetUniform("light_shadow_draw", shadows_enabled);
 
 			//point lights
 			std::vector<PointLight*> point_lights = this->GetEngine()->GetScene()->GetPointLights();
@@ -200,21 +200,21 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				PointLight* point_light = point_lights.at(i);
 				std::string root_name = "light_points[" + std::to_string(i) + "].";
 
-				this->AddShaderUniformName(root_name + "position");
-				this->SetShaderUniform(root_name + "position", point_light->GetPosition());
+				this->m_shader_program->AddUniformName(root_name + "position");
+				this->m_shader_program->SetUniform(root_name + "position", point_light->GetPosition());
 
-				this->AddShaderUniformName(root_name + "intensity");
-				this->SetShaderUniform(root_name + "intensity", point_light->GetIntensity());
+				this->m_shader_program->AddUniformName(root_name + "intensity");
+				this->m_shader_program->SetUniform(root_name + "intensity", point_light->GetIntensity());
 
-				this->AddShaderUniformName(root_name + "shadow_far_plane");
-				this->SetShaderUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));
+				this->m_shader_program->AddUniformName(root_name + "shadow_far_plane");
+				this->m_shader_program->SetUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));
 
-				this->AddShaderUniformName(root_name + "shadow_bias");
-				this->SetShaderUniform(root_name + "shadow_bias", point_light->GetShadowBias());
+				this->m_shader_program->AddUniformName(root_name + "shadow_bias");
+				this->m_shader_program->SetUniform(root_name + "shadow_bias", point_light->GetShadowBias());
 				
 				std::string cubemap_name = "light_shadow_cubemaps[" + std::to_string(i) + "]";
 
-				this->AddShaderUniformName(cubemap_name);
+				this->m_shader_program->AddUniformName(cubemap_name);
 				RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
 
 				LoadedTexture loaded_texture;
@@ -232,31 +232,31 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				OrientedBoundingBox obb = scene_approximations.at(i);
 				std::string prefix = "scene_approximations[" + std::to_string(i) + "].";
 
-				this->AddShaderUniformName(prefix + "position");
-				this->SetShaderUniform(prefix + "position", obb.GetPosition());
+				this->m_shader_program->AddUniformName(prefix + "position");
+				this->m_shader_program->SetUniform(prefix + "position", obb.GetPosition());
 				
-				this->AddShaderUniformName(prefix + "dimensions");
-				this->SetShaderUniform(prefix + "dimensions", obb.GetDimensionsVec());
+				this->m_shader_program->AddUniformName(prefix + "dimensions");
+				this->m_shader_program->SetUniform(prefix + "dimensions", obb.GetDimensionsVec());
 
-				this->AddShaderUniformName(prefix + "rotation");
-				this->SetShaderUniform(prefix + "rotation", glm::mat3(obb.GetRotationMatrix()));
+				this->m_shader_program->AddUniformName(prefix + "rotation");
+				this->m_shader_program->SetUniform(prefix + "rotation", glm::mat3(obb.GetRotationMatrix()));
 
-				this->AddShaderUniformName(prefix + "rotation_inverse");
-				this->SetShaderUniform(prefix + "rotation_inverse", glm::mat3(obb.GetRotationMatrixInverse()));
+				this->m_shader_program->AddUniformName(prefix + "rotation_inverse");
+				this->m_shader_program->SetUniform(prefix + "rotation_inverse", glm::mat3(obb.GetRotationMatrixInverse()));
 			}
 
 			//previous render result
 			if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
 			{
-				this->SetShaderUniform("render_output_valid", false);
+				this->m_shader_program->SetUniform("render_output_valid", false);
 			}
 			else
 			{
-				this->SetShaderUniform("render_output_valid", this->FramebufferContainsRenderOutput());
+				this->m_shader_program->SetUniform("render_output_valid", this->FramebufferContainsRenderOutput());
 			}
 
-			this->SetShaderUniform("render_output_x", std::get<0>(this->GetOutputSize()));
-			this->SetShaderUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+			this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
+			this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
 
 			//load textures from the previous frame (if in normal rendering mode)
 			LoadedTexture texture;
@@ -279,7 +279,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 		if (this->GetRenderMode() == RenderMode::Wireframe)
 		{
-			this->SetShaderUniform("draw_back_faces", std::get<RenderableConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+			this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderableConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
 		}
 
 		switch (this->GetRenderMode())
@@ -348,9 +348,9 @@ void Renderable::RenderScene(std::vector<Model*> models)
 			}
 			else
 			{
-				this->SetShaderUniform("mdl_translate", glm::vec4(model->GetPosition(), 0.0f));
-				this->SetShaderUniform("mdl_rotate", model->GetRotationMatrix());
-				this->SetShaderUniform("mdl_scale", model->GetScaleMatrix());
+				this->m_shader_program->SetUniform("mdl_translate", glm::vec4(model->GetPosition(), 0.0f));
+				this->m_shader_program->SetUniform("mdl_rotate", model->GetRotationMatrix());
+				this->m_shader_program->SetUniform("mdl_scale", model->GetScaleMatrix());
 
 				if ((this->GetRenderMode() == RenderMode::Normal)
 					|| (this->GetRenderMode() == RenderMode::Textured))
@@ -364,20 +364,20 @@ void Renderable::RenderScene(std::vector<Model*> models)
 				{
 					Material& material = model->GetMaterial();
 					//material
-					this->SetShaderUniform("mat_diffuse", material.diffuse);
-					this->SetShaderUniform("mat_specular", material.specular);
-					this->SetShaderUniform("mat_specular_highlight", material.specular_highlight);
-					this->SetShaderUniform("mat_displacement_multiplier", material.displacement.multiplier);
-					this->SetShaderUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
+					this->m_shader_program->SetUniform("mat_diffuse", material.diffuse);
+					this->m_shader_program->SetUniform("mat_specular", material.specular);
+					this->m_shader_program->SetUniform("mat_specular_highlight", material.specular_highlight);
+					this->m_shader_program->SetUniform("mat_displacement_multiplier", material.displacement.multiplier);
+					this->m_shader_program->SetUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
 
 					//screen space reflections
-					this->SetShaderUniform("mat_ssr_enabled", material.ssr_enabled);
-					this->SetShaderUniform("mat_ssr_resolution", material.ssr.resolution);
-					this->SetShaderUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
-					this->SetShaderUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
-					this->SetShaderUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);
-					this->SetShaderUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
-					this->SetShaderUniform("mat_ssr_refinements", material.ssr.refinements);
+					this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled);
+					this->m_shader_program->SetUniform("mat_ssr_resolution", material.ssr.resolution);
+					this->m_shader_program->SetUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
+					this->m_shader_program->SetUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
+					this->m_shader_program->SetUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);
+					this->m_shader_program->SetUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
+					this->m_shader_program->SetUniform("mat_ssr_refinements", material.ssr.refinements);
 
 					//textures
 					LoadedTexture texture;
@@ -405,11 +405,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					//reflections
 					if (this->GetRenderMode() == RenderMode::Normal && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_reflections)
 					{
-						this->SetShaderUniform("reflections_enabled", false);
+						this->m_shader_program->SetUniform("reflections_enabled", false);
 					}
 					else
 					{
-						this->SetShaderUniform("reflections_enabled", material.reflections_enabled);
+						this->m_shader_program->SetUniform("reflections_enabled", material.reflections_enabled);
 					}
 
 					std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
@@ -420,29 +420,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 						std::string prefix = "reflections[" + std::to_string(i) + "].";
 
-						this->AddShaderUniformName(prefix + "position");
-						this->SetShaderUniform(prefix + "position", reflection->GetPosition());
-
-						this->AddShaderUniformName(prefix + "clip_near");
-						this->SetShaderUniform(prefix + "clip_near", std::get<0>(reflection->GetClips()));
-						
-						this->AddShaderUniformName(prefix + "clip_far");
-						this->SetShaderUniform(prefix + "clip_far", std::get<1>(reflection->GetClips()));
-
-						this->AddShaderUniformName(prefix + "mode");
-						this->SetShaderUniform(prefix + "mode", static_cast<int>(reflection_mode));
-
-						this->AddShaderUniformName(prefix + "iterations");
-						this->SetShaderUniform(prefix + "iterations", reflection->GetIterations());
-
-						this->AddShaderUniformNames({
-							"reflection_cubemaps[" + std::to_string(i) + "]",
-							"reflection_depth_cubemaps[" + std::to_string(i) + "]"
-							});
-						for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
-						{
-							this->AddShaderUniformName("reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]");
-						}
+						this->m_shader_program->SetUniform(prefix + "position", reflection->GetPosition());
+						this->m_shader_program->SetUniform(prefix + "clip_near", std::get<0>(reflection->GetClips()));
+						this->m_shader_program->SetUniform(prefix + "clip_far", std::get<1>(reflection->GetClips()));
+						this->m_shader_program->SetUniform(prefix + "mode", static_cast<int>(reflection_mode));
+						this->m_shader_program->SetUniform(prefix + "iterations", reflection->GetIterations());
 						
 						RenderTextureGroup reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
 
@@ -465,7 +447,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 						}
 					}
 
-					this->SetShaderUniform("reflection_count", static_cast<int>(reflections.size()));
+					this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
 
 					//skybox cubemap
 					Skybox* skybox = model->GetSkybox();
@@ -482,7 +464,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 				if (this->GetRenderMode() == RenderMode::Wireframe)
 				{
-					this->SetShaderUniform("wireframe_colour", model->GetCurrentWireframeColour());
+					this->m_shader_program->SetUniform("wireframe_colour", model->GetCurrentWireframeColour());
 				}
 
 				this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
@@ -498,11 +480,11 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					{
 						mode = GL_PATCHES;
 
-						this->SetShaderUniform("tess_enable", info.tesselation_enabled);
-						this->SetShaderUniform("tess_interp_mode", static_cast<int>(info.interpolation_mode));
+						this->m_shader_program->SetUniform("tess_enable", info.tesselation_enabled);
+						this->m_shader_program->SetUniform("tess_interp_mode", static_cast<int>(info.interpolation_mode));
 
-						this->SetShaderUniform("patch_size_u", info.primitive_dimensions.x);
-						this->SetShaderUniform("patch_size_v", info.primitive_dimensions.y);
+						this->m_shader_program->SetUniform("patch_size_u", info.primitive_dimensions.x);
+						this->m_shader_program->SetUniform("patch_size_v", info.primitive_dimensions.y);
 					}
 					else
 					{
@@ -535,22 +517,6 @@ void Renderable::RenderScene(std::vector<Model*> models)
 	}
 }
 
-void Renderable::RecompileShader()
-{
-	std::vector<std::tuple<std::string, std::string>> shader_defines;
-	for (std::map<std::string, std::string>::iterator it = this->m_shader_defines.begin(); it != this->m_shader_defines.end(); it++)
-	{
-		shader_defines.push_back({ it->first, it->second });
-	}
-
-	this->m_shader_program = std::make_unique<ShaderProgram>(this->m_shaders, shader_defines, false);
-
-	for (std::string uniform_name : this->m_shader_uniform_names)
-	{
-		this->m_shader_program->RegisterUniform(uniform_name);
-	}
-}
-
 void Renderable::SetFramebuffer(GLuint fbo)
 {
 	this->m_fbo = fbo;
@@ -570,135 +536,6 @@ void Renderable::SetTargetType(GLenum target_type)
 GLenum Renderable::GetTargetType() const
 {
 	return this->m_fbo_target_type;
-}
-
-bool Renderable::SetShaderDefine(std::string key, std::string value)
-{
-	std::map<std::string, std::string>::iterator it = this->m_shader_defines.find(key);
-	if (it == this->m_shader_defines.end())
-	{
-		this->m_shader_defines.insert(std::pair(key, value));
-		return true;
-	}
-	else if (it->second != value)
-	{
-		this->m_shader_defines.at(key) = value;
-		return true;
-	}
-	return false;
-}
-
-void Renderable::AddShaderUniformName(std::string name)
-{
-	std::pair<std::unordered_set<std::string>::iterator, bool> insert_result = this->m_shader_uniform_names.insert(name);
-
-	if (insert_result.second && (this->m_shader_program != nullptr))
-	{
-		this->m_shader_program->RegisterUniform(name);
-	}
-}
-
-void Renderable::AddShaderUniformNames(std::vector<std::string> names)
-{
-	for (std::string name : names)
-	{
-		this->AddShaderUniformName(name);
-	}
-}
-
-void Renderable::SetShaderUniform(std::string name, bool value)
-{
-	glUniform1i(this->m_shader_program->GetUniform(name), value ? GL_TRUE : GL_FALSE);
-}
-
-void Renderable::SetShaderUniform(std::string name, int value)
-{
-	glUniform1i(this->m_shader_program->GetUniform(name), value);
-}
-
-void Renderable::SetShaderUniform(std::string name, float value)
-{
-	glUniform1f(this->m_shader_program->GetUniform(name), value);
-}
-
-void Renderable::SetShaderUniform(std::string name, double value, bool demote)
-{
-	if (demote)
-	{
-		this->SetShaderUniform(name, (float)value);
-	}
-	else
-	{
-		glUniform1d(this->m_shader_program->GetUniform(name), value);
-	}
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::vec3 vec)
-{
-	glUniform3fv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::dvec3 vec, bool demote)
-{
-	if (demote)
-	{
-		this->SetShaderUniform(name, glm::vec3(vec));
-	}
-	else
-	{
-		glUniform3dv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
-	}
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::vec4 vec)
-{
-	glUniform4fv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::dvec4 vec, bool demote)
-{
-	if (demote)
-	{
-		this->SetShaderUniform(name, glm::vec4(vec));
-	}
-	else
-	{
-		glUniform4dv(this->m_shader_program->GetUniform(name), 1, glm::value_ptr(vec));
-	}
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::mat4 mat)
-{
-	glUniformMatrix4fv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::dmat4 mat, bool demote)
-{
-	if (demote)
-	{
-		this->SetShaderUniform(name, glm::mat4(mat));
-	}
-	else
-	{
-		glUniformMatrix4dv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
-	}
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::mat3 mat)
-{
-	glUniformMatrix3fv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
-}
-
-void Renderable::SetShaderUniform(std::string name, glm::dmat3 mat, bool demote)
-{
-	if (demote)
-	{
-		this->SetShaderUniform(name, glm::mat3(mat));
-	}
-	else
-	{
-		glUniformMatrix3dv(this->m_shader_program->GetUniform(name), 1, GL_FALSE, glm::value_ptr(mat));
-	}
 }
 
 bool Renderable::FramebufferContainsRenderOutput() const
@@ -736,6 +573,7 @@ Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engin
 		this->RenderScene(models);
 	};
 
+	this->m_shader_program = std::make_unique<ShaderProgram>();
 	this->SetConfig(config);
 }
 
@@ -825,56 +663,51 @@ void Renderable::SetConfig(RenderableConfig config)
 	this->m_config = config;
 	this->m_fbo_contains_render = false;
 
-	this->m_shaders.clear();
+	std::vector<ShaderProgram::ShaderSource> shaders;
 	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 	{
-		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER));
-		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
-		this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
 
 		if (this->GetRenderMode() == RenderMode::Normal)
 		{
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 		else if (this->GetRenderMode() == RenderMode::Wireframe)
 		{
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 		else if (this->GetRenderMode() == RenderMode::Shadow)
 		{
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 		else if (this->GetRenderMode() == RenderMode::Textured)
 		{
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			this->m_shaders.push_back(std::tuple(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 	}
 	else if (this->GetRenderMode() == RenderMode::Postprocess)
 	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER }
-		};
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER));
 	}
 	else if (this->GetRenderMode() == RenderMode::Default)
 	{
-		this->m_shaders = {
-			{ GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER },
-			{ GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER }
-		};
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER));
 	}
 
-	this->m_shader_uniform_names.clear();
-
-	this->RecompileShader();
+	this->m_shader_program->SetShaderSources(shaders);
+	this->m_shader_program->Recompile();
 
 	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 	{
-		this->AddShaderUniformNames({
+		this->m_shader_program->AddUniformNames({
 			//vertex
 			"mdl_translate",
 			"mdl_rotate",
@@ -903,7 +736,7 @@ void Renderable::SetConfig(RenderableConfig config)
 
 		if (this->GetRenderMode() == RenderMode::Normal)
 		{
-			this->AddShaderUniformNames({
+			this->m_shader_program->AddUniformNames({
 				//fragment
 				"mat_diffuse",
 				"mat_specular",
@@ -937,12 +770,12 @@ void Renderable::SetConfig(RenderableConfig config)
 
 			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
 			{
-				this->AddShaderUniformName("render_output_data[" + std::to_string(i) + "]");
+				this->m_shader_program->AddUniformName("render_output_data[" + std::to_string(i) + "]");
 			}
 		}
 		else if (this->GetRenderMode() == RenderMode::Wireframe)
 		{
-			this->AddShaderUniformNames({
+			this->m_shader_program->AddUniformNames({
 				//geometry
 				"draw_back_faces",
 				//fragment
@@ -951,7 +784,7 @@ void Renderable::SetConfig(RenderableConfig config)
 		}
 		else if (this->GetRenderMode() == RenderMode::Textured)
 		{
-			this->AddShaderUniformNames({
+			this->m_shader_program->AddUniformNames({
 				//fragment
 				"colourTexture"
 				});

@@ -39,17 +39,10 @@ private:
 	Engine* m_engine = nullptr;
 
 	std::unique_ptr<ShaderProgram> m_shader_program = nullptr;
-	std::vector<std::tuple<std::string, GLenum>> m_shaders;
-	std::map<std::string, std::string> m_shader_defines;
-	std::unordered_set<std::string> m_shader_uniform_names;
-
-	std::map<int, LoadedTexture> m_textures;
 
 	ControllerFunction m_render_function;
 
 	std::unique_ptr<Model> m_postprocess_model = nullptr;
-
-	void RecompileShader();
 
 protected:
 	//scene rendering
@@ -59,23 +52,6 @@ protected:
 	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
 	GLenum GetTargetType() const;
-
-	bool SetShaderDefine(std::string key, std::string value); //returns whether or not the shader requires recompilation (this is deferred to the caller)
-	void AddShaderUniformName(std::string name);
-	void AddShaderUniformNames(std::vector<std::string> names);
-
-	void SetShaderUniform(std::string name, bool value);
-	void SetShaderUniform(std::string name, int value);
-	void SetShaderUniform(std::string name, float value);
-	void SetShaderUniform(std::string name, double value, bool demote = true);
-	void SetShaderUniform(std::string name, glm::vec3 vec);
-	void SetShaderUniform(std::string name, glm::dvec3 vec, bool demote = true);
-	void SetShaderUniform(std::string name, glm::vec4 vec);
-	void SetShaderUniform(std::string name, glm::dvec4 vec, bool demote = true);
-	void SetShaderUniform(std::string name, glm::mat4 mat);
-	void SetShaderUniform(std::string name, glm::dmat4 mat, bool demote = true);
-	void SetShaderUniform(std::string name, glm::mat3 mat);
-	void SetShaderUniform(std::string name, glm::dmat3 mat, bool demote = true);
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
