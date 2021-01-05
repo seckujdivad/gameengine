@@ -526,33 +526,25 @@ void main()
 						int line_end_index = search_index;
 
 						{
-							bool clear_run = false;
-							while (!clear_run)
+							const float tolerance = 0.01f;
+							const vec3 tolerance_vec = tolerance * refl_dir;
+
+							for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 							{
-								clear_run = true; //changes to false whenever a line segment is merged in that affects the end point
-
-								for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
+								for (int j = 0; j < APPROXIMATION_OBB_NUM; j++)
 								{
-									if (valid_segments[i] && !included_segments[i]) //don't check line segments that are already included in the line
-									{
-										//check if extending end is possible
-										const float tolerance = 0.01f;
-										const vec3 tolerance_vec = tolerance * refl_dir;
+									const bool segment_can_be_included = valid_segments[j] && !included_segments[j]; //don't check line segments that are already included in the line
 
-										// (of the existing line segment)
-										const bool starts_after_start = dot(all_intersections[i * 2] - line_start + tolerance_vec, refl_dir) > 0.0f;
-										const bool starts_before_end = dot(all_intersections[i * 2] - line_end - tolerance_vec, refl_dir) < 0.0f;
-										const bool ends_after_end = dot(all_intersections[(i * 2) + 1] - line_end - tolerance_vec, refl_dir) > 0.0f;
+									//check if extending end is possible
+									// (of the existing line segment)
+									const bool starts_after_start = dot(all_intersections[j * 2] - line_start + tolerance_vec, refl_dir) > 0.0f;
+									const bool starts_before_end = dot(all_intersections[j * 2] - line_end - tolerance_vec, refl_dir) < 0.0f;
+									const bool ends_after_end = dot(all_intersections[(j * 2) + 1] - line_end - tolerance_vec, refl_dir) > 0.0f;
 
-										if (starts_after_start && starts_before_end && ends_after_end) //new line segment overlaps with end of current line segment - extend line
-										{
-											clear_run = false;
-											included_segments[i] = true;
-
-											line_end = all_intersections[(i * 2) + 1];
-											line_end_index = i;
-										}
-									}
+									const bool extend_line = segment_can_be_included && starts_after_start && starts_before_end && ends_after_end; //new line segment overlaps with end of current line segment - extend line
+									included_segments[j] = extend_line ? true : included_segments[j];
+									line_end = extend_line ? all_intersections[(j * 2) + 1] : line_end;
+									line_end_index = extend_line ? j : line_end_index;
 								}
 							}
 						}
