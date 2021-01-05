@@ -3,15 +3,11 @@
 #include "../GLComponents.h"
 
 #include <GL/GL.h>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
 
 #include <vector>
-#include <string>
-#include <tuple>
-#include <map>
-#include <functional>
 #include <unordered_set>
+#include <tuple>
+#include <functional>
 #include <memory>
 
 #include "../scene/Referenceable.h"
@@ -23,7 +19,6 @@ class Engine;
 class Model;
 class Camera;
 class ShaderProgram;
-class Renderable;
 
 class Renderable
 {
