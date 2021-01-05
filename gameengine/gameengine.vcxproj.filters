@@ -73,6 +73,9 @@
     <Filter Include="Resource Files\shaders\model">
       <UniqueIdentifier>{9ea4a5d6-5493-4222-b408-1e885d7c44ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\model\normal">
+      <UniqueIdentifier>{1bd67220-ce7f-4584-8cf1-18b2bcdfa1a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\render\EngineCanvas.h">
@@ -411,9 +414,6 @@
     <None Include="resources\shaders\model\default.vert">
       <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model\normal.frag">
-      <Filter>Resource Files\shaders\model</Filter>
-    </None>
     <None Include="resources\shaders\model\shadow.frag">
       <Filter>Resource Files\shaders\model</Filter>
     </None>
@@ -425,6 +425,15 @@
     </None>
     <None Include="resources\shaders\model\wireframe.geom">
       <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\shaders\model\normal\pass0.frag">
+      <Filter>Resource Files\shaders\model\normal</Filter>
+    </None>
+    <None Include="resources\shaders\model\normal\pass1.frag">
+      <Filter>Resource Files\shaders\model\normal</Filter>
+    </None>
+    <None Include="resources\shaders\model\normal\pass1.vert">
+      <Filter>Resource Files\shaders\model\normal</Filter>
     </None>
   </ItemGroup>
 </Project>

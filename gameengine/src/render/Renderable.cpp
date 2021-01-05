@@ -666,7 +666,7 @@ void Renderable::SetConfig(RenderableConfig config)
 		if (this->GetRenderMode() == RenderMode::Normal)
 		{
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_PASS0_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 		else if (this->GetRenderMode() == RenderMode::Wireframe)
 		{
