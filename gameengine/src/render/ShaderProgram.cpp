@@ -105,6 +105,8 @@ void ShaderProgram::Recompile()
 	
 	this->m_uniforms.clear();
 	this->AddUniformNames(uniform_names);
+
+	this->Select();
 }
 
 void ShaderProgram::SetShaderSources(std::vector<ShaderSource> sources, bool defer_recompilation)

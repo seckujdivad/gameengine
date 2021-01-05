@@ -4,6 +4,8 @@
 
 #include "RenderTexture.h"
 #include "RenderTextureData.h"
+#include "../scene/Scene.h"
+#include "../Engine.h"
 
 CumulativeTexture::CumulativeTexture()
 {
@@ -44,7 +46,7 @@ void CumulativeTexture::Render(int index, bool continuous_draw) const
 			CopyTextureGroup(this->m_textures.at(i - 1)->GetOutputTextures(), this->m_textures.at(i)->GetWriteTextures(), this->m_textures.at(i)->GetTextureInfo(), this->m_textures.at(i)->GetOutputSize());
 		}
 
-		this->m_textures.at(i)->Render({ nullptr }, continuous_draw);
+		this->m_textures.at(i)->Render(this->m_textures.at(i)->GetEngine()->GetScene()->GetModels(), continuous_draw);
 	}
 }
 

@@ -1,5 +1,7 @@
 #include "EngineCanvasController.h"
 
+#include "../../Engine.h"
+#include "../../scene/Scene.h"
 #include "../EngineCanvas.h"
 #include "../RenderTexture.h"
 
@@ -83,14 +85,15 @@ void EngineCanvasController::Render()
 	this->m_texture_final->SetOutputSize(new_output_size);
 
 	//redraw all textures
+	std::vector<Model*> models = this->m_engine->GetScene()->GetModels();
 	for (RenderTexture* render_texture : this->m_textures)
 	{
 		render_texture->SetCamera(this->m_canvas->GetControlledCamera());
-		render_texture->Render();
+		render_texture->Render(models);
 	}
 
-	this->m_texture_final->Render();
-	this->m_canvas->Render();
+	this->m_texture_final->Render(models);
+	this->m_canvas->Render(models);
 }
 
 RenderTextureGroup EngineCanvasController::GetRenderTexture() const

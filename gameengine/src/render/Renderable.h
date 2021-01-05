@@ -23,10 +23,10 @@ class ShaderProgram;
 class Renderable
 {
 public:
-	using ControllerFunction = std::function<void(std::vector<Model*>)>;
+	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
 
 private:
-	GLuint m_fbo = -1;
+	GLuint m_fbo = NULL;
 	bool m_fbo_contains_render = false;
 	GLenum m_fbo_target_type = GL_TEXTURE_2D;
 
@@ -54,6 +54,13 @@ protected:
 	static bool RenderModeIsModelRendering(RenderMode mode);
 	bool RenderModeIsModelRendering();
 
+	//rendering stages
+	std::vector<Model*> Render_GetModels_Model(std::vector<Model*> model_pool);
+	void Render_Setup_Model(std::vector<Model*> models);
+	void Render_Setup_FlatQuad();
+	void Render_ForEachModel_Model(Model* model);
+	void Render_ForEachModel_Quad(Model* model);
+
 public:
 	Renderable(Engine* engine, RenderableConfig config);
 	virtual ~Renderable();
@@ -69,8 +76,8 @@ public:
 
 	bool FramebufferContainsRenderOutput() const;
 
-	void Render(std::vector<Model*> models = { nullptr }, bool continuous_draw = false);
-	void RenderScene(std::vector<Model*> models = { nullptr }); //only for calling by lambdas passed in through SetRenderFunction
+	void Render(std::vector<Model*> models, bool continuous_draw = false);
+	void RenderScene(std::vector<Model*> models); //only for calling by lambdas passed in through SetRenderFunction
 
 	virtual std::tuple<int, int> GetOutputSize() const = 0;
 
