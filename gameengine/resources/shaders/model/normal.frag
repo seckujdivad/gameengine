@@ -615,6 +615,8 @@ void main()
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
 	frag_out *= vec4(1.0f - skybox_intensity, 1.0f);
 	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos + cam_translate.xyz).rgb, 0.0f);
+
+	//this shader can't produce translucent fragments
 	frag_out.a = 1.0f;
 	
 	//texture usage:
