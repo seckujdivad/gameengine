@@ -6,21 +6,21 @@
 
 #include <vector>
 #include <unordered_set>
-#include <tuple>
 #include <functional>
 #include <memory>
 
-#include "../../scene/Referenceable.h"
 #include "RenderTarget.h"
-#include "../LoadedTexture.h"
 #include "RenderTargetConfig.h"
+#include "../LoadedTexture.h"
+#include "../renderable/Renderable.h"
+#include "../../scene/Referenceable.h"
 
 class Engine;
 class Model;
 class Camera;
 class ShaderProgram;
 
-class RenderTarget
+class RenderTarget : public Renderable
 {
 public:
 	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
@@ -78,8 +78,6 @@ public:
 
 	void Render(std::vector<Model*> models, bool continuous_draw = false);
 	void RenderScene(std::vector<Model*> models); //only for calling by lambdas passed in through SetRenderFunction
-
-	virtual std::tuple<int, int> GetOutputSize() const = 0;
 
 	void SetRenderFunction(ControllerFunction function);
 

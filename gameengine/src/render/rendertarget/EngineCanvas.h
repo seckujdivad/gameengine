@@ -58,6 +58,7 @@ public:
 	void SetVerticalSync(bool enabled);
 
 	std::tuple<int, int> GetOutputSize() const override;
+	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 
 	void MakeOpenGLFocus();
 

@@ -41,7 +41,7 @@ public:
 	~RenderTexture();
 
 	std::tuple<int, int> GetOutputSize() const override;
-	bool SetOutputSize(std::tuple<int, int> dimensions);
+	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 
 	RenderTextureGroup GetOutputTextures() const;
 	RenderTextureGroup GetWriteTextures() const;

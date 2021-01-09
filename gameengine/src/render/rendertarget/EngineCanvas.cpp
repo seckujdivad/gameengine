@@ -226,6 +226,21 @@ std::tuple<int, int> EngineCanvas::GetOutputSize() const
 	return std::tuple(this->GetSize().GetX(), this->GetSize().GetY());
 }
 
+bool EngineCanvas::SetOutputSize(std::tuple<int, int> dimensions)
+{
+	std::tuple<int, int> old_dimensions = this->GetOutputSize();
+	if (old_dimensions == dimensions)
+	{
+		return false;
+	}
+	else
+	{
+		this->SetSize(wxSize(std::get<0>(dimensions), std::get<1>(dimensions)));
+
+		return true;
+	}
+}
+
 void EngineCanvas::MakeOpenGLFocus()
 {
 	this->SetCurrent(*this->m_glcontext);

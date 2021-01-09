@@ -246,6 +246,9 @@
     <ClInclude Include="src\render\rendertarget\RenderTextureData.h">
       <Filter>Header Files\render\rendertarget</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\renderable\Renderable.h">
+      <Filter>Header Files\render\renderable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -394,6 +397,9 @@
     </ClCompile>
     <ClCompile Include="src\render\rendertarget\RenderTextureData.cpp">
       <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderable\Renderable.cpp">
+      <Filter>Source Files\render\renderable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
