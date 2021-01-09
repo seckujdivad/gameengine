@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 
@@ -13,7 +13,7 @@ RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderableConfig config = { RenderMode::Normal, RenderableConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
@@ -31,18 +31,18 @@ bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
 
-	if (render_texture->GetRenderMode() == RenderMode::Normal)
+	if (render_texture->GetRenderMode() == RenderTargetMode::Normal)
 	{
-		if (std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows()
-			&& std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_reflections == reflection->GetDrawReflections())
+		if (std::get<RenderTargetConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows()
+			&& std::get<RenderTargetConfig::Normal>(render_texture->GetConfig().mode_data).draw_reflections == reflection->GetDrawReflections())
 		{
 			return false;
 		}
 		else
 		{
-			RenderableConfig config = render_texture->GetConfig();
-			std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
-			std::get<RenderableConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
+			RenderTargetConfig config = render_texture->GetConfig();
+			std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
+			std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
 			render_texture->SetConfig(config);
 
 			return true;

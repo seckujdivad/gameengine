@@ -8,12 +8,12 @@
 #error
 #endif
 
-#include "../Engine.h"
-#include "../scene/Camera.h"
+#include "../../Engine.h"
+#include "../../scene/Camera.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderableConfig config)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderTargetConfig config)
 	: wxGLCanvas(parent, args, id),
-	Renderable(engine, config),
+	RenderTarget(engine, config),
 	m_glcontext(context)
 {
 	this->SetFramebuffer(0);

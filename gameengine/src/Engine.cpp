@@ -8,8 +8,8 @@
 
 #include "scene/Scene.h"
 
-#include "render/Renderable.h"
-#include "render/EngineCanvas.h"
+#include "render/rendertarget/RenderTarget.h"
+#include "render/rendertarget/EngineCanvas.h"
 
 #include "render/controllers/RenderController.h"
 #include "render/controllers/ShadowController.h"
@@ -373,7 +373,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 {
 	this->MakeContextCurrent();
 
-	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
+	RenderTargetConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
 
@@ -389,11 +389,11 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 	return controller;
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderTargetConfig> configs, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
 	composite_layers.reserve(configs.size());
-	for (const RenderableConfig& config : configs)
+	for (const RenderTargetConfig& config : configs)
 	{
 		EngineCanvasController::CompositeLayer layer;
 		layer.config = config;
@@ -403,7 +403,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderableConfig> 
 	return this->GenerateNewCanvas(composite_layers, id, parent);
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(RenderTargetConfig config, wxWindowID id, wxWindow* parent)
 {
 	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
 }

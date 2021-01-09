@@ -2,10 +2,10 @@
 
 #include "../../Engine.h"
 #include "../../scene/Scene.h"
-#include "../EngineCanvas.h"
-#include "../RenderTexture.h"
+#include "../rendertarget/EngineCanvas.h"
+#include "../rendertarget/RenderTexture.h"
 
-RenderableConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers)
+RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers)
 {
 	if (composite_layers.size() == 0)
 	{
@@ -20,7 +20,7 @@ RenderableConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvas
 	this->m_textures.clear();
 
 	//make new textures
-	RenderableConfig postprocess_config = { RenderMode::Postprocess, RenderableConfig::PostProcess() };
+	RenderTargetConfig postprocess_config = { RenderTargetMode::Postprocess, RenderTargetConfig::PostProcess() };
 	for (CompositeLayer composite : composite_layers)
 	{
 		RenderTextureInfo info;
@@ -30,15 +30,15 @@ RenderableConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvas
 		RenderTexture* const render_texture = new RenderTexture(this->GetReference(), this->m_engine, composite.config, info, GL_TEXTURE_2D, true);
 		this->m_textures.push_back(render_texture);
 
-		if (composite.config.mode == RenderMode::Normal)
+		if (composite.config.mode == RenderTargetMode::Normal)
 		{
-			std::get<RenderableConfig::Normal>(composite.config.mode_data).previous_frame = render_texture->GetOutputTextures();
+			std::get<RenderTargetConfig::Normal>(composite.config.mode_data).previous_frame = render_texture->GetOutputTextures();
 			render_texture->SetConfig(composite.config);
 		}
 
-		RenderableConfig::PostProcess::CompositeLayer layer;
+		RenderTargetConfig::PostProcess::CompositeLayer layer;
 		layer.id = render_texture->GetOutputTextures().colour;
-		std::get<RenderableConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
+		std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
 	}
 
 	return postprocess_config;
@@ -55,11 +55,11 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 
 	this->m_texture_final = new RenderTexture(reference, engine, this->RemakeTextures(composites), postprocess_texture_info, GL_TEXTURE_2D, false);
 
-	RenderableConfig canvas_config = { RenderMode::Postprocess, RenderableConfig::PostProcess() };
+	RenderTargetConfig canvas_config = { RenderTargetMode::Postprocess, RenderTargetConfig::PostProcess() };
 
-	RenderableConfig::PostProcess::CompositeLayer passthrough_layer;
+	RenderTargetConfig::PostProcess::CompositeLayer passthrough_layer;
 	passthrough_layer.id = this->m_texture_final->GetOutputTextures().colour;
-	std::get<RenderableConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
+	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
 
 	this->m_canvas->SetConfig(canvas_config);
 }
@@ -116,11 +116,11 @@ void EngineCanvasController::SetRenderLayers(std::vector<EngineCanvasController:
 	this->m_texture_final->SetConfig(this->RemakeTextures(composite_layers));
 }
 
-void EngineCanvasController::SetRenderLayers(std::vector<RenderableConfig> configs)
+void EngineCanvasController::SetRenderLayers(std::vector<RenderTargetConfig> configs)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
 	composite_layers.reserve(configs.size());
-	for (const RenderableConfig& config : configs)
+	for (const RenderTargetConfig& config : configs)
 	{
 		EngineCanvasController::CompositeLayer layer;
 		layer.config = config;
@@ -130,7 +130,7 @@ void EngineCanvasController::SetRenderLayers(std::vector<RenderableConfig> confi
 	return this->SetRenderLayers(composite_layers);
 }
 
-void EngineCanvasController::SetRenderLayers(RenderableConfig config)
+void EngineCanvasController::SetRenderLayers(RenderTargetConfig config)
 {
 	return this->SetRenderLayers(std::vector({ config }));
 }

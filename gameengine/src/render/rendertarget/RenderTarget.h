@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../GLComponents.h"
+#include "../../GLComponents.h"
 
 #include <GL/GL.h>
 
@@ -10,17 +10,17 @@
 #include <functional>
 #include <memory>
 
-#include "../scene/Referenceable.h"
-#include "RenderMode.h"
-#include "LoadedTexture.h"
-#include "RenderableConfig.h"
+#include "../../scene/Referenceable.h"
+#include "RenderTarget.h"
+#include "../LoadedTexture.h"
+#include "RenderTargetConfig.h"
 
 class Engine;
 class Model;
 class Camera;
 class ShaderProgram;
 
-class Renderable
+class RenderTarget
 {
 public:
 	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
@@ -41,7 +41,7 @@ private:
 
 protected:
 	//scene rendering
-	RenderableConfig m_config;
+	RenderTargetConfig m_config;
 
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
@@ -51,7 +51,7 @@ protected:
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
-	static bool RenderModeIsModelRendering(RenderMode mode);
+	static bool RenderModeIsModelRendering(RenderTargetMode mode);
 	bool RenderModeIsModelRendering();
 
 	//rendering stages
@@ -62,17 +62,17 @@ protected:
 	void Render_ForEachModel_Quad(Model* model);
 
 public:
-	Renderable(Engine* engine, RenderableConfig config);
-	virtual ~Renderable();
+	RenderTarget(Engine* engine, RenderTargetConfig config);
+	virtual ~RenderTarget();
 	
 	void SetCamera(Camera* camera);
 	Camera* GetCamera() const;
 
 	Engine* GetEngine() const;
 
-	void SetConfig(RenderableConfig config);
-	RenderableConfig GetConfig() const;
-	RenderMode GetRenderMode() const;
+	void SetConfig(RenderTargetConfig config);
+	RenderTargetConfig GetConfig() const;
+	RenderTargetMode GetRenderMode() const;
 
 	bool FramebufferContainsRenderOutput() const;
 

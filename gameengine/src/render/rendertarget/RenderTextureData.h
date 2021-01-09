@@ -3,7 +3,7 @@
 #include <tuple>
 #include <vector>
 
-#include "../GLComponents.h"
+#include "../../GLComponents.h"
 
 struct RenderTextureGroup
 {

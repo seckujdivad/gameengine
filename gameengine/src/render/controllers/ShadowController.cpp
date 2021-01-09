@@ -1,6 +1,6 @@
 #include "ShadowController.h"
 
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 
@@ -11,7 +11,7 @@ RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
 	info.depth = true;
 	info.num_data = 0;
 
-	RenderableConfig config = { RenderMode::Shadow, RenderableConfig::Shadow() };
+	RenderTargetConfig config = { RenderTargetMode::Shadow, RenderTargetConfig::Shadow() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../GLComponents.h"
+#include "../../GLComponents.h"
 
 #include <wx/wx.h>
 #include <wx/dcclient.h>
 
-#include "Renderable.h"
+#include "RenderTarget.h"
 
-class EngineCanvas : public wxGLCanvas, public Renderable
+class EngineCanvas : public wxGLCanvas, public RenderTarget
 {
 private:
 	//rendering
@@ -44,7 +44,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderableConfig config);
+	EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderTargetConfig config);
 	EngineCanvas(const EngineCanvas&) = delete;
 	EngineCanvas& operator=(const EngineCanvas&) = delete;
 	EngineCanvas(EngineCanvas&&) = delete;

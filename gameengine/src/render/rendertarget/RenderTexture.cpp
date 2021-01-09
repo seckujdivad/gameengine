@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../Engine.h"
+#include "../../Engine.h"
 
 void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {
@@ -196,9 +196,9 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderableConfig config, RenderTextureInfo info, GLenum type, bool simultaneous_read_write, bool auto_swap_buffers)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, RenderTextureInfo info, GLenum type, bool simultaneous_read_write, bool auto_swap_buffers)
 	:
-	Renderable(engine, config),
+	RenderTarget(engine, config),
 	Referenceable<RenderTextureReference>(reference),
 	m_dimensions(1, 1),
 	m_simultaneous_read_write(simultaneous_read_write),
@@ -327,9 +327,9 @@ void RenderTexture::SwapBuffers()
 
 void RenderTexture::SetNormalModePreviousFrameToSelf()
 {
-	if (this->GetRenderMode() == RenderMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
 	{
-		std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
+		std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
 	}
 	else
 	{

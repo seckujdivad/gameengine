@@ -6,9 +6,9 @@
 #include <glm/glm.hpp>
 
 #include "RenderTextureData.h"
-#include "RenderMode.h"
+#include "RenderTargetMode.h"
 
-struct RenderableConfig
+struct RenderTargetConfig
 {
 	struct Normal
 	{
@@ -43,7 +43,7 @@ struct RenderableConfig
 
 	};
 
-	RenderMode mode = RenderMode::Default;
+	RenderTargetMode mode = RenderTargetMode::Default;
 	std::variant<Normal, Wireframe, Shadow, PostProcess, Textured> mode_data;
 
 	bool clear_fbo = true;

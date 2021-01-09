@@ -6,7 +6,7 @@
 #include "../CumulativeTexture.h"
 #include "../../scene/Referenceable.h"
 #include "../../scene/Cubemap.h"
-#include "../RenderMode.h"
+#include "../rendertarget/RenderTargetMode.h"
 
 class RenderTexture;
 class Camera;

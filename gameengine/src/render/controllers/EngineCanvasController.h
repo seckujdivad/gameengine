@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "RenderController.h"
-#include "../RenderableConfig.h"
+#include "../rendertarget/RenderTargetConfig.h"
 
 #include <glm/glm.hpp>
 
@@ -17,7 +17,7 @@ class EngineCanvasController : public RenderController
 public:
 	struct CompositeLayer
 	{
-		RenderableConfig config;
+		RenderTargetConfig config;
 		glm::vec4 colour_translate = glm::vec4(0.0f);
 		glm::vec4 colour_scale = glm::vec4(1.0f);
 	};
@@ -28,7 +28,7 @@ private:
 	std::vector<RenderTexture*> m_textures;
 	RenderTexture* m_texture_final;
 
-	RenderableConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
+	RenderTargetConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
 
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
@@ -45,8 +45,8 @@ public:
 	EngineCanvas* GetEngineCanvas() const;
 
 	void SetRenderLayers(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
-	void SetRenderLayers(std::vector<RenderableConfig> configs);
-	void SetRenderLayers(RenderableConfig config);
+	void SetRenderLayers(std::vector<RenderTargetConfig> configs);
+	void SetRenderLayers(RenderTargetConfig config);
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
 	bool IsEssentialDraw() const override;

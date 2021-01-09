@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "../../Engine.h"
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/Scene.h"
 #include "../../scene/Camera.h"
 

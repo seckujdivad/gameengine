@@ -10,7 +10,7 @@
 #include "Engine.h"
 #include "generic/std_glm.h"
 #include "generic/LoadFile.h"
-#include "render/EngineCanvas.h"
+#include "render/rendertarget/EngineCanvas.h"
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
 #include "scene/Camera.h"
@@ -41,7 +41,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	RenderableConfig normal_config = { RenderMode::Normal, RenderableConfig::Normal() };
+	RenderTargetConfig normal_config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
 	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(normal_config, wxID_ANY, this);
 
 	this->m_glcanvas = this->m_glcanvas_controller->GetEngineCanvas();
@@ -243,21 +243,21 @@ void Main::rdobx_render_mode_OnChanged(wxCommandEvent& evt)
 {
 	int render_mode_index = evt.GetInt();
 
-	RenderableConfig config;
+	RenderTargetConfig config;
 	if (render_mode_index == 0)
 	{
-		config.mode = RenderMode::Normal;
-		config.mode_data = RenderableConfig::Normal();
+		config.mode = RenderTargetMode::Normal;
+		config.mode_data = RenderTargetConfig::Normal();
 	}
 	else if(render_mode_index == 1)
 	{
-		config.mode = RenderMode::Wireframe;
-		config.mode_data = RenderableConfig::Wireframe();
+		config.mode = RenderTargetMode::Wireframe;
+		config.mode_data = RenderTargetConfig::Wireframe();
 	}
 	else if(render_mode_index == 2)
 	{
-		config.mode = RenderMode::Textured;
-		config.mode_data = RenderableConfig::Textured();
+		config.mode = RenderTargetMode::Textured;
+		config.mode_data = RenderTargetConfig::Textured();
 	}
 	else
 	{

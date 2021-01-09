@@ -16,7 +16,7 @@
 #include "GLComponents.h"
 
 #include "render/LoadedTexture.h"
-#include "render/RenderTextureData.h"
+#include "render/rendertarget/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
 
 #include "scene/Referenceable.h"
@@ -27,7 +27,7 @@
 
 class EngineCanvas;
 class Scene;
-class Renderable;
+class RenderTarget;
 class Model;
 
 class Engine : public SceneChild
@@ -92,8 +92,8 @@ public:
 	~Engine();
 
 	EngineCanvasController* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(RenderableConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(std::vector<RenderTargetConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(RenderTargetConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
 

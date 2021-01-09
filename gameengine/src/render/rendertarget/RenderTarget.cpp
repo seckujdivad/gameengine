@@ -1,4 +1,4 @@
-#include "Renderable.h"
+#include "RenderTarget.h"
 
 #include <stdexcept>
 #include <string>
@@ -6,21 +6,21 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "ShaderProgram.h"
-#include "../Engine.h"
-#include "../Resource.h"
-#include "../scene/Camera.h"
-#include "../scene/Scene.h"
-#include "../scene/OrientedBoundingBox.h"
-#include "../scene/Skybox.h"
-#include "../scene/light/PointLight.h"
-#include "../scene/model/Model.h"
-#include "../scene/model/geometry/PresetGeometry.h"
-#include "../scene/model/geometry/Patch.h"
+#include "../ShaderProgram.h"
+#include "../../Engine.h"
+#include "../../Resource.h"
+#include "../../scene/Camera.h"
+#include "../../scene/Scene.h"
+#include "../../scene/OrientedBoundingBox.h"
+#include "../../scene/Skybox.h"
+#include "../../scene/light/PointLight.h"
+#include "../../scene/model/Model.h"
+#include "../../scene/model/geometry/PresetGeometry.h"
+#include "../../scene/model/geometry/Patch.h"
 
-void Renderable::RenderScene(std::vector<Model*> models)
+void RenderTarget::RenderScene(std::vector<Model*> models)
 {
-	if (this->GetRenderMode() == RenderMode::Default)
+	if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
 		throw std::runtime_error("Can't render when in default mode");
 	}
@@ -59,29 +59,29 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 		switch (this->GetRenderMode())
 		{
-		case RenderMode::Normal:
+		case RenderTargetMode::Normal:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 
 			glEnable(GL_DEPTH_TEST);
 			break;
-		case RenderMode::Postprocess:
+		case RenderTargetMode::Postprocess:
 			glDisable(GL_CULL_FACE);
 
 			glDisable(GL_DEPTH_TEST);
 			break;
-		case RenderMode::Wireframe:
+		case RenderTargetMode::Wireframe:
 			glDisable(GL_CULL_FACE);
 
 			glEnable(GL_DEPTH_TEST);
 			break;
-		case RenderMode::Shadow:
+		case RenderTargetMode::Shadow:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
 
 			glEnable(GL_DEPTH_TEST);
 			break;
-		case RenderMode::Textured:
+		case RenderTargetMode::Textured:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 
@@ -105,7 +105,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 
 		if (this->m_config.clear_fbo)
 		{
-			if (this->GetRenderMode() == RenderMode::Shadow)
+			if (this->GetRenderMode() == RenderTargetMode::Shadow)
 			{
 				glClear(GL_DEPTH_BUFFER_BIT);
 			}
@@ -136,7 +136,7 @@ void Renderable::RenderScene(std::vector<Model*> models)
 					throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
 				}
 			}
-			else if (this->GetRenderMode() == RenderMode::Postprocess)
+			else if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 			{
 				if (info.primitive_type == Geometry::PrimitiveType::Triangles)
 				{
@@ -174,63 +174,63 @@ void Renderable::RenderScene(std::vector<Model*> models)
 	}
 }
 
-void Renderable::SetFramebuffer(GLuint fbo)
+void RenderTarget::SetFramebuffer(GLuint fbo)
 {
 	this->m_fbo = fbo;
 	this->m_fbo_contains_render = false;
 }
 
-GLuint Renderable::GetFramebuffer() const
+GLuint RenderTarget::GetFramebuffer() const
 {
 	return this->m_fbo;
 }
 
-void Renderable::SetTargetType(GLenum target_type)
+void RenderTarget::SetTargetType(GLenum target_type)
 {
 	this->m_fbo_target_type = target_type;
 }
 
-GLenum Renderable::GetTargetType() const
+GLenum RenderTarget::GetTargetType() const
 {
 	return this->m_fbo_target_type;
 }
 
-bool Renderable::FramebufferContainsRenderOutput() const
+bool RenderTarget::FramebufferContainsRenderOutput() const
 {
 	return this->m_fbo_contains_render;
 }
 
-void Renderable::PreRenderEvent()
+void RenderTarget::PreRenderEvent()
 {
 }
 
-void Renderable::PostRenderEvent()
+void RenderTarget::PostRenderEvent()
 {
 }
 
-bool Renderable::RenderModeIsModelRendering(RenderMode mode)
+bool RenderTarget::RenderModeIsModelRendering(RenderTargetMode mode)
 {
-	return (mode == RenderMode::Normal)
-		|| (mode == RenderMode::Shadow)
-		|| (mode == RenderMode::Wireframe)
-		|| (mode == RenderMode::Textured);
+	return (mode == RenderTargetMode::Normal)
+		|| (mode == RenderTargetMode::Shadow)
+		|| (mode == RenderTargetMode::Wireframe)
+		|| (mode == RenderTargetMode::Textured);
 }
 
-bool Renderable::RenderModeIsModelRendering()
+bool RenderTarget::RenderModeIsModelRendering()
 {
 	return this->RenderModeIsModelRendering(this->GetRenderMode());
 }
 
-std::vector<Model*> Renderable::Render_GetModels_Model(std::vector<Model*> model_pool)
+std::vector<Model*> RenderTarget::Render_GetModels_Model(std::vector<Model*> model_pool)
 {
 	return this->GetEngine()->GetScene()->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode(), model_pool);
 }
 
-void Renderable::Render_Setup_Model(std::vector<Model*> models)
+void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 {
 	bool recompile_required = false;
 	
-	if (this->GetRenderMode() == RenderMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
 	{
 		//point lights
 		recompile_required = this->m_shader_program->SetDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) ? true : recompile_required;
@@ -257,9 +257,9 @@ void Renderable::Render_Setup_Model(std::vector<Model*> models)
 		}
 	}
 
-	if ((this->GetRenderMode() == RenderMode::Normal)
-		|| (this->GetRenderMode() == RenderMode::Wireframe)
-		|| (this->GetRenderMode() == RenderMode::Textured))
+	if ((this->GetRenderMode() == RenderTargetMode::Normal)
+		|| (this->GetRenderMode() == RenderTargetMode::Wireframe)
+		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
 		//data textures
 		recompile_required = this->m_shader_program->SetDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) ? true : recompile_required;
@@ -306,14 +306,14 @@ void Renderable::Render_Setup_Model(std::vector<Model*> models)
 	this->m_shader_program->SetUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
 	this->m_shader_program->SetUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
 
-	if (this->GetRenderMode() == RenderMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
 	{
 		// ambient light
 		this->m_shader_program->SetUniform("light_ambient", this->GetEngine()->GetScene()->GetAmbientLight());
 
 		// shadows
 		bool shadows_enabled = true;
-		if (!std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_shadows)
+		if (!std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).draw_shadows)
 		{
 			shadows_enabled = false;
 		}
@@ -370,36 +370,36 @@ void Renderable::Render_Setup_Model(std::vector<Model*> models)
 
 		//load textures from the previous frame (if in normal rendering mode)
 		LoadedTexture texture;
-		texture.type = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.type;
-		texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.colour;
+		texture.type = std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame.type;
+		texture.id = std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame.colour;
 		texture.uniform_name = "render_output_colour";
 		this->m_shader_program->SetTexture(-1, texture);
 
-		texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.depth;
+		texture.id = std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame.depth;
 		texture.uniform_name = "render_output_depth";
 		this->m_shader_program->SetTexture(-1, texture);
 
-		for (int i = 0; i < static_cast<int>(std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.data.size()); i++)
+		for (int i = 0; i < static_cast<int>(std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame.data.size()); i++)
 		{
-			texture.id = std::get<RenderableConfig::Normal>(this->m_config.mode_data).previous_frame.data.at(i);
+			texture.id = std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame.data.at(i);
 			texture.uniform_name = "render_output_data[" + std::to_string(i) + "]";
 			this->m_shader_program->SetTexture(-1, texture);
 		}
 	}
 
-	if (this->GetRenderMode() == RenderMode::Wireframe)
+	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
-		this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderableConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+		this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderTargetConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
 	}
 }
 
-void Renderable::Render_Setup_FlatQuad()
+void RenderTarget::Render_Setup_FlatQuad()
 {
 	bool recompile_required = false;
 
-	if (this->GetRenderMode() == RenderMode::Postprocess)
+	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
-		size_t num_layers = std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.size();
+		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
 		recompile_required = this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers)) ? true : recompile_required;
 	}
 
@@ -408,11 +408,11 @@ void Renderable::Render_Setup_FlatQuad()
 		this->m_shader_program->Recompile();
 	}
 
-	if (this->GetRenderMode() == RenderMode::Postprocess)
+	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
-		for (size_t i = 0; i < std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
+		for (size_t i = 0; i < std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
 		{
-			const RenderableConfig::PostProcess::CompositeLayer& layer = std::get<RenderableConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
+			const RenderTargetConfig::PostProcess::CompositeLayer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
 
 			LoadedTexture texture;
 			texture.id = layer.id;
@@ -428,21 +428,21 @@ void Renderable::Render_Setup_FlatQuad()
 	}
 }
 
-void Renderable::Render_ForEachModel_Model(Model* model)
+void RenderTarget::Render_ForEachModel_Model(Model* model)
 {
 	this->m_shader_program->SetUniform("mdl_translate", glm::vec4(model->GetPosition(), 0.0f));
 	this->m_shader_program->SetUniform("mdl_rotate", model->GetRotationMatrix());
 	this->m_shader_program->SetUniform("mdl_scale", model->GetScaleMatrix());
 
-	if ((this->GetRenderMode() == RenderMode::Normal)
-		|| (this->GetRenderMode() == RenderMode::Textured))
+	if ((this->GetRenderMode() == RenderTargetMode::Normal)
+		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
 		LoadedTexture texture = this->GetEngine()->GetTexture(model->GetColourTexture().GetReference());
 		texture.uniform_name = "colourTexture";
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 	}
 
-	if (this->GetRenderMode() == RenderMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
 	{
 		Material& material = model->GetMaterial();
 		//material
@@ -485,7 +485,7 @@ void Renderable::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 		//reflections
-		if (this->GetRenderMode() == RenderMode::Normal && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_reflections)
+		if (this->GetRenderMode() == RenderTargetMode::Normal && !std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).draw_reflections)
 		{
 			this->m_shader_program->SetUniform("reflections_enabled", false);
 		}
@@ -544,7 +544,7 @@ void Renderable::Render_ForEachModel_Model(Model* model)
 		}
 	}
 
-	if (this->GetRenderMode() == RenderMode::Wireframe)
+	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
 		this->m_shader_program->SetUniform("wireframe_colour", model->GetCurrentWireframeColour());
 	}
@@ -552,12 +552,12 @@ void Renderable::Render_ForEachModel_Model(Model* model)
 	this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 }
 
-void Renderable::Render_ForEachModel_Quad(Model* model)
+void RenderTarget::Render_ForEachModel_Quad(Model* model)
 {
 	this->m_shader_program->Select(-1); //select shader (and texture group)
 }
 
-Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engine)
+RenderTarget::RenderTarget(Engine* engine, RenderTargetConfig config) : m_engine(engine)
 {
 	this->m_engine->MakeContextCurrent(true); //this is necessary when constructing the first EngineCanvas - call it every time as construction is infrequent and already expensive
 
@@ -570,26 +570,26 @@ Renderable::Renderable(Engine* engine, RenderableConfig config) : m_engine(engin
 	this->SetConfig(config);
 }
 
-Renderable::~Renderable()
+RenderTarget::~RenderTarget()
 {
 }
 
-void Renderable::SetCamera(Camera* camera)
+void RenderTarget::SetCamera(Camera* camera)
 {
 	this->m_camera = camera;
 }
 
-Camera* Renderable::GetCamera() const
+Camera* RenderTarget::GetCamera() const
 {
 	return this->m_camera;
 }
 
-Engine* Renderable::GetEngine() const
+Engine* RenderTarget::GetEngine() const
 {
 	return this->m_engine;
 }
 
-void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
+void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
 {
 	if (this->m_engine->GetScene() != nullptr)
 	{
@@ -608,23 +608,23 @@ void Renderable::Render(std::vector<Model*> models, bool continuous_draw)
 	}
 }
 
-void Renderable::SetRenderFunction(ControllerFunction function)
+void RenderTarget::SetRenderFunction(ControllerFunction function)
 {
 	this->m_render_function = function;
 }
 
-std::unordered_set<RenderTextureReference> Renderable::GetRenderTextureDependencies() const
+std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDependencies() const
 {
 	std::unordered_set<RenderTextureReference> result;
 
-	if (this->GetRenderMode() == RenderMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
 	{
 		for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetEngine()->GetScene()->GetCubemaps())
 		{
 			Cubemap* cubemap = std::get<0>(cubemap_data);
 			CubemapType cubemap_type = std::get<1>(cubemap_data);
 
-			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderableConfig::Normal>(this->m_config.mode_data).draw_reflections))
+			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).draw_reflections))
 			{
 				result.insert(cubemap->GetReference());
 			}
@@ -634,16 +634,16 @@ std::unordered_set<RenderTextureReference> Renderable::GetRenderTextureDependenc
 	return result;
 }
 
-RenderMode Renderable::GetRenderMode() const
+RenderTargetMode RenderTarget::GetRenderMode() const
 {
 	return this->m_config.mode;
 }
 
-void Renderable::SetConfig(RenderableConfig config)
+void RenderTarget::SetConfig(RenderTargetConfig config)
 {
 	if (this->m_config.mode != config.mode)
 	{
-		if (config.mode == RenderMode::Postprocess)
+		if (config.mode == RenderTargetMode::Postprocess)
 		{
 			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
 		}
@@ -663,33 +663,33 @@ void Renderable::SetConfig(RenderableConfig config)
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
 
-		if (this->GetRenderMode() == RenderMode::Normal)
+		if (this->GetRenderMode() == RenderTargetMode::Normal)
 		{
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_PASS0_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
-		else if (this->GetRenderMode() == RenderMode::Wireframe)
+		else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 		{
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
-		else if (this->GetRenderMode() == RenderMode::Shadow)
+		else if (this->GetRenderMode() == RenderTargetMode::Shadow)
 		{
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
-		else if (this->GetRenderMode() == RenderMode::Textured)
+		else if (this->GetRenderMode() == RenderTargetMode::Textured)
 		{
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 	}
-	else if (this->GetRenderMode() == RenderMode::Postprocess)
+	else if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER));
 	}
-	else if (this->GetRenderMode() == RenderMode::Default)
+	else if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER));
@@ -727,7 +727,7 @@ void Renderable::SetConfig(RenderableConfig config)
 			"is_cubemap"
 			});
 
-		if (this->GetRenderMode() == RenderMode::Normal)
+		if (this->GetRenderMode() == RenderTargetMode::Normal)
 		{
 			this->m_shader_program->AddUniformNames({
 				//fragment
@@ -766,7 +766,7 @@ void Renderable::SetConfig(RenderableConfig config)
 				this->m_shader_program->AddUniformName("render_output_data[" + std::to_string(i) + "]");
 			}
 		}
-		else if (this->GetRenderMode() == RenderMode::Wireframe)
+		else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 		{
 			this->m_shader_program->AddUniformNames({
 				//geometry
@@ -775,7 +775,7 @@ void Renderable::SetConfig(RenderableConfig config)
 				"wireframe_colour"
 				});
 		}
-		else if (this->GetRenderMode() == RenderMode::Textured)
+		else if (this->GetRenderMode() == RenderTargetMode::Textured)
 		{
 			this->m_shader_program->AddUniformNames({
 				//fragment
@@ -785,7 +785,7 @@ void Renderable::SetConfig(RenderableConfig config)
 	}
 }
 
-RenderableConfig Renderable::GetConfig() const
+RenderTargetConfig RenderTarget::GetConfig() const
 {
 	return this->m_config;
 }
