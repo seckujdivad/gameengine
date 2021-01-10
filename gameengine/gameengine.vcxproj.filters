@@ -88,6 +88,12 @@
     <Filter Include="Source Files\render\rendertarget">
       <UniqueIdentifier>{712c77fe-f34a-4dce-ad36-4a5c54b4b3bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\renderjob">
+      <UniqueIdentifier>{affc10b1-2b42-4f95-9ad7-c1a4a8bbbdcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\renderjob">
+      <UniqueIdentifier>{6021df5d-9472-4311-a57b-76efb66654db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -249,6 +255,12 @@
     <ClInclude Include="src\render\renderable\Renderable.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\renderjob\RenderJob.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderjob\RenderJobFactory.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -400,6 +412,12 @@
     </ClCompile>
     <ClCompile Include="src\render\renderable\Renderable.cpp">
       <Filter>Source Files\render\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\RenderJob.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\RenderJobFactory.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

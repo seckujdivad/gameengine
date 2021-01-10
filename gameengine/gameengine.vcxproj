@@ -203,6 +203,8 @@
     <ClInclude Include="src\render\LoadedTexture.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
     <ClInclude Include="src\render\renderable\Renderable.h" />
+    <ClInclude Include="src\render\renderjob\RenderJob.h" />
+    <ClInclude Include="src\render\renderjob\RenderJobFactory.h" />
     <ClInclude Include="src\render\rendertarget\EngineCanvas.h" />
     <ClInclude Include="src\render\rendertarget\RenderTarget.h" />
     <ClInclude Include="src\render\rendertarget\RenderTargetConfig.h" />
@@ -256,6 +258,8 @@
     <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
     <ClCompile Include="src\render\CumulativeTexture.cpp" />
     <ClCompile Include="src\render\renderable\Renderable.cpp" />
+    <ClCompile Include="src\render\renderjob\RenderJob.cpp" />
+    <ClCompile Include="src\render\renderjob\RenderJobFactory.cpp" />
     <ClCompile Include="src\render\rendertarget\EngineCanvas.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTarget.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTargetMode.cpp" />
