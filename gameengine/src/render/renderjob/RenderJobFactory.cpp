@@ -1,5 +1,7 @@
 #include "RenderJobFactory.h"
 
+#include "../rendertarget/RenderTarget.h"
+
 RenderJobFactory::RenderJobFactory(Engine* engine, RenderTarget* target) : m_engine(engine), m_target(target)
 {
 }
@@ -16,4 +18,9 @@ Engine* RenderJobFactory::GetEngine() const
 RenderTarget* RenderJobFactory::GetTarget() const
 {
 	return this->m_target;
+}
+
+std::tuple<int, int> RenderJobFactory::GetOutputSize() const
+{
+	return this->m_target->GetOutputSize();
 }

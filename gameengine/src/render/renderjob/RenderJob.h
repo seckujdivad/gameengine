@@ -1,8 +1,10 @@
 #pragma once
 
+#include "../renderable/Renderable.h"
+
 class RenderJobFactory;
 
-class RenderJob
+class RenderJob : public Renderable
 {
 private:
 	RenderJobFactory* m_factory;
@@ -13,5 +15,6 @@ public:
 
 	RenderJobFactory* GetFactory() const;
 
-	virtual bool Render() = 0;
+	std::tuple<int, int> GetOutputSize() const;
+	bool SetOutputSize(std::tuple<int, int> dimensions);
 };
