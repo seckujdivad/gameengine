@@ -337,3 +337,20 @@ void RenderTexture::SetNormalModePreviousFrameToSelf()
 		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
 	}
 }
+
+void RenderTexture::CopyFrom(const RenderTarget* src) const
+{
+	if (this != src)
+	{
+		const RenderTexture* src_tex = dynamic_cast<const RenderTexture*>(src);
+
+		if (src_tex == nullptr)
+		{
+			this->RenderTarget::CopyFrom(src);
+		}
+		else
+		{
+			CopyTextureGroup(src_tex->GetOutputTextures(), this->GetWriteTextures(), this->GetTextureInfo(), this->GetOutputSize());
+		}
+	}
+}

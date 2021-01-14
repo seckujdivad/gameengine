@@ -90,6 +90,6 @@ public:
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const;
 
-	void CopyFrom(const RenderTarget* src) const;
+	virtual void CopyFrom(const RenderTarget* src) const;
 	void CopyTo(const RenderTarget* dest) const;
 };

@@ -638,17 +638,7 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 
 void RenderTarget::CopyFrom(const RenderTarget* src) const
 {
-	if (this != src)
-	{
-		const RenderTexture* this_tex = dynamic_cast<const RenderTexture*>(this);
-		const RenderTexture* src_tex = dynamic_cast<const RenderTexture*>(src);
-
-		if ((this_tex != nullptr) && (src_tex != nullptr))
-		{
-			CopyTextureGroup(src_tex->GetOutputTextures(), this_tex->GetWriteTextures(), this_tex->GetTextureInfo(), this_tex->GetOutputSize());
-		}
-	}
-	/*if ((this != src) && (this->GetFramebuffer() != src->GetFramebuffer()))
+	if ((this != src) && (this->GetFramebuffer() != src->GetFramebuffer()))
 	{
 		auto [src_x, src_y] = src->GetOutputSize();
 		auto [dest_x, dest_y] = this->GetOutputSize();
@@ -663,7 +653,7 @@ void RenderTarget::CopyFrom(const RenderTarget* src) const
 			0, 0, static_cast<GLint>(dest_x), static_cast<GLint>(dest_y),
 			mask, GL_NEAREST
 		);
-	}*/
+	}
 }
 
 void RenderTarget::CopyTo(const RenderTarget* dest) const
