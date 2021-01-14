@@ -30,6 +30,16 @@ void RenderJobFactory::CopyTo(const RenderJobFactory* dest) const
 	dest->CopyFrom(this);
 }
 
+void RenderJobFactory::SetCamera(Camera* camera)
+{
+	this->GetTarget()->SetCamera(camera);
+}
+
+Camera* RenderJobFactory::GetCamera() const
+{
+	return this->GetTarget()->GetCamera();
+}
+
 RenderJobInitialiser::~RenderJobInitialiser()
 {
 }

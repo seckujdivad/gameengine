@@ -389,23 +389,23 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 	return controller;
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderTargetConfig> configs, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
-	composite_layers.reserve(configs.size());
-	for (const RenderTargetConfig& config : configs)
+	composite_layers.reserve(modes.size());
+	for (RenderMode mode : modes)
 	{
 		EngineCanvasController::CompositeLayer layer;
-		layer.config = config;
+		layer.mode = mode;
 		composite_layers.push_back(layer);
 	}
 
 	return this->GenerateNewCanvas(composite_layers, id, parent);
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(RenderTargetConfig config, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
 {
-	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
+	return this->GenerateNewCanvas(std::vector({ mode }), id, parent);
 }
 
 void Engine::Render()

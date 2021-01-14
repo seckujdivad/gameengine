@@ -273,6 +273,7 @@
     <ClCompile Include="src\render\renderjob\WrapperRenderJobFactory.cpp" />
     <ClCompile Include="src\render\rendertarget\EngineCanvas.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTarget.cpp" />
+    <ClCompile Include="src\render\rendertarget\RenderTargetConfig.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTargetMode.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTexture.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTextureData.cpp" />

@@ -9,6 +9,7 @@
 
 class Engine;
 class RenderTarget;
+class Camera;
 
 struct RenderJobInitialiser
 {
@@ -37,4 +38,7 @@ public:
 	void CopyTo(const RenderJobFactory* dest) const;
 
 	virtual std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const = 0;
+
+	virtual void SetCamera(Camera* camera);
+	virtual Camera* GetCamera() const;
 };

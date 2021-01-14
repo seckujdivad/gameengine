@@ -92,8 +92,8 @@ public:
 	~Engine();
 
 	EngineCanvasController* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(std::vector<RenderTargetConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(RenderTargetConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
 

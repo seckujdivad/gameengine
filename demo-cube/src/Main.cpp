@@ -14,6 +14,7 @@
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
 #include "scene/Camera.h"
+#include "render/RenderMode.h"
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
@@ -41,8 +42,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	RenderTargetConfig normal_config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
-	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(normal_config, wxID_ANY, this);
+	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(RenderMode::Normal, wxID_ANY, this);
 
 	this->m_glcanvas = this->m_glcanvas_controller->GetEngineCanvas();
 	this->m_glcanvas->SetControlledCamera(this->m_camera.get());
@@ -243,28 +243,25 @@ void Main::rdobx_render_mode_OnChanged(wxCommandEvent& evt)
 {
 	int render_mode_index = evt.GetInt();
 
-	RenderTargetConfig config;
+	RenderMode mode;
 	if (render_mode_index == 0)
 	{
-		config.mode = RenderTargetMode::Normal;
-		config.mode_data = RenderTargetConfig::Normal();
+		mode = RenderMode::Normal;
 	}
 	else if(render_mode_index == 1)
 	{
-		config.mode = RenderTargetMode::Wireframe;
-		config.mode_data = RenderTargetConfig::Wireframe();
+		mode = RenderMode::Wireframe;
 	}
 	else if(render_mode_index == 2)
 	{
-		config.mode = RenderTargetMode::Textured;
-		config.mode_data = RenderTargetConfig::Textured();
+		mode = RenderMode::Textured;
 	}
 	else
 	{
 		throw std::runtime_error("Unknown render mode selection (index: " + std::to_string(render_mode_index) + ", label: " + evt.GetString() + ")");
 	}
 
-	this->m_glcanvas_controller->SetRenderLayers(config);
+	this->m_glcanvas_controller->SetRenderLayers(mode);
 
 	evt.Skip();
 }

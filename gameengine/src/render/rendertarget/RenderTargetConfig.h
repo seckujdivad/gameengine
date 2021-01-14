@@ -47,4 +47,8 @@ struct RenderTargetConfig
 	std::variant<Normal, Wireframe, Shadow, PostProcess, Textured> mode_data;
 
 	bool clear_fbo = true;
+
+	void SetMode(RenderTargetMode mode);
 };
+
+void SetMode(RenderTargetConfig& config, RenderTargetMode mode);

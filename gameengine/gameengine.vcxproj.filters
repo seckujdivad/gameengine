@@ -452,6 +452,9 @@
     <ClCompile Include="src\render\renderjob\RenderJobType.cpp">
       <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTargetConfig.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
