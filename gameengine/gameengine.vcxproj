@@ -207,8 +207,10 @@
     <ClInclude Include="src\render\renderjob\NormalRenderJobFactory.h" />
     <ClInclude Include="src\render\renderjob\RenderJob.h" />
     <ClInclude Include="src\render\renderjob\RenderJobFactory.h" />
+    <ClInclude Include="src\render\renderjob\RenderJobType.h" />
     <ClInclude Include="src\render\renderjob\WrapperRenderJob.h" />
     <ClInclude Include="src\render\renderjob\WrapperRenderJobFactory.h" />
+    <ClInclude Include="src\render\RenderMode.h" />
     <ClInclude Include="src\render\rendertarget\EngineCanvas.h" />
     <ClInclude Include="src\render\rendertarget\RenderTarget.h" />
     <ClInclude Include="src\render\rendertarget\RenderTargetConfig.h" />
@@ -266,6 +268,7 @@
     <ClCompile Include="src\render\renderjob\NormalRenderJobFactory.cpp" />
     <ClCompile Include="src\render\renderjob\RenderJob.cpp" />
     <ClCompile Include="src\render\renderjob\RenderJobFactory.cpp" />
+    <ClCompile Include="src\render\renderjob\RenderJobType.cpp" />
     <ClCompile Include="src\render\renderjob\WrapperRenderJob.cpp" />
     <ClCompile Include="src\render\renderjob\WrapperRenderJobFactory.cpp" />
     <ClCompile Include="src\render\rendertarget\EngineCanvas.cpp" />

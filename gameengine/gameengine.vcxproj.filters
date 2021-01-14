@@ -273,6 +273,12 @@
     <ClInclude Include="src\render\renderjob\WrapperRenderJobFactory.h">
       <Filter>Header Files\render\renderjob</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\renderjob\RenderJobType.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\RenderMode.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -441,6 +447,9 @@
       <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
     <ClCompile Include="src\render\renderjob\WrapperRenderJobFactory.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\RenderJobType.cpp">
       <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
   </ItemGroup>
