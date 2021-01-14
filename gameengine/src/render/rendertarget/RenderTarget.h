@@ -71,6 +71,11 @@ public:
 	Engine* GetEngine() const;
 
 	void SetConfig(RenderTargetConfig config);
+	void SetModeConfig(RenderTargetConfig::Normal mode_config);
+	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
+	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
+	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);
+	void SetModeConfig(RenderTargetConfig::Textured mode_config);
 	RenderTargetConfig GetConfig() const;
 	RenderTargetMode GetRenderMode() const;
 
@@ -79,7 +84,12 @@ public:
 	void Render(std::vector<Model*> models, bool continuous_draw = false);
 	void RenderScene(std::vector<Model*> models); //only for calling by lambdas passed in through SetRenderFunction
 
+	virtual bool SwapBuffers() = 0;
+
 	void SetRenderFunction(ControllerFunction function);
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const;
+
+	void CopyFrom(const RenderTarget* src) const;
+	void CopyTo(const RenderTarget* dest) const;
 };

@@ -15,6 +15,6 @@ public:
 
 	RenderJobFactory* GetFactory() const;
 
-	std::tuple<int, int> GetOutputSize() const;
-	bool SetOutputSize(std::tuple<int, int> dimensions);
+	std::tuple<int, int> GetOutputSize() const override;
+	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 };

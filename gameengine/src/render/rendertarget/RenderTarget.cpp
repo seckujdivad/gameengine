@@ -18,6 +18,8 @@
 #include "../../scene/model/geometry/PresetGeometry.h"
 #include "../../scene/model/geometry/Patch.h"
 
+#include "RenderTexture.h"
+
 void RenderTarget::RenderScene(std::vector<Model*> models)
 {
 	if (this->GetRenderMode() == RenderTargetMode::Default)
@@ -634,6 +636,41 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 	return result;
 }
 
+void RenderTarget::CopyFrom(const RenderTarget* src) const
+{
+	if (this != src)
+	{
+		const RenderTexture* this_tex = dynamic_cast<const RenderTexture*>(this);
+		const RenderTexture* src_tex = dynamic_cast<const RenderTexture*>(src);
+
+		if ((this_tex != nullptr) && (src_tex != nullptr))
+		{
+			CopyTextureGroup(src_tex->GetOutputTextures(), this_tex->GetWriteTextures(), this_tex->GetTextureInfo(), this_tex->GetOutputSize());
+		}
+	}
+	/*if ((this != src) && (this->GetFramebuffer() != src->GetFramebuffer()))
+	{
+		auto [src_x, src_y] = src->GetOutputSize();
+		auto [dest_x, dest_y] = this->GetOutputSize();
+
+		GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, src->GetFramebuffer());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->GetFramebuffer());
+
+		glBlitFramebuffer(
+			0, 0, static_cast<GLint>(src_x), static_cast<GLint>(src_y),
+			0, 0, static_cast<GLint>(dest_x), static_cast<GLint>(dest_y),
+			mask, GL_NEAREST
+		);
+	}*/
+}
+
+void RenderTarget::CopyTo(const RenderTarget* dest) const
+{
+	dest->CopyFrom(this);
+}
+
 RenderTargetMode RenderTarget::GetRenderMode() const
 {
 	return this->m_config.mode;
@@ -783,6 +820,46 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				});
 		}
 	}
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::Normal mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Normal;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::Wireframe mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Wireframe;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::Shadow mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Shadow;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::PostProcess mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Postprocess;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::Textured mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Textured;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
 }
 
 RenderTargetConfig RenderTarget::GetConfig() const

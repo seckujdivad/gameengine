@@ -2,20 +2,17 @@
 
 #include <memory>
 #include <tuple>
+#include <unordered_set>
 
 #include "RenderJob.h"
+#include "../../scene/Referenceable.h"
 
 class Engine;
 class RenderTarget;
 
-enum class RenderJobFactoryType
-{
-	None
-};
-
 struct RenderJobInitialiser
 {
-	RenderJobFactoryType type = RenderJobFactoryType::None;
+	virtual ~RenderJobInitialiser(); //to ensure RTTI can be used
 };
 
 class RenderJobFactory
@@ -31,8 +28,13 @@ public:
 	Engine* GetEngine() const;
 	RenderTarget* GetTarget() const;
 
-	virtual std::shared_ptr<RenderJob> GenerateJob(RenderJobInitialiser* initialiser) = 0;
-
 	std::tuple<int, int> GetOutputSize() const;
 	virtual bool SetOutputSize(std::tuple<int, int> dimensions) = 0;
+
+	virtual std::shared_ptr<RenderJob> GenerateJob(RenderJobInitialiser* initialiser) = 0;
+
+	virtual void CopyFrom(const RenderJobFactory* src) const = 0;
+	void CopyTo(const RenderJobFactory* dest) const;
+
+	virtual std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const = 0;
 };

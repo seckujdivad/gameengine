@@ -261,6 +261,18 @@
     <ClInclude Include="src\render\renderjob\RenderJobFactory.h">
       <Filter>Header Files\render\renderjob</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\renderjob\NormalRenderJob.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderjob\NormalRenderJobFactory.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderjob\WrapperRenderJob.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderjob\WrapperRenderJobFactory.h">
+      <Filter>Header Files\render\renderjob</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -417,6 +429,18 @@
       <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
     <ClCompile Include="src\render\renderjob\RenderJobFactory.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\NormalRenderJob.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\NormalRenderJobFactory.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\WrapperRenderJob.cpp">
+      <Filter>Source Files\render\renderjob</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderjob\WrapperRenderJobFactory.cpp">
       <Filter>Source Files\render\renderjob</Filter>
     </ClCompile>
   </ItemGroup>

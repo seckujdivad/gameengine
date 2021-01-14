@@ -6,58 +6,45 @@
 #include "rendertarget/RenderTextureData.h"
 #include "../scene/Scene.h"
 #include "../Engine.h"
+#include "renderjob/RenderJobFactory.h"
 
-CumulativeTexture::CumulativeTexture()
+CumulativeTexture::CumulativeTexture(std::vector<RenderJobFactory*> factories) : m_factories(factories)
 {
-}
-
-CumulativeTexture::CumulativeTexture(std::vector<RenderTexture*> textures) :
-	m_textures(textures)
-{
-	if (textures.size() > 0U)
+	if (factories.size() == 0)
 	{
-		RenderTextureInfo info = textures.at(0)->GetTextureInfo();
+		throw std::invalid_argument("At least one factory must be provided");
+	}
 
-		for (int i = 1; i < (int)textures.size(); i++)
+	this->SetFetchModelsFunction([&factories = this->m_factories](int layer)
 		{
-			if (textures.at(i)->GetTextureInfo() != info)
-			{
-				throw std::invalid_argument("Texture info for texture " + std::to_string(i) + " doesn't match the texture info for texture 0");
-			}
-		}
-	}
-	else
-	{
-		throw std::invalid_argument("At least one RenderTexture must be provided");
-	}
+			return factories.at(layer)->GetEngine()->GetScene()->GetModels();
+		});
 }
 
 void CumulativeTexture::Render(int index, bool continuous_draw) const
 {
-	if ((index < 0) || (index >= (int)this->m_textures.size()))
+	if ((index < 0) || (index >= static_cast<int>(this->m_factories.size())))
 	{
-		throw std::invalid_argument("\"index\" must be between 0 and " + std::to_string((int)this->m_textures.size() - 1) + " but is " + std::to_string(index));
+		throw std::invalid_argument("\"index\" must be between 0 and " + std::to_string(static_cast<int>(this->m_factories.size()) - 1) + " but is " + std::to_string(index));
 	}
 
-	for (int i = index; i < (int)this->m_textures.size(); i++)
+	for (int i = index; i < static_cast<int>(this->m_factories.size()); i++)
 	{
 		if (i != 0)
 		{
-			CopyTextureGroup(this->m_textures.at(i - 1)->GetOutputTextures(), this->m_textures.at(i)->GetWriteTextures(), this->m_textures.at(i)->GetTextureInfo(), this->m_textures.at(i)->GetOutputSize());
+			this->m_factories.at(i - 1)->CopyTo(this->m_factories.at(i));
 		}
 
-		this->m_textures.at(i)->Render(this->m_textures.at(i)->GetEngine()->GetScene()->GetModels(), continuous_draw);
+		this->m_factories.at(i)->GenerateJob(nullptr)->Render(this->m_fetch_models_function(i), continuous_draw);
 	}
 }
 
-RenderTexture* CumulativeTexture::GetOutput() const
+RenderTarget* CumulativeTexture::GetOutput() const
 {
-	if (this->m_textures.size() == 0U)
-	{
-		throw std::runtime_error("No textures stored");
-	}
-	else
-	{
-		return this->m_textures.at((int)this->m_textures.size() - 1);
-	}
+	return this->m_factories.at(this->m_factories.size() - 1)->GetTarget();
+}
+
+void CumulativeTexture::SetFetchModelsFunction(FetchModelsFunction func)
+{
+	this->m_fetch_models_function = func;
 }

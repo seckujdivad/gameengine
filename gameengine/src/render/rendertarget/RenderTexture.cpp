@@ -317,12 +317,13 @@ RenderTextureInfo RenderTexture::GetTextureInfo() const
 	return this->m_info;
 }
 
-void RenderTexture::SwapBuffers()
+bool RenderTexture::SwapBuffers()
 {
 	if (this->m_simultaneous_read_write)
 	{
 		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
 	}
+	return true;
 }
 
 void RenderTexture::SetNormalModePreviousFrameToSelf()

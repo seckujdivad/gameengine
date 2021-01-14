@@ -64,4 +64,6 @@ public:
 
 	void SetControlledCamera(Camera* camera);
 	Camera* GetControlledCamera() const;
+
+	bool SwapBuffers() override;
 };

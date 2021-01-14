@@ -255,3 +255,8 @@ Camera* EngineCanvas::GetControlledCamera() const
 {
 	return this->m_camera_controlled;
 }
+
+bool EngineCanvas::SwapBuffers()
+{
+	return this->wxGLCanvas::SwapBuffers();
+}

@@ -3,8 +3,9 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
+#include "../renderjob/WrapperRenderJobFactory.h"
 
-RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
+std::unique_ptr<RenderJobFactory> ShadowController::GenerateFactory(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = false;
@@ -17,14 +18,16 @@ RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
 		config.clear_fbo = false;
 	}
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false);
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false)));
+	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
+	render_texture->SetCamera(this->m_camera.get());
 
-	return render_texture;
+	std::unique_ptr<WrapperRenderJobFactory> factory = std::make_unique<WrapperRenderJobFactory>(this->m_engine, render_texture);
+	return factory;
 }
 
-bool ShadowController::RepeatingConfigureRenderTexture(RenderTexture* render_texture) const
+bool ShadowController::RepeatingConfigureFactory(RenderJobFactory* factory) const
 {
 	return false;
 }

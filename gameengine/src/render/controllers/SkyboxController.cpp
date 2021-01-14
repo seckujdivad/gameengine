@@ -3,8 +3,9 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
+#include "../renderjob/NormalRenderJobFactory.h"
 
-RenderTexture* SkyboxController::GenerateRenderTexture(int layer) const
+std::unique_ptr<RenderJobFactory> SkyboxController::GenerateFactory(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = true;
@@ -21,13 +22,14 @@ RenderTexture* SkyboxController::GenerateRenderTexture(int layer) const
 
 	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
+	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();
 
-	return render_texture;
+	std::unique_ptr<NormalRenderJobFactory> factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
+	return factory;
 }
 
-bool SkyboxController::RepeatingConfigureRenderTexture(RenderTexture* render_texture) const
+bool SkyboxController::RepeatingConfigureFactory(RenderJobFactory* factory) const
 {
 	return false;
 }

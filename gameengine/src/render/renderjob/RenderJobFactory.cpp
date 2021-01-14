@@ -24,3 +24,12 @@ std::tuple<int, int> RenderJobFactory::GetOutputSize() const
 {
 	return this->m_target->GetOutputSize();
 }
+
+void RenderJobFactory::CopyTo(const RenderJobFactory* dest) const
+{
+	dest->CopyFrom(this);
+}
+
+RenderJobInitialiser::~RenderJobInitialiser()
+{
+}

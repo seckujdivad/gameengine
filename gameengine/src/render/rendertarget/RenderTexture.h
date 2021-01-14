@@ -47,7 +47,7 @@ public:
 	RenderTextureGroup GetWriteTextures() const;
 	RenderTextureInfo GetTextureInfo() const;
 
-	void SwapBuffers();
+	bool SwapBuffers() override;
 
 	void SetNormalModePreviousFrameToSelf();
 };

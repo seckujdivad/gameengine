@@ -1,19 +1,29 @@
 #pragma once
 
 #include <vector>
+#include <optional>
+#include <functional>
 
-class RenderTexture;
+class RenderTarget;
+class RenderJobFactory;
+class Model;
 
 class CumulativeTexture
 {
+public:
+	using FetchModelsFunction = std::function<std::vector<Model*>(int layer)>;
+
 private:
-	std::vector<RenderTexture*> m_textures;
+	std::vector<RenderJobFactory*> m_factories;
+
+	FetchModelsFunction m_fetch_models_function;
 
 public:
-	CumulativeTexture();
-	CumulativeTexture(std::vector<RenderTexture*> textures);
+	CumulativeTexture(std::vector<RenderJobFactory*> factories);
 
 	void Render(int index = 0, bool continuous_draw = false) const;
 
-	RenderTexture* GetOutput() const;
+	RenderTarget* GetOutput() const;
+
+	void SetFetchModelsFunction(FetchModelsFunction func);
 };
