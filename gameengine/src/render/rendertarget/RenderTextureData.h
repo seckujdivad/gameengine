@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../../GLComponents.h"
+#include "../NormalModeConstants.h"
 
 struct RenderTextureGroup
 {

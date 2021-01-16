@@ -3,7 +3,8 @@
 enum class RenderTargetMode
 {
 	Default,
-	Normal,
+	Normal_FirstPass,
+	Normal_LastPass,
 	Wireframe,
 	Shadow,
 	Postprocess,

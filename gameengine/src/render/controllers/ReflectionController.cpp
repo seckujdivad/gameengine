@@ -6,6 +6,7 @@
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderjob/NormalRenderJobFactory.h"
+#include "../NormalModeConstants.h"
 
 std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int layer)
 {
@@ -14,7 +15,7 @@ std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int laye
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTargetConfig config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal_LastPass, RenderTargetConfig::Normal_LastPass() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
@@ -24,7 +25,6 @@ std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int laye
 	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
-	render_texture->SetNormalModePreviousFrameToSelf();
 
 	std::unique_ptr<NormalRenderJobFactory> factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
 	return factory;
@@ -37,7 +37,7 @@ bool ReflectionController::RepeatingConfigureFactory(RenderJobFactory* factory) 
 	bool updated = false;
 	
 	RenderTargetConfig config = factory->GetTarget()->GetConfig();
-	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows)
+	/*if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows)
 	{
 		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
 		updated = true;
@@ -47,7 +47,7 @@ bool ReflectionController::RepeatingConfigureFactory(RenderJobFactory* factory) 
 	{
 		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
 		updated = true;
-	}
+	}*/
 
 	if (updated)
 	{

@@ -4,6 +4,7 @@
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderjob/NormalRenderJobFactory.h"
+#include "../NormalModeConstants.h"
 
 std::unique_ptr<RenderJobFactory> SkyboxController::GenerateFactory(int layer)
 {
@@ -12,18 +13,17 @@ std::unique_ptr<RenderJobFactory> SkyboxController::GenerateFactory(int layer)
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTargetConfig config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal_LastPass, RenderTargetConfig::Normal_LastPass() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
 
-	std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = false;
+	//std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = false;
 
 	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
-	render_texture->SetNormalModePreviousFrameToSelf();
 
 	std::unique_ptr<NormalRenderJobFactory> factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
 	return factory;

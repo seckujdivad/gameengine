@@ -6,12 +6,13 @@ RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode)
 {
 	switch (mode)
 	{
-	case RenderTargetMode::Normal:
+	case RenderTargetMode::Normal_FirstPass:
 	case RenderTargetMode::Wireframe:
 	case RenderTargetMode::Shadow:
 	case RenderTargetMode::Textured:
 		return RenderTargetModeType::Model;
 	case RenderTargetMode::Postprocess:
+	case RenderTargetMode::Normal_LastPass:
 		return RenderTargetModeType::FSQuad;
 	default:
 		throw std::invalid_argument("Unknown render target mode");

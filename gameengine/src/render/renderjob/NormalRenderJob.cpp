@@ -9,5 +9,5 @@ NormalRenderJob::NormalRenderJob(NormalRenderJobFactory* factory) : RenderJob(fa
 
 void NormalRenderJob::Render(std::vector<Model*> models, bool continuous_draw)
 {
-	this->GetFactory()->GetTarget()->Render(models, continuous_draw);
+	static_cast<NormalRenderJobFactory*>(this->GetFactory())->Render(models, continuous_draw);
 }

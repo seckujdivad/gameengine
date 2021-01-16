@@ -202,6 +202,7 @@
     <ClInclude Include="src\render\CumulativeTexture.h" />
     <ClInclude Include="src\render\LoadedTexture.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\NormalModeConstants.h" />
     <ClInclude Include="src\render\renderable\Renderable.h" />
     <ClInclude Include="src\render\renderjob\NormalRenderJob.h" />
     <ClInclude Include="src\render\renderjob\NormalRenderJobFactory.h" />
