@@ -306,10 +306,12 @@
     <ClCompile Include="src\scene\VisBox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="models.rc" />
     <ResourceCompile Include="resource.rc" />
     <ResourceCompile Include="shaders.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\models\icosphere.ply" />
     <None Include="resources\shaders\default.frag" />
     <None Include="resources\shaders\default.vert" />
     <None Include="resources\shaders\model\default.geom" />

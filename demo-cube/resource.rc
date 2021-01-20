@@ -2,6 +2,7 @@
 
 #include <gameengine/resource.rc>
 #include <gameengine/shaders.rc>
+#include <gameengine/models.rc>
 
 ApplicationIcon ICON "main.ico"
 ICONPRG ICON "main.ico"

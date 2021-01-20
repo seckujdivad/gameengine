@@ -94,6 +94,9 @@
     <Filter Include="Source Files\render\renderjob">
       <UniqueIdentifier>{6021df5d-9472-4311-a57b-76efb66654db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{d8e96184-4322-4c6c-9733-8cd148922a3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -464,6 +467,9 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
     <ResourceCompile Include="shaders.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="models.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
