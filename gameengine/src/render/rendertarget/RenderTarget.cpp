@@ -51,6 +51,36 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		this->m_shader_program->Select();
 
+		//cubemap uniforms
+		bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
+		this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
+
+		if (is_cubemap)
+		{
+			std::vector<glm::mat4> transforms;
+			glm::vec3 translate = glm::vec3(0.0f);
+
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+			for (int i = 0; i < static_cast<int>(transforms.size()); i++)
+			{
+				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", glm::mat4(1.0f));
+			}
+		}
+
+		//mode-specific uniforms
 		if (this->RenderModeIsModelRendering())
 		{
 			this->Render_Setup_Model(models);
@@ -340,32 +370,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	}
 
 	//load "constant" uniforms (uniforms constant between models like camera data) into program
-	// cubemap uniforms
-	bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
-	this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
-
-	if (is_cubemap)
-	{
-		std::vector<glm::mat4> transforms;
-		glm::vec3 translate = glm::vec3(0.0f);
-
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-		for (int i = 0; i < static_cast<int>(transforms.size()); i++)
-		{
-			this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
-		}
-	}
-	else
-	{
-		this->m_shader_program->SetUniform("cubemap_transform[0]", glm::mat4(1.0f));
-	}
-
 	// camera
 	this->m_shader_program->SetUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
 	this->m_shader_program->SetUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
@@ -720,6 +724,17 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	this->m_shader_program->SetShaderSources(shaders);
 	this->m_shader_program->Recompile();
 
+	this->m_shader_program->AddUniformNames({
+		//geometry
+		"cubemap_transform[0]",
+		"cubemap_transform[1]",
+		"cubemap_transform[2]",
+		"cubemap_transform[3]",
+		"cubemap_transform[4]",
+		"cubemap_transform[5]",
+		"is_cubemap"
+		});
+
 	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
 	{
 		this->m_shader_program->AddUniformNames({
@@ -739,14 +754,6 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			"tess_interp_mode",
 			"patch_size_u",
 			"patch_size_v",
-			//geometry
-			"cubemap_transform[0]",
-			"cubemap_transform[1]",
-			"cubemap_transform[2]",
-			"cubemap_transform[3]",
-			"cubemap_transform[4]",
-			"cubemap_transform[5]",
-			"is_cubemap",
 			//fragment
 			"screen_dimensions"
 			});
