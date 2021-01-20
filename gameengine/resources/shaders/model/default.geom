@@ -92,6 +92,10 @@ void set_outputs(const int index)
 
 	geomTangentSpacePos = geomNormalTBN * geomSceneSpacePos;
 	geomTangentSpaceCameraPos = geomNormalTBN * (0.0f - cam_translate.xyz);
+
+#if defined(CAP_AT_FAR_PLANE)
+	gl_Position.z = min(gl_Position.z, gl_Position.w * 0.99f);
+#endif
 }
 
 void main()

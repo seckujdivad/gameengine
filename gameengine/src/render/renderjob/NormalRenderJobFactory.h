@@ -15,6 +15,7 @@ private:
 	std::unique_ptr<NormalRenderJobInitialiser> m_default_initialiser;
 
 	std::unique_ptr<RenderTexture> m_rendertexture_first_pass;
+	std::unique_ptr<RenderTexture> m_rendertexture_pointlight;
 
 public:
 	NormalRenderJobFactory(Engine* engine, RenderTarget* target);

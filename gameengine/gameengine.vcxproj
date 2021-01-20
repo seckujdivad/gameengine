@@ -321,6 +321,7 @@
     <None Include="resources\shaders\model\normal\pass0.frag" />
     <None Include="resources\shaders\model\normal\pass1.frag" />
     <None Include="resources\shaders\model\normal\pass1.vert" />
+    <None Include="resources\shaders\model\normal\pointlight.frag" />
     <None Include="resources\shaders\model\shadow.frag" />
     <None Include="resources\shaders\model\textured.frag" />
     <None Include="resources\shaders\model\wireframe.frag" />

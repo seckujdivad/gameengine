@@ -38,6 +38,7 @@ private:
 	ControllerFunction m_render_function;
 
 	std::unique_ptr<Model> m_fsquad_model = nullptr;
+	std::vector<std::unique_ptr<Model>> m_pointlight_icospheres;
 
 protected:
 	//scene rendering
@@ -74,6 +75,7 @@ public:
 	void SetConfig(RenderTargetConfig config);
 	void SetModeConfig(RenderTargetConfig::Normal_FirstPass mode_config);
 	void SetModeConfig(RenderTargetConfig::Normal_LastPass mode_config);
+	void SetModeConfig(RenderTargetConfig::Normal_PointLight mode_config);
 	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
 	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
 	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);

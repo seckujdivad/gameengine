@@ -70,6 +70,12 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 				glEnable(GL_DEPTH_TEST);
 				break;
+			case RenderTargetMode::Normal_PointLight:
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_FRONT);
+
+				glEnable(GL_DEPTH_TEST);
+				break;
 			case RenderTargetMode::Wireframe:
 				glDisable(GL_CULL_FACE);
 
@@ -98,6 +104,16 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glDisable(GL_DEPTH_TEST);
 		}
 
+		if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+
 		//prepare viewport
 		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
 
@@ -106,9 +122,13 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		{
 			clear_colour = glm::vec4(0.0f);
 		}
+		else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+		{
+			clear_colour = glm::vec4(this->GetEngine()->GetScene()->GetAmbientLight(), 0.0f);
+		}
 		else
 		{
-			clear_colour = this->m_engine->GetScene()->GetClearColour();
+			clear_colour = this->GetEngine()->GetScene()->GetClearColour();
 		}
 
 		glClearColor(
@@ -225,6 +245,7 @@ void RenderTarget::PostRenderEvent()
 bool RenderTarget::RenderModeIsModelRendering(RenderTargetMode mode)
 {
 	return (mode == RenderTargetMode::Normal_FirstPass)
+		|| (mode == RenderTargetMode::Normal_PointLight)
 		|| (mode == RenderTargetMode::Shadow)
 		|| (mode == RenderTargetMode::Wireframe)
 		|| (mode == RenderTargetMode::Textured);
@@ -237,7 +258,57 @@ bool RenderTarget::RenderModeIsModelRendering()
 
 std::vector<Model*> RenderTarget::Render_GetModels_Model(std::vector<Model*> model_pool)
 {
-	return this->GetEngine()->GetScene()->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode(), model_pool);
+	if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+	{
+		std::vector<PointLight*> pointlights = this->GetEngine()->GetScene()->GetPointLights();
+
+		while (pointlights.size() < this->m_pointlight_icospheres.size())
+		{
+			this->m_pointlight_icospheres.erase(this->m_pointlight_icospheres.rbegin().base());
+		}
+		
+		if (pointlights.size() > this->m_pointlight_icospheres.size())
+		{
+			for (std::size_t i = this->m_pointlight_icospheres.size(); i < pointlights.size(); i++)
+			{
+				std::vector<std::shared_ptr<Geometry>> geometry;
+				geometry.push_back(std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Icosphere));
+				this->m_pointlight_icospheres.push_back(std::make_unique<Model>(static_cast<ModelReference>(i), geometry));
+			}
+		}
+
+		for (std::size_t i = 0; i < this->m_pointlight_icospheres.size(); i++)
+		{
+			PointLight* pointlight = pointlights.at(i);
+			std::unique_ptr<Model>& model = this->m_pointlight_icospheres.at(i);
+
+			//shorter names for constants
+			const double quadratic_a = static_cast<double>(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_A);
+			const double quadratic_b = static_cast<double>(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_B);
+			const double quadratic_c = static_cast<double>(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_C);
+
+			double light_max = static_cast<double>(std::max(std::max(pointlight->GetIntensity().r, pointlight->GetIntensity().g), pointlight->GetIntensity().b));
+			double cutoff = (256.0 / 5.0) * light_max;
+			double max_travel_distance = (std::sqrt(std::pow(quadratic_b, 2.0) - (4.0 * quadratic_a * (quadratic_c - cutoff))) - quadratic_b) / (2.0 * quadratic_a);
+			double cam_to_light = static_cast<double>(glm::length(pointlight->GetPosition() - this->GetCamera()->GetPosition()));
+			double radius = std::max(max_travel_distance - cam_to_light, 0.0);
+
+			model->SetPosition(pointlight->GetPosition());
+			model->SetScale(glm::dvec3(radius));
+		}
+
+		std::vector<Model*> models;
+		for (std::unique_ptr<Model>& model : this->m_pointlight_icospheres)
+		{
+			models.push_back(model.get());
+		}
+
+		return models;
+	}
+	else
+	{
+		return this->GetEngine()->GetScene()->GetVisibleModels(this->m_camera->GetPosition(), this->GetRenderMode(), model_pool);
+	}
 }
 
 void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
@@ -253,6 +324,14 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_FirstPass)
 	{
 		recompile_required = this->m_shader_program->SetDefine("PASSTHROUGH_TEX_NUM", std::to_string(GAMEENGINE_NORMAL_PASSTHROUGH_TEX)) ? true : recompile_required;
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+	{
+		recompile_required = this->m_shader_program->SetDefine("LIGHT_ATTENUATION_A", std::to_string(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_A)) ? true : recompile_required;
+		recompile_required = this->m_shader_program->SetDefine("LIGHT_ATTENUATION_B", std::to_string(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_B)) ? true : recompile_required;
+		recompile_required = this->m_shader_program->SetDefine("LIGHT_ATTENUATION_C", std::to_string(GAMEENGINE_NORMAL_POINTLIGHT_ATTENUATION_C)) ? true : recompile_required;
+
+		recompile_required = this->m_shader_program->SetDefine("CAP_AT_FAR_PLANE", "") ? true : recompile_required;
 	}
 
 	if (recompile_required)
@@ -296,9 +375,38 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	this->m_shader_program->SetUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
 	this->m_shader_program->SetUniform("cam_transform_inverse", glm::inverse(this->GetCamera()->GetCombinedMatrix()));
 
+	auto [screen_x, screen_y] = this->GetOutputSize();
+	this->m_shader_program->SetUniform("screen_dimensions", glm::vec2(screen_x, screen_y));
+
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
 		this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderTargetConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+	{
+		LoadedTexture texture;
+
+		texture.id = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.data.at(0);
+		texture.type = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferNormal";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.data.at(1);
+		texture.type = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferSpecular";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.data.at(2);
+		texture.type = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferDiffuse";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.depth;
+		texture.type = std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferDepth";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		this->m_shader_program->SetUniform("light_draw_shadows", std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).draw_shadows);
 	}
 }
 
@@ -347,6 +455,26 @@ void RenderTarget::Render_Setup_FlatQuad()
 		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.type;
 		texture.uniform_name = "gbufferTextureSample";
 		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.data.at(0);
+		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferNormal";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.data.at(1);
+		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferSpecular";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.data.at(2);
+		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).first_pass.type;
+		texture.uniform_name = "gbufferDiffuse";
+		this->m_shader_program->SetTexture(-1, texture);
+
+		texture.id = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).pointlight_pass.colour;
+		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).pointlight_pass.type;
+		texture.uniform_name = "gbufferLighting";
+		this->m_shader_program->SetTexture(-1, texture);
 	}
 }
 
@@ -363,10 +491,43 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		texture.uniform_name = "colourTexture";
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 	}
+	
+	if (this->GetRenderMode() == RenderTargetMode::Normal_FirstPass)
+	{
+		LoadedTexture texture = this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference());
+		texture.uniform_name = "specularTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
-	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
+		this->m_shader_program->SetUniform("mat_diffuse", model->GetMaterial().diffuse);
+		this->m_shader_program->SetUniform("mat_specular_highlight", model->GetMaterial().specular_highlight);
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
 		this->m_shader_program->SetUniform("wireframe_colour", model->GetCurrentWireframeColour());
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+	{
+		std::vector<PointLight*> point_lights = this->GetEngine()->GetScene()->GetPointLights();
+		PointLight* point_light = point_lights.at(model->GetReference());
+
+		this->m_shader_program->SetUniform("light_position", point_light->GetPosition());
+		this->m_shader_program->SetUniform("light_intensity", point_light->GetIntensity());
+		this->m_shader_program->SetUniform("light_far_plane", std::get<1>(point_light->GetClips()));
+		this->m_shader_program->SetUniform("light_bias", point_light->GetShadowBias());
+
+		RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
+
+		LoadedTexture loaded_texture;
+		loaded_texture.id = texture.depth;
+		loaded_texture.type = GL_TEXTURE_CUBE_MAP;
+		loaded_texture.uniform_name = "light_cubemap";
+
+		this->m_shader_program->SetTexture(model->GetReference(), loaded_texture);
+	}
+
+	if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+	{
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
@@ -437,19 +598,24 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 {
 	std::unordered_set<RenderTextureReference> result;
 
-	/*if (this->GetRenderMode() == RenderTargetMode::Normal_LastPass)
+	if (this->GetRenderMode() == RenderTargetMode::Normal_LastPass)
 	{
 		for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetEngine()->GetScene()->GetCubemaps())
 		{
 			Cubemap* cubemap = std::get<0>(cubemap_data);
 			CubemapType cubemap_type = std::get<1>(cubemap_data);
 
-			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).draw_reflections))
+			/*if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).draw_reflections))
+			{
+				result.insert(cubemap->GetReference());
+			}*/
+
+			if (cubemap_type == CubemapType::Pointlight)
 			{
 				result.insert(cubemap->GetReference());
 			}
 		}
-	}*/
+	}
 
 	return result;
 }
@@ -529,6 +695,11 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
+		else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+		{
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_POINTLIGHT_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
@@ -575,7 +746,9 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			"cubemap_transform[3]",
 			"cubemap_transform[4]",
 			"cubemap_transform[5]",
-			"is_cubemap"
+			"is_cubemap",
+			//fragment
+			"screen_dimensions"
 			});
 
 		if (this->GetRenderMode() == RenderTargetMode::Normal_FirstPass)
@@ -606,12 +779,29 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"colourTexture"
 				});
 		}
+		else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
+		{
+			this->m_shader_program->AddUniformNames({
+				//fragment
+				"gbufferDepth",
+				"gbufferNormal",
+				"gbufferSpecular",
+				"gbufferDiffuse",
+				"light_position",
+				"light_intensity",
+				"light_cubemap",
+				"light_draw_shadows",
+				"light_far_plane",
+				"light_bias"
+				});
+		}
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_LastPass)
 	{
 		this->m_shader_program->AddUniformNames({
 			//fragment
-			"gbufferTextureSample"
+			"gbufferTextureSample",
+			"gbufferLighting"
 			});
 	}
 }
@@ -628,6 +818,14 @@ void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_LastPass mode_config
 {
 	RenderTargetConfig config = this->m_config;
 	config.mode = RenderTargetMode::Normal_LastPass;
+	config.mode_data = mode_config;
+	this->SetConfig(config);
+}
+
+void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_PointLight mode_config)
+{
+	RenderTargetConfig config = this->m_config;
+	config.mode = RenderTargetMode::Normal_PointLight;
 	config.mode_data = mode_config;
 	this->SetConfig(config);
 }
