@@ -4,6 +4,8 @@
 #include <string>
 
 #include "Polygonal.h"
+#include "../../../loaders/models/PlyLoader.h"
+#include "../../../Resource.h"
 
 std::vector<double> PresetGeometry::GetPrimitivesWithoutCache() const
 {
@@ -41,6 +43,10 @@ void PresetGeometry::SetGeometryType(GeometryType type, bool force_reload)
 			geom->AddFace(face);
 
 			this->m_geometry = geom;
+		}
+		else if (type == GeometryType::Icosphere)
+		{
+			this->m_geometry = ModelFromPlyText(GetEmbeddedTextfile(RCID_TF_MODEL_ICOSPHERE));
 		}
 		else
 		{

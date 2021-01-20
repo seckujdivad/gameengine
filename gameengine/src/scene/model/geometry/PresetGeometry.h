@@ -10,7 +10,8 @@ class PresetGeometry : public Geometry
 public:
 	enum class GeometryType
 	{
-		Plane
+		Plane,
+		Icosphere
 	};
 
 private:
