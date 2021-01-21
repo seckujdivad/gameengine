@@ -5,7 +5,7 @@
 #include "NormalRenderJob.h"
 #include "../rendertarget/RenderTexture.h"
 
-NormalRenderJobFactory::NormalRenderJobFactory(Engine* engine, RenderTarget* target) : RenderJobFactory(engine, target)
+NormalRenderJobFactory::NormalRenderJobFactory(Engine* engine, RenderTarget* target) : RenderJobFactory(engine, target), m_camera(target->GetCamera())
 {
 	if (target->GetRenderMode() != RenderTargetMode::Normal_LastPass)
 	{
@@ -22,6 +22,7 @@ NormalRenderJobFactory::NormalRenderJobFactory(Engine* engine, RenderTarget* tar
 		info.colour_filtering = GL_NEAREST;
 
 		this->m_rendertexture_first_pass = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, info, target->GetTargetType(), false, true);
+		this->m_rendertexture_first_pass->SetCamera(this->GetCamera());
 	}
 
 	{
@@ -34,12 +35,14 @@ NormalRenderJobFactory::NormalRenderJobFactory(Engine* engine, RenderTarget* tar
 		info.colour_filtering = GL_NEAREST;
 
 		this->m_rendertexture_pointlight = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, info, target->GetTargetType(), false, true);
+		this->m_rendertexture_pointlight->SetCamera(this->GetCamera());
 	}
 
 	{
 		RenderTargetConfig config = this->GetTarget()->GetConfig();
 		std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).first_pass = this->m_rendertexture_first_pass->GetOutputTextures();
 		std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).pointlight_pass = this->m_rendertexture_pointlight->GetOutputTextures();
+		std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).camera = this->GetCamera();
 		this->GetTarget()->SetConfig(config);
 	}
 }
@@ -92,10 +95,20 @@ NormalRenderJobInitialiser& NormalRenderJobFactory::GetDefaultInitialiser()
 
 void NormalRenderJobFactory::Render(std::vector<Model*> models, bool continuous_draw)
 {
-	this->m_rendertexture_first_pass->SetCamera(this->GetTarget()->GetCamera());
-	this->m_rendertexture_first_pass->SetOutputSize(this->GetTarget()->GetOutputSize());
+	if (this->GetCamera() != this->m_camera)
+	{
+		this->m_rendertexture_first_pass->SetCamera(this->GetCamera());
+		this->m_rendertexture_pointlight->SetCamera(this->GetCamera());
 
-	this->m_rendertexture_pointlight->SetCamera(this->GetTarget()->GetCamera());
+		RenderTargetConfig config = this->GetTarget()->GetConfig();
+		std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).camera = this->GetCamera();
+		this->GetTarget()->SetConfig(config);
+
+		this->m_camera = this->GetCamera();
+	}
+
+	
+	this->m_rendertexture_first_pass->SetOutputSize(this->GetTarget()->GetOutputSize());
 	this->m_rendertexture_pointlight->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rendertexture_first_pass->Render(models, continuous_draw);

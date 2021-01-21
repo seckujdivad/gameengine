@@ -51,33 +51,20 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		this->m_shader_program->Select();
 
-		//cubemap uniforms
-		bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
-		this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
+		bool recompile_required = false;
 
-		if (is_cubemap)
+		if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
 		{
-			std::vector<glm::mat4> transforms;
-			glm::vec3 translate = glm::vec3(0.0f);
-
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-			transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-			for (int i = 0; i < static_cast<int>(transforms.size()); i++)
-			{
-				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
-			}
+			recompile_required = this->m_shader_program->SetDefine("ACCESS_CUBE_MAPS", "1") ? true : recompile_required;
 		}
 		else
 		{
-			for (int i = 0; i < 6; i++)
-			{
-				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", glm::mat4(1.0f));
-			}
+			recompile_required = this->m_shader_program->RemoveDefine("ACCESS_CUBE_MAPS") ? true : recompile_required;
+		}
+
+		if (recompile_required)
+		{
+			this->m_shader_program->Recompile();
 		}
 
 		//mode-specific uniforms
@@ -88,6 +75,25 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		else
 		{
 			this->Render_Setup_FlatQuad();
+		}
+
+		//cubemap uniforms
+		bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
+		this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
+
+		for (int i = 0; i < 6; i++)
+		{
+			if (is_cubemap)
+			{
+				const auto& [transform, transform_inverse] = this->m_cubemap_transforms.at(i);
+				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transform);
+				this->m_shader_program->SetUniform("cubemap_transform_inverse[" + std::to_string(i) + "]", transform_inverse);
+			}
+			else
+			{
+				this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", glm::mat4(1.0f));
+				this->m_shader_program->SetUniform("cubemap_transform_inverse[" + std::to_string(i) + "]", glm::mat4(1.0f));
+			}
 		}
 
 		if (this->RenderModeIsModelRendering())
@@ -104,7 +110,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				glEnable(GL_CULL_FACE);
 				glCullFace(GL_FRONT);
 
-				glEnable(GL_DEPTH_TEST);
+				glDisable(GL_DEPTH_TEST);
 				break;
 			case RenderTargetMode::Wireframe:
 				glDisable(GL_CULL_FACE);
@@ -479,6 +485,8 @@ void RenderTarget::Render_Setup_FlatQuad()
 		texture.type = std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).pointlight_pass.type;
 		texture.uniform_name = "gbufferLighting";
 		this->m_shader_program->SetTexture(-1, texture);
+
+		this->m_shader_program->SetUniform("cam_persp_inverse", glm::inverse(std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).camera->GetPerspectiveMatrix()));
 	}
 }
 
@@ -529,11 +537,6 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(model->GetReference(), loaded_texture);
 	}
 
-	if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
-	{
-		glClear(GL_DEPTH_BUFFER_BIT);
-	}
-
 	this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 }
 
@@ -544,6 +547,22 @@ void RenderTarget::Render_ForEachModel_Quad(Model* model)
 
 RenderTarget::RenderTarget(Engine* engine, RenderTargetConfig config) : m_engine(engine)
 {
+	std::vector<glm::mat4> transforms;
+	transforms.reserve(6);
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	transforms.push_back(glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+	for (int i = 0; i < 6; i++)
+	{
+		auto& [transform, transform_inverse] = this->m_cubemap_transforms.at(i);
+		transform = transforms.at(i);
+		transform_inverse = glm::inverse(transforms.at(i));
+	}
+
 	this->m_engine->MakeContextCurrent(true); //this is necessary when constructing the first EngineCanvas - call it every time as construction is infrequent and already expensive
 
 	this->m_render_function = [this](std::vector<Model*> model_pool)
@@ -718,6 +737,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_LastPass)
 	{
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_PASS1_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_PASS1_GEOMSHADER), GL_GEOMETRY_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_PASS1_VERTSHADER), GL_VERTEX_SHADER));
 	}
 
@@ -732,6 +752,12 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 		"cubemap_transform[3]",
 		"cubemap_transform[4]",
 		"cubemap_transform[5]",
+		"cubemap_transform_inverse[0]",
+		"cubemap_transform_inverse[1]",
+		"cubemap_transform_inverse[2]",
+		"cubemap_transform_inverse[3]",
+		"cubemap_transform_inverse[4]",
+		"cubemap_transform_inverse[5]",
 		"is_cubemap"
 		});
 
@@ -808,7 +834,8 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 		this->m_shader_program->AddUniformNames({
 			//fragment
 			"gbufferTextureSample",
-			"gbufferLighting"
+			"gbufferLighting",
+			"cam_persp_inverse"
 			});
 	}
 }

@@ -4,6 +4,7 @@
 #include "../rendertarget/RenderTargetConfig.h"
 
 class RenderTexture;
+class Camera;
 
 struct NormalRenderJobInitialiser : public RenderJobInitialiser
 {
@@ -16,6 +17,8 @@ private:
 
 	std::unique_ptr<RenderTexture> m_rendertexture_first_pass;
 	std::unique_ptr<RenderTexture> m_rendertexture_pointlight;
+
+	Camera* m_camera = nullptr;
 
 public:
 	NormalRenderJobFactory(Engine* engine, RenderTarget* target);

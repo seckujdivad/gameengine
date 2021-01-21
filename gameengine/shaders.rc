@@ -26,4 +26,5 @@ RCID_TF_MODEL_SHADOW_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/mo
 
 //normal second pass
 RCID_TF_MODEL_NORMAL_PASS1_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal/pass1.vert"
+RCID_TF_MODEL_NORMAL_PASS1_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal/pass1.geom"
 RCID_TF_MODEL_NORMAL_PASS1_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal/pass1.frag"
