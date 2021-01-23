@@ -380,7 +380,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	this->m_shader_program->SetUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
 	this->m_shader_program->SetUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
 	this->m_shader_program->SetUniform("cam_persp", this->GetCamera()->GetPerspectiveMatrix());
-	this->m_shader_program->SetUniform("cam_persp_inverse", glm::inverse(this->GetCamera()->GetPerspectiveMatrix()));
 	this->m_shader_program->SetUniform("cam_clip_near", std::get<0>(this->GetCamera()->GetClips()));
 	this->m_shader_program->SetUniform("cam_clip_far", std::get<1>(this->GetCamera()->GetClips()));
 	this->m_shader_program->SetUniform("cam_transform", this->GetCamera()->GetCombinedMatrix());
@@ -624,19 +623,17 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 
 	if (this->GetRenderMode() == RenderTargetMode::Normal_LastPass)
 	{
-		for (const auto& [cubemap, cubemap_type] : this->GetEngine()->GetScene()->GetCubemaps())
+		for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetEngine()->GetScene()->GetCubemaps())
 		{
-			if ((cubemap_type == CubemapType::Reflection && std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).draw_reflections))
+			Cubemap* cubemap = std::get<0>(cubemap_data);
+			CubemapType cubemap_type = std::get<1>(cubemap_data);
+
+			/*if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal_LastPass>(this->m_config.mode_data).draw_reflections))
 			{
 				result.insert(cubemap->GetReference());
-			}
-		}
-	}
-	else if (this->GetRenderMode() == RenderTargetMode::Normal_PointLight)
-	{
-		for (const auto& [cubemap, cubemap_type] : this->GetEngine()->GetScene()->GetCubemaps())
-		{
-			if (cubemap_type == CubemapType::Pointlight && std::get<RenderTargetConfig::Normal_PointLight>(this->m_config.mode_data).draw_shadows)
+			}*/
+
+			if (cubemap_type == CubemapType::Pointlight)
 			{
 				result.insert(cubemap->GetReference());
 			}

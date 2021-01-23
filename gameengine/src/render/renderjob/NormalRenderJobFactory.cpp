@@ -85,54 +85,12 @@ void NormalRenderJobFactory::CopyFrom(const RenderJobFactory* src) const
 
 std::unordered_set<RenderTextureReference> NormalRenderJobFactory::GetRenderTextureDependencies() const
 {
-	std::unordered_set<RenderTextureReference> output = this->m_rendertexture_first_pass->GetRenderTextureDependencies();
-
-	for (RenderTextureReference reference : this->m_rendertexture_pointlight->GetRenderTextureDependencies())
-	{
-		output.insert(reference);
-	}
-
-	for (RenderTextureReference reference : this->GetTarget()->GetRenderTextureDependencies())
-	{
-		output.insert(reference);
-	}
-
-	return output;
+	return this->GetTarget()->GetRenderTextureDependencies();
 }
 
 NormalRenderJobInitialiser& NormalRenderJobFactory::GetDefaultInitialiser()
 {
 	return *this->m_default_initialiser;
-}
-
-bool NormalRenderJobFactory::SetDrawReflections(bool value)
-{
-	RenderTargetConfig config = this->GetTarget()->GetConfig();
-	if (value != std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).draw_reflections)
-	{
-		std::get<RenderTargetConfig::Normal_LastPass>(config.mode_data).draw_reflections = value;
-		this->GetTarget()->SetConfig(config);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool NormalRenderJobFactory::SetDrawShadows(bool value)
-{
-	RenderTargetConfig config = this->m_rendertexture_pointlight->GetConfig();
-	if (value != std::get<RenderTargetConfig::Normal_PointLight>(config.mode_data).draw_shadows)
-	{
-		std::get<RenderTargetConfig::Normal_PointLight>(config.mode_data).draw_shadows = value;
-		this->m_rendertexture_pointlight->SetConfig(config);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
 }
 
 void NormalRenderJobFactory::Render(std::vector<Model*> models, bool continuous_draw)

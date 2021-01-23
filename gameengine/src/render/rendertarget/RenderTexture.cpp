@@ -78,6 +78,10 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum inter
 		glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glTexParameteri(type, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, 0);
+		glGenerateMipmap(type);
 	}
 
 #ifdef _DEBUG

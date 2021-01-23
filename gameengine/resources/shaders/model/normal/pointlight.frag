@@ -1,4 +1,4 @@
-#version 430 core
+#version 400 core
 
 #if !defined(LIGHT_ATTENUATION_A)
 #define LIGHT_ATTENUATION_A 0.032f
@@ -10,12 +10,6 @@
 
 #if !defined(LIGHT_ATTENUATION_C)
 #define LIGHT_ATTENUATION_C 1.0f
-#endif
-
-#if defined(ACCESS_CUBE_MAPS)
-#define INPUT_TEXTURE sampler2DArray
-#else
-#define INPUT_TEXTURE sampler2D
 #endif
 
 layout(location = 0) out vec4 data_out;
@@ -36,10 +30,10 @@ in mat3 geomNormalTBN;
 in vec3 geomTangentSpaceCameraPos;
 
 //gbuffers
-uniform INPUT_TEXTURE gbufferDepth;
-uniform INPUT_TEXTURE gbufferNormal;
-uniform INPUT_TEXTURE gbufferSpecular;
-uniform INPUT_TEXTURE gbufferDiffuse;
+uniform sampler2D gbufferDepth;
+uniform sampler2D gbufferNormal;
+uniform sampler2D gbufferSpecular;
+uniform sampler2D gbufferDiffuse;
 
 //light attributes
 uniform vec3 light_position;
@@ -49,40 +43,23 @@ uniform bool light_draw_shadows;
 uniform float light_far_plane;
 uniform float light_bias;
 
-uniform vec4 cam_translate;
 uniform mat4 cam_transform_inverse;
-uniform mat4 cam_persp_inverse;
-
-uniform mat4 cubemap_transform_inverse[6];
+uniform vec4 cam_translate;
 
 uniform vec2 screen_dimensions;
 
-vec3 PerspDiv(vec4 vec)
+vec3 PerspDiv(const vec4 vec)
 {
 	return vec.xyz / vec.w;
-}
-
-vec4 GetTexture(INPUT_TEXTURE tex, vec2 texel)
-{
-#if defined(ACCESS_CUBE_MAPS)
-	return texture(tex, vec3(texel, gl_Layer));
-#else
-	return texture(tex, texel);
-#endif
-}
-
-vec4 GetTexture(INPUT_TEXTURE tex)
-{
-	return GetTexture(tex, gl_FragCoord.xy / screen_dimensions);
 }
 
 void main()
 {
 	vec2 gbuffer_sample = gl_FragCoord.xy / screen_dimensions;
 
-	vec3 scene_space_normal = normalize((GetTexture(gbufferNormal).xyz * 2.0f) - 1.0f);
+	vec3 scene_space_normal = normalize((texture(gbufferNormal, gbuffer_sample).xyz * 2.0f) - 1.0f);
 
-	vec3 screen_space_pos = (vec3(gbuffer_sample, GetTexture(gbufferDepth).r) * 2.0f) - 1.0f;
+	vec3 screen_space_pos = (vec3(gbuffer_sample, texture(gbufferDepth, gbuffer_sample).r) * 2.0f) - 1.0f;
 	vec3 scene_space_pos = PerspDiv(cam_transform_inverse * vec4(screen_space_pos, 1.0f));
 
 	vec3 frag_to_light = normalize(light_position - scene_space_pos);
@@ -90,13 +67,13 @@ void main()
 
 	//diffuse
 	float diffuse_intensity = min(max(dot(scene_space_normal, frag_to_light), 0.0f), 1.0f);
-	vec3 intensity = diffuse_intensity * light_intensity * GetTexture(gbufferDiffuse).rgb;
+	vec3 intensity = diffuse_intensity * light_intensity * texture(gbufferDiffuse, gbuffer_sample).rgb;
 
 	//specular
 	vec3 halfway_dir = normalize(frag_to_cam + frag_to_light);
-	float specular_highlight = GetTexture(gbufferNormal).a * 100.0f;
+	float specular_highlight = texture(gbufferNormal, gbuffer_sample).a * 100.0f;
 	float specular_intensity = min(pow(max(dot(scene_space_normal, halfway_dir), 0.0f), specular_highlight), 1.0f);
-	intensity += float(diffuse_intensity > 0.0f) * specular_intensity * light_intensity * GetTexture(gbufferSpecular).rgb;
+	intensity += float(diffuse_intensity > 0.0f) * specular_intensity * light_intensity * texture(gbufferSpecular, gbuffer_sample).rgb;
 
 	//shadow
 	float depth_sample = texture(light_cubemap, 0.0f - frag_to_light).r;

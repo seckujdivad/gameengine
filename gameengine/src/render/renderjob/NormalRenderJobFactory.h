@@ -30,9 +30,6 @@ public:
 
 	NormalRenderJobInitialiser& GetDefaultInitialiser();
 
-	bool SetDrawReflections(bool value);
-	bool SetDrawShadows(bool value);
-
 	//do not call directly
 	void Render(std::vector<Model*> models, bool continuous_draw = false);
 };
