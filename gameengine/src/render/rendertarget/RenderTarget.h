@@ -37,7 +37,7 @@ private:
 
 	ControllerFunction m_render_function;
 
-	std::unique_ptr<Model> m_fsquad_model = nullptr;
+	std::unique_ptr<Model> m_postprocess_model = nullptr;
 
 protected:
 	//scene rendering
@@ -46,6 +46,7 @@ protected:
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
+	GLenum GetTargetType() const;
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
@@ -69,11 +70,8 @@ public:
 
 	Engine* GetEngine() const;
 
-	GLenum GetTargetType() const;
-
 	void SetConfig(RenderTargetConfig config);
-	void SetModeConfig(RenderTargetConfig::Normal_FirstPass mode_config);
-	void SetModeConfig(RenderTargetConfig::Normal_LastPass mode_config);
+	void SetModeConfig(RenderTargetConfig::Normal mode_config);
 	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
 	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
 	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);

@@ -1,5 +1,0 @@
-#pragma once
-
-const int GAMEENGINE_NUM_DATA_TEX = 1;
-
-const int GAMEENGINE_NORMAL_PASSTHROUGH_TEX = 1;

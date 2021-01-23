@@ -326,6 +326,18 @@ bool RenderTexture::SwapBuffers()
 	return true;
 }
 
+void RenderTexture::SetNormalModePreviousFrameToSelf()
+{
+	if (this->GetRenderMode() == RenderTargetMode::Normal)
+	{
+		std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
+	}
+	else
+	{
+		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
+	}
+}
+
 void RenderTexture::CopyFrom(const RenderTarget* src) const
 {
 	if (this != src)

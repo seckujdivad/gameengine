@@ -10,14 +10,11 @@
 
 struct RenderTargetConfig
 {
-	struct Normal_FirstPass
+	struct Normal
 	{
-
-	};
-
-	struct Normal_LastPass
-	{
-		RenderTextureGroup first_pass;
+		RenderTextureGroup previous_frame;
+		bool draw_shadows = true;
+		bool draw_reflections = true;
 	};
 
 	struct Wireframe
@@ -47,7 +44,7 @@ struct RenderTargetConfig
 	};
 
 	RenderTargetMode mode = RenderTargetMode::Default;
-	std::variant<Normal_FirstPass, Normal_LastPass, Wireframe, Shadow, PostProcess, Textured> mode_data;
+	std::variant<Normal, Wireframe, Shadow, PostProcess, Textured> mode_data;
 
 	bool clear_fbo = true;
 

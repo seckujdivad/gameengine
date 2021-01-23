@@ -28,7 +28,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		RenderTargetConfig cfg;
 		if (composite.mode == RenderMode::Normal)
 		{
-			cfg.SetMode(RenderTargetMode::Normal_LastPass);
+			cfg.SetMode(RenderTargetMode::Normal);
 		}
 		else if (composite.mode == RenderMode::Wireframe)
 		{
@@ -43,12 +43,13 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 			throw std::invalid_argument("Unsupported render mode " + std::to_string(static_cast<int>(composite.mode)));
 		}
 
-		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, info, GL_TEXTURE_2D, false));
+		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, info, GL_TEXTURE_2D, true));
 		RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 
 		std::unique_ptr<RenderJobFactory> factory;
 		if (composite.mode == RenderMode::Normal)
 		{
+			render_texture->SetNormalModePreviousFrameToSelf();
 			factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
 		}
 		else
