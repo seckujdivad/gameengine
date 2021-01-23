@@ -2,18 +2,12 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 18) out;
 
-in vec2 vertUV[];
-
-out vec2 geomUV;
-
 const int NUM_VERTICES = 3;
 
 uniform bool is_cubemap;
 
 void set_outputs(const int index)
 {
-	gl_Position = gl_in[index].gl_Position;
-	geomUV = vertUV[index];
 }
 
 void main()

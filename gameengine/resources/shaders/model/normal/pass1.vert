@@ -2,11 +2,11 @@
 layout (location = 0) in vec3 inPos;
 layout (location = 2) in vec2 inUV;
 
-out vec2 vertUV;
+out vec2 ssUV;
 
 void main()
 {
-	vertUV = inUV;
+	ssUV = inUV;
 
 	gl_Position = vec4(inPos, 1.0f);
 }

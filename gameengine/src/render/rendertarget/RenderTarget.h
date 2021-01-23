@@ -8,7 +8,6 @@
 #include <unordered_set>
 #include <functional>
 #include <memory>
-#include <array>
 
 #include "RenderTarget.h"
 #include "RenderTargetConfig.h"
@@ -40,8 +39,6 @@ private:
 
 	std::unique_ptr<Model> m_fsquad_model = nullptr;
 	std::vector<std::unique_ptr<Model>> m_pointlight_icospheres;
-
-	std::array<std::tuple<glm::mat4, glm::mat4>, 6> m_cubemap_transforms;
 
 protected:
 	//scene rendering

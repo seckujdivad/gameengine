@@ -8,8 +8,6 @@
 #include "RenderTextureData.h"
 #include "RenderTargetMode.h"
 
-class Camera;
-
 struct RenderTargetConfig
 {
 	struct Normal_FirstPass
@@ -21,7 +19,6 @@ struct RenderTargetConfig
 	{
 		RenderTextureGroup first_pass;
 		RenderTextureGroup pointlight_pass;
-		Camera* camera;
 	};
 
 	struct Normal_PointLight

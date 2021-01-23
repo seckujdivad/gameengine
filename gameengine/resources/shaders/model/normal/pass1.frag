@@ -4,49 +4,18 @@
 #define DATA_TEX_NUM 1
 #endif
 
-#if defined(ACCESS_CUBE_MAPS)
-#define INPUT_TEXTURE samplerCube
-#else
-#define INPUT_TEXTURE sampler2D
-#endif
-
 layout(location = 0) out vec4 frag_out;
 
-in vec2 geomUV;
+in vec2 ssUV;
 
-uniform INPUT_TEXTURE gbufferTextureSample;
-uniform INPUT_TEXTURE gbufferLighting;
-uniform INPUT_TEXTURE gbufferNormal;
-uniform INPUT_TEXTURE gbufferSpecular;
-uniform INPUT_TEXTURE gbufferDiffuse;
-
-uniform vec2 screen_dimensions;
-
-uniform mat4 cubemap_transform_inverse[6];
-
-uniform mat4 cam_persp_inverse;
-
-vec3 PerspDiv(vec4 vec)
-{
-	return vec.xyz / vec.w;
-}
-
-vec4 GetTexture(INPUT_TEXTURE tex, vec2 texel)
-{
-#if defined(ACCESS_CUBE_MAPS)
-	return texture(tex, PerspDiv(cubemap_transform_inverse[gl_Layer] * cam_persp_inverse * vec4(texel, 1.0f, 1.0f)));
-#else
-	return texture(tex, texel);
-#endif
-}
-
-vec4 GetTexture(INPUT_TEXTURE tex)
-{
-	return GetTexture(tex, geomUV);
-}
+uniform sampler2D gbufferTextureSample;
+uniform sampler2D gbufferLighting;
+uniform sampler2D gbufferNormal;
+uniform sampler2D gbufferSpecular;
+uniform sampler2D gbufferDiffuse;
 
 void main()
 {
-	frag_out = GetTexture(gbufferTextureSample);
-	frag_out *= vec4(GetTexture(gbufferLighting).rgb, 1.0f);
+	frag_out = texture(gbufferTextureSample, ssUV);
+	frag_out *= vec4(texture(gbufferLighting, ssUV).rgb, 1.0f);
 }
