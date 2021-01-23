@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "RenderController.h"
-#include "../CumulativeTexture.h"
+#include "../renderable/CumulativeTexture.h"
 #include "../../scene/Referenceable.h"
 #include "../../scene/Cubemap.h"
 #include "../rendertarget/RenderTargetMode.h"

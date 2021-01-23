@@ -4,7 +4,7 @@
 #include <optional>
 #include <functional>
 
-#include "renderable/Renderable.h"
+#include "Renderable.h"
 
 class RenderTarget;
 class Renderer;

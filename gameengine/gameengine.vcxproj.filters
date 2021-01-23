@@ -189,9 +189,6 @@
     <ClInclude Include="src\render\LoadedTexture.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\CumulativeTexture.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\controllers\CubemapController.h">
       <Filter>Header Files\render\controllers</Filter>
     </ClInclude>
@@ -272,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="src\render\renderer\WrapperRenderer.h">
       <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderable\CumulativeTexture.h">
+      <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -359,9 +359,6 @@
     <ClCompile Include="src\loaders\SceneLoader.cpp">
       <Filter>Source Files\loaders</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\CumulativeTexture.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\controllers\CubemapController.cpp">
       <Filter>Source Files\render\controllers</Filter>
     </ClCompile>
@@ -439,6 +436,9 @@
     </ClCompile>
     <ClCompile Include="src\render\renderer\WrapperRenderer.cpp">
       <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderable\CumulativeTexture.cpp">
+      <Filter>Source Files\render\renderable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

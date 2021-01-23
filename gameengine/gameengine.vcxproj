@@ -199,9 +199,9 @@
     <ClInclude Include="src\render\controllers\ReflectionController.h" />
     <ClInclude Include="src\render\controllers\ShadowController.h" />
     <ClInclude Include="src\render\controllers\SkyboxController.h" />
-    <ClInclude Include="src\render\CumulativeTexture.h" />
     <ClInclude Include="src\render\LoadedTexture.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\renderable\CumulativeTexture.h" />
     <ClInclude Include="src\render\renderable\Renderable.h" />
     <ClInclude Include="src\render\renderer\NormalRenderer.h" />
     <ClInclude Include="src\render\renderer\Renderer.h" />
@@ -259,7 +259,7 @@
     <ClCompile Include="src\render\controllers\RenderController.cpp" />
     <ClCompile Include="src\render\controllers\ShadowController.cpp" />
     <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
-    <ClCompile Include="src\render\CumulativeTexture.cpp" />
+    <ClCompile Include="src\render\renderable\CumulativeTexture.cpp" />
     <ClCompile Include="src\render\renderable\Renderable.cpp" />
     <ClCompile Include="src\render\renderer\NormalRenderer.cpp" />
     <ClCompile Include="src\render\renderer\Renderer.cpp" />

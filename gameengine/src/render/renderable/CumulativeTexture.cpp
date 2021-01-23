@@ -2,11 +2,11 @@
 
 #include <stdexcept>
 
-#include "rendertarget/RenderTexture.h"
-#include "rendertarget/RenderTextureData.h"
-#include "../scene/Scene.h"
-#include "../Engine.h"
-#include "renderer/Renderer.h"
+#include "../rendertarget/RenderTexture.h"
+#include "../rendertarget/RenderTextureData.h"
+#include "../../scene/Scene.h"
+#include "../../Engine.h"
+#include "../renderer/Renderer.h"
 
 CumulativeTexture::CumulativeTexture(std::vector<Renderer*> renderers) : m_renderers(renderers)
 {
