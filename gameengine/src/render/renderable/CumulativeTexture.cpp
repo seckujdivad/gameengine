@@ -12,7 +12,7 @@ CumulativeTexture::CumulativeTexture(std::vector<Renderer*> renderers) : m_rende
 {
 	if (renderers.size() == 0)
 	{
-		throw std::invalid_argument("At least one factory must be provided");
+		throw std::invalid_argument("At least one renderer must be provided");
 	}
 
 	this->SetFetchModelsFunction([&renderers = this->m_renderers](int layer)
