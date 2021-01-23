@@ -22,6 +22,7 @@ struct RenderTargetConfig
 		RenderTextureGroup first_pass;
 		RenderTextureGroup pointlight_pass;
 		Camera* camera;
+		bool draw_reflections = true;
 	};
 
 	struct Normal_PointLight

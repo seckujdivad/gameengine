@@ -5,7 +5,7 @@
 #endif
 
 #if defined(ACCESS_CUBE_MAPS)
-#define INPUT_TEXTURE samplerCube
+#define INPUT_TEXTURE sampler2DArray
 #else
 #define INPUT_TEXTURE sampler2D
 #endif
@@ -34,7 +34,7 @@ vec3 PerspDiv(vec4 vec)
 vec4 GetTexture(INPUT_TEXTURE tex, vec2 texel)
 {
 #if defined(ACCESS_CUBE_MAPS)
-	return texture(tex, PerspDiv(cubemap_transform_inverse[gl_Layer] * cam_persp_inverse * vec4(texel, 1.0f, 1.0f)));
+	return texture(tex, vec3(texel, gl_Layer));
 #else
 	return texture(tex, texel);
 #endif

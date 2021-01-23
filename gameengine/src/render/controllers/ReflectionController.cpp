@@ -21,7 +21,7 @@ std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int laye
 		config.clear_fbo = false;
 	}
 
-	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1)));
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false, layer != 1)));
 	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
@@ -34,25 +34,10 @@ bool ReflectionController::RepeatingConfigureFactory(RenderJobFactory* factory) 
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
 
-	bool updated = false;
-	
-	RenderTargetConfig config = factory->GetTarget()->GetConfig();
-	/*if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows)
-	{
-		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
-		updated = true;
-	}
+	NormalRenderJobFactory* normal_factory = dynamic_cast<NormalRenderJobFactory*>(factory);
 
-	if (reflection->GetDrawReflections() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections)
-	{
-		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
-		updated = true;
-	}*/
-
-	if (updated)
-	{
-		factory->GetTarget()->SetConfig(config);
-	}
+	bool updated = normal_factory->SetDrawReflections(reflection->GetDrawReflections());
+	updated = normal_factory->SetDrawReflections(reflection->GetDrawReflections()) ? true : updated;
 
 	return updated;
 }
