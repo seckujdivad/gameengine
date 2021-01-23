@@ -7,7 +7,6 @@ RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode)
 	switch (mode)
 	{
 	case RenderTargetMode::Normal_FirstPass:
-	case RenderTargetMode::Normal_PointLight:
 	case RenderTargetMode::Wireframe:
 	case RenderTargetMode::Shadow:
 	case RenderTargetMode::Textured:

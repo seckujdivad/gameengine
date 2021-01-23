@@ -19,7 +19,6 @@ RCID_TF_MODEL_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/def
 RCID_TF_MODEL_WIREFRAME_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/wireframe.geom"
 
 RCID_TF_MODEL_NORMAL_PASS0_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal/pass0.frag"
-RCID_TF_MODEL_POINTLIGHT_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/normal/pointlight.frag"
 RCID_TF_MODEL_WIREFRAME_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/wireframe.frag"
 RCID_TF_MODEL_TEXTURED_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/textured.frag"
 RCID_TF_MODEL_SHADOW_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/model/shadow.frag"

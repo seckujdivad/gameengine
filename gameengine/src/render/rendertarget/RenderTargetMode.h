@@ -5,7 +5,6 @@ enum class RenderTargetMode
 	Default,
 	Normal_FirstPass,
 	Normal_LastPass,
-	Normal_PointLight,
 	Wireframe,
 	Shadow,
 	Postprocess,

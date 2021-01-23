@@ -519,11 +519,5 @@
     <None Include="resources\shaders\model\normal\pass1.vert">
       <Filter>Resource Files\shaders\model\normal</Filter>
     </None>
-    <None Include="resources\shaders\model\normal\pointlight.frag">
-      <Filter>Resource Files\shaders\model\normal</Filter>
-    </None>
-    <None Include="resources\models\icosphere.ply">
-      <Filter>Resource Files\models</Filter>
-    </None>
   </ItemGroup>
 </Project>
