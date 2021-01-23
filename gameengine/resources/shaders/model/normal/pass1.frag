@@ -1,4 +1,4 @@
-#version 430 core
+#version 400 core
 
 #if !defined(DATA_TEX_NUM)
 #define DATA_TEX_NUM 1
