@@ -88,14 +88,14 @@
     <Filter Include="Source Files\render\rendertarget">
       <UniqueIdentifier>{712c77fe-f34a-4dce-ad36-4a5c54b4b3bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\render\renderjob">
-      <UniqueIdentifier>{affc10b1-2b42-4f95-9ad7-c1a4a8bbbdcd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\render\renderjob">
-      <UniqueIdentifier>{6021df5d-9472-4311-a57b-76efb66654db}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\models">
       <UniqueIdentifier>{d8e96184-4322-4c6c-9733-8cd148922a3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\renderer">
+      <UniqueIdentifier>{60297c09-8fe5-487f-ace0-aec8dcbb2e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\renderer">
+      <UniqueIdentifier>{c747aba1-c51b-4ab4-abf8-7894dbef5c44}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -258,29 +258,20 @@
     <ClInclude Include="src\render\renderable\Renderable.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\renderjob\RenderJob.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\RenderJobFactory.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\NormalRenderJob.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\NormalRenderJobFactory.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\WrapperRenderJob.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\WrapperRenderJobFactory.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderjob\RenderJobType.h">
-      <Filter>Header Files\render\renderjob</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\RenderMode.h">
       <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\NormalRenderer.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\Renderer.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\RendererType.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\WrapperRenderer.h">
+      <Filter>Header Files\render\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -434,29 +425,20 @@
     <ClCompile Include="src\render\renderable\Renderable.cpp">
       <Filter>Source Files\render\renderable</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\renderjob\RenderJob.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\RenderJobFactory.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\NormalRenderJob.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\NormalRenderJobFactory.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\WrapperRenderJob.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\WrapperRenderJobFactory.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderjob\RenderJobType.cpp">
-      <Filter>Source Files\render\renderjob</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\rendertarget\RenderTargetConfig.cpp">
       <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\NormalRenderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\Renderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\RendererType.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\WrapperRenderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -516,5 +498,6 @@
     <None Include="resources\shaders\model\normal\pass1.vert">
       <Filter>Resource Files\shaders\model\normal</Filter>
     </None>
+    <None Include="resources\models\icosphere.ply" />
   </ItemGroup>
 </Project>

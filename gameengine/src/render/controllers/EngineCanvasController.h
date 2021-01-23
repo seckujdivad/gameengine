@@ -7,7 +7,7 @@
 #include "RenderController.h"
 #include "../RenderMode.h"
 #include "../rendertarget/RenderTargetConfig.h"
-#include "../renderjob/RenderJobFactory.h"
+#include "../renderer/Renderer.h"
 
 #include <glm/glm.hpp>
 
@@ -28,7 +28,7 @@ public:
 private:
 	EngineCanvas* m_canvas;
 
-	std::vector<std::unique_ptr<RenderJobFactory>> m_factories;
+	std::vector<std::unique_ptr<Renderer>> m_renderers;
 	std::vector<std::unique_ptr<RenderTexture>> m_textures;
 	std::unique_ptr<RenderTexture> m_texture_final;
 

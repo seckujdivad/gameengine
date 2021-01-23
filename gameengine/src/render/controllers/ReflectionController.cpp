@@ -5,9 +5,9 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
-#include "../renderjob/NormalRenderJobFactory.h"
+#include "../renderer/NormalRenderer.h"
 
-std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int layer)
+std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = true;
@@ -26,17 +26,17 @@ std::unique_ptr<RenderJobFactory> ReflectionController::GenerateFactory(int laye
 	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();
 
-	std::unique_ptr<NormalRenderJobFactory> factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
-	return factory;
+	std::unique_ptr<NormalRenderer> renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
+	return renderer;
 }
 
-bool ReflectionController::RepeatingConfigureFactory(RenderJobFactory* factory) const
+bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
 
 	bool updated = false;
 	
-	RenderTargetConfig config = factory->GetTarget()->GetConfig();
+	RenderTargetConfig config = renderer->GetTarget()->GetConfig();
 	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows)
 	{
 		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
@@ -51,7 +51,7 @@ bool ReflectionController::RepeatingConfigureFactory(RenderJobFactory* factory) 
 
 	if (updated)
 	{
-		factory->GetTarget()->SetConfig(config);
+		renderer->GetTarget()->SetConfig(config);
 	}
 
 	return updated;
@@ -64,7 +64,7 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 
 void ReflectionController::PostRender()
 {
-	this->m_factories.at(1)->GetTarget()->SwapBuffers();
+	this->m_renderers.at(1)->GetTarget()->SwapBuffers();
 }
 
 RenderControllerType ReflectionController::GetType() const

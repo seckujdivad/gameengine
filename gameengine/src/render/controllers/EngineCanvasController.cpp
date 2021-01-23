@@ -4,8 +4,8 @@
 #include "../../scene/Scene.h"
 #include "../rendertarget/EngineCanvas.h"
 #include "../rendertarget/RenderTexture.h"
-#include "../renderjob/WrapperRenderJobFactory.h"
-#include "../renderjob/NormalRenderJobFactory.h"
+#include "../renderer/WrapperRenderer.h"
+#include "../renderer/NormalRenderer.h"
 
 RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers)
 {
@@ -14,7 +14,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		throw std::invalid_argument("You must provide at least one composite layer");
 	}
 
-	this->m_factories.clear();
+	this->m_renderers.clear();
 	this->m_textures.clear();
 
 	//make new textures
@@ -46,22 +46,22 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, info, GL_TEXTURE_2D, true));
 		RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 
-		std::unique_ptr<RenderJobFactory> factory;
+		std::unique_ptr<Renderer> renderer;
 		if (composite.mode == RenderMode::Normal)
 		{
 			render_texture->SetNormalModePreviousFrameToSelf();
-			factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
+			renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
 		}
 		else
 		{
-			factory = std::make_unique<WrapperRenderJobFactory>(this->m_engine, render_texture);
+			renderer = std::make_unique<WrapperRenderer>(this->m_engine, render_texture);
 		}
 
 		RenderTargetConfig::PostProcess::CompositeLayer layer;
 		layer.id = render_texture->GetOutputTextures().colour;
 		std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
 
-		this->m_factories.push_back(std::move(factory));
+		this->m_renderers.push_back(std::move(renderer));
 	}
 
 	return postprocess_config;
@@ -91,7 +91,7 @@ void EngineCanvasController::Render()
 {
 	//resize textures to make sure that all textures in the chain are the same size/drawing at the same resolution
 	std::tuple new_output_size = this->m_canvas->GetOutputSize();
-	for (std::unique_ptr<RenderJobFactory>& factory : this->m_factories)
+	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
 	{
 		factory->SetOutputSize(new_output_size);
 	}
@@ -99,10 +99,10 @@ void EngineCanvasController::Render()
 
 	//redraw all textures
 	std::vector<Model*> models = this->m_engine->GetScene()->GetModels();
-	for (std::unique_ptr<RenderJobFactory>& factory : this->m_factories)
+	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
 	{
 		factory->SetCamera(this->m_canvas->GetControlledCamera());
-		factory->GenerateJob(nullptr)->Render(models);
+		factory->Render(models);
 	}
 
 	this->m_texture_final->Render(models);
@@ -151,7 +151,7 @@ void EngineCanvasController::SetRenderLayers(RenderMode mode)
 std::unordered_set<RenderTextureReference> EngineCanvasController::GetRenderTextureDependencies() const
 {
 	std::unordered_set<RenderTextureReference> result;
-	for (const std::unique_ptr<RenderJobFactory>& factory : this->m_factories)
+	for (const std::unique_ptr<Renderer>& factory : this->m_renderers)
 	{
 		for (RenderTextureReference reference : factory->GetRenderTextureDependencies())
 		{

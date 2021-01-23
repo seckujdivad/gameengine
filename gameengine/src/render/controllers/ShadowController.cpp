@@ -3,9 +3,9 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
-#include "../renderjob/WrapperRenderJobFactory.h"
+#include "../renderer/WrapperRenderer.h"
 
-std::unique_ptr<RenderJobFactory> ShadowController::GenerateFactory(int layer)
+std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = false;
@@ -23,11 +23,11 @@ std::unique_ptr<RenderJobFactory> ShadowController::GenerateFactory(int layer)
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
 
-	std::unique_ptr<WrapperRenderJobFactory> factory = std::make_unique<WrapperRenderJobFactory>(this->m_engine, render_texture);
-	return factory;
+	std::unique_ptr<WrapperRenderer> renderer = std::make_unique<WrapperRenderer>(this->m_engine, render_texture);
+	return renderer;
 }
 
-bool ShadowController::RepeatingConfigureFactory(RenderJobFactory* factory) const
+bool ShadowController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	return false;
 }

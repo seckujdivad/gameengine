@@ -4,26 +4,32 @@
 #include <optional>
 #include <functional>
 
+#include "renderable/Renderable.h"
+
 class RenderTarget;
-class RenderJobFactory;
+class Renderer;
 class Model;
 
-class CumulativeTexture
+class CumulativeTexture : Renderable
 {
 public:
 	using FetchModelsFunction = std::function<std::vector<Model*>(int layer)>;
 
 private:
-	std::vector<RenderJobFactory*> m_factories;
+	std::vector<Renderer*> m_renderers;
 
 	FetchModelsFunction m_fetch_models_function;
 
 public:
-	CumulativeTexture(std::vector<RenderJobFactory*> factories);
+	CumulativeTexture(std::vector<Renderer*> renderers);
 
+	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
 	void Render(int index = 0, bool continuous_draw = false) const;
+
+	void SetFetchModelsFunction(FetchModelsFunction func);
 
 	RenderTarget* GetOutput() const;
 
-	void SetFetchModelsFunction(FetchModelsFunction func);
+	std::tuple<int, int> GetOutputSize() const override;
+	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 };

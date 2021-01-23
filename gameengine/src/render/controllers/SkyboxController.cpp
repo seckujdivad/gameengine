@@ -3,9 +3,9 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
-#include "../renderjob/NormalRenderJobFactory.h"
+#include "../renderer/NormalRenderer.h"
 
-std::unique_ptr<RenderJobFactory> SkyboxController::GenerateFactory(int layer)
+std::unique_ptr<Renderer> SkyboxController::GenerateRenderer(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = true;
@@ -25,11 +25,11 @@ std::unique_ptr<RenderJobFactory> SkyboxController::GenerateFactory(int layer)
 	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();
 
-	std::unique_ptr<NormalRenderJobFactory> factory = std::make_unique<NormalRenderJobFactory>(this->m_engine, render_texture);
-	return factory;
+	std::unique_ptr<NormalRenderer> renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
+	return renderer;
 }
 
-bool SkyboxController::RepeatingConfigureFactory(RenderJobFactory* factory) const
+bool SkyboxController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	return false;
 }

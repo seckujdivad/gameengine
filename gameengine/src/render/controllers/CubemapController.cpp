@@ -7,7 +7,7 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../../scene/Scene.h"
 #include "../../scene/Camera.h"
-#include "../renderjob/RenderJobFactory.h"
+#include "../renderer/Renderer.h"
 
 void CubemapController::DerivedClassConstructedEvent()
 {
@@ -42,21 +42,21 @@ void CubemapController::DerivedClassConstructedEvent()
 	this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
 
 	//initialise 2 render textures for the cumulative texture
-	this->m_factories.reserve(2);
+	this->m_renderers.reserve(2);
 	for (int i = 0; i < 2; i++) //0 = static render, 1 = dynamic render
 	{
-		this->m_factories.push_back(this->GenerateFactory(i));
+		this->m_renderers.push_back(this->GenerateRenderer(i));
 	}
 
 	//reinitialise cumulative texture with new render textures
 	{
-		std::vector<RenderJobFactory*> factories;
-		factories.reserve(this->m_factories.size());
-		for (const auto& factory : this->m_factories)
+		std::vector<Renderer*> renderers;
+		renderers.reserve(this->m_renderers.size());
+		for (const auto& renderer : this->m_renderers)
 		{
-			factories.push_back(factory.get());
+			renderers.push_back(renderer.get());
 		}
-		this->m_cumulative_texture = CumulativeTexture(factories);
+		this->m_cumulative_texture = CumulativeTexture(renderers);
 
 		this->m_cumulative_texture->SetFetchModelsFunction([&, engine = this->m_engine, cubemap = this->m_cubemap](int layer)
 		{
@@ -95,7 +95,7 @@ void CubemapController::Render()
 {
 	int redraw_level = -1; //the texture that the redraw starts at - -1 means no redraw at all
 
-	if (!this->m_factories.at(0)->GetTarget()->FramebufferContainsRenderOutput()) //textures have never been drawn to, redraw static textures as well as dynamic
+	if (!this->m_renderers.at(0)->GetTarget()->FramebufferContainsRenderOutput()) //textures have never been drawn to, redraw static textures as well as dynamic
 	{
 		redraw_level = 0;
 	}
@@ -123,11 +123,11 @@ void CubemapController::Render()
 				this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
 			}
 			
-			for (const auto& factory : this->m_factories)
+			for (const auto& renderer : this->m_renderers)
 			{
-				factory->SetOutputSize(this->m_cubemap->GetTextureDimensions());
+				renderer->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 
-				if (this->RepeatingConfigureFactory(factory.get())) //returning true means data has changed
+				if (this->RepeatingConfigureRenderer(renderer.get())) //returning true means data has changed
 				{
 					static_redraw_required = true;
 				}
@@ -164,9 +164,9 @@ RenderTextureGroup CubemapController::GetRenderTexture() const
 std::unordered_set<RenderTextureReference> CubemapController::GetRenderTextureDependencies() const
 {
 	std::unordered_set<RenderTextureReference> result;
-	for (const auto& factory : this->m_factories)
+	for (const auto& renderer : this->m_renderers)
 	{
-		for (RenderTextureReference reference : factory->GetRenderTextureDependencies())
+		for (RenderTextureReference reference : renderer->GetRenderTextureDependencies())
 		{
 			result.insert(reference);
 		}

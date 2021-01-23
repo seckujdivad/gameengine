@@ -5,8 +5,8 @@
 class SkyboxController : public CubemapController
 {
 private:
-	std::unique_ptr<RenderJobFactory> GenerateFactory(int layer) override;
-	bool RepeatingConfigureFactory(RenderJobFactory* factory) const override;
+	std::unique_ptr<Renderer> GenerateRenderer(int layer) override;
+	bool RepeatingConfigureRenderer(Renderer* renderer) const override;
 
 public:
 	SkyboxController(Engine* engine, RenderTextureReference reference);

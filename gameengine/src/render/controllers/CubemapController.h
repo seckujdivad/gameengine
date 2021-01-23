@@ -12,13 +12,13 @@
 
 class Camera;
 class Model;
-class RenderJobFactory;
+class Renderer;
 class RenderTexture;
 
 class CubemapController : public RenderController
 {
 protected:
-	std::vector<std::unique_ptr<RenderJobFactory>> m_factories;
+	std::vector<std::unique_ptr<Renderer>> m_renderers;
 	std::vector<std::unique_ptr<RenderTexture>> m_textures;
 	std::optional<CumulativeTexture> m_cumulative_texture;
 
@@ -29,8 +29,8 @@ protected:
 
 	void DerivedClassConstructedEvent(); //this MUST be called by the derived constructor
 
-	virtual std::unique_ptr<RenderJobFactory> GenerateFactory(int layer) = 0;
-	virtual bool RepeatingConfigureFactory(RenderJobFactory* render_texture) const = 0;
+	virtual std::unique_ptr<Renderer> GenerateRenderer(int layer) = 0;
+	virtual bool RepeatingConfigureRenderer(Renderer* renderer) const = 0;
 
 public:
 	CubemapController(Engine* engine, RenderTextureReference reference);
