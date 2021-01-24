@@ -200,7 +200,19 @@ void ShaderProgram::Select(int texture_group_id)
 			targeted_groups.push_back(texture_group_id);
 		}
 
+		std::vector<int> valid_targeted_groups;
+		std::size_t num_textures = 1;
+		for (int targeted_group : targeted_groups)
+		{
+			if (this->m_textures.count(targeted_group) > 0)
+			{
+				valid_targeted_groups.push_back(targeted_group);
+				num_textures += this->m_textures.at(targeted_group).size();
+			}
+		}
+
 		std::vector<LoadedTexture> textures;
+		textures.reserve(num_textures);
 
 		/*
 		* Without an invalid dummy texture in texture unit 0, OpenGL will produce an invalid program texture usage error
@@ -221,24 +233,20 @@ void ShaderProgram::Select(int texture_group_id)
 			textures.push_back(dummy);
 		}
 
-		for (int group : targeted_groups)
+		for (int targeted_group : valid_targeted_groups)
 		{
-			auto it = this->m_textures.find(group);
-			if (it != this->m_textures.end())
+			for (LoadedTexture& texture : this->m_textures.at(targeted_group))
 			{
-				for (LoadedTexture texture : it->second)
-				{
-					textures.push_back(texture);
-				}
+				textures.push_back(texture);
 			}
 		}
 
-		if ((int)textures.size() >= this->m_max_texture_units)
+		if (static_cast<int>(textures.size()) >= this->m_max_texture_units)
 		{
 			throw std::runtime_error("Too many bound textures - maximum is " + std::to_string(this->m_max_texture_units));
 		}
 
-		for (int i = 0; i < (int)textures.size(); i++)
+		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(textures.at(i).type, textures.at(i).id);
@@ -262,22 +270,20 @@ GLuint ShaderProgram::GetUniform(std::string name)
 	}
 	else
 	{
-		auto it = this->m_uniforms.find(name);
-
 		GLuint result;
-		if (it == this->m_uniforms.end())
+		if (this->m_uniforms.count(name) == 0)
 		{
 			result = this->AddUniformName(name);
 		}
 		else
 		{
-			result = it->second;
+			result = this->m_uniforms.at(name);
 		}
 
 #ifdef GM_SHADER_REJECT_UNKNOWN_UNIFORMS
-		if (result == (GLuint)(-1))
+		if (result == static_cast<GLuint>(-1))
 		{
-			throw std::runtime_error("Uniform location stored is -1 - this is not allowed");
+			throw std::invalid_argument("Uniform location stored is -1 - this is not allowed");
 		}
 #endif
 
