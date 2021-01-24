@@ -33,20 +33,28 @@ void CumulativeTexture::Render(int index, bool continuous_draw) const
 		throw std::invalid_argument("\"index\" must be between 0 and " + std::to_string(static_cast<int>(this->m_renderers.size()) - 1) + " but is " + std::to_string(index));
 	}
 
+	bool propagate_draws = false;
 	for (int i = index; i < static_cast<int>(this->m_renderers.size()); i++)
 	{
-		if (i != 0)
+		std::vector<Model*> models = this->m_fetch_models_function(i);
+		bool draw_required = (models.size() > 0) || (!this->m_renderers.at(i)->GetTarget()->FramebufferContainsRenderOutput()) || this->m_renderers.at(i)->GetTarget()->IsFBOClearedOnRender();
+
+		if ((i != 0) && (propagate_draws || draw_required))
 		{
 			this->m_renderers.at(i - 1)->CopyTo(this->m_renderers.at(i));
 		}
 
-		this->m_renderers.at(i)->Render(this->m_fetch_models_function(i), continuous_draw);
+		if (draw_required)
+		{
+			this->m_renderers.at(i)->Render(models, continuous_draw);
+			propagate_draws = true;
+		}
 	}
 }
 
 RenderTarget* CumulativeTexture::GetOutput() const
 {
-	return this->m_renderers.at(this->m_renderers.size() - 1)->GetTarget();
+	return (*this->m_renderers.rbegin())->GetTarget();
 }
 
 std::tuple<int, int> CumulativeTexture::GetOutputSize() const
