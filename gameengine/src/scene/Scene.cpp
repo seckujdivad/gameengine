@@ -199,9 +199,9 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 		}
 		else
 		{
-			for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+			for (VisBox* visbox : enclosed_visboxes)
 			{
-				std::set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+				std::set<Model*> locally_visible_models = visbox->GetPotentiallyVisibleModels();
 				visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
 			}
 		}
