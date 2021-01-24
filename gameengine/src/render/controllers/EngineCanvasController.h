@@ -1,10 +1,13 @@
 #pragma once
 
-#include <tuple>
+#include <unordered_set>
 #include <vector>
+#include <memory>
 
 #include "RenderController.h"
-#include "../RenderableConfig.h"
+#include "../RenderMode.h"
+#include "../rendertarget/RenderTargetConfig.h"
+#include "../renderer/Renderer.h"
 
 #include <glm/glm.hpp>
 
@@ -17,7 +20,7 @@ class EngineCanvasController : public RenderController
 public:
 	struct CompositeLayer
 	{
-		RenderableConfig config;
+		RenderMode mode;
 		glm::vec4 colour_translate = glm::vec4(0.0f);
 		glm::vec4 colour_scale = glm::vec4(1.0f);
 	};
@@ -25,18 +28,14 @@ public:
 private:
 	EngineCanvas* m_canvas;
 
-	std::vector<RenderTexture*> m_textures;
-	RenderTexture* m_texture_final;
+	std::vector<std::unique_ptr<Renderer>> m_renderers;
+	std::vector<std::unique_ptr<RenderTexture>> m_textures;
+	std::unique_ptr<RenderTexture> m_texture_final;
 
-	RenderableConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
+	RenderTargetConfig RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
 
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
-	EngineCanvasController(const EngineCanvasController&) = delete;
-	EngineCanvasController& operator=(const EngineCanvasController&) = delete;
-	EngineCanvasController(EngineCanvasController&&) = delete;
-	EngineCanvasController& operator=(EngineCanvasController&&) = delete;
-	~EngineCanvasController();
 
 	void Render() override;
 	RenderTextureGroup GetRenderTexture() const override;
@@ -45,8 +44,8 @@ public:
 	EngineCanvas* GetEngineCanvas() const;
 
 	void SetRenderLayers(std::vector<EngineCanvasController::CompositeLayer> composite_layers);
-	void SetRenderLayers(std::vector<RenderableConfig> configs);
-	void SetRenderLayers(RenderableConfig config);
+	void SetRenderLayers(std::vector<RenderMode> modes);
+	void SetRenderLayers(RenderMode mode);
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
 	bool IsEssentialDraw() const override;

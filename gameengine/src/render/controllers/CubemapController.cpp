@@ -4,9 +4,10 @@
 #include <stdexcept>
 
 #include "../../Engine.h"
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/Scene.h"
 #include "../../scene/Camera.h"
+#include "../renderer/Renderer.h"
 
 void CubemapController::DerivedClassConstructedEvent()
 {
@@ -33,7 +34,7 @@ void CubemapController::DerivedClassConstructedEvent()
 	}
 
 	//initialise camera
-	this->m_camera = new Camera();
+	this->m_camera = std::make_unique<Camera>();
 	this->m_camera->SetPosition(this->m_cubemap->GetPosition());
 	this->m_camera->SetRotation(0.0, 0.0, 0.0);
 	this->m_camera->SetClips(this->m_cubemap->GetClips());
@@ -41,14 +42,23 @@ void CubemapController::DerivedClassConstructedEvent()
 	this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
 
 	//initialise 2 render textures for the cumulative texture
-	this->m_render_textures.reserve(2);
+	this->m_renderers.reserve(2);
 	for (int i = 0; i < 2; i++) //0 = static render, 1 = dynamic render
 	{
-		RenderTexture* render_texture = this->GenerateRenderTexture(i);
+		this->m_renderers.push_back(this->GenerateRenderer(i));
+	}
 
-		render_texture->SetRenderFunction(
-			[render_texture, cubemap = this->m_cubemap, engine = this->m_engine, layer = i]
-		(std::vector<Model*> models_input)
+	//reinitialise cumulative texture with new render textures
+	{
+		std::vector<Renderer*> renderers;
+		renderers.reserve(this->m_renderers.size());
+		for (const auto& renderer : this->m_renderers)
+		{
+			renderers.push_back(renderer.get());
+		}
+		this->m_cumulative_texture = CumulativeTexture(renderers);
+
+		this->m_cumulative_texture->SetFetchModelsFunction([&, engine = this->m_engine, cubemap = this->m_cubemap](int layer)
 		{
 			std::vector<Model*> model_ptrs;
 			if (layer == 0)
@@ -64,14 +74,9 @@ void CubemapController::DerivedClassConstructedEvent()
 				throw std::invalid_argument("Invalid layer: " + std::to_string(layer));
 			}
 
-			render_texture->RenderScene(model_ptrs);
+			return model_ptrs;
 		});
-
-		this->m_render_textures.push_back(render_texture);
 	}
-
-	//reinitialise cumulative texture with new render textures
-	this->m_cumulative_texture = CumulativeTexture(this->m_render_textures);
 }
 
 //some members aren't initialised - this is fine if the derived class calls DerivedClassConstructedEvent (which it must)
@@ -84,19 +89,13 @@ CubemapController::CubemapController(Engine* engine, RenderTextureReference refe
 
 CubemapController::~CubemapController()
 {
-	for (RenderTexture* render_texture : this->m_render_textures)
-	{
-		delete render_texture;
-	}
-
-	delete this->m_camera;
 }
 
 void CubemapController::Render()
 {
 	int redraw_level = -1; //the texture that the redraw starts at - -1 means no redraw at all
 
-	if (!this->m_render_textures.at(0)->FramebufferContainsRenderOutput()) //textures have never been drawn to, redraw static textures as well as dynamic
+	if (!this->m_renderers.at(0)->GetTarget()->FramebufferContainsRenderOutput()) //textures have never been drawn to, redraw static textures as well as dynamic
 	{
 		redraw_level = 0;
 	}
@@ -124,11 +123,11 @@ void CubemapController::Render()
 				this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
 			}
 			
-			for (RenderTexture* render_texture : this->m_render_textures)
+			for (const auto& renderer : this->m_renderers)
 			{
-				render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
+				renderer->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 
-				if (this->RepeatingConfigureRenderTexture(render_texture)) //returning true means data has changed
+				if (this->RepeatingConfigureRenderer(renderer.get())) //returning true means data has changed
 				{
 					static_redraw_required = true;
 				}
@@ -153,21 +152,21 @@ void CubemapController::Render()
 
 	if (redraw_level != -1)
 	{
-		this->m_cumulative_texture.Render(redraw_level);
+		this->m_cumulative_texture->Render(redraw_level);
 	}
 }
 
 RenderTextureGroup CubemapController::GetRenderTexture() const
 {
-	return this->m_cumulative_texture.GetOutput()->GetOutputTextures();
+	return dynamic_cast<RenderTexture*>(this->m_cumulative_texture->GetOutput())->GetOutputTextures();
 }
 
 std::unordered_set<RenderTextureReference> CubemapController::GetRenderTextureDependencies() const
 {
 	std::unordered_set<RenderTextureReference> result;
-	for (RenderTexture* render_texture : this->m_render_textures)
+	for (const auto& renderer : this->m_renderers)
 	{
-		for (RenderTextureReference reference : render_texture->GetRenderTextureDependencies())
+		for (RenderTextureReference reference : renderer->GetRenderTextureDependencies())
 		{
 			result.insert(reference);
 		}

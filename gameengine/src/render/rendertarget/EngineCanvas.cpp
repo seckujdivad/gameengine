@@ -8,12 +8,12 @@
 #error
 #endif
 
-#include "../Engine.h"
-#include "../scene/Camera.h"
+#include "../../Engine.h"
+#include "../../scene/Camera.h"
 
-EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderableConfig config)
+EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderTargetConfig config)
 	: wxGLCanvas(parent, args, id),
-	Renderable(engine, config),
+	RenderTarget(engine, config),
 	m_glcontext(context)
 {
 	this->SetFramebuffer(0);
@@ -226,6 +226,21 @@ std::tuple<int, int> EngineCanvas::GetOutputSize() const
 	return std::tuple(this->GetSize().GetX(), this->GetSize().GetY());
 }
 
+bool EngineCanvas::SetOutputSize(std::tuple<int, int> dimensions)
+{
+	std::tuple<int, int> old_dimensions = this->GetOutputSize();
+	if (old_dimensions == dimensions)
+	{
+		return false;
+	}
+	else
+	{
+		this->SetSize(wxSize(std::get<0>(dimensions), std::get<1>(dimensions)));
+
+		return true;
+	}
+}
+
 void EngineCanvas::MakeOpenGLFocus()
 {
 	this->SetCurrent(*this->m_glcontext);
@@ -239,4 +254,9 @@ void EngineCanvas::SetControlledCamera(Camera* camera)
 Camera* EngineCanvas::GetControlledCamera() const
 {
 	return this->m_camera_controlled;
+}
+
+bool EngineCanvas::SwapBuffers()
+{
+	return this->wxGLCanvas::SwapBuffers();
 }

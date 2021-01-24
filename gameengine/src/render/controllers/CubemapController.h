@@ -1,39 +1,39 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+#include <optional>
 
 #include "RenderController.h"
-#include "../CumulativeTexture.h"
+#include "../renderable/CumulativeTexture.h"
 #include "../../scene/Referenceable.h"
 #include "../../scene/Cubemap.h"
-#include "../RenderMode.h"
+#include "../rendertarget/RenderTargetMode.h"
 
-class RenderTexture;
 class Camera;
 class Model;
+class Renderer;
+class RenderTexture;
 
 class CubemapController : public RenderController
 {
 protected:
-	std::vector<RenderTexture*> m_render_textures;
-	CumulativeTexture m_cumulative_texture;
+	std::vector<std::unique_ptr<Renderer>> m_renderers;
+	std::vector<std::unique_ptr<RenderTexture>> m_textures;
+	std::optional<CumulativeTexture> m_cumulative_texture;
 
 	int m_frame_counter;
 
 	Cubemap* m_cubemap;
-	Camera* m_camera;
+	std::unique_ptr<Camera> m_camera;
 
 	void DerivedClassConstructedEvent(); //this MUST be called by the derived constructor
 
-	virtual RenderTexture* GenerateRenderTexture(int layer) const = 0;
-	virtual bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const = 0;
+	virtual std::unique_ptr<Renderer> GenerateRenderer(int layer) = 0;
+	virtual bool RepeatingConfigureRenderer(Renderer* renderer) const = 0;
 
 public:
 	CubemapController(Engine* engine, RenderTextureReference reference);
-	CubemapController(const CubemapController&) = delete;
-	CubemapController& operator=(const CubemapController&) = delete;
-	CubemapController(CubemapController&&) = delete;
-	CubemapController& operator=(CubemapController&&) = delete;
 	virtual ~CubemapController();
 
 	void Render() override;

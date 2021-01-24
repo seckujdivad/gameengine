@@ -1,0 +1,3 @@
+#include "resource.h"
+
+RCID_TF_MODEL_ICOSPHERE RCT_TEXTFILE "../gameengine/resources/models/icosphere.ply"

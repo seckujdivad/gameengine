@@ -5,8 +5,8 @@
 class ShadowController : public CubemapController
 {
 private:
-	RenderTexture* GenerateRenderTexture(int layer) const override;
-	bool RepeatingConfigureRenderTexture(RenderTexture* render_texture) const override;
+	std::unique_ptr<Renderer> GenerateRenderer(int layer) override;
+	bool RepeatingConfigureRenderer(Renderer* renderer) const override;
 
 public:
 	ShadowController(Engine* engine, RenderTextureReference reference);

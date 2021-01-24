@@ -2,56 +2,59 @@
 
 #include <stdexcept>
 
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
+#include "../renderer/NormalRenderer.h"
 
-RenderTexture* ReflectionController::GenerateRenderTexture(int layer) const
+std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = true;
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderableConfig config = { RenderMode::Normal, RenderableConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal_Draw, RenderTargetConfig::Normal_Draw() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1);
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1)));
+	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
+	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();
 
-	return render_texture;
+	std::unique_ptr<NormalRenderer> renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
+	return renderer;
 }
 
-bool ReflectionController::RepeatingConfigureRenderTexture(RenderTexture* render_texture) const
+bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
 
-	if (render_texture->GetRenderMode() == RenderMode::Normal)
+	bool updated = false;
+	
+	RenderTargetConfig config = renderer->GetTarget()->GetConfig();
+	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows)
 	{
-		if (std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_shadows == reflection->GetDrawShadows()
-			&& std::get<RenderableConfig::Normal>(render_texture->GetConfig().mode_data).draw_reflections == reflection->GetDrawReflections())
-		{
-			return false;
-		}
-		else
-		{
-			RenderableConfig config = render_texture->GetConfig();
-			std::get<RenderableConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
-			std::get<RenderableConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
-			render_texture->SetConfig(config);
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
+		updated = true;
+	}
 
-			return true;
-		}
-	}
-	else
+	if (reflection->GetDrawReflections() != std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_reflections)
 	{
-		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(render_texture->GetRenderMode())));
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
+		updated = true;
 	}
+
+	if (updated)
+	{
+		renderer->GetTarget()->SetConfig(config);
+	}
+
+	return updated;
 }
 
 ReflectionController::ReflectionController(Engine* engine, RenderTextureReference reference) : CubemapController(engine, reference)
@@ -61,7 +64,7 @@ ReflectionController::ReflectionController(Engine* engine, RenderTextureReferenc
 
 void ReflectionController::PostRender()
 {
-	this->m_render_textures.at(1)->SwapBuffers();
+	this->m_renderers.at(1)->GetTarget()->SwapBuffers();
 }
 
 RenderControllerType ReflectionController::GetType() const

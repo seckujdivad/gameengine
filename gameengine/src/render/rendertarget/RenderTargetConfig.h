@@ -6,11 +6,15 @@
 #include <glm/glm.hpp>
 
 #include "RenderTextureData.h"
-#include "RenderMode.h"
+#include "RenderTargetMode.h"
 
-struct RenderableConfig
+struct RenderTargetConfig
 {
-	struct Normal
+	struct Normal_DepthOnly
+	{
+	};
+
+	struct Normal_Draw
 	{
 		RenderTextureGroup previous_frame;
 		bool draw_shadows = true;
@@ -43,8 +47,12 @@ struct RenderableConfig
 
 	};
 
-	RenderMode mode = RenderMode::Default;
-	std::variant<Normal, Wireframe, Shadow, PostProcess, Textured> mode_data;
+	RenderTargetMode mode = RenderTargetMode::Default;
+	std::variant<Normal_DepthOnly, Normal_Draw, Wireframe, Shadow, PostProcess, Textured> mode_data;
 
 	bool clear_fbo = true;
+
+	void SetMode(RenderTargetMode mode);
 };
+
+void SetMode(RenderTargetConfig& config, RenderTargetMode mode);

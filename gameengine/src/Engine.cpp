@@ -1,17 +1,15 @@
 #include "Engine.h"
 
-#include <tuple>
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <chrono>
 
 #include <wx/image.h>
 
+#include "LogMessage.h"
+
 #include "scene/Scene.h"
 
-#include "render/Renderable.h"
-#include "render/EngineCanvas.h"
+#include "render/rendertarget/RenderTarget.h"
+#include "render/rendertarget/EngineCanvas.h"
 
 #include "render/controllers/RenderController.h"
 #include "render/controllers/ShadowController.h"
@@ -19,8 +17,6 @@
 #include "render/controllers/ReflectionController.h"
 
 #include "scene/model/Model.h"
-
-const char GAMEENGINE_LOG_PATH[] = "gameengine_GL.log";
 
 const std::size_t GAMEENGINE_PATCH_SIZE = 16;
 
@@ -377,7 +373,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 {
 	this->MakeContextCurrent();
 
-	RenderableConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
+	RenderTargetConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
 	canvas->MakeOpenGLFocus();
 
@@ -393,23 +389,23 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 	return controller;
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id, wxWindow* parent)
 {
 	std::vector<EngineCanvasController::CompositeLayer> composite_layers;
-	composite_layers.reserve(configs.size());
-	for (const RenderableConfig& config : configs)
+	composite_layers.reserve(modes.size());
+	for (RenderMode mode : modes)
 	{
 		EngineCanvasController::CompositeLayer layer;
-		layer.config = config;
+		layer.mode = mode;
 		composite_layers.push_back(layer);
 	}
 
 	return this->GenerateNewCanvas(composite_layers, id, parent);
 }
 
-EngineCanvasController* Engine::GenerateNewCanvas(RenderableConfig config, wxWindowID id, wxWindow* parent)
+EngineCanvasController* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id, wxWindow* parent)
 {
-	return this->GenerateNewCanvas(std::vector({ config }), id, parent);
+	return this->GenerateNewCanvas(std::vector({ mode }), id, parent);
 }
 
 void Engine::Render()
@@ -688,8 +684,6 @@ void Engine::Render()
 			}
 		}
 	}
-
-	glFlush();
 }
 
 LoadedTexture Engine::GetTexture(TextureReference reference) const
@@ -848,65 +842,6 @@ bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometr
 bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
 {
 	return !(first == second);
-}
-
-void LogMessage(std::string message, bool show_time)
-{
-	std::ofstream output_file;
-	output_file.open(GAMEENGINE_LOG_PATH, std::ios_base::app);
-
-	std::string padding;
-	if (show_time)
-	{
-		std::chrono::system_clock::time_point now_time_point = std::chrono::system_clock::now();
-		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now_time_point);
-		std::string now_string = std::ctime(&now_time_t);
-		now_string = now_string.substr(0, now_string.size() - 1); //remove the newline that is added for some reason
-
-		output_file << now_string << ": ";
-
-		for (std::size_t i = 0; i < now_string.size() + 2U; i++)
-		{
-			padding += ' ';
-		}
-	}
-
-	std::vector<std::string> lines = { "" };
-	for (char& character : message)
-	{
-		if (character == '\n')
-		{
-			if (!lines.back().empty())
-			{
-				lines.push_back("");
-			}
-		}
-		else
-		{
-			lines.back() += character;
-		}
-	}
-
-	for (std::size_t i = 0U; i < lines.size(); i++)
-	{
-		std::string& line = lines.at(i);
-
-		if (!(
-			i != 0U
-			&& i + 1U == lines.size()
-			&& line.empty()
-			))
-		{
-			if (i != 0U)
-			{
-				output_file << padding;
-			}
-
-			output_file << line << std::endl;
-		}
-	}
-
-	output_file.close();
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)

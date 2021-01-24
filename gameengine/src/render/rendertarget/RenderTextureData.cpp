@@ -64,3 +64,12 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 		glCopyImageSubData(source.data.at(i), source.type, 0, 0, 0, 0, destination.data.at(i), destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}
 }
+
+bool CheckTextureGroup(RenderTextureGroup texture_group, RenderTextureInfo texture_info)
+{
+	bool correct = (texture_info.colour) == (texture_group.colour != NULL);
+	correct = correct && (texture_info.depth) == (texture_group.depth != NULL);
+	correct = correct && (texture_info.num_data == static_cast<int>(texture_group.data.size()));
+
+	return correct;
+}

@@ -1,30 +1,33 @@
 #include "ShadowController.h"
 
-#include "../RenderTexture.h"
+#include "../rendertarget/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
+#include "../renderer/WrapperRenderer.h"
 
-RenderTexture* ShadowController::GenerateRenderTexture(int layer) const
+std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
 	RenderTextureInfo info;
 	info.colour = false;
 	info.depth = true;
 	info.num_data = 0;
 
-	RenderableConfig config = { RenderMode::Shadow, RenderableConfig::Shadow() };
+	RenderTargetConfig config = { RenderTargetMode::Shadow, RenderTargetConfig::Shadow() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false);
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false)));
+	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
-	render_texture->SetCamera(this->m_camera);
+	render_texture->SetCamera(this->m_camera.get());
 
-	return render_texture;
+	std::unique_ptr<WrapperRenderer> renderer = std::make_unique<WrapperRenderer>(this->m_engine, render_texture);
+	return renderer;
 }
 
-bool ShadowController::RepeatingConfigureRenderTexture(RenderTexture* render_texture) const
+bool ShadowController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	return false;
 }

@@ -175,9 +175,9 @@ glm::vec4 Scene::GetClearColour() const
 	return this->m_clear_colour;
 }
 
-std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode, std::vector<Model*> model_pool) const
+std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMode mode, std::vector<Model*> model_pool) const
 {
-	if ((mode == RenderMode::Normal) || (mode == RenderMode::Shadow) || (mode == RenderMode::Textured))
+	if ((mode == RenderTargetMode::Normal_DepthOnly) || (mode == RenderTargetMode::Normal_Draw) || (mode == RenderTargetMode::Shadow) || (mode == RenderTargetMode::Textured))
 	{
 		std::set<Model*> visible_models;
 		std::set<VisBox*> enclosed_visboxes;
@@ -199,9 +199,9 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode
 		}
 		else
 		{
-			for (auto it = enclosed_visboxes.begin(); it != enclosed_visboxes.end(); it++)
+			for (VisBox* visbox : enclosed_visboxes)
 			{
-				std::set<Model*> locally_visible_models = (*it)->GetPotentiallyVisibleModels();
+				std::set<Model*> locally_visible_models = visbox->GetPotentiallyVisibleModels();
 				visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
 			}
 		}
@@ -223,11 +223,9 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderMode mode
 			output.assign(output_set.begin(), output_set.end());
 		}
 
-		std::sort(output.begin(), output.end(), [position](Model* a, Model* b) mutable { return glm::length(a->GetPosition() - position) < glm::length(b->GetPosition() - position); }); //true means a should be moved forward and drawn earlier
-
 		return output;
 	}
-	else if (mode == RenderMode::Wireframe)
+	else if (mode == RenderTargetMode::Wireframe)
 	{
 		return this->m_models;
 	}

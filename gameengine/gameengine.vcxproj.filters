@@ -73,11 +73,32 @@
     <Filter Include="Resource Files\shaders\model">
       <UniqueIdentifier>{9ea4a5d6-5493-4222-b408-1e885d7c44ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\model\normal">
+      <UniqueIdentifier>{1bd67220-ce7f-4584-8cf1-18b2bcdfa1a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\renderable">
+      <UniqueIdentifier>{5d9a2569-9432-42ff-846e-4114c203735e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\rendertarget">
+      <UniqueIdentifier>{21e18304-d079-4bb3-b33f-4b955cffd682}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\renderable">
+      <UniqueIdentifier>{aee1afc4-e0d7-4a7b-a59c-2f40b0d89dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\rendertarget">
+      <UniqueIdentifier>{712c77fe-f34a-4dce-ad36-4a5c54b4b3bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{d8e96184-4322-4c6c-9733-8cd148922a3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\renderer">
+      <UniqueIdentifier>{60297c09-8fe5-487f-ace0-aec8dcbb2e29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\renderer">
+      <UniqueIdentifier>{c747aba1-c51b-4ab4-abf8-7894dbef5c44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\render\EngineCanvas.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="src\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,17 +153,11 @@
     <ClInclude Include="src\scene\SceneApproximation.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\Renderable.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="src\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\RenderTexture.h">
-      <Filter>Header Files\render</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\Referenceable.h">
       <Filter>Header Files\scene</Filter>
@@ -171,19 +186,7 @@
     <ClInclude Include="src\loaders\SceneLoader.h">
       <Filter>Header Files\loaders</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\RenderMode.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\RenderTextureData.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\LoadedTexture.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\RenderableConfig.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\CumulativeTexture.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
     <ClInclude Include="src\render\controllers\CubemapController.h">
@@ -228,11 +231,50 @@
     <ClInclude Include="src\scene\RevisableResource.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\LogMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\RenderTarget.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\EngineCanvas.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\RenderTexture.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\RenderTargetConfig.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\RenderTargetMode.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\RenderTextureData.h">
+      <Filter>Header Files\render\rendertarget</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderable\Renderable.h">
+      <Filter>Header Files\render\renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\RenderMode.h">
+      <Filter>Header Files\render\controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\NormalRenderer.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\Renderer.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\RendererType.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer\WrapperRenderer.h">
+      <Filter>Header Files\render\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderable\CumulativeTexture.h">
+      <Filter>Header Files\render\renderable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\render\EngineCanvas.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -287,14 +329,8 @@
     <ClCompile Include="src\scene\SceneApproximation.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\Renderable.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="src\Resource.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\RenderTexture.cpp">
-      <Filter>Source Files\render</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Referenceable.cpp">
       <Filter>Source Files\scene</Filter>
@@ -322,12 +358,6 @@
     </ClCompile>
     <ClCompile Include="src\loaders\SceneLoader.cpp">
       <Filter>Source Files\loaders</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\CumulativeTexture.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\RenderTextureData.cpp">
-      <Filter>Source Files\render</Filter>
     </ClCompile>
     <ClCompile Include="src\render\controllers\CubemapController.cpp">
       <Filter>Source Files\render\controllers</Filter>
@@ -371,12 +401,54 @@
     <ClCompile Include="src\scene\RevisableResource.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\LogMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTarget.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\EngineCanvas.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTexture.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTargetMode.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTextureData.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderable\Renderable.cpp">
+      <Filter>Source Files\render\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\RenderTargetConfig.cpp">
+      <Filter>Source Files\render\rendertarget</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\NormalRenderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\Renderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\RendererType.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer\WrapperRenderer.cpp">
+      <Filter>Source Files\render\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderable\CumulativeTexture.cpp">
+      <Filter>Source Files\render\renderable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
     <ResourceCompile Include="shaders.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="models.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -405,9 +477,6 @@
     <None Include="resources\shaders\model\default.vert">
       <Filter>Resource Files\shaders\model</Filter>
     </None>
-    <None Include="resources\shaders\model\normal.frag">
-      <Filter>Resource Files\shaders\model</Filter>
-    </None>
     <None Include="resources\shaders\model\shadow.frag">
       <Filter>Resource Files\shaders\model</Filter>
     </None>
@@ -419,6 +488,15 @@
     </None>
     <None Include="resources\shaders\model\wireframe.geom">
       <Filter>Resource Files\shaders\model</Filter>
+    </None>
+    <None Include="resources\models\icosphere.ply">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="resources\shaders\model\normal\depthonly.frag">
+      <Filter>Resource Files\shaders\model\normal</Filter>
+    </None>
+    <None Include="resources\shaders\model\normal\draw.frag">
+      <Filter>Resource Files\shaders\model\normal</Filter>
     </None>
   </ItemGroup>
 </Project>

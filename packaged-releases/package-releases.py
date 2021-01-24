@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+#to run in visual studio, press [Shift]+[Alt]+[F5]
+
 import os
 import json
 import sys

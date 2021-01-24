@@ -16,7 +16,7 @@
 #include "GLComponents.h"
 
 #include "render/LoadedTexture.h"
-#include "render/RenderTextureData.h"
+#include "render/rendertarget/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
 
 #include "scene/Referenceable.h"
@@ -27,7 +27,7 @@
 
 class EngineCanvas;
 class Scene;
-class Renderable;
+class RenderTarget;
 class Model;
 
 class Engine : public SceneChild
@@ -92,8 +92,8 @@ public:
 	~Engine();
 
 	EngineCanvasController* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(std::vector<RenderableConfig> configs, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
-	EngineCanvasController* GenerateNewCanvas(RenderableConfig config, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
+	EngineCanvasController* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
 	void Render();
 
@@ -110,5 +110,3 @@ public:
 
 bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
 bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
-
-void LogMessage(std::string message, bool show_time = true);

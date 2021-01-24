@@ -57,7 +57,7 @@ bool IsPlyInt(std::string type_name)
 	}
 }
 
-std::shared_ptr<Polygonal> ModelFromPly(std::string path)
+std::shared_ptr<Polygonal> ModelFromPlyText(std::string text)
 {
 	//ply files could (in theory) contain pretty much any kind of data
 	//I have restricted this parser to work with Blender-style properties
@@ -88,167 +88,183 @@ std::shared_ptr<Polygonal> ModelFromPly(std::string path)
 
 	std::shared_ptr<Polygonal> result = std::make_shared<Polygonal>();
 
+	std::vector<std::string> lines = SplitOnChar(text, '\n');
+
+	for (std::string line : lines)
+	{
+		if ((line_index == 0) && (line != "ply"))
+		{
+			throw std::runtime_error("Invalid file format: line 1 of header should be \"ply\", not \"" + line + "\"");
+		}
+		else if ((line_index == 1) && (line != "format ascii 1.0"))
+		{
+			throw std::runtime_error("Invalid file format subtype: line 2 must be \"format ascii 1.0\", not \"" + line + "\"");
+		}
+		else if (line.substr(0, 8) == "comment ")
+		{
+			//ignore comments
+		}
+		else
+		{
+			if (in_header) //interpret data formats
+			{
+				if (line == "end_header")
+				{
+					for (int i = 0; i < (int)header_layout.size(); i++)
+					{
+						current_element = header_layout.at(i);
+						for (int j = 0; j < (int)current_element->field_names.size(); j++)
+						{
+							current_element->field_name_map.insert(std::pair<std::string, int>(current_element->field_names.at(j), j));
+						}
+					}
+
+					in_header = false;
+				}
+				else if (line.substr(0, 8) == "element ")
+				{
+					current_element = new PlyElement();
+					sliced_string = SplitOnChar(line, ' ');
+
+					if (sliced_string.size() == 3)
+					{
+						current_element->name = sliced_string.at(1);
+						current_element->num_elements = std::stoi(sliced_string.at(2));
+						header_layout.push_back(current_element);
+					}
+					else
+					{
+						throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + " in element definition: 3 items required, but " + std::to_string(sliced_string.size()) + " found");
+					}
+				}
+				else if (line.substr(0, 9) == "property ")
+				{
+					if (current_element != nullptr)
+					{
+						sliced_string = SplitOnChar(line, ' ');
+
+						if (sliced_string.size() == 3)
+						{
+							current_type.is_list = false;
+							current_type.is_ints = IsPlyInt(sliced_string.at(1));
+							current_element->field_names.push_back(sliced_string.at(2));
+							current_element->types.push_back(current_type);
+						}
+						else if (sliced_string.size() == 5)
+						{
+							if (sliced_string.at(1) == "list")
+							{
+								current_type.is_list = true;
+								current_type.is_ints = IsPlyInt(sliced_string.at(3));
+								current_element->field_names.push_back(sliced_string.at(4));
+								current_element->types.push_back(current_type);
+							}
+							else
+							{
+								throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": if there are 5 elements, the second must be \"list\"");
+							}
+						}
+						else
+						{
+							throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": 3 or 5 items required, but " + std::to_string(sliced_string.size()) + " found");
+						}
+					}
+				}
+			}
+			else //interpret body
+			{
+				sliced_string = SplitOnChar(line, ' ');
+
+				if (header_layout.at(pattern_index)->name == "vertex")
+				{
+					vertex_id_lookup.push_back(result->AddVertex(glm::dvec3(
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
+					)));
+					vertex_normals.push_back(glm::dvec3(
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
+					));
+					vertex_uvs.push_back(glm::dvec2(
+						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
+						1.0 - std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
+					));
+				}
+				else if (header_layout.at(pattern_index)->name == "face")
+				{
+					vertex_indices.clear();
+					face_normals.clear();
+					face_uvs.clear();
+
+					for (int i = 1; i < std::stoi(sliced_string.at(0)) + 1; i++)
+					{
+						vertex_indices.push_back(std::stoi(sliced_string.at(i)));
+						face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
+						face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
+					}
+
+					glm::dvec3 face_normal = glm::dvec3(0.0f, 0.0f, 0.0f);
+					for (size_t i = 0; i < face_normals.size(); i++)
+					{
+						face_normal = face_normal + face_normals.at(i);
+					}
+
+					Polygonal::Face face = Polygonal::Face(*result);
+					face.SetNormal(glm::normalize(face_normal));
+
+					for (int i = 0; i < static_cast<int>(vertex_indices.size()); i++)
+					{
+						Polygonal::Face::IndexedVertex vertex = Polygonal::Face::IndexedVertex(vertex_id_lookup.at(vertex_indices.at(i)), face_uvs.at(i));
+						face.AddVertex(vertex);
+					}
+
+					result->AddFace(face);
+				}
+
+				//move to next subpattern
+				pattern_subindex++;
+				if (header_layout.at(pattern_index)->num_elements == pattern_subindex)
+				{
+					pattern_subindex = 0;
+					pattern_index++;
+				}
+			}
+		}
+
+		line_index++;
+	}
+
+	//free header layout memory
+	for (size_t i = 0; i < header_layout.size(); i++)
+	{
+		delete header_layout.at(i);
+	}
+
+	//return model
+	return result;
+}
+
+std::shared_ptr<Polygonal> ModelFromPly(std::string path)
+{
+	std::ifstream file;
+	std::string file_contents;
+	std::string line;
+
 	file.open(path);
 	if (file.is_open())
 	{
 		while (std::getline(file, line))
 		{
-			if ((line_index == 0) && (line != "ply"))
-			{
-				throw std::runtime_error("Invalid file format: line 1 of header should be \"ply\", not \"" + line + "\"");
-			}
-			else if ((line_index == 1) && (line != "format ascii 1.0"))
-			{
-				throw std::runtime_error("Invalid file format subtype: line 2 must be \"format ascii 1.0\", not \"" + line + "\"");
-			}
-			else if (line.substr(0, 8) == "comment ")
-			{
-				//ignore comments
-			}
-			else
-			{
-				if (in_header) //interpret data formats
-				{
-					if (line == "end_header")
-					{
-						for (int i = 0; i < (int)header_layout.size(); i++)
-						{
-							current_element = header_layout.at(i);
-							for (int j = 0; j < (int)current_element->field_names.size(); j++)
-							{
-								current_element->field_name_map.insert(std::pair<std::string, int>(current_element->field_names.at(j), j));
-							}
-						}
-
-						in_header = false;
-					}
-					else if (line.substr(0, 8) == "element ")
-					{
-						current_element = new PlyElement();
-						sliced_string = SplitOnChar(line, ' ');
-
-						if (sliced_string.size() == 3)
-						{
-							current_element->name = sliced_string.at(1);
-							current_element->num_elements = std::stoi(sliced_string.at(2));
-							header_layout.push_back(current_element);
-						}
-						else
-						{
-							throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + " in element definition: 3 items required, but " + std::to_string(sliced_string.size()) + " found");
-						}
-					}
-					else if (line.substr(0, 9) == "property ")
-					{
-						if (current_element != nullptr)
-						{
-							sliced_string = SplitOnChar(line, ' ');
-
-							if (sliced_string.size() == 3)
-							{
-								current_type.is_list = false;
-								current_type.is_ints = IsPlyInt(sliced_string.at(1));
-								current_element->field_names.push_back(sliced_string.at(2));
-								current_element->types.push_back(current_type);
-							}
-							else if (sliced_string.size() == 5)
-							{
-								if (sliced_string.at(1) == "list")
-								{
-									current_type.is_list = true;
-									current_type.is_ints = IsPlyInt(sliced_string.at(3));
-									current_element->field_names.push_back(sliced_string.at(4));
-									current_element->types.push_back(current_type);
-								}
-								else
-								{
-									throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": if there are 5 elements, the second must be \"list\"");
-								}
-							}
-							else
-							{
-								throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": 3 or 5 items required, but " + std::to_string(sliced_string.size()) + " found");
-							}
-						}
-					}
-				}
-				else //interpret body
-				{
-					sliced_string = SplitOnChar(line, ' ');
-
-					if (header_layout.at(pattern_index)->name == "vertex")
-					{
-						vertex_id_lookup.push_back(result->AddVertex(glm::dvec3(
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
-						)));
-						vertex_normals.push_back(glm::dvec3(
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
-						));
-						vertex_uvs.push_back(glm::dvec2(
-							std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
-							1.0 - std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
-						));
-					}
-					else if (header_layout.at(pattern_index)->name == "face")
-					{
-						vertex_indices.clear();
-						face_normals.clear();
-						face_uvs.clear();
-
-						for (int i = 1; i < std::stoi(sliced_string.at(0)) + 1; i++)
-						{
-							vertex_indices.push_back(std::stoi(sliced_string.at(i)));
-							face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
-							face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
-						}
-
-						glm::dvec3 face_normal = glm::dvec3(0.0f, 0.0f, 0.0f);
-						for (size_t i = 0; i < face_normals.size(); i++)
-						{
-							face_normal = face_normal + face_normals.at(i);
-						}
-
-						Polygonal::Face face = Polygonal::Face(*result);
-						face.SetNormal(glm::normalize(face_normal));
-
-						for (int i = 0; i < static_cast<int>(vertex_indices.size()); i++)
-						{
-							Polygonal::Face::IndexedVertex vertex = Polygonal::Face::IndexedVertex(vertex_id_lookup.at(vertex_indices.at(i)), face_uvs.at(i));
-							face.AddVertex(vertex);
-						}
-
-						result->AddFace(face);
-					}
-
-					//move to next subpattern
-					pattern_subindex++;
-					if (header_layout.at(pattern_index)->num_elements == pattern_subindex)
-					{
-						pattern_subindex = 0;
-						pattern_index++;
-					}
-				}
-			}
-
-			line_index++;
+			file_contents += line + '\n';
 		}
-
-		//free header layout memory
-		for (size_t i = 0; i < header_layout.size(); i++)
-		{
-			delete header_layout.at(i);
-		}
-
-		//return model
-		return result;
 	}
 	else
 	{
 		throw std::invalid_argument("Can't open ply file at '" + path + "'");
 	}
+
+	return ModelFromPlyText(file_contents);
 }
 
