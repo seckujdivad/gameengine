@@ -113,7 +113,15 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		);
 
 		glClearDepth(1.0);
-		glDepthMask(GL_TRUE);
+
+		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+		{
+			glDepthMask(GL_FALSE);
+		}
+		else
+		{
+			glDepthMask(GL_TRUE);
+		}
 
 		if (this->m_config.clear_fbo)
 		{
