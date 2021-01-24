@@ -125,22 +125,20 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		if (this->m_config.clear_fbo)
 		{
-			if (this->GetRenderMode() == RenderTargetMode::Shadow)
+			GLbitfield clear_buffers = NULL;
+			if ((this->GetRenderMode() == RenderTargetMode::Shadow) || (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly))
 			{
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-			else if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
-			{
-				glClear(GL_DEPTH_BUFFER_BIT);
+				clear_buffers |= GL_DEPTH_BUFFER_BIT;
 			}
 			else if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 			{
-				glClear(GL_COLOR_BUFFER_BIT);
+				clear_buffers |= GL_COLOR_BUFFER_BIT;
 			}
 			else
 			{
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				clear_buffers |= GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 			}
+			glClear(clear_buffers);
 		}
 
 		const std::function<GLenum(Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)
