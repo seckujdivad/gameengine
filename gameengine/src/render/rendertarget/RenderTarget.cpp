@@ -114,7 +114,8 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		glClearDepth(1.0);
 
-		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+		if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+			|| this->RenderModeIsFSQuadRendering())
 		{
 			glDepthMask(GL_FALSE);
 		}
@@ -123,7 +124,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glDepthMask(GL_TRUE);
 		}
 
-		if (this->m_config.clear_fbo)
+		if (this->m_config.clear_fbo && !this->RenderModeIsFSQuadRendering())
 		{
 			GLbitfield clear_buffers = NULL;
 			if ((this->GetRenderMode() == RenderTargetMode::Shadow) || (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly))
@@ -251,6 +252,11 @@ bool RenderTarget::RenderModeIsModelRendering(RenderTargetMode mode)
 bool RenderTarget::RenderModeIsModelRendering()
 {
 	return this->RenderModeIsModelRendering(this->GetRenderMode());
+}
+
+bool RenderTarget::RenderModeIsFSQuadRendering()
+{
+	return !this->RenderModeIsModelRendering();
 }
 
 std::vector<Model*> RenderTarget::Render_GetModels_Model(std::vector<Model*> model_pool)

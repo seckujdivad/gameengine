@@ -52,6 +52,7 @@ protected:
 
 	static bool RenderModeIsModelRendering(RenderTargetMode mode);
 	bool RenderModeIsModelRendering();
+	bool RenderModeIsFSQuadRendering();
 
 	//rendering stages
 	std::vector<Model*> Render_GetModels_Model(std::vector<Model*> model_pool);
