@@ -226,6 +226,11 @@ bool RenderTarget::FramebufferContainsRenderOutput() const
 	return this->m_fbo_contains_render;
 }
 
+bool RenderTarget::IsFBOClearedOnRender() const
+{
+	return this->m_config.clear_fbo;
+}
+
 void RenderTarget::PreRenderEvent()
 {
 }

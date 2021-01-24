@@ -82,8 +82,9 @@ public:
 	RenderTargetMode GetRenderMode() const;
 
 	bool FramebufferContainsRenderOutput() const;
+	bool IsFBOClearedOnRender() const;
 
-	void Render(std::vector<Model*> models, bool continuous_draw = false);
+	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
 	void RenderScene(std::vector<Model*> models); //only for calling by lambdas passed in through SetRenderFunction
 
 	virtual bool SwapBuffers() = 0;
