@@ -684,8 +684,6 @@ void Engine::Render()
 			}
 		}
 	}
-
-	glFlush();
 }
 
 LoadedTexture Engine::GetTexture(TextureReference reference) const

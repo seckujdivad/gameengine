@@ -12,13 +12,13 @@ std::unique_ptr<Renderer> SkyboxController::GenerateRenderer(int layer)
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTargetConfig config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal_Draw, RenderTargetConfig::Normal_Draw() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
 
-	std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = false;
+	std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows = false;
 
 	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());

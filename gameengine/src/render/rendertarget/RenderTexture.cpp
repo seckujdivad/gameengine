@@ -188,6 +188,11 @@ void RenderTexture::ResizeTextureGroup(RenderTextureGroup& texture_group)
 	this->InitialiseTextureGroup(texture_group, texture_group.type, false);
 }
 
+bool RenderTexture::CheckTextureGroup(RenderTextureGroup texture_group) const
+{
+	return ::CheckTextureGroup(texture_group, this->m_info);
+}
+
 void RenderTexture::PostRenderEvent()
 {
 	if (this->m_simultaneous_read_write && this->m_auto_swap_buffers)
@@ -208,45 +213,23 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 {
 	this->SetTargetType(type);
 
-	this->InitialiseTextureGroup(this->m_texture_write, this->m_type);
-	if (simultaneous_read_write)
+	if (info.auto_generate_textures)
 	{
-		this->InitialiseTextureGroup(this->m_texture_read, this->m_type);
+		this->InitialiseTextureGroup(this->m_texture_write, this->m_type);
+		if (simultaneous_read_write)
+		{
+			this->InitialiseTextureGroup(this->m_texture_read, this->m_type);
+		}
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	GLuint fbo;
 	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	this->SetFramebuffer(fbo);
 
-	std::vector<GLenum> attachments;
-
-	if (info.colour)
+	if (info.auto_generate_textures)
 	{
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.colour, 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT0);
+		this->AttachTexturesToFramebuffer();
 	}
-
-	if (info.depth)
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
-	}
-
-	for (int i = 0; i < static_cast<int>(this->m_texture_write.data.size()); i++)
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);
-	}
-
-	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 RenderTexture::~RenderTexture()
@@ -268,6 +251,39 @@ RenderTexture::~RenderTexture()
 	}
 
 	glDeleteTextures(static_cast<GLsizei>(textures.size()), textures.data());
+}
+
+void RenderTexture::AttachTexturesToFramebuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, this->GetFramebuffer());
+
+	std::vector<GLenum> attachments;
+
+	if (this->m_info.colour)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->m_texture_write.colour, 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT0);
+	}
+
+	if (this->m_info.depth)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.depth, 0);
+	}
+
+	for (int i = 0; i < static_cast<int>(this->m_texture_write.data.size()); i++)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1 + i, this->m_texture_write.data.at(i), 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT1 + i);
+	}
+
+	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 std::tuple<int, int> RenderTexture::GetOutputSize() const
@@ -292,6 +308,39 @@ bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 		}
 
 		return true;
+	}
+}
+
+void RenderTexture::SetWriteTextures(RenderTextureGroup textures)
+{
+	if (this->CheckTextureGroup(textures))
+	{
+		this->m_texture_write = textures;
+		this->AttachTexturesToFramebuffer();
+	}
+	else
+	{
+		throw std::invalid_argument("Provided RenderTextureGroup must match the RenderTextureInfo of the RenderTexture");
+	}
+}
+
+void RenderTexture::SetOutputTextures(RenderTextureGroup textures)
+{
+	if (this->m_simultaneous_read_write)
+	{
+		if (this->CheckTextureGroup(textures))
+		{
+			this->m_texture_read = textures;
+			this->AttachTexturesToFramebuffer();
+		}
+		else
+		{
+			throw std::invalid_argument("Provided RenderTextureGroup must match the RenderTextureInfo of the RenderTexture");
+		}
+	}
+	else
+	{
+		this->SetWriteTextures(textures);
 	}
 }
 
@@ -328,9 +377,9 @@ bool RenderTexture::SwapBuffers()
 
 void RenderTexture::SetNormalModePreviousFrameToSelf()
 {
-	if (this->GetRenderMode() == RenderTargetMode::Normal)
+	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
-		std::get<RenderTargetConfig::Normal>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
+		std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
 	}
 	else
 	{

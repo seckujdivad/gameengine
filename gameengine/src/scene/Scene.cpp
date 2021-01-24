@@ -177,7 +177,7 @@ glm::vec4 Scene::GetClearColour() const
 
 std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMode mode, std::vector<Model*> model_pool) const
 {
-	if ((mode == RenderTargetMode::Normal) || (mode == RenderTargetMode::Shadow) || (mode == RenderTargetMode::Textured))
+	if ((mode == RenderTargetMode::Normal_DepthOnly) || (mode == RenderTargetMode::Normal_Draw) || (mode == RenderTargetMode::Shadow) || (mode == RenderTargetMode::Textured))
 	{
 		std::set<Model*> visible_models;
 		std::set<VisBox*> enclosed_visboxes;
@@ -222,8 +222,6 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 
 			output.assign(output_set.begin(), output_set.end());
 		}
-
-		std::sort(output.begin(), output.end(), [position](Model* a, Model* b) mutable { return glm::length(a->GetPosition() - position) < glm::length(b->GetPosition() - position); }); //true means a should be moved forward and drawn earlier
 
 		return output;
 	}

@@ -3,7 +3,8 @@
 enum class RenderTargetMode
 {
 	Default,
-	Normal,
+	Normal_DepthOnly,
+	Normal_Draw,
 	Wireframe,
 	Shadow,
 	Postprocess,

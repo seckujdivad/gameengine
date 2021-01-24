@@ -14,7 +14,7 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTargetConfig config = { RenderTargetMode::Normal, RenderTargetConfig::Normal() };
+	RenderTargetConfig config = { RenderTargetMode::Normal_Draw, RenderTargetConfig::Normal_Draw() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
@@ -37,15 +37,15 @@ bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 	bool updated = false;
 	
 	RenderTargetConfig config = renderer->GetTarget()->GetConfig();
-	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows)
+	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows)
 	{
-		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
 		updated = true;
 	}
 
-	if (reflection->GetDrawReflections() != std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections)
+	if (reflection->GetDrawReflections() != std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_reflections)
 	{
-		std::get<RenderTargetConfig::Normal>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_reflections = reflection->GetDrawReflections();
 		updated = true;
 	}
 

@@ -29,19 +29,21 @@ private:
 
 	void InitialiseTextureGroup(RenderTextureGroup& texture_group, GLenum type, bool do_create = true);
 	void ResizeTextureGroup(RenderTextureGroup& texture_group);
+	bool CheckTextureGroup(RenderTextureGroup texture_group) const;
+
+	void AttachTexturesToFramebuffer();
 
 	void PostRenderEvent() override;
 
 public:
 	RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false, bool auto_swap_buffers = true);
-	RenderTexture(const RenderTexture&) = delete;
-	RenderTexture& operator=(const RenderTexture&) = delete;
-	RenderTexture(RenderTexture&&) = delete;
-	RenderTexture& operator=(RenderTexture&&) = delete;
 	~RenderTexture();
 
 	std::tuple<int, int> GetOutputSize() const override;
 	bool SetOutputSize(std::tuple<int, int> dimensions) override;
+
+	void SetWriteTextures(RenderTextureGroup textures);
+	void SetOutputTextures(RenderTextureGroup textures);
 
 	RenderTextureGroup GetOutputTextures() const;
 	RenderTextureGroup GetWriteTextures() const;

@@ -23,9 +23,13 @@ struct RenderTextureInfo
 	GLenum depth_filtering = GL_NEAREST;
 	int num_data = GAMEENGINE_NUM_DATA_TEX;
 	GLenum data_filtering = GL_NEAREST;
+
+	bool auto_generate_textures = true;
 };
 
 bool operator==(const RenderTextureInfo& first, const RenderTextureInfo& second);
 bool operator!=(const RenderTextureInfo& first, const RenderTextureInfo& second);
 
 void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination, RenderTextureInfo info, std::tuple<int, int> dimensions);
+
+bool CheckTextureGroup(RenderTextureGroup texture_group, RenderTextureInfo texture_info);

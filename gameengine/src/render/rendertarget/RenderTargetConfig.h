@@ -10,7 +10,11 @@
 
 struct RenderTargetConfig
 {
-	struct Normal
+	struct Normal_DepthOnly
+	{
+	};
+
+	struct Normal_Draw
 	{
 		RenderTextureGroup previous_frame;
 		bool draw_shadows = true;
@@ -44,7 +48,7 @@ struct RenderTargetConfig
 	};
 
 	RenderTargetMode mode = RenderTargetMode::Default;
-	std::variant<Normal, Wireframe, Shadow, PostProcess, Textured> mode_data;
+	std::variant<Normal_DepthOnly, Normal_Draw, Wireframe, Shadow, PostProcess, Textured> mode_data;
 
 	bool clear_fbo = true;
 

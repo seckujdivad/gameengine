@@ -6,7 +6,8 @@ RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode)
 {
 	switch (mode)
 	{
-	case RenderTargetMode::Normal:
+	case RenderTargetMode::Normal_DepthOnly:
+	case RenderTargetMode::Normal_Draw:
 	case RenderTargetMode::Wireframe:
 	case RenderTargetMode::Shadow:
 	case RenderTargetMode::Textured:

@@ -28,7 +28,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		RenderTargetConfig cfg;
 		if (composite.mode == RenderMode::Normal)
 		{
-			cfg.SetMode(RenderTargetMode::Normal);
+			cfg.SetMode(RenderTargetMode::Normal_Draw);
 		}
 		else if (composite.mode == RenderMode::Wireframe)
 		{
@@ -106,7 +106,7 @@ void EngineCanvasController::Render()
 	}
 
 	this->m_texture_final->Render(models);
-	this->m_canvas->Render(models);
+	this->m_canvas->Render(models, true);
 }
 
 RenderTextureGroup EngineCanvasController::GetRenderTexture() const

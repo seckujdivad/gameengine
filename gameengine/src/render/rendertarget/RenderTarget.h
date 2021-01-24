@@ -46,7 +46,6 @@ protected:
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
 	void SetTargetType(GLenum target_type);
-	GLenum GetTargetType() const;
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
@@ -70,8 +69,11 @@ public:
 
 	Engine* GetEngine() const;
 
+	GLenum GetTargetType() const;
+
 	void SetConfig(RenderTargetConfig config);
-	void SetModeConfig(RenderTargetConfig::Normal mode_config);
+	void SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config);
+	void SetModeConfig(RenderTargetConfig::Normal_Draw mode_config);
 	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
 	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
 	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);

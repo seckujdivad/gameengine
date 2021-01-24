@@ -13,7 +13,8 @@ void SetMode(RenderTargetConfig& config, RenderTargetMode mode)
 	switch (mode)
 	{
 	case RenderTargetMode::Default: throw std::invalid_argument("Can't set mode to Default");
-	case RenderTargetMode::Normal: config.mode_data = RenderTargetConfig::Normal(); break;
+	case RenderTargetMode::Normal_DepthOnly: config.mode_data = RenderTargetConfig::Normal_DepthOnly(); break;
+	case RenderTargetMode::Normal_Draw: config.mode_data = RenderTargetConfig::Normal_Draw(); break;
 	case RenderTargetMode::Wireframe: config.mode_data = RenderTargetConfig::Wireframe(); break;
 	case RenderTargetMode::Shadow: config.mode_data = RenderTargetConfig::Shadow(); break;
 	case RenderTargetMode::Postprocess: config.mode_data = RenderTargetConfig::PostProcess(); break;
