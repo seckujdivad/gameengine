@@ -195,9 +195,9 @@ bool RenderTexture::CheckTextureGroup(RenderTextureGroup texture_group) const
 
 void RenderTexture::PostRenderEvent()
 {
-	if (this->m_simultaneous_read_write && this->m_auto_swap_buffers)
+	if (this->m_auto_swap_buffers)
 	{
-		CopyTextureGroup(this->m_texture_write, this->m_texture_read, this->m_info, this->m_dimensions);
+		this->SwapBuffers();
 	}
 }
 
