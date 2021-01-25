@@ -2,6 +2,38 @@ OpenGL renderer using wxWidgets components.
 
 [![Actions Status](https://github.com/seckujdivad/gameengine/workflows/Windows%20build%20and%20test/badge.svg)](https://github.com/seckujdivad/gameengine/actions)
 
+# Features
+* Perspective rendering
+  * Modes
+    * Normal
+      * Point lights
+      * Real time and static point light shadows
+      * Real time and dynamic reflection cubemaps
+        * Simple
+        * Oriented bounding box perspective corrected
+      * Screen space reflections
+      * Normal mapping
+      * Displacement mapping
+    * Wireframe
+    * Textured
+  * Geometry formats
+    * Polygonal
+    * Bezier patches
+      * Interpolated on GPU
+      * Detail adapts to camera distance
+* Scene can be drawn by multiple contexts to multiple windows
+
+# Platform requirements
+* OpenGL 4.3
+  * Post-2012 hardware (released 2012)
+  * NVIDIA GeForce 400 series (or newer)
+  * AMD Radeon HD 5000 series (or newer)
+* Windows or Linux
+  * Windows compatibility likely goes as far back as XP, but MSVC++ will need to be reconfigured to run pre-Vista
+  * Linux compatibility is only theoretical, you will need your own toolchain
+
+Tested on Windows 10 (NVIDIA and AMD)
+
 # Build Dependencies
 ## vcpkg
 Build dependencies are handled by [vcpkg](https://github.com/microsoft/vcpkg). You must set up vcpkg and install the required libraries:
