@@ -51,8 +51,8 @@ protected:
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
 	static bool RenderModeIsModelRendering(RenderTargetMode mode);
-	bool RenderModeIsModelRendering();
-	bool RenderModeIsFSQuadRendering();
+	bool RenderModeIsModelRendering() const;
+	bool RenderModeIsFSQuadRendering() const;
 
 	//rendering stages
 	std::vector<Model*> Render_GetModels_Model(std::vector<Model*> model_pool);

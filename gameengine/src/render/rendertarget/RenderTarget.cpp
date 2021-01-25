@@ -249,12 +249,12 @@ bool RenderTarget::RenderModeIsModelRendering(RenderTargetMode mode)
 		|| (mode == RenderTargetMode::Textured);
 }
 
-bool RenderTarget::RenderModeIsModelRendering()
+bool RenderTarget::RenderModeIsModelRendering() const
 {
 	return this->RenderModeIsModelRendering(this->GetRenderMode());
 }
 
-bool RenderTarget::RenderModeIsFSQuadRendering()
+bool RenderTarget::RenderModeIsFSQuadRendering() const
 {
 	return !this->RenderModeIsModelRendering();
 }
