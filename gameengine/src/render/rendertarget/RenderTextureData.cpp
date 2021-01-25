@@ -51,16 +51,49 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 
 	if (info.colour)
 	{
+#ifdef _DEBUG
+		if (!glIsTexture(source.colour))
+		{
+			throw std::invalid_argument("Source colour texture (" + std::to_string(source.colour) + ") is invalid");
+		}
+
+		if (!glIsTexture(destination.colour))
+		{
+			throw std::invalid_argument("Destination colour texture (" + std::to_string(destination.colour) + ") is invalid");
+		}
+#endif
 		glCopyImageSubData(source.colour, source.type, 0, 0, 0, 0, destination.colour, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}
 
 	if (info.depth)
 	{
+#ifdef _DEBUG
+		if (!glIsTexture(source.depth))
+		{
+			throw std::invalid_argument("Source depth texture (" + std::to_string(source.depth) + ") is invalid");
+		}
+
+		if (!glIsTexture(destination.depth))
+		{
+			throw std::invalid_argument("Destination depth texture (" + std::to_string(destination.depth) + ") is invalid");
+		}
+#endif
 		glCopyImageSubData(source.depth, source.type, 0, 0, 0, 0, destination.depth, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}
 
 	for (int i = 0; i < static_cast<int>(source.data.size()); i++)
 	{
+#ifdef _DEBUG
+		if (!glIsTexture(source.data.at(i)))
+		{
+			throw std::invalid_argument("Source data " + std::to_string(i) + " texture (" + std::to_string(source.data.at(i)) + ") is invalid");
+		}
+
+		if (!glIsTexture(destination.data.at(i)))
+		{
+			throw std::invalid_argument("Destination data " + std::to_string(i) +  " texture (" + std::to_string(destination.data.at(i)) + ") is invalid");
+		}
+#endif
 		glCopyImageSubData(source.data.at(i), source.type, 0, 0, 0, 0, destination.data.at(i), destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
 	}
 }
