@@ -49,6 +49,8 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 		throw std::invalid_argument("Source data size and destination data size must match - source data has size " + std::to_string(source.data.size()) + " and destination data has size " + std::to_string(destination.data.size()));
 	}
 
+	GLint copy_layers = source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1;
+
 	if (info.colour)
 	{
 #ifdef _DEBUG
@@ -62,7 +64,7 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 			throw std::invalid_argument("Destination colour texture (" + std::to_string(destination.colour) + ") is invalid");
 		}
 #endif
-		glCopyImageSubData(source.colour, source.type, 0, 0, 0, 0, destination.colour, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
+		glCopyImageSubData(source.colour, source.type, 0, 0, 0, 0, destination.colour, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), copy_layers);
 	}
 
 	if (info.depth)
@@ -78,7 +80,7 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 			throw std::invalid_argument("Destination depth texture (" + std::to_string(destination.depth) + ") is invalid");
 		}
 #endif
-		glCopyImageSubData(source.depth, source.type, 0, 0, 0, 0, destination.depth, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
+		glCopyImageSubData(source.depth, source.type, 0, 0, 0, 0, destination.depth, destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), copy_layers);
 	}
 
 	for (int i = 0; i < static_cast<int>(source.data.size()); i++)
@@ -94,7 +96,7 @@ void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination,
 			throw std::invalid_argument("Destination data " + std::to_string(i) +  " texture (" + std::to_string(destination.data.at(i)) + ") is invalid");
 		}
 #endif
-		glCopyImageSubData(source.data.at(i), source.type, 0, 0, 0, 0, destination.data.at(i), destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), source.type == GL_TEXTURE_CUBE_MAP ? 6 : 1);
+		glCopyImageSubData(source.data.at(i), source.type, 0, 0, 0, 0, destination.data.at(i), destination.type, 0, 0, 0, 0, std::get<0>(dimensions), std::get<1>(dimensions), copy_layers);
 	}
 }
 
