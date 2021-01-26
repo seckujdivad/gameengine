@@ -309,8 +309,6 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 		throw std::runtime_error("Couldn't initialise glew");
 	}
 
-	glLoadIdentity();
-
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
