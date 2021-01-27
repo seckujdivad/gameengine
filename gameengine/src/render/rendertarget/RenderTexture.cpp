@@ -383,7 +383,7 @@ void RenderTexture::SetNormalModePreviousFrameToSelf()
 	}
 	else
 	{
-		throw std::runtime_error("Render mode must be \"Normal\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
+		throw std::runtime_error("Render mode must be \"Normal_Draw\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
 	}
 }
 
