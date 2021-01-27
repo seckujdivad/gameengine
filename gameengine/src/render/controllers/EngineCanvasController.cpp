@@ -105,8 +105,8 @@ void EngineCanvasController::Render()
 		factory->Render(models);
 	}
 
-	this->m_texture_final->Render(models);
-	this->m_canvas->Render(models, true);
+	this->m_texture_final->Render({});
+	this->m_canvas->Render({}, true);
 }
 
 RenderTextureGroup EngineCanvasController::GetRenderTexture() const
