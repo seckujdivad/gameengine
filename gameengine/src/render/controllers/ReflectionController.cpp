@@ -20,7 +20,7 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 		config.clear_fbo = false;
 	}
 
-	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, layer != 1)));
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, true)));
 	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
@@ -60,11 +60,6 @@ bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 ReflectionController::ReflectionController(Engine* engine, RenderTextureReference reference) : CubemapController(engine, reference)
 {
 	this->DerivedClassConstructedEvent();
-}
-
-void ReflectionController::PostRender()
-{
-	this->m_renderers.at(1)->GetTarget()->SwapBuffers();
 }
 
 RenderControllerType ReflectionController::GetType() const
