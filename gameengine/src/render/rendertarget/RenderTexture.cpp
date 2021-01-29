@@ -239,15 +239,18 @@ RenderTexture::~RenderTexture()
 
 	std::vector<GLuint> textures;
 	
-	textures.push_back(this->m_texture_write.colour);
-	textures.push_back(this->m_texture_write.depth);
-	textures.insert(textures.end(), this->m_texture_write.data.begin(), this->m_texture_write.data.end());
-
-	if (this->m_simultaneous_read_write)
+	if (this->m_info.auto_generate_textures)
 	{
-		textures.push_back(this->m_texture_read.colour);
-		textures.push_back(this->m_texture_read.depth);
-		textures.insert(textures.end(), this->m_texture_read.data.begin(), this->m_texture_read.data.end());
+		textures.push_back(this->m_texture_write.colour);
+		textures.push_back(this->m_texture_write.depth);
+		textures.insert(textures.end(), this->m_texture_write.data.begin(), this->m_texture_write.data.end());
+
+		if (this->m_simultaneous_read_write)
+		{
+			textures.push_back(this->m_texture_read.colour);
+			textures.push_back(this->m_texture_read.depth);
+			textures.insert(textures.end(), this->m_texture_read.data.begin(), this->m_texture_read.data.end());
+		}
 	}
 
 	glDeleteTextures(static_cast<GLsizei>(textures.size()), textures.data());
