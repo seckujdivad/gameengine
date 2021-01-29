@@ -22,6 +22,6 @@ public:
 	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
 
-	RenderTarget* GetDepthOnlyTarget() const;
-	RenderTarget* GetDrawTarget() const;
+	RenderTexture* GetDepthOnlyTarget() const;
+	RenderTexture* GetDrawTarget() const;
 };

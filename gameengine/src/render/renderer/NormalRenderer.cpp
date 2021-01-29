@@ -78,12 +78,12 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->GetTarget()->Render(models, continuous_draw);
 }
 
-RenderTarget* NormalRenderer::GetDepthOnlyTarget() const
+RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
 {
 	return this->m_rt_depth_only.get();
 }
 
-RenderTarget* NormalRenderer::GetDrawTarget() const
+RenderTexture* NormalRenderer::GetDrawTarget() const
 {
-	return this->GetTarget();
+	return dynamic_cast<RenderTexture*>(this->GetTarget());
 }
