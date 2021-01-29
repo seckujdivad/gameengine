@@ -124,6 +124,16 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glDepthMask(GL_TRUE);
 		}
 
+		if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly
+			|| this->GetRenderMode() == RenderTargetMode::Shadow)
+		{
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		}
+		else
+		{
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		}
+
 		if (this->m_config.clear_fbo && !this->RenderModeIsFSQuadRendering())
 		{
 			GLbitfield clear_buffers = NULL;
