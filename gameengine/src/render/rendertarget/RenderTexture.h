@@ -23,6 +23,8 @@ private:
 	RenderTextureGroup m_texture_write;
 	RenderTextureGroup m_texture_read;
 
+	bool m_owns_target;
+
 	std::tuple<int, int> m_dimensions;
 
 	static void CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create = true);
@@ -42,7 +44,10 @@ public:
 	std::tuple<int, int> GetOutputSize() const override;
 	bool SetOutputSize(std::tuple<int, int> dimensions) override;
 
-	void SetWriteTextures(RenderTextureGroup textures);
+	void SetWriteTarget(RenderTexture* target);
+
+	void SetFBO(GLuint fbo);
+	void SetWriteTextures(RenderTextureGroup textures, bool attach = true);
 	void SetOutputTextures(RenderTextureGroup textures);
 
 	RenderTextureGroup GetOutputTextures() const;

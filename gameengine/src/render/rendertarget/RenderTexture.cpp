@@ -209,7 +209,8 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 	m_simultaneous_read_write(simultaneous_read_write),
 	m_info(info),
 	m_type(type),
-	m_auto_swap_buffers(auto_swap_buffers)
+	m_auto_swap_buffers(auto_swap_buffers),
+	m_owns_target(info.auto_generate_textures)
 {
 	this->SetTargetType(type);
 
@@ -220,27 +221,23 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		{
 			this->InitialiseTextureGroup(this->m_texture_read, this->m_type);
 		}
-	}
 
-	GLuint fbo;
-	glGenFramebuffers(1, &fbo);
-	this->SetFramebuffer(fbo);
-
-	if (info.auto_generate_textures)
-	{
+		GLuint fbo;
+		glGenFramebuffers(1, &fbo);
+		this->SetFramebuffer(fbo);
 		this->AttachTexturesToFramebuffer();
 	}
 }
 
 RenderTexture::~RenderTexture()
 {
-	GLuint fbo = this->GetFramebuffer();
-	glDeleteFramebuffers(1, &fbo);
-
-	std::vector<GLuint> textures;
-	
-	if (this->m_info.auto_generate_textures)
+	if (this->m_owns_target)
 	{
+		GLuint fbo = this->GetFramebuffer();
+		glDeleteFramebuffers(1, &fbo);
+
+		std::vector<GLuint> textures;
+
 		textures.push_back(this->m_texture_write.colour);
 		textures.push_back(this->m_texture_write.depth);
 		textures.insert(textures.end(), this->m_texture_write.data.begin(), this->m_texture_write.data.end());
@@ -251,9 +248,9 @@ RenderTexture::~RenderTexture()
 			textures.push_back(this->m_texture_read.depth);
 			textures.insert(textures.end(), this->m_texture_read.data.begin(), this->m_texture_read.data.end());
 		}
-	}
 
-	glDeleteTextures(static_cast<GLsizei>(textures.size()), textures.data());
+		glDeleteTextures(static_cast<GLsizei>(textures.size()), textures.data());
+	}
 }
 
 void RenderTexture::AttachTexturesToFramebuffer()
@@ -314,12 +311,79 @@ bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 	}
 }
 
-void RenderTexture::SetWriteTextures(RenderTextureGroup textures)
+void RenderTexture::SetWriteTarget(RenderTexture* target)
 {
-	if (this->CheckTextureGroup(textures))
+	this->SetFBO(target->GetFramebuffer());
+
+	RenderTextureGroup write_textures = target->GetWriteTextures();
+	if (this->m_info.colour)
+	{
+		if (write_textures.colour == NULL)
+		{
+			throw std::invalid_argument("Target must have a colour texture");
+		}
+	}
+	else
+	{
+		write_textures.colour = NULL;
+	}
+
+	if (this->m_info.depth)
+	{
+		if (write_textures.depth == NULL)
+		{
+			throw std::invalid_argument("Target must have a depth texture");
+		}
+	}
+	else
+	{
+		write_textures.depth = NULL;
+	}
+
+	if (this->m_info.num_data > static_cast<int>(write_textures.data.size()))
+	{
+		throw std::invalid_argument("Target must have " + std::to_string(this->m_info.num_data) + " data texture(s)");
+	}
+	else if (this->m_info.num_data < static_cast<int>(write_textures.data.size()))
+	{
+		std::vector<GLuint> data_tex;
+		data_tex.reserve(this->m_info.num_data);
+		for (int i = 0; i < this->m_info.num_data; i++)
+		{
+			data_tex.push_back(write_textures.data.at(i));
+		}
+		write_textures.data = data_tex;
+	}
+
+	this->SetWriteTextures(write_textures, false);
+}
+
+void RenderTexture::SetFBO(GLuint fbo)
+{
+	if (this->m_owns_target)
+	{
+		throw std::runtime_error("RenderTexture must not own the target");
+	}
+	else
+	{
+		this->SetFramebuffer(fbo);
+	}
+}
+
+void RenderTexture::SetWriteTextures(RenderTextureGroup textures, bool attach)
+{
+	if (this->m_owns_target)
+	{
+		throw std::runtime_error("RenderTexture must not own the target");
+	}
+	else if (this->CheckTextureGroup(textures))
 	{
 		this->m_texture_write = textures;
-		this->AttachTexturesToFramebuffer();
+
+		if (attach)
+		{
+			this->AttachTexturesToFramebuffer();
+		}
 	}
 	else
 	{
@@ -329,12 +393,15 @@ void RenderTexture::SetWriteTextures(RenderTextureGroup textures)
 
 void RenderTexture::SetOutputTextures(RenderTextureGroup textures)
 {
-	if (this->m_simultaneous_read_write)
+	if (this->m_owns_target)
+	{
+		throw std::runtime_error("RenderTexture must not own the target");
+	}
+	else if (this->m_simultaneous_read_write)
 	{
 		if (this->CheckTextureGroup(textures))
 		{
 			this->m_texture_read = textures;
-			this->AttachTexturesToFramebuffer();
 		}
 		else
 		{
