@@ -807,6 +807,11 @@ void Engine::MakeContextCurrent(bool force) const
 	}
 }
 
+bool Engine::ContextIsValid() const
+{
+	return this->m_glcontext->IsOK();
+}
+
 void Engine::SetDebugMessageLevel(Engine::DebugMessageConfig config) const
 {
 	this->MakeContextCurrent();

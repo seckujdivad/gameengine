@@ -103,6 +103,7 @@ public:
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
 
 	void MakeContextCurrent(bool force = false) const;
+	bool ContextIsValid() const;
 
 	void SetDebugMessageLevel(Engine::DebugMessageConfig config) const;
 	void SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config) const;
