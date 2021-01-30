@@ -39,6 +39,8 @@ private:
 
 	std::unique_ptr<Model> m_postprocess_model = nullptr;
 
+	void CheckParentContext() const;
+
 protected:
 	//scene rendering
 	RenderTargetConfig m_config;

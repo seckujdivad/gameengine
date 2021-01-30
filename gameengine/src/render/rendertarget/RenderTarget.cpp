@@ -192,6 +192,8 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			return mode;
 		};
 
+		this->CheckParentContext();
+
 		//draw scene geometry
 		for (Model* model : models)
 		{
@@ -205,10 +207,22 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			}
 
 			this->GetEngine()->DrawModel(model, predraw);
+
+			this->CheckParentContext();
 		}
 
 		this->m_fbo_contains_render = true;
 	}
+}
+
+void RenderTarget::CheckParentContext() const
+{
+#ifdef _DEBUG
+	if (!this->GetEngine()->ContextIsValid())
+	{
+		throw std::runtime_error("Context of the Engine that this RenderTarget is a child of is no longer valid");
+	}
+#endif
 }
 
 void RenderTarget::SetFramebuffer(GLuint fbo)
@@ -653,6 +667,8 @@ void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
 		{
 			this->PostRenderEvent();
 		}
+
+		this->CheckParentContext();
 	}
 }
 
