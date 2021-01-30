@@ -20,11 +20,12 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 		config.clear_fbo = false;
 	}
 
-	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, true)));
-	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();
+
+	this->m_textures.push_back(std::move(std::unique_ptr<RenderTexture>(render_texture)));
 
 	std::unique_ptr<NormalRenderer> renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
 	return renderer;
