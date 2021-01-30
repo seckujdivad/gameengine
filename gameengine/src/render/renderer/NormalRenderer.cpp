@@ -29,12 +29,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.SetMode(RenderTargetMode::Normal_DepthOnly);
 
 		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, info, this->GetTarget()->GetTargetType());
-
-		RenderTextureGroup target_group = target_texture->GetWriteTextures();
-		target_group.colour = NULL;
-		target_group.data.clear();
-
-		this->m_rt_depth_only->SetWriteTextures(target_group);
+		this->m_rt_depth_only->SetWriteTarget(target_texture);
 	}
 }
 
@@ -73,6 +68,7 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 {
 	this->m_rt_depth_only->SetCamera(this->GetTarget()->GetCamera());
+	this->m_rt_depth_only->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
 	this->GetTarget()->Render(models, continuous_draw);
