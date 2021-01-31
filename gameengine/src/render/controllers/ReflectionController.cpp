@@ -14,11 +14,9 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 	info.depth = true;
 	info.num_data = GAMEENGINE_NUM_DATA_TEX;
 
-	RenderTargetConfig config = { RenderTargetMode::Normal_Draw, RenderTargetConfig::Normal_Draw() };
-	if (layer != 0)
-	{
-		config.clear_fbo = false;
-	}
+	RenderTargetConfig config;
+	config.SetMode(RenderTargetMode::Normal_Draw);
+	config.clear_fbo = layer == 0;
 
 	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
