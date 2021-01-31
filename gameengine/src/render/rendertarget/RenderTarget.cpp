@@ -124,8 +124,8 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glDepthMask(GL_TRUE);
 		}
 
-		if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly
-			|| this->GetRenderMode() == RenderTargetMode::Shadow)
+		if ((this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
+			|| (this->GetRenderMode() == RenderTargetMode::Shadow))
 		{
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		}
@@ -513,7 +513,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
 
 		//screen space reflections
-		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled);
+		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == GL_TEXTURE_2D));
 		this->m_shader_program->SetUniform("mat_ssr_resolution", material.ssr.resolution);
 		this->m_shader_program->SetUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
 		this->m_shader_program->SetUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
