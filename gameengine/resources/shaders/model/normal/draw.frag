@@ -569,9 +569,10 @@ void main()
 							bool sample_is_skybox = false;
 							for (int i = 0; i < reflection_count; i++)
 							{
+								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
-								reflection_sample += float(i == reflection_index) * texture(reflection_cubemaps[i], sample_vector).rgb;
-								sample_is_skybox = sample_is_skybox || texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f;
+								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i], sample_vector).rgb;
+								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_data_cubemaps[i * DATA_TEX_NUM], sample_vector).g == 1.0f));
 							}
 
 							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;
