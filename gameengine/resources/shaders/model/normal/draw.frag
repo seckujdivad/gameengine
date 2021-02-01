@@ -180,7 +180,6 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 
 	int intersection_index = 0;
 
-	isvalid = false;
 	vec3 intersections[2];
 	intersections[0] = vec3(0.0f);
 	intersections[1] = vec3(0.0f);
@@ -207,7 +206,6 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 				intersections[intersection_index][(i + 1) % 3] = second_axis_value;
 				intersections[intersection_index][(i + 2) % 3] = third_axis_value;
 				lambdas[intersection_index] = lambda;
-				isvalid = true;
 				intersection_index++;
 			}
 		}
@@ -222,6 +220,8 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 		results[0] = results[1];
 		results[1] = swap;
 	}
+
+	isvalid = intersection_index >= 2;
 }
 
 vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
