@@ -204,10 +204,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				this->Render_ForEachModel_Quad(model);
 			}
 
-			//if (!((this->GetRenderMode() == RenderTargetMode::Normal_Draw) && (this->GetTargetType() == GL_TEXTURE_CUBE_MAP) && (model->GetIdentifier() == "level")))
-			{
-				this->GetEngine()->DrawModel(model, predraw);
-			}
+			this->GetEngine()->DrawModel(model, predraw);
 
 			this->CheckParentContext();
 		}
