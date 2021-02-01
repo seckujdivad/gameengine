@@ -337,6 +337,8 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 	glPatchParameteri(GL_PATCH_VERTICES, static_cast<GLint>(GAMEENGINE_PATCH_SIZE));
 
 	this->MakeContextCurrent(true);
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 Engine::~Engine()
