@@ -293,13 +293,13 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
 		//point lights
-		recompile_required = recompile_required || this->m_shader_program->SetDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size()));
+		recompile_required = this->m_shader_program->SetDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size())) || recompile_required;
 
 		//OBB approximations
-		recompile_required = recompile_required || this->m_shader_program->SetDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size()));
+		recompile_required = this->m_shader_program->SetDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size())) || recompile_required;
 
 		//reflections
-		recompile_required = recompile_required || this->m_shader_program->SetDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size()));
+		recompile_required = this->m_shader_program->SetDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size())) || recompile_required;
 
 		//determine if any models might need to discard fragments
 		{
@@ -313,7 +313,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 				}
 			}
 
-			recompile_required = recompile_required || this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0");
+			recompile_required = this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0") || recompile_required;
 		}
 	}
 
@@ -322,7 +322,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
 		//data textures
-		recompile_required = recompile_required || this->m_shader_program->SetDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX));
+		recompile_required = this->m_shader_program->SetDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX)) || recompile_required;
 	}
 
 	if (recompile_required)
@@ -460,7 +460,7 @@ void RenderTarget::Render_Setup_FlatQuad()
 	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
 		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
-		recompile_required = recompile_required || this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers));
+		recompile_required = this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers)) || recompile_required;
 	}
 
 	if (recompile_required)
