@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "../Scene.h"
+#include "geometry/Geometry.h"
 
 Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene)
 	:

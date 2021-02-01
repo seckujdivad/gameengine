@@ -14,10 +14,9 @@
 #include "../LocalTexture.h"
 #include "../SceneChild.h"
 
-#include "geometry/Geometry.h"
-
 class Scene;
 class Skybox;
+class Geometry;
 
 class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>, public SceneChild
 {
