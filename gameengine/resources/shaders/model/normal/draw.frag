@@ -178,11 +178,16 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 	vec3 reflection_oob = obb_rotation_inverse * normalize(direction);
 	vec3 fragpos_oob = obb_rotation_inverse * (start_pos - obb_translation);
 
-	vec3 intersections[2];
 	int intersection_index = 0;
-	float lambdas[2];
 
 	isvalid = false;
+	vec3 intersections[2];
+	intersections[0] = vec3(0.0f);
+	intersections[1] = vec3(0.0f);
+	
+	float lambdas[2];
+	lambdas[0] = 0.0f;
+	lambdas[1] = 0.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
