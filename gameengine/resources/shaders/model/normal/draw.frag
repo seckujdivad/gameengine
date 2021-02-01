@@ -109,7 +109,6 @@ uniform struct Reflection
 uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
-uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform samplerCube reflection_data_cubemaps[REFLECTION_NUM * DATA_TEX_NUM];
 uniform int reflection_count;
 

@@ -204,7 +204,10 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				this->Render_ForEachModel_Quad(model);
 			}
 
-			this->GetEngine()->DrawModel(model, predraw);
+			//if (!((this->GetRenderMode() == RenderTargetMode::Normal_Draw) && (this->GetTargetType() == GL_TEXTURE_CUBE_MAP) && (model->GetIdentifier() == "level")))
+			{
+				this->GetEngine()->DrawModel(model, predraw);
+			}
 
 			this->CheckParentContext();
 		}
@@ -575,10 +578,6 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 			texture.id = reflection_output.colour;
 			texture.uniform_name = "reflection_cubemaps[" + std::to_string(i) + "]";
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
-
-			texture.id = reflection_output.depth;
-			texture.uniform_name = "reflection_depth_cubemaps[" + std::to_string(i) + "]";
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
