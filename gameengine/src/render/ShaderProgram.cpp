@@ -42,77 +42,86 @@ ShaderProgram::~ShaderProgram()
 	}
 }
 
-void ShaderProgram::Recompile()
+void ShaderProgram::Recompile(bool force)
 {
-	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &this->m_max_texture_units); //get number of texture units allowed at once
-
-	if (this->m_program_id != NULL)
+	if (force || this->m_recompile_required)
 	{
-		glDeleteProgram(this->m_program_id);
+		if (this->m_program_id != NULL)
+		{
+			glDeleteProgram(this->m_program_id);
+		}
+
+		this->m_program_id = glCreateProgram();
+		if (this->m_program_id == NULL)
+		{
+			throw std::runtime_error("Couldn't create program object");
+		}
+
+		std::vector<GLuint> shader_ids;
+		for (const ShaderSource& shader_source : this->m_sources)
+		{
+			shader_ids.push_back(this->LoadShader(shader_source));
+		}
+
+		//link shaders
+		for (GLuint shader_id : shader_ids)
+		{
+			glAttachShader(this->m_program_id, shader_id);
+		}
+		glLinkProgram(this->m_program_id);
+
+		//clean up shaders as they have already been linked
+		for (GLuint shader_id : shader_ids)
+		{
+			glDetachShader(this->m_program_id, shader_id);
+			glDeleteShader(shader_id);
+		}
+
+		glValidateProgram(this->m_program_id);
+
+		//check for errors
+		GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
+
+		glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
+		if (link_was_successful != GL_TRUE) //get error message from GPU
+		{
+			char err_info[512];
+			int err_len;
+			glGetProgramInfoLog(this->m_program_id, 512, &err_len, err_info);
+			std::string errmsg = std::string(err_info);
+			errmsg = errmsg.substr(0, err_len);
+
+			LogMessage("Shader link exception: " + errmsg);
+
+			throw std::runtime_error("Shader link exception: " + errmsg);
+		}
+
+		//re-register uniform names
+		std::vector<std::string> uniform_names;
+		for (const auto& [name, id] : this->m_uniforms)
+		{
+			uniform_names.push_back(name);
+		}
+
+		this->m_uniforms.clear();
+		this->AddUniformNames(uniform_names);
+
+		this->Select();
+
+		this->m_recompile_required = false;
 	}
+}
 
-	this->m_program_id = glCreateProgram();
-	if (this->m_program_id == NULL)
-	{
-		throw std::runtime_error("Couldn't create program object");
-	}
-
-	std::vector<GLuint> shader_ids;
-	for (const ShaderSource& shader_source : this->m_sources)
-	{
-		shader_ids.push_back(this->LoadShader(shader_source));
-	}
-
-	//link shaders
-	for (GLuint shader_id : shader_ids)
-	{
-		glAttachShader(this->m_program_id, shader_id);
-	}
-	glLinkProgram(this->m_program_id);
-
-	//clean up shaders as they have already been linked
-	for (GLuint shader_id : shader_ids)
-	{
-		glDetachShader(this->m_program_id, shader_id);
-		glDeleteShader(shader_id);
-	}
-
-	glValidateProgram(this->m_program_id);
-
-	//check for errors
-	GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
-
-	glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
-	if (link_was_successful != GL_TRUE) //get error message from GPU
-	{
-		char err_info[512];
-		int err_len;
-		glGetProgramInfoLog(this->m_program_id, 512, &err_len, err_info);
-		std::string errmsg = std::string(err_info);
-		errmsg = errmsg.substr(0, err_len);
-
-		LogMessage("Shader link exception: " + errmsg);
-
-		throw std::runtime_error("Shader link exception: " + errmsg);
-	}
-
-	//re-register uniform names
-	std::vector<std::string> uniform_names;
-	for (const auto& [name, id] : this->m_uniforms)
-	{
-		uniform_names.push_back(name);
-	}
-	
-	this->m_uniforms.clear();
-	this->AddUniformNames(uniform_names);
-
-	this->Select();
+bool ShaderProgram::RecompileIsRequired() const
+{
+	return this->m_recompile_required;
 }
 
 void ShaderProgram::SetShaderSources(std::vector<ShaderSource> sources, bool defer_recompilation)
 {
 	this->m_sources = sources;
 
+	this->m_recompile_required = true;
 	if (!defer_recompilation)
 	{
 		this->Recompile();
@@ -516,9 +525,13 @@ bool ShaderProgram::SetDefine(std::string key, std::string value, bool defer_rec
 		recompile_required = true;
 	}
 	
-	if (recompile_required && !defer_recompilation)
+	if (recompile_required)
 	{
-		this->Recompile();
+		this->m_recompile_required = true;
+		if (!defer_recompilation)
+		{
+			this->Recompile();
+		}
 	}
 
 	return recompile_required && defer_recompilation;
@@ -535,9 +548,13 @@ bool ShaderProgram::RemoveDefine(std::string key, bool defer_recompilation)
 		recompile_required = true;
 	}
 
-	if (recompile_required && !defer_recompilation)
+	if (recompile_required)
 	{
-		this->Recompile();
+		this->m_recompile_required = true;
+		if (!defer_recompilation)
+		{
+			this->Recompile();
+		}
 	}
 
 	return recompile_required && defer_recompilation;

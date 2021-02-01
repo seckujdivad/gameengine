@@ -35,6 +35,8 @@ private:
 	std::unordered_map<int, std::vector<LoadedTexture>> m_textures;
 	std::unordered_map<std::string, std::string> m_defines;
 
+	bool m_recompile_required = true;
+
 	GLuint LoadShader(ShaderSource source);
 
 public:
@@ -45,7 +47,9 @@ public:
 	ShaderProgram& operator=(ShaderProgram&& move_from) noexcept;
 	~ShaderProgram();
 
-	void Recompile();
+	void Recompile(bool force = false);
+	bool RecompileIsRequired() const;
+
 	void SetShaderSources(std::vector<ShaderSource> sources, bool defer_recompilation = true);
 	GLuint GetProgramID() const;
 
