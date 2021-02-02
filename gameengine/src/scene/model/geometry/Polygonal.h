@@ -129,6 +129,7 @@ public:
 
 	void MergeVertices(double threshold = 0.0);
 	void InvertNormals();
+	void SnapVerticesToGrid(glm::dvec3 grid);
 	
 	std::size_t GetPrimitivesNumVertices() const override;
 	Geometry::PrimitiveType GetPrimitiveType() const override;

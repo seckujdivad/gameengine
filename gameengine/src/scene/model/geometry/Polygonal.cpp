@@ -409,6 +409,25 @@ void Polygonal::InvertNormals()
 	this->InvalidatePrimitivesCache();
 }
 
+void Polygonal::SnapVerticesToGrid(glm::dvec3 grid)
+{
+	if (grid != glm::dvec3(0.0))
+	{
+		for (auto& [index, vertex] : this->m_vertices)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				if (grid[i] != 0.0)
+				{
+					vertex[i] = std::round(vertex[i] / grid[i]) * grid[i];
+				}
+			}
+		}
+	}
+
+	this->InvalidatePrimitivesCache();
+}
+
 std::vector<double> Polygonal::GetPrimitivesWithoutCache() const
 {
 	std::vector<double> result;
