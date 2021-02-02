@@ -297,6 +297,8 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 				}
 			}
 
+			model_geometry->SnapVerticesToGrid(GetVector(it.value()["grid"], glm::dvec3(0.0)));
+
 			std::string model_name = it.key();
 
 			if (geometry_lookup.count(model_name) == 0)
