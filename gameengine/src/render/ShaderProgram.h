@@ -76,6 +76,15 @@ public:
 	void SetUniform(std::string name, glm::mat3 mat);
 	void SetUniform(std::string name, glm::dmat3 mat, bool demote = true);
 
+	template<typename T>
+	inline void SetUniform(std::string prefix, std::vector<T> values, int index_start = 0, int index_step = 1)
+	{
+		for (int i = 0; i < static_cast<int>(values.size()); i++)
+		{
+			this->SetUniform(prefix + "[" + std::to_string(index_start + (i * index_step)) + "]", values.at(i));
+		}
+	};
+
 	void SetTexture(int texture_group_id, LoadedTexture texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
