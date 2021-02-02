@@ -113,9 +113,10 @@ public:
 	void RemoveVertex(int identifier);
 	void RemoveVertex(glm::dvec3 vertex);
 	bool VertexDoesExist(int identifier);
-	void PruneVertices();
 	void FilterVertices(std::function<bool(int identifier, glm::dvec3 vertex)> filter);
 	void MapVertices(std::function<std::pair<int, glm::dvec3>(int identifier, glm::dvec3 vertex)> map);
+
+	void RecalculateVertexIndices();
 	
 	template<typename T>
 	inline T FoldVertices(std::function<T(T previous, int identifier, glm::dvec3 vertex)> fold, T initial) const

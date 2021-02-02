@@ -303,15 +303,16 @@ bool Polygonal::VertexDoesExist(int identifier)
 	return this->m_vertices.count(identifier) != 0;
 }
 
-void Polygonal::PruneVertices()
+void Polygonal::RecalculateVertexIndices()
 {
 	std::unordered_map<int, int> identifier_lookup;
 	std::unordered_map<int, glm::dvec3> new_vertices;
 	int vertices_counter = 0;
-	for (const auto& [key, value] : this->m_vertices)
+	for (const auto& [index, vertex] : this->m_vertices)
 	{
-		new_vertices.insert(std::pair(static_cast<int>(vertices_counter++), value));
-		identifier_lookup.insert(std::pair(key, static_cast<int>(vertices_counter++)));
+		int new_index = vertices_counter++;
+		new_vertices.insert(std::pair(new_index, vertex));
+		identifier_lookup.insert(std::pair(index, new_index));
 	}
 
 	this->m_vertices = new_vertices;
@@ -395,13 +396,11 @@ void Polygonal::MergeVertices(double threshold)
 			}
 		);
 	}
-
-	this->PruneVertices();
 }
 
 void Polygonal::InvertNormals()
 {
-	for (auto& face : this->m_faces)
+	for (Face& face : this->m_faces)
 	{
 		face.SetNormal(0.0 - face.GetNormal());
 	}
