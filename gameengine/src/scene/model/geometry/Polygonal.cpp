@@ -144,11 +144,8 @@ Polygonal::Face::StandaloneVertex Polygonal::Face::GetStandaloneVertex(const Ind
 
 Polygonal::Face::IndexedVertex Polygonal::Face::GetIndexedVertex(const StandaloneVertex& vertex) const
 {
-	IndexedVertex indexed_vertex;
-	indexed_vertex.uv = vertex.uv;
+	IndexedVertex indexed_vertex = IndexedVertex(this->m_parent.GetVertexIndex(vertex.vertex, false), vertex.uv);
 
-	indexed_vertex.vertex = this->m_parent.GetVertexIndex(vertex.vertex, false);
-	
 	if (indexed_vertex.vertex == -1)
 	{
 		indexed_vertex.vertex = this->m_parent.AddVertex(vertex.vertex);
