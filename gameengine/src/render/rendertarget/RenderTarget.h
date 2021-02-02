@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <functional>
 #include <memory>
+#include <array>
 
 #include "RenderTarget.h"
 #include "RenderTargetConfig.h"
@@ -38,6 +39,8 @@ private:
 	ControllerFunction m_render_function;
 
 	std::unique_ptr<Model> m_postprocess_model = nullptr;
+
+	std::array<glm::mat4, 6> m_cubemap_rotations;
 
 	void CheckParentContext() const;
 

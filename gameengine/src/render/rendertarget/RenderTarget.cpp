@@ -332,24 +332,16 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 	if (is_cubemap)
 	{
-		std::vector<glm::mat4> transforms;
-		glm::vec3 translate = glm::vec3(0.0f);
-
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		transforms.push_back(glm::lookAt(translate, translate + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-		for (int i = 0; i < static_cast<int>(transforms.size()); i++)
-		{
-			this->m_shader_program->SetUniform("cubemap_transform[" + std::to_string(i) + "]", transforms.at(i));
-		}
+		this->m_shader_program->SetUniform("cubemap_transform", std::vector(this->m_cubemap_rotations.begin(), this->m_cubemap_rotations.end()));
 	}
 	else
 	{
 		this->m_shader_program->SetUniform("cubemap_transform[0]", glm::mat4(1.0f));
+		this->m_shader_program->SetUniform("cubemap_transform[1]", glm::mat4(1.0f));
+		this->m_shader_program->SetUniform("cubemap_transform[2]", glm::mat4(1.0f));
+		this->m_shader_program->SetUniform("cubemap_transform[3]", glm::mat4(1.0f));
+		this->m_shader_program->SetUniform("cubemap_transform[4]", glm::mat4(1.0f));
+		this->m_shader_program->SetUniform("cubemap_transform[5]", glm::mat4(1.0f));
 	}
 
 	// camera
@@ -605,6 +597,13 @@ void RenderTarget::Render_ForEachModel_Quad(Model* model)
 
 RenderTarget::RenderTarget(Engine* engine, RenderTargetConfig config) : m_engine(engine)
 {
+	this->m_cubemap_rotations.at(0) = glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	this->m_cubemap_rotations.at(1) = glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	this->m_cubemap_rotations.at(2) = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	this->m_cubemap_rotations.at(3) = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	this->m_cubemap_rotations.at(4) = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	this->m_cubemap_rotations.at(5) = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+
 	this->m_engine->MakeContextCurrent(true); //this is necessary when constructing the first EngineCanvas - call it every time as construction is infrequent and already expensive
 
 	this->m_render_function = [this](std::vector<Model*> model_pool)
