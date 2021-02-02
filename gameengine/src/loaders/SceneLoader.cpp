@@ -275,7 +275,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 						double merge_distance = it.value()["merge geometry"]["distance"].get<double>();
 						if (merge_distance >= 0)
 						{
-							//model_geometry->MergeVertices(merge_distance);
+							model_geometry->MergeVertices(merge_distance);
 						}
 						else
 						{
@@ -373,7 +373,6 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 	//load potentially visible sets
 	if (scene_data["visboxes"].is_object())
 	{
-
 		//first pass - load visboxes
 		for (auto& el : scene_data["visboxes"].items())
 		{
