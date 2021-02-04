@@ -3,143 +3,70 @@
 #include <stdexcept>
 
 #include "../../Engine.h"
+#include "../TextureType.h"
 
-void RenderTexture::CreateTextureData(GLuint& texture, GLenum type, GLenum internal_format, GLenum format, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
+void RenderTexture::CreateTextureData(GLuint& texture, GLenum target, TextureFormat format, TextureType type, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {
-	void* pixels = NULL;
-#ifdef _DEBUG
-	std::vector<GLubyte> pixel_data_ubyte;
-	std::vector<GLfloat> pixel_data_float;
-	if (do_create)
+	const auto& [size_x, size_y] = dimensions;
+
+	GLint internal_format = GL_NONE;
+	switch (format)
 	{
-		if (format == GL_UNSIGNED_BYTE)
-		{
-			pixel_data_ubyte.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
-			for (std::size_t i = 0; i < static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)); i++)
-			{
-				pixel_data_ubyte.push_back(128);
-			}
-		}
-		else if (format == GL_FLOAT)
-		{
-			pixel_data_float.reserve(std::get<0>(dimensions) * std::get<1>(dimensions));
-			for (std::size_t i = 0; i < static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)); i++)
-			{
-				pixel_data_float.push_back(0.5f);
-			}
-		}
+	case TextureFormat::Depth: internal_format = GL_DEPTH_COMPONENT; break;
+	case TextureFormat::R: internal_format = GL_RED; break;
+	case TextureFormat::RG: internal_format = GL_RG; break;
+	case TextureFormat::RGB: internal_format = GL_RGB; break;
+	case TextureFormat::RGBA: internal_format = GL_RGBA; break;
+	default: throw std::invalid_argument("Unknown texture format");
 	}
 
-	if (do_create)
+	GLenum tex_type = GL_NONE;
+	switch (type)
 	{
-		if (format == GL_UNSIGNED_BYTE)
-		{
-			pixels = pixel_data_ubyte.data();
-		}
-		else if (format == GL_FLOAT)
-		{
-			pixels = pixel_data_float.data();
-		}
-		else
-		{
-			throw std::invalid_argument("Unknown format \"" + std::to_string(format) + "\"");
-		}
+	case TextureType::Float: tex_type = GL_FLOAT; break;
+	case TextureType::HalfFloat: tex_type = GL_HALF_FLOAT; break;
+	case TextureType::UnsignedByte: tex_type = GL_UNSIGNED_BYTE; break;
+	default: throw std::invalid_argument("Unknown texture type");
 	}
-#endif
+
+	GLint preferred_format = GL_NONE;
+	glGetInternalformativ(target, internal_format, GL_TEXTURE_IMAGE_FORMAT, 1, &preferred_format);
 
 	if (do_create)
 	{
 		glGenTextures(1, &texture);
 	}
+	glBindTexture(target, texture);
 
-	glBindTexture(type, texture);
-
-	if (type == GL_TEXTURE_2D)
+	if (target == GL_TEXTURE_2D)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, std::get<0>(dimensions), std::get<1>(dimensions), 0, internal_format, format, pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, size_x, size_y, 0, static_cast<GLenum>(preferred_format), tex_type, nullptr);
 	}
-	else if (type == GL_TEXTURE_CUBE_MAP)
+	else if (target == GL_TEXTURE_CUBE_MAP)
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, std::get<0>(dimensions), std::get<1>(dimensions), 0, internal_format, format, pixels);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, size_x, size_y, 0, static_cast<GLenum>(preferred_format), tex_type, nullptr);
 		}
 	}
 	else
 	{
-		throw std::runtime_error("Unknown texture type " + std::to_string(type));
+		throw std::runtime_error("Unknown texture target " + std::to_string(target));
 	}
 
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, filtering);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, filtering);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filtering);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filtering);
 
 	if (do_create) //these parameters don't change
 	{
-		glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		glTexParameteri(type, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, 0);
-		glGenerateMipmap(type);
+		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
+		glGenerateMipmap(target);
 	}
-
-#ifdef _DEBUG
-	if (do_create)
-	{
-		bool arrays_are_different = false;
-
-		if (format == GL_UNSIGNED_BYTE)
-		{
-			std::vector<GLubyte> return_data(std::get<0>(dimensions) * std::get<1>(dimensions));
-			glGetTexImage(type == GL_TEXTURE_CUBE_MAP ? GL_TEXTURE_CUBE_MAP_POSITIVE_X : type, 0, internal_format, format, return_data.data());
-
-			if (return_data.size() == pixel_data_ubyte.size())
-			{
-				for (std::size_t i = 0; i < return_data.size(); i++)
-				{
-					if (std::abs(return_data.at(i) - pixel_data_ubyte.at(i)) > 0)
-					{
-						arrays_are_different = true;
-					}
-				}
-			}
-			else
-			{
-				arrays_are_different = true;
-			}
-		}
-		else if (format == GL_FLOAT)
-		{
-			std::vector<GLfloat> return_data(std::get<0>(dimensions) * std::get<1>(dimensions));
-			glGetTexImage(type == GL_TEXTURE_CUBE_MAP ? GL_TEXTURE_CUBE_MAP_POSITIVE_X : type, 0, internal_format, format, return_data.data());
-			
-			if (return_data.size() == pixel_data_float.size())
-			{
-				for (std::size_t i = 0; i < return_data.size(); i++)
-				{
-					if (std::abs(return_data.at(i) - pixel_data_float.at(i)) > 0.000001f)
-					{
-						arrays_are_different = true;
-					}
-				}
-			}
-			else
-			{
-				arrays_are_different = true;
-			}
-		}
-		else
-		{
-			throw std::invalid_argument("Unknown format \"" + std::to_string(format) + "\"");
-		}
-
-		if (arrays_are_different)
-		{
-			throw std::runtime_error("Texture is not using the set data");
-		}
-	}
-#endif
 }
 
 void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, GLenum type, bool do_create)
@@ -149,12 +76,12 @@ void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, GL
 
 	if (this->m_info.colour)
 	{
-		this->CreateTextureData(texture_group.colour, type, GL_RGBA, GL_UNSIGNED_BYTE, this->m_dimensions, this->m_info.colour_filtering, do_create);
+		this->CreateTextureData(texture_group.colour, type, TextureFormat::RGBA, TextureType::UnsignedByte, this->m_dimensions, this->m_info.colour_filtering, do_create);
 	}
 
 	if (this->m_info.depth)
 	{
-		this->CreateTextureData(texture_group.depth, type, GL_DEPTH_COMPONENT, GL_FLOAT, this->m_dimensions, this->m_info.depth_filtering, do_create);
+		this->CreateTextureData(texture_group.depth, type, TextureFormat::Depth, TextureType::Float, this->m_dimensions, this->m_info.depth_filtering, do_create);
 	}
 
 	if (do_create)
@@ -170,7 +97,7 @@ void RenderTexture::InitialiseTextureGroup(RenderTextureGroup& texture_group, GL
 			texture_id = texture_group.data.at(i);
 		}
 
-		this->CreateTextureData(texture_id, type, GL_RGBA, GL_UNSIGNED_BYTE, this->m_dimensions, this->m_info.data_filtering, do_create);
+		this->CreateTextureData(texture_id, type, TextureFormat::RGBA, TextureType::HalfFloat, this->m_dimensions, this->m_info.data_filtering, do_create);
 
 		if (do_create)
 		{
