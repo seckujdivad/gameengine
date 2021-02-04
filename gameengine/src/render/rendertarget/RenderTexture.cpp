@@ -51,7 +51,7 @@ void RenderTexture::CreateTextureData(GLuint& texture, GLenum target, TextureFor
 	}
 	else
 	{
-		throw std::runtime_error("Unknown texture target " + std::to_string(target));
+		throw std::invalid_argument("Unknown texture target " + std::to_string(target));
 	}
 
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filtering);
