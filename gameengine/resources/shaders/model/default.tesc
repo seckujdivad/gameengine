@@ -72,7 +72,7 @@ void main()
 
 		for (int i = 0; i < 4; i++)
 		{
-			gl_TessLevelOuter[i] = 1.0f + max(20.0f * sin(acos(edge_angle_cosines[i])), 0.0f);
+			gl_TessLevelOuter[i] = ceil(1.0f + max(20.0f * sin(acos(edge_angle_cosines[i])), 0.0f));
 		}
 		
 		gl_TessLevelInner[0] = (gl_TessLevelOuter[1] + gl_TessLevelOuter[3]) / 2;
