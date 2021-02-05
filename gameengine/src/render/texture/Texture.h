@@ -39,8 +39,8 @@ private:
 
 public:
 	Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps);
-	Texture(const Texture&) = delete;
-	Texture& operator=(const Texture&) = delete;
+	Texture(const Texture& copy_from);
+	Texture& operator=(const Texture& copy_from);
 	Texture(Texture&& move_from) noexcept;
 	Texture& operator=(Texture&& move_from) noexcept;
 	~Texture();
@@ -67,4 +67,7 @@ public:
 	void BindTexture() const;
 
 	void SetPixels(TextureFormat pixel_format, std::vector<const void*> pixels);
+
+	void CopyTo(Texture& dest) const;
+	void CopyFrom(const Texture& src);
 };

@@ -113,6 +113,18 @@ Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensio
 	this->ConfigureTexture(true);
 }
 
+Texture::Texture(const Texture& copy_from)
+{
+	*this = copy_from;
+}
+
+Texture& Texture::operator=(const Texture& copy_from)
+{
+	this->CopyFrom(copy_from);
+
+	return *this;
+}
+
 Texture::Texture(Texture&& move_from) noexcept
 {
 	*this = std::move(move_from);
@@ -242,4 +254,35 @@ void Texture::BindTexture() const
 void Texture::SetPixels(TextureFormat pixel_format, std::vector<const void*> pixels)
 {
 	this->ConfigureTexture(false, pixel_format, pixels);
+}
+
+void Texture::CopyTo(Texture& dest) const
+{
+	dest.m_dimensions = this->m_dimensions;
+	dest.m_type = this->m_type;
+	dest.m_format = this->m_format;
+	dest.m_filtering = this->m_filtering;
+	dest.m_target = this->m_target;
+	dest.m_generate_mipmaps = this->m_generate_mipmaps;
+
+	dest.m_preferred_format = this->m_preferred_format;
+
+	dest.ConfigureTexture(dest.m_texture == GL_NONE);
+
+	const auto& [width, height] = this->GetDimensions();
+
+	int copy_layers = 0;
+	switch (this->GetTargetType())
+	{
+	case TargetType::Texture_2D: copy_layers = 1; break;
+	case TargetType::Texture_Cubemap: copy_layers = 6; break;
+	default: throw std::runtime_error("Unknown TargetType " + std::to_string(static_cast<int>(this->GetTargetType())));
+	}
+
+	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
+}
+
+void Texture::CopyFrom(const Texture& src)
+{
+	src.CopyTo(*this);
 }
