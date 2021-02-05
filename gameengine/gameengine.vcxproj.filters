@@ -97,6 +97,12 @@
     <Filter Include="Header Files\render\renderer">
       <UniqueIdentifier>{c747aba1-c51b-4ab4-abf8-7894dbef5c44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\texture">
+      <UniqueIdentifier>{dc8cd7a1-6a36-4380-b54c-97a5839d5d20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\texture">
+      <UniqueIdentifier>{2ccc4255-e285-43f0-8cf9-e2f9e5e02417}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -273,10 +279,16 @@
     <ClInclude Include="src\render\renderable\CumulativeTexture.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\TextureType.h">
-      <Filter>Header Files\render</Filter>
+    <ClInclude Include="src\render\texture\TextureFormat.h">
+      <Filter>Header Files\render\texture</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\TextureFormat.h">
+    <ClInclude Include="src\render\texture\TextureFiltering.h">
+      <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\texture\TextureType.h">
+      <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\TargetType.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
   </ItemGroup>
@@ -445,6 +457,18 @@
     </ClCompile>
     <ClCompile Include="src\render\renderable\CumulativeTexture.cpp">
       <Filter>Source Files\render\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\TargetType.cpp">
+      <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\texture\TextureFormat.cpp">
+      <Filter>Source Files\render\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\texture\TextureFiltering.cpp">
+      <Filter>Source Files\render\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\texture\TextureType.cpp">
+      <Filter>Source Files\render\texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

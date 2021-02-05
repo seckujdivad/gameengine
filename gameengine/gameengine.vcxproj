@@ -215,8 +215,10 @@
     <ClInclude Include="src\render\rendertarget\RenderTexture.h" />
     <ClInclude Include="src\render\rendertarget\RenderTextureData.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
-    <ClInclude Include="src\render\TextureFormat.h" />
-    <ClInclude Include="src\render\TextureType.h" />
+    <ClInclude Include="src\render\TargetType.h" />
+    <ClInclude Include="src\render\texture\TextureFiltering.h" />
+    <ClInclude Include="src\render\texture\TextureFormat.h" />
+    <ClInclude Include="src\render\texture\TextureType.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\scene\Camera.h" />
     <ClInclude Include="src\scene\Cubemap.h" />
@@ -274,6 +276,10 @@
     <ClCompile Include="src\render\rendertarget\RenderTexture.cpp" />
     <ClCompile Include="src\render\rendertarget\RenderTextureData.cpp" />
     <ClCompile Include="src\render\ShaderProgram.cpp" />
+    <ClCompile Include="src\render\TargetType.cpp" />
+    <ClCompile Include="src\render\texture\TextureFiltering.cpp" />
+    <ClCompile Include="src\render\texture\TextureFormat.cpp" />
+    <ClCompile Include="src\render\texture\TextureType.cpp" />
     <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\scene\Camera.cpp" />
     <ClCompile Include="src\scene\Cubemap.cpp" />

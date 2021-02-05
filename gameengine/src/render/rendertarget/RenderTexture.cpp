@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 #include "../../Engine.h"
-#include "../TextureType.h"
-#include "../TextureFormat.h"
+#include "../texture/TextureType.h"
+#include "../texture/TextureFormat.h"
 
 void RenderTexture::CreateTextureData(GLuint& texture, GLenum target, TextureFormat format, TextureType type, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {
