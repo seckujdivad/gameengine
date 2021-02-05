@@ -215,6 +215,7 @@
     <ClInclude Include="src\render\rendertarget\RenderTexture.h" />
     <ClInclude Include="src\render\rendertarget\RenderTextureData.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
+    <ClInclude Include="src\render\TextureFormat.h" />
     <ClInclude Include="src\render\TextureType.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\scene\Camera.h" />

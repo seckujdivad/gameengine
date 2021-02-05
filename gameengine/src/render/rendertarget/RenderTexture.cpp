@@ -4,6 +4,7 @@
 
 #include "../../Engine.h"
 #include "../TextureType.h"
+#include "../TextureFormat.h"
 
 void RenderTexture::CreateTextureData(GLuint& texture, GLenum target, TextureFormat format, TextureType type, std::tuple<int, int> dimensions, GLint filtering, bool do_create)
 {

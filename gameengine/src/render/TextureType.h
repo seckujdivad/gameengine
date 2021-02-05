@@ -6,12 +6,3 @@ enum class TextureType
 	HalfFloat,
 	UnsignedByte
 };
-
-enum class TextureFormat
-{
-	Depth,
-	R,
-	RG,
-	RGB,
-	RGBA
-};

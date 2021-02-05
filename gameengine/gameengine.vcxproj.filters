@@ -276,6 +276,9 @@
     <ClInclude Include="src\render\TextureType.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\TextureFormat.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
