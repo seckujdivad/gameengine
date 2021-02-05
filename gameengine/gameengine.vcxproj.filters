@@ -279,6 +279,9 @@
     <ClInclude Include="src\render\renderable\CumulativeTexture.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\texture\Texture.h">
+      <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
     <ClInclude Include="src\render\texture\TextureFormat.h">
       <Filter>Header Files\render\texture</Filter>
     </ClInclude>
@@ -457,6 +460,9 @@
     </ClCompile>
     <ClCompile Include="src\render\renderable\CumulativeTexture.cpp">
       <Filter>Source Files\render\renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\texture\Texture.cpp">
+      <Filter>Source Files\render\texture</Filter>
     </ClCompile>
     <ClCompile Include="src\render\TargetType.cpp">
       <Filter>Source Files\render</Filter>
