@@ -101,6 +101,13 @@ bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 
 void RenderTexture::SetWriteTarget(RenderTexture* target)
 {
+	if (this->m_owns_fbo)
+	{
+		GLuint fbo = this->GetFramebuffer();
+		glDeleteFramebuffers(1, &fbo);
+	}
+	this->m_owns_fbo = false;
+
 	this->SetFramebuffer(target->GetFramebuffer());
 	this->SetTargetType(target->GetTargetType());
 
