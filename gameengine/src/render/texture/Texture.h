@@ -30,7 +30,7 @@ private:
 	TargetType m_target;
 	bool m_generate_mipmaps;
 
-	GLuint m_texture;
+	GLuint m_texture = GL_NONE;
 	GLint m_preferred_format = GL_NONE;
 
 private:
