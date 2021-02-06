@@ -38,7 +38,7 @@ private:
 	GLint GetPreferredFormat(bool force = false);
 
 public:
-	Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps);
+	Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions = std::tuple<int, int>(1, 1), bool generate_mipmaps = false);
 	Texture(const Texture& copy_from);
 	Texture& operator=(const Texture& copy_from);
 	Texture(Texture&& move_from) noexcept;
