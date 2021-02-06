@@ -102,6 +102,7 @@ bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 void RenderTexture::SetWriteTarget(RenderTexture* target)
 {
 	this->SetFramebuffer(target->GetFramebuffer());
+	this->SetTargetType(target->GetTargetType());
 
 	this->m_texture_write = target->m_texture_write;
 	this->m_texture_read = target->m_texture_read;
