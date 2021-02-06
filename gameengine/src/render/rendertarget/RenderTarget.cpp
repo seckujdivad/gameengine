@@ -563,7 +563,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 			{
 				texture.id = reflection_output->colour.at(j + 1).GetTexture();
-				texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
+				texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * (static_cast<int>(reflection_output->colour.size()) - 1)) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 			}
 		}
