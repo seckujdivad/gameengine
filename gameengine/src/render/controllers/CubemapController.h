@@ -37,7 +37,7 @@ public:
 	virtual ~CubemapController();
 
 	void Render() override;
-	RenderTextureGroup GetRenderTexture() const override;
+	std::shared_ptr<RenderTextureGroup> GetRenderTexture() const override;
 	virtual RenderControllerType GetType() const = 0;
 
 	virtual CubemapType GetCubemapType() const = 0;

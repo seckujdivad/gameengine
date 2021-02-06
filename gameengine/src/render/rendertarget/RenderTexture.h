@@ -5,42 +5,35 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <memory>
+#include <optional>
 
 #include "RenderTarget.h"
 #include "../../scene/Referenceable.h"
-#include "RenderTextureData.h"
+#include "../texture/Texture.h"
 
 class Engine;
-enum class TextureType;
-enum class TextureFormat;
 
 class RenderTexture : public RenderTarget, public Referenceable<RenderTextureReference>
 {
 private:
-	GLenum m_type;
-	RenderTextureInfo m_info;
-
-	bool m_simultaneous_read_write;
 	bool m_auto_swap_buffers;
-	RenderTextureGroup m_texture_write;
-	RenderTextureGroup m_texture_read;
 
-	bool m_owns_target;
+	bool m_owns_fbo;
 
-	std::tuple<int, int> m_dimensions;
-
-	static void CreateTextureData(GLuint& texture, GLenum target, TextureFormat format, TextureType type, std::tuple<int, int> dimensions, GLint filtering, bool do_create = true);
-
-	void InitialiseTextureGroup(RenderTextureGroup& texture_group, GLenum type, bool do_create = true);
-	void ResizeTextureGroup(RenderTextureGroup& texture_group);
-	bool CheckTextureGroup(RenderTextureGroup texture_group) const;
+	std::shared_ptr<RenderTextureGroup> m_texture_write;
+	std::optional<std::shared_ptr<RenderTextureGroup>> m_texture_read;
 
 	void AttachTexturesToFramebuffer();
 
 	void PostRenderEvent() override;
 
 public:
-	RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, RenderTextureInfo info, GLenum type = GL_TEXTURE_2D, bool simultaneous_read_write = false, bool auto_swap_buffers = true);
+	RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, std::optional<RenderTextureGroup*> write_textures = std::optional<RenderTextureGroup*>(), bool simultaneous_read_write = false, bool auto_swap_buffers = true);
+	RenderTexture(const RenderTexture&) = delete;
+	RenderTexture& operator=(const RenderTexture&) = delete;
+	RenderTexture(RenderTexture&&) noexcept = delete;
+	RenderTexture& operator=(RenderTexture&&) noexcept = delete;
 	~RenderTexture();
 
 	std::tuple<int, int> GetOutputSize() const override;
@@ -48,13 +41,8 @@ public:
 
 	void SetWriteTarget(RenderTexture* target);
 
-	void SetFBO(GLuint fbo);
-	void SetWriteTextures(RenderTextureGroup textures, bool attach = true);
-	void SetOutputTextures(RenderTextureGroup textures);
-
-	RenderTextureGroup GetOutputTextures() const;
-	RenderTextureGroup GetWriteTextures() const;
-	RenderTextureInfo GetTextureInfo() const;
+	std::shared_ptr<RenderTextureGroup> GetOutputTextures() const;
+	std::shared_ptr<RenderTextureGroup> GetWriteTextures() const;
 
 	bool SwapBuffers() override;
 

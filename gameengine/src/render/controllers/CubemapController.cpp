@@ -156,7 +156,7 @@ void CubemapController::Render()
 	}
 }
 
-RenderTextureGroup CubemapController::GetRenderTexture() const
+std::shared_ptr<RenderTextureGroup> CubemapController::GetRenderTexture() const
 {
 	return dynamic_cast<RenderTexture*>(this->m_cumulative_texture->GetOutput())->GetOutputTextures();
 }

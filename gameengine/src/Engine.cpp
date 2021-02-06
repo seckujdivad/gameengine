@@ -691,7 +691,7 @@ LoadedTexture Engine::GetTexture(TextureReference reference) const
 	return std::get<0>(this->m_textures_static.at(reference));
 }
 
-RenderTextureGroup Engine::GetRenderTexture(RenderTextureReference reference) const
+std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureReference reference) const
 {
 	for (RenderController* controller : this->m_render_controllers)
 	{

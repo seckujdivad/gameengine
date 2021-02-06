@@ -19,15 +19,10 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Target must inherit from RenderTexture");
 	}
 
-	RenderTextureInfo info;
-	info.colour = false;
-	info.num_data = 0;
-	info.auto_generate_textures = false;
-
 	RenderTargetConfig config;
 	config.SetMode(RenderTargetMode::Normal_DepthOnly);
 
-	this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, info, this->GetTarget()->GetTargetType());
+	this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, std::optional<RenderTextureGroup*>(), true, false);
 	this->m_rt_depth_only->SetWriteTarget(target_texture);
 }
 

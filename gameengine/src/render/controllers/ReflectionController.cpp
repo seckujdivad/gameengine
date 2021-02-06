@@ -6,19 +6,17 @@
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderer/NormalRenderer.h"
+#include "../TargetType.h"
 
 std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {
-	RenderTextureInfo info;
-	info.colour = true;
-	info.depth = true;
-	info.num_data = GAMEENGINE_NUM_DATA_TEX;
-
 	RenderTargetConfig config;
 	config.SetMode(RenderTargetMode::Normal_Draw);
 	config.clear_fbo = layer == 0;
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, true, true);
+	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_Draw, TargetType::Texture_Cubemap);
+
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, textures.get(), true, true);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
 	render_texture->SetNormalModePreviousFrameToSelf();

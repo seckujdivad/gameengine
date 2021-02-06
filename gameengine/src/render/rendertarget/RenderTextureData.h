@@ -2,34 +2,42 @@
 
 #include <tuple>
 #include <vector>
+#include <optional>
+#include <functional>
 
-#include "../../GLComponents.h"
+#include "../texture/Texture.h"
 
-struct RenderTextureGroup
+enum class TargetType;
+enum class RenderTargetMode;
+
+class RenderTextureGroup
 {
-	GLenum type = GL_TEXTURE_2D;
-	GLuint colour = NULL;
-	GLuint depth = NULL;
-	std::vector<GLuint> data;
+public:
+	struct Identifiers
+	{
+		std::vector<GLuint> colour;
+		std::optional<GLuint> depth;
+	};
 
-	std::tuple<int, int> dimensions;
+private:
+	const Texture& GetATexture() const;
+
+public:
+	RenderTextureGroup();
+	RenderTextureGroup(RenderTargetMode mode, TargetType target);
+
+	std::vector<Texture> colour;
+	std::optional<Texture> depth;
+
+	std::tuple<int, int> GetDimensions() const;
+	void SetDimensions(std::tuple<int, int> dimensions);
+
+	TargetType GetTargetType() const;
+
+	void CopyFrom(const RenderTextureGroup& src);
+	void CopyTo(RenderTextureGroup& dest) const;
+
+	void ForEachTexture(std::function<void(Texture& texture)> foreach);
+
+	Identifiers GetIdentifiers() const;
 };
-
-struct RenderTextureInfo
-{
-	bool colour = true;
-	GLenum colour_filtering = GL_LINEAR;
-	bool depth = true;
-	GLenum depth_filtering = GL_NEAREST;
-	int num_data = GAMEENGINE_NUM_DATA_TEX;
-	GLenum data_filtering = GL_NEAREST;
-
-	bool auto_generate_textures = true;
-};
-
-bool operator==(const RenderTextureInfo& first, const RenderTextureInfo& second);
-bool operator!=(const RenderTextureInfo& first, const RenderTextureInfo& second);
-
-void CopyTextureGroup(RenderTextureGroup source, RenderTextureGroup destination, RenderTextureInfo info, std::tuple<int, int> dimensions);
-
-bool CheckTextureGroup(RenderTextureGroup texture_group, RenderTextureInfo texture_info);

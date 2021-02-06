@@ -4,21 +4,19 @@
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderer/WrapperRenderer.h"
+#include "../TargetType.h"
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
-	RenderTextureInfo info;
-	info.colour = false;
-	info.depth = true;
-	info.num_data = 0;
-
 	RenderTargetConfig config = { RenderTargetMode::Shadow, RenderTargetConfig::Shadow() };
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
+	
+	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
 
-	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, info, GL_TEXTURE_CUBE_MAP, false)));
+	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, textures.get(), false)));
 	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());

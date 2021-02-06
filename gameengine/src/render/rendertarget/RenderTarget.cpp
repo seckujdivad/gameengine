@@ -17,6 +17,7 @@
 #include "../../scene/model/Model.h"
 #include "../../scene/model/geometry/PresetGeometry.h"
 #include "../../scene/model/geometry/Patch.h"
+#include "../TargetType.h"
 
 #include "RenderTexture.h"
 
@@ -380,10 +381,10 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			std::string cubemap_name = "light_shadow_cubemaps[" + std::to_string(i) + "]";
 
 			this->m_shader_program->AddUniformName(cubemap_name);
-			RenderTextureGroup texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
+			std::shared_ptr<RenderTextureGroup> texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
 
 			LoadedTexture loaded_texture;
-			loaded_texture.id = texture.depth;
+			loaded_texture.id = texture->depth->GetTexture();
 			loaded_texture.type = GL_TEXTURE_CUBE_MAP;
 			loaded_texture.uniform_name = cubemap_name;
 
@@ -417,19 +418,19 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		//load textures from the previous frame (if in normal rendering mode)
 		LoadedTexture texture;
-		texture.type = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame.type;
-		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame.colour;
+		texture.type = GetTargetEnum(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->GetTargetType());
+		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0).GetTexture();
 		texture.uniform_name = "render_output_colour";
 		this->m_shader_program->SetTexture(-1, texture);
 
-		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame.depth;
+		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth->GetTexture();
 		texture.uniform_name = "render_output_depth";
 		this->m_shader_program->SetTexture(-1, texture);
 
-		for (int i = 0; i < static_cast<int>(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame.data.size()); i++)
+		for (int i = 1; i < static_cast<int>(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.size()); i++)
 		{
-			texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame.data.at(i);
-			texture.uniform_name = "render_output_data[" + std::to_string(i) + "]";
+			texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i).GetTexture();
+			texture.uniform_name = "render_output_data[" + std::to_string(i - 1) + "]";
 			this->m_shader_program->SetTexture(-1, texture);
 		}
 	}
@@ -550,18 +551,18 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform(prefix + "mode", static_cast<int>(reflection_mode));
 			this->m_shader_program->SetUniform(prefix + "iterations", reflection->GetIterations());
 
-			RenderTextureGroup reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
+			std::shared_ptr<RenderTextureGroup> reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
 
 			LoadedTexture texture;
-			texture.type = reflection_output.type;
+			texture.type = GetTargetEnum(reflection_output->GetTargetType());
 
-			texture.id = reflection_output.colour;
+			texture.id = reflection_output->colour.at(0).GetTexture();
 			texture.uniform_name = "reflection_cubemaps[" + std::to_string(i) + "]";
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 			{
-				texture.id = reflection_output.data.at(j);
+				texture.id = reflection_output->colour.at(j + 1).GetTexture();
 				texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 			}
@@ -573,10 +574,10 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		Skybox* skybox = model->GetSkybox();
 		if (skybox != nullptr)
 		{
-			RenderTextureGroup render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
+			std::shared_ptr<RenderTextureGroup> render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
 			LoadedTexture loaded_texture;
-			loaded_texture.id = render_texture.colour;
-			loaded_texture.type = render_texture.type;
+			loaded_texture.id = render_texture->colour.at(0).GetTexture();
+			loaded_texture.type = GetTargetEnum(render_texture->GetTargetType());
 			loaded_texture.uniform_name = "skyboxTexture";
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), loaded_texture);
 		}

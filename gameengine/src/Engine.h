@@ -98,7 +98,7 @@ public:
 	void Render();
 
 	LoadedTexture GetTexture(TextureReference reference) const;
-	RenderTextureGroup GetRenderTexture(RenderTextureReference reference) const;
+	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
 
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
 

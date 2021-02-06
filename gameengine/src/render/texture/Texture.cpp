@@ -95,7 +95,7 @@ Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensio
 	}
 	else if (preset == Preset::Data)
 	{
-		this->m_type = TextureType::HalfFloat;
+		this->m_type = TextureType::UnsignedByte;
 		this->m_format = TextureFormat::RGBA;
 		this->m_filtering = TextureFiltering::Nearest;
 	}
@@ -103,7 +103,7 @@ Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensio
 	{
 		this->m_type = TextureType::Float;
 		this->m_format = TextureFormat::Depth;
-		this->m_filtering = TextureFiltering::Nearest;
+		this->m_filtering = TextureFiltering::Linear;
 	}
 	else
 	{

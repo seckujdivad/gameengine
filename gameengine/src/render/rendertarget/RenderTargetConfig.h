@@ -16,7 +16,7 @@ struct RenderTargetConfig
 
 	struct Normal_Draw
 	{
-		RenderTextureGroup previous_frame;
+		std::shared_ptr<RenderTextureGroup> previous_frame;
 		bool draw_shadows = true;
 		bool draw_reflections = true;
 	};

@@ -27,7 +27,7 @@ public:
 	virtual void Render() = 0;
 	virtual void PostRender();
 
-	virtual RenderTextureGroup GetRenderTexture() const = 0;
+	virtual std::shared_ptr<RenderTextureGroup> GetRenderTexture() const = 0;
 	virtual RenderControllerType GetType() const = 0;
 
 	virtual std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const = 0;

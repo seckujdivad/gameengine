@@ -6,6 +6,7 @@
 #include "../rendertarget/RenderTexture.h"
 #include "../renderer/WrapperRenderer.h"
 #include "../renderer/NormalRenderer.h"
+#include "../TargetType.h"
 
 RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanvasController::CompositeLayer> composite_layers)
 {
@@ -19,31 +20,32 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 
 	//make new textures
 	RenderTargetConfig postprocess_config = { RenderTargetMode::Postprocess, RenderTargetConfig::PostProcess() };
-	for (CompositeLayer composite : composite_layers)
+	for (const CompositeLayer& composite : composite_layers)
 	{
-		RenderTextureInfo info;
-		info.colour = true;
-		info.depth = true;
-
 		RenderTargetConfig cfg;
+		RenderTargetMode render_target_mode;
 		if (composite.mode == RenderMode::Normal)
 		{
-			cfg.SetMode(RenderTargetMode::Normal_Draw);
+			render_target_mode = RenderTargetMode::Normal_Draw;
 		}
 		else if (composite.mode == RenderMode::Wireframe)
 		{
-			cfg.SetMode(RenderTargetMode::Wireframe);
+			render_target_mode = RenderTargetMode::Wireframe;
 		}
 		else if (composite.mode == RenderMode::Textured)
 		{
-			cfg.SetMode(RenderTargetMode::Textured);
+			render_target_mode = RenderTargetMode::Textured;
 		}
 		else
 		{
 			throw std::invalid_argument("Unsupported render mode " + std::to_string(static_cast<int>(composite.mode)));
 		}
 
-		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, info, GL_TEXTURE_2D, true));
+		cfg.SetMode(render_target_mode);
+
+		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(render_target_mode, TargetType::Texture_2D);
+
+		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, textures.get(), true));
 		RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 
 		std::unique_ptr<Renderer> renderer;
@@ -58,7 +60,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		}
 
 		RenderTargetConfig::PostProcess::CompositeLayer layer;
-		layer.id = render_texture->GetOutputTextures().colour;
+		layer.id = render_texture->GetOutputTextures()->colour.at(0).GetTexture();
 		std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
 
 		this->m_renderers.push_back(std::move(renderer));
@@ -71,17 +73,13 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	: RenderController(engine, reference),
 	m_canvas(canvas)
 {
-	RenderTextureInfo postprocess_texture_info;
-	postprocess_texture_info.colour = true;
-	postprocess_texture_info.depth = false;
-	postprocess_texture_info.num_data = 0;
-
-	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), postprocess_texture_info, GL_TEXTURE_2D, false);
+	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Postprocess, TargetType::Texture_2D);
+	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), textures.get(), false);
 
 	RenderTargetConfig canvas_config = { RenderTargetMode::Postprocess, RenderTargetConfig::PostProcess() };
 
 	RenderTargetConfig::PostProcess::CompositeLayer passthrough_layer;
-	passthrough_layer.id = this->m_texture_final->GetOutputTextures().colour;
+	passthrough_layer.id = this->m_texture_final->GetOutputTextures()->colour.at(0).GetTexture();
 	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
 
 	this->m_canvas->SetConfig(canvas_config);
@@ -109,7 +107,7 @@ void EngineCanvasController::Render()
 	this->m_canvas->Render({}, true);
 }
 
-RenderTextureGroup EngineCanvasController::GetRenderTexture() const
+std::shared_ptr<RenderTextureGroup> EngineCanvasController::GetRenderTexture() const
 {
 	return this->m_texture_final->GetOutputTextures();
 }
