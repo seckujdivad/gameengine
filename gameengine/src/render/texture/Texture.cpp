@@ -23,7 +23,8 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 
 	GLenum tex_type = GetTextureTypeEnum(this->GetTextureType());
 	GLint internal_format = GetTextureFormatEnum(this->GetFormat());
-	GLint filtering = GetTextureFilteringEnum(this->GetFiltering());
+	GLint min_filtering = GetTextureFilteringEnum(this->GetMinFiltering());
+	GLint mag_filtering = GetTextureFilteringEnum(this->GetMagFiltering());
 	GLenum target = GetTargetEnum(this->GetTargetType());
 
 	GLint preferred_format;
@@ -54,8 +55,8 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 		}
 	}
 
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filtering);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filtering);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mag_filtering);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, min_filtering);
 
 	if (create) //these parameters don't change
 	{
@@ -91,19 +92,22 @@ Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensio
 	{
 		this->m_type = TextureType::UnsignedByte;
 		this->m_format = TextureFormat::RGBA;
-		this->m_filtering = TextureFiltering::Linear;
+		this->m_filtering_min = TextureFiltering::Linear;
+		this->m_filtering_mag = TextureFiltering::Linear;
 	}
 	else if (preset == Preset::Data)
 	{
 		this->m_type = TextureType::HalfFloat;
 		this->m_format = TextureFormat::RGBA;
-		this->m_filtering = TextureFiltering::Nearest;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Depth)
 	{
 		this->m_type = TextureType::Float;
 		this->m_format = TextureFormat::Depth;
-		this->m_filtering = TextureFiltering::Nearest;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else
 	{
@@ -135,7 +139,8 @@ Texture& Texture::operator=(Texture&& move_from) noexcept
 	this->m_dimensions = move_from.m_dimensions;
 	this->m_type = move_from.m_type;
 	this->m_format = move_from.m_format;
-	this->m_filtering = move_from.m_filtering;
+	this->m_filtering_min = move_from.m_filtering_min;
+	this->m_filtering_mag = move_from.m_filtering_mag;
 	this->m_target = move_from.m_target;
 	this->m_generate_mipmaps = move_from.m_generate_mipmaps;
 
@@ -200,16 +205,51 @@ TextureFormat Texture::GetFormat() const
 
 void Texture::SetFiltering(TextureFiltering filtering)
 {
-	if (filtering != this->m_filtering)
+	bool reconfigure = false;
+	if (filtering != this->m_filtering_min)
 	{
-		this->m_filtering = filtering;
+		this->m_filtering_min = filtering;
+		reconfigure = true;
+	}
+
+	if (filtering != this->m_filtering_mag)
+	{
+		this->m_filtering_mag = filtering;
+		reconfigure = true;
+	}
+
+	if (reconfigure)
+	{
 		this->ConfigureTexture(false);
 	}
 }
 
-TextureFiltering Texture::GetFiltering() const
+void Texture::SetMinFiltering(TextureFiltering min_filtering)
 {
-	return this->m_filtering;
+	if (min_filtering != this->m_filtering_min)
+	{
+		this->m_filtering_min = min_filtering;
+		this->ConfigureTexture(false);
+	}
+}
+
+TextureFiltering Texture::GetMinFiltering() const
+{
+	return this->m_filtering_min;
+}
+
+void Texture::SetMagFiltering(TextureFiltering mag_filtering)
+{
+	if (mag_filtering != this->m_filtering_mag)
+	{
+		this->m_filtering_mag = mag_filtering;
+		this->ConfigureTexture(false);
+	}
+}
+
+TextureFiltering Texture::GetMagFiltering() const
+{
+	return this->m_filtering_mag;
 }
 
 void Texture::SetTargetType(TargetType target)
@@ -261,7 +301,8 @@ void Texture::CopyTo(Texture& dest) const
 	dest.m_dimensions = this->m_dimensions;
 	dest.m_type = this->m_type;
 	dest.m_format = this->m_format;
-	dest.m_filtering = this->m_filtering;
+	dest.m_filtering_min = this->m_filtering_min;
+	dest.m_filtering_mag = this->m_filtering_mag;
 	dest.m_target = this->m_target;
 	dest.m_generate_mipmaps = this->m_generate_mipmaps;
 

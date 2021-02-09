@@ -26,7 +26,8 @@ private:
 
 	TextureType m_type;
 	TextureFormat m_format;
-	TextureFiltering m_filtering;
+	TextureFiltering m_filtering_min;
+	TextureFiltering m_filtering_mag;
 	TargetType m_target;
 	bool m_generate_mipmaps;
 
@@ -55,7 +56,12 @@ public:
 	TextureFormat GetFormat() const;
 
 	void SetFiltering(TextureFiltering filtering);
-	TextureFiltering GetFiltering() const;
+
+	void SetMinFiltering(TextureFiltering min_filtering);
+	TextureFiltering GetMinFiltering() const;
+
+	void SetMagFiltering(TextureFiltering mag_filtering);
+	TextureFiltering GetMagFiltering() const;
 
 	void SetTargetType(TargetType target);
 	TargetType GetTargetType() const;
