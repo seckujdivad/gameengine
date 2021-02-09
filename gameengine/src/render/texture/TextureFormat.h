@@ -8,7 +8,8 @@ enum class TextureFormat
 	R,
 	RG,
 	RGB,
-	RGBA
+	RGBA,
+	RGB8
 };
 
 TextureFormat GetTextureFormat(GLint format);
