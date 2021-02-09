@@ -19,6 +19,15 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 		}
 	}
 
+	bool pixel_data_provided = false;
+	for (const void* ptr : pixels)
+	{
+		if (ptr != nullptr)
+		{
+			pixel_data_provided = true;
+		}
+	}
+
 	const auto& [size_x, size_y] = this->GetDimensions();
 
 	GLenum tex_type = GetTextureTypeEnum(this->GetTextureType());
@@ -63,12 +72,14 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
 
+	if (create || pixel_data_provided)
+	{
 		if (!this->GetGenerateMipMaps())
 		{
 			glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
 			glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
-			
 		}
 		else
 		{
