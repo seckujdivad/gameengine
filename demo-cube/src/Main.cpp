@@ -18,6 +18,9 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
+	//load settings file
+	this->ReloadSettings();
+
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));
 
@@ -42,7 +45,32 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 100.0 });
 
-	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(RenderMode::Normal, wxID_ANY, this);
+	RenderMode render_mode = RenderMode::Normal;
+	int render_mode_index = 0;
+	if (this->GetSettings()["render mode"].is_string())
+	{
+		if (this->GetSettings()["render mode"].get<std::string>() == "normal")
+		{
+			render_mode = RenderMode::Normal;
+			render_mode_index = 0;
+		}
+		else if (this->GetSettings()["render mode"].get<std::string>() == "wireframe")
+		{
+			render_mode = RenderMode::Wireframe;
+			render_mode_index = 1;
+		}
+		else if (this->GetSettings()["render mode"].get<std::string>() == "textured")
+		{
+			render_mode = RenderMode::Textured;
+			render_mode_index = 2;
+		}
+		else
+		{
+			throw std::runtime_error("Setting for render mode is unknown: " + this->GetSettings()["render mode"].get<std::string>());
+		}
+	}
+
+	this->m_glcanvas_controller = this->m_engine->GenerateNewCanvas(render_mode, wxID_ANY, this);
 
 	this->m_glcanvas = this->m_glcanvas_controller->GetEngineCanvas();
 	this->m_glcanvas->SetControlledCamera(this->m_camera.get());
@@ -99,6 +127,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	render_modes.Add("Textured");
 
 	this->m_rdobx_render_mode = new wxRadioBox(this, wxID_ANY, "Render Mode", wxDefaultPosition, wxDefaultSize, render_modes);
+	this->m_rdobx_render_mode->Select(render_mode_index);
 	this->m_rdobx_render_mode->Bind(wxEVT_RADIOBOX, &Main::rdobx_render_mode_OnChanged, this);
 	this->m_sizer->Add(this->m_rdobx_render_mode, wxGBPosition(4, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
@@ -159,14 +188,33 @@ void Main::SetModel(Model* model)
 	}
 }
 
-SceneLoaderConfig Main::GetSceneLoaderConfig()
+void Main::ReloadSettings()
 {
-	SceneLoaderConfig config;
-	
-	//load settings
-	nlohmann::json settings;
+	std::string settings_file = "";
+
+	try
 	{
-		std::string settings_file = "";
+		settings_file = LoadFile("resources/settings.json");
+	}
+	catch (std::invalid_argument&)
+	{
+		settings_file = "";
+	}
+
+	if (settings_file == "")
+	{
+		try
+		{
+			std::filesystem::copy_file(
+				std::filesystem::path("resources/settings.default.json"),
+				std::filesystem::path("resources/settings.json"),
+				std::filesystem::copy_options::overwrite_existing
+			);
+		}
+		catch (std::filesystem::filesystem_error&)
+		{
+			throw std::runtime_error("Couldn't copy default settings file into current settings file");
+		}
 
 		try
 		{
@@ -176,46 +224,36 @@ SceneLoaderConfig Main::GetSceneLoaderConfig()
 		{
 			settings_file = "";
 		}
-
-		if (settings_file == "")
-		{
-			try
-			{
-				std::filesystem::copy_file(
-					std::filesystem::path("resources/settings.default.json"),
-					std::filesystem::path("resources/settings.json"),
-					std::filesystem::copy_options::overwrite_existing
-				);
-			}
-			catch (std::filesystem::filesystem_error&)
-			{
-				throw std::runtime_error("Couldn't copy default settings file into current settings file");
-			}
-
-			try
-			{
-				settings_file = LoadFile("resources/settings.json");
-			}
-			catch (std::invalid_argument&)
-			{
-				settings_file = "";
-			}
-		}
-
-		if (settings_file == "")
-		{
-			throw std::runtime_error("Couldn't open a settings file");
-		}
-		else
-		{
-			settings = nlohmann::json::parse(settings_file);
-		}
 	}
+
+	if (settings_file == "")
+	{
+		throw std::runtime_error("Couldn't open a settings file");
+	}
+	else
+	{
+		this->m_settings = nlohmann::json::parse(settings_file);
+	}
+}
+
+nlohmann::json& Main::GetSettings()
+{
+	return this->m_settings;
+}
+
+const nlohmann::json& Main::GetSettings() const
+{
+	return this->m_settings;
+}
+
+SceneLoaderConfig Main::GetSceneLoaderConfig() const
+{
+	SceneLoaderConfig config;
 
 	config.path.root = "resources";
 	config.path.file = "simplescene.json";
 
-	config.performance.index = settings["performance level"].get<int>();
+	config.performance.index = this->GetSettings()["performance level"].get<int>();
 
 	return config;
 }

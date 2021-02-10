@@ -33,7 +33,9 @@ private:
 
 	Model* m_model_selected = nullptr;
 
-	static SceneLoaderConfig GetSceneLoaderConfig();
+	nlohmann::json m_settings;
+
+	SceneLoaderConfig GetSceneLoaderConfig() const;
 
 	//wxwidgets
 	wxGridBagSizer* m_sizer;
@@ -65,4 +67,8 @@ public:
 	Main();
 
 	void SetModel(Model* model);
+
+	void ReloadSettings();
+	nlohmann::json& GetSettings();
+	const nlohmann::json& GetSettings() const;
 };

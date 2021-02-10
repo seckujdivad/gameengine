@@ -1,4 +1,5 @@
 {
   "scene": "simplescene.json",
-  "performance level": 0
+  "performance level": 0,
+  "render mode": "normal"
 }
