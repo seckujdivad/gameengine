@@ -74,9 +74,10 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 
 	if (create) //these parameters don't change
 	{
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		const GLint wrapping_mode = GL_CLAMP_TO_EDGE;
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapping_mode);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapping_mode);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, wrapping_mode);
 	}
 
 	if (create || pixel_data_provided)
