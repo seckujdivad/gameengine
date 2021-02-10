@@ -10,13 +10,18 @@
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
 {
-	if (pixels.size() == 0) //fill with nullptr if default value provided
+	//pad pixel data with nullptr
+	std::size_t min_num_pixel_arrays = 0;
+	switch (this->GetTargetType())
 	{
-		pixels.reserve(6);
-		for (int i = 0; i < 6; i++)
-		{
-			pixels.push_back(nullptr);
-		}
+	case (TargetType::Texture_2D): min_num_pixel_arrays = 1; break;
+	case (TargetType::Texture_Cubemap): min_num_pixel_arrays = 6; break;
+	default: throw std::invalid_argument("Unrecognised target type");
+	}
+
+	for (std::size_t i = pixels.size(); i < min_num_pixel_arrays; i++)
+	{
+		pixels.push_back(nullptr);
 	}
 
 	bool pixel_data_provided = false;
