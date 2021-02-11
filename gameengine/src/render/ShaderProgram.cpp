@@ -77,22 +77,13 @@ void ShaderProgram::Recompile(bool force)
 			glDeleteShader(shader_id);
 		}
 
-		glValidateProgram(this->m_program_id);
-
 		//check for errors
 		GLint link_was_successful; //should be glboolean in my opinion but that's what the function takes
-
 		glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
 		if (link_was_successful != GL_TRUE) //get error message from GPU
 		{
-			char err_info[512];
-			int err_len;
-			glGetProgramInfoLog(this->m_program_id, 512, &err_len, err_info);
-			std::string errmsg = std::string(err_info);
-			errmsg = errmsg.substr(0, err_len);
-
+			std::string errmsg = this->GetInfoLog();
 			LogMessage("Shader link exception: " + errmsg);
-
 			throw std::runtime_error("Shader link exception: " + errmsg);
 		}
 
@@ -176,9 +167,10 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compile_was_successful);
 	if (compile_was_successful != GL_TRUE) //get error message from GPU
 	{
-		char err_info[512];
+		const int error_length = 512;
+		char err_info[error_length];
 		int err_len;
-		glGetShaderInfoLog(shader_id, 512, &err_len, err_info);
+		glGetShaderInfoLog(shader_id, error_length, &err_len, err_info);
 		std::string errmsg = std::string(err_info);
 		errmsg = errmsg.substr(0, err_len);
 
@@ -558,6 +550,37 @@ bool ShaderProgram::RemoveDefine(std::string key, bool defer_recompilation)
 	}
 
 	return recompile_required && defer_recompilation;
+}
+
+std::optional<std::string> ShaderProgram::CheckProgramValidity() const
+{
+	if (this->IsValid())
+	{
+		return std::optional<std::string>();
+	}
+	else
+	{
+		return this->GetInfoLog();
+	}
+}
+
+std::string ShaderProgram::GetInfoLog() const
+{
+	const int max_err_len = 512;
+	int err_len = 0;
+	char err_info[max_err_len];
+	glGetProgramInfoLog(this->m_program_id, max_err_len, &err_len, err_info);
+	std::string errmsg = std::string(err_info);
+	errmsg = errmsg.substr(0, err_len);
+	return errmsg;
+}
+
+bool ShaderProgram::IsValid() const
+{
+	glValidateProgram(this->m_program_id);
+	GLint program_is_valid = GL_FALSE;
+	glGetProgramiv(this->m_program_id, GL_VALIDATE_STATUS, &program_is_valid);
+	return program_is_valid == GL_TRUE;
 }
 
 GLuint ShaderProgram::GetProgramID() const

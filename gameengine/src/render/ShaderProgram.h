@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <optional>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -38,6 +39,9 @@ private:
 	bool m_recompile_required = true;
 
 	GLuint LoadShader(ShaderSource source);
+
+	std::string GetInfoLog() const;
+	bool IsValid() const;
 
 public:
 	ShaderProgram();
@@ -90,4 +94,6 @@ public:
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, std::string value, bool defer_recompilation = true);
 	bool RemoveDefine(std::string key, bool defer_recompilation = true);
+
+	std::optional<std::string> CheckProgramValidity() const;
 };
