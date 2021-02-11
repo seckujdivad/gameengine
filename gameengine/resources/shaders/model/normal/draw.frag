@@ -453,9 +453,9 @@ void main()
 				{
 					float current_distance = length(reflections[i].position - geomSceneSpacePos);
 
-					bool condition = current_distance < refl_distance;
-					reflection_index = condition ? i : reflection_index;
-					refl_distance = mix(refl_distance, current_distance, condition);
+					bool is_closer = current_distance < refl_distance;
+					reflection_index = is_closer ? i : reflection_index;
+					refl_distance = mix(refl_distance, current_distance, is_closer);
 				}
 			
 				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
