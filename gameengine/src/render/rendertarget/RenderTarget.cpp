@@ -18,6 +18,7 @@
 #include "../../scene/model/geometry/PresetGeometry.h"
 #include "../../scene/model/geometry/Patch.h"
 #include "../TargetType.h"
+#include "../../LogMessage.h"
 
 #include "RenderTexture.h"
 
@@ -187,6 +188,15 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			{
 				throw std::runtime_error("Render mode " + std::to_string(static_cast<int>(this->GetRenderMode())) + " can't render geometry");
 			}
+
+#ifdef _DEBUG
+			std::optional<std::string> validity_message = this->m_shader_program->CheckProgramValidity();
+			if (validity_message.has_value())
+			{
+				LogMessage("Shader not valid - info log: " + validity_message.value());
+				throw std::runtime_error("Shader not valid - info log: " + validity_message.value());
+			}
+#endif
 
 			return mode;
 		};
