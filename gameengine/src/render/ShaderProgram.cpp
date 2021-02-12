@@ -22,7 +22,7 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& move_from) noexcept
 	}
 
 	this->m_program_id = move_from.m_program_id;
-	move_from.m_program_id = NULL;
+	move_from.m_program_id = GL_NONE;
 
 	this->m_max_texture_units = move_from.m_max_texture_units;
 
@@ -36,7 +36,7 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& move_from) noexcept
 
 ShaderProgram::~ShaderProgram()
 {
-	if (this->m_program_id != NULL)
+	if (this->m_program_id != GL_NONE)
 	{
 		glDeleteProgram(this->m_program_id);
 	}
@@ -46,13 +46,13 @@ void ShaderProgram::Recompile(bool force)
 {
 	if (force || this->m_recompile_required)
 	{
-		if (this->m_program_id != NULL)
+		if (this->m_program_id != GL_NONE)
 		{
 			glDeleteProgram(this->m_program_id);
 		}
 
 		this->m_program_id = glCreateProgram();
-		if (this->m_program_id == NULL)
+		if (this->m_program_id == GL_NONE)
 		{
 			throw std::runtime_error("Couldn't create program object");
 		}
@@ -121,7 +121,7 @@ void ShaderProgram::SetShaderSources(std::vector<ShaderSource> sources, bool def
 
 GLuint ShaderProgram::LoadShader(ShaderSource source)
 {
-	if (source.type == NULL)
+	if (source.type == GL_NONE)
 	{
 		throw std::invalid_argument("ShaderSource::type must be set to a valid OpenGL shader enumerator");
 	}
@@ -146,12 +146,12 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 
 	//load shader into GPU and compile
 	GLuint shader_id = glCreateShader(source.type);
-	glShaderSource(shader_id, 1, &shader_src, NULL);
+	glShaderSource(shader_id, 1, &shader_src, 0);
 	glCompileShader(shader_id);
 
 	//get log
 	{
-		GLint buffer_len = NULL;
+		GLint buffer_len = 0;
 		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &buffer_len);
 		if (buffer_len > 1)
 		{
@@ -186,7 +186,7 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 
 void ShaderProgram::Select(int texture_group_id)
 {
-	if (this->m_program_id == NULL)
+	if (this->m_program_id == GL_NONE)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
@@ -254,7 +254,7 @@ void ShaderProgram::Select(int texture_group_id)
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
 
 #ifdef _DEBUG
-			if ((textures.at(i).id != 0) && !glIsTexture(textures.at(i).id))
+			if ((textures.at(i).id != GL_NONE) && !glIsTexture(textures.at(i).id))
 			{
 				throw std::runtime_error("Texture does not exist (uniform \"" + textures.at(i).uniform_name + "\")");
 			}
@@ -265,7 +265,7 @@ void ShaderProgram::Select(int texture_group_id)
 
 GLuint ShaderProgram::GetUniform(std::string name)
 {
-	if (this->m_program_id == NULL)
+	if (this->m_program_id == GL_NONE)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}
@@ -296,7 +296,7 @@ GLuint ShaderProgram::AddUniformName(std::string name)
 {
 	if (this->m_uniforms.count(name) == 0)
 	{
-		if (this->m_program_id == NULL)
+		if (this->m_program_id == GL_NONE)
 		{
 			throw std::runtime_error("ShaderProgram has not been initialised");
 		}
@@ -585,7 +585,7 @@ bool ShaderProgram::IsValid() const
 
 GLuint ShaderProgram::GetProgramID() const
 {
-	if (this->m_program_id == NULL)
+	if (this->m_program_id == GL_NONE)
 	{
 		throw std::runtime_error("ShaderProgram has not been initialised");
 	}

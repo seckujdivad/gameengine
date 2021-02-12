@@ -27,7 +27,7 @@ public:
 	};
 
 private:
-	GLuint m_program_id = NULL; //OpenGL identifier of the program the shaders have been linked into
+	GLuint m_program_id = GL_NONE; //OpenGL identifier of the program the shaders have been linked into
 	GLint m_max_texture_units = 16; //minimum value required by the spec
 
 	std::vector<ShaderSource> m_sources;
