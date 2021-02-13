@@ -192,9 +192,6 @@
     <ClInclude Include="src\loaders\SceneLoader.h">
       <Filter>Header Files\loaders</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\LoadedTexture.h">
-      <Filter>Header Files\render</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\controllers\CubemapController.h">
       <Filter>Header Files\render\controllers</Filter>
     </ClInclude>

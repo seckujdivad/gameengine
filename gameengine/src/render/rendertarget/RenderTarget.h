@@ -10,9 +10,7 @@
 #include <memory>
 #include <array>
 
-#include "RenderTarget.h"
 #include "RenderTargetConfig.h"
-#include "../LoadedTexture.h"
 #include "../renderable/Renderable.h"
 #include "../../scene/Referenceable.h"
 

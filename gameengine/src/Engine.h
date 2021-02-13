@@ -15,7 +15,6 @@
 
 #include "GLComponents.h"
 
-#include "render/LoadedTexture.h"
 #include "render/rendertarget/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
 
@@ -29,6 +28,7 @@ class EngineCanvas;
 class Scene;
 class RenderTarget;
 class Model;
+class Texture;
 
 class Engine : public SceneChild
 {
@@ -60,7 +60,7 @@ private:
 
 	bool m_single_context_mode = false;
 
-	std::unordered_map<TextureReference, std::tuple<LoadedTexture, LocalTexture>> m_textures_static;
+	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<Texture>, LocalTexture>> m_textures_static;
 
 	std::vector<RenderController*> m_render_controllers;
 
@@ -81,7 +81,7 @@ private:
 
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
-	void LoadTexture(LocalTexture texture, std::string uniform_name);
+	void LoadTexture(LocalTexture texture);
 
 public:
 	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
@@ -97,7 +97,8 @@ public:
 
 	void Render();
 
-	LoadedTexture GetTexture(TextureReference reference) const;
+	std::shared_ptr<Texture> GetTexture(TextureReference reference) const;
+	std::shared_ptr<Texture> GetTexture(const LocalTexture& texture) const;
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
 
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);

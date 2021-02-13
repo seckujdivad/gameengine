@@ -3,6 +3,8 @@
 #include <stdexcept>
 
 #include "../LogMessage.h"
+#include "texture/Texture.h"
+#include "TargetType.h"
 
 ShaderProgram::ShaderProgram()
 {
@@ -96,6 +98,7 @@ void ShaderProgram::Recompile(bool force)
 
 		this->m_uniforms.clear();
 		this->AddUniformNames(uniform_names);
+		this->ClearAllTextures();
 
 		this->Select();
 
@@ -212,7 +215,14 @@ void ShaderProgram::Select(int texture_group_id)
 			}
 		}
 
-		std::vector<LoadedTexture> textures;
+		struct GLTexture
+		{
+			GLuint id = GL_NONE;
+			GLenum target = GL_NONE;
+			std::string uniform = "";
+		};
+
+		std::vector<GLTexture> textures;
 		textures.reserve(num_textures);
 
 		/*
@@ -228,17 +238,22 @@ void ShaderProgram::Select(int texture_group_id)
 		* TODO: remove dummy texture requirement
 		*/
 		{
-			LoadedTexture dummy;
-			dummy.id = NULL;
-			dummy.type = GL_TEXTURE_2D;
+			GLTexture dummy;
+			dummy.id = GL_NONE;
+			dummy.target = GL_TEXTURE_2D;
 			textures.push_back(dummy);
 		}
 
 		for (int targeted_group : valid_targeted_groups)
 		{
-			for (LoadedTexture& texture : this->m_textures.at(targeted_group))
+			for (const auto& [uniform, texture] : this->m_textures.at(targeted_group))
 			{
-				textures.push_back(texture);
+				GLTexture gl_texture;
+				gl_texture.id = texture->GetTexture();
+				gl_texture.target = GetTargetEnum(texture->GetTargetType());
+				gl_texture.uniform = uniform;
+
+				textures.push_back(gl_texture);
 			}
 		}
 
@@ -247,20 +262,36 @@ void ShaderProgram::Select(int texture_group_id)
 			throw std::runtime_error("Too many bound textures - maximum is " + std::to_string(this->m_max_texture_units));
 		}
 
+#ifdef _DEBUG
+		std::unordered_map<int, int> texture_info;
+#endif
 		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
+			const GLTexture& texture = textures.at(i);
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(textures.at(i).type, textures.at(i).id);
-			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
+			glBindTexture(texture.target, texture.id);
+			this->SetUniform(texture.uniform, i);
 
 #ifdef _DEBUG
-			if ((textures.at(i).id != GL_NONE) && !glIsTexture(textures.at(i).id))
+			if ((texture.id != GL_NONE) && !glIsTexture(texture.id))
 			{
-				throw std::runtime_error("Texture does not exist (uniform \"" + textures.at(i).uniform_name + "\")");
+				throw std::runtime_error("Texture does not exist (uniform \"" + texture.uniform + "\")");
+			}
+
+			if (texture_info.count(texture.id) == 0)
+			{
+				texture_info.insert(std::pair(texture.id, texture.target));
+			}
+			else if (texture_info.at(texture.id) != texture.target)
+			{
+				throw std::runtime_error("Target mismatch of textures");
 			}
 #endif
 		}
 	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 }
 
 GLuint ShaderProgram::GetUniform(std::string name)
@@ -470,33 +501,46 @@ void ShaderProgram::SetUniform(std::string name, glm::dmat3 mat, bool demote)
 	}
 }
 
-void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
+void ShaderProgram::SetTexture(int texture_group_id, std::string uniform, Texture* texture)
 {
-	this->AddUniformName(texture.uniform_name);
+	this->AddUniformName(uniform);
 
-	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
+	if (this->m_textures.count(texture_group_id) == 0)
 	{
-		this->m_textures.insert(std::pair(texture_group_id, std::vector<LoadedTexture>()));
-		this->m_textures.at(texture_group_id).push_back(texture);
+		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, Texture*>()));
+	}
+
+	if (this->m_textures.at(texture_group_id).count(uniform) == 0)
+	{
+		this->m_textures.at(texture_group_id).insert(std::pair(uniform, texture));
 	}
 	else
 	{
-		bool found_match = false;
-		std::vector<LoadedTexture>& textures = this->m_textures.at(texture_group_id);
-		for (std::size_t i = 0; (i < textures.size()) && !found_match; i++)
-		{
-			if (textures.at(i).uniform_name == texture.uniform_name)
-			{
-				found_match = true;
-				textures.at(i) = texture;
-			}
-		}
-
-		if (!found_match)
-		{
-			textures.push_back(texture);
-		}
+		this->m_textures.at(texture_group_id).at(uniform) = texture;
 	}
+}
+
+void ShaderProgram::ClearAllTextures()
+{
+	std::vector<int> texture_group_ids;
+	for (auto& [texture_group_id, texture_group] : this->m_textures)
+	{
+		texture_group_ids.push_back(texture_group_id);
+	}
+
+	for (int texture_group_id : texture_group_ids)
+	{
+		this->ClearTextureGroup(texture_group_id);
+	}
+}
+
+void ShaderProgram::ClearTextureGroup(int texture_group_id)
+{
+	for (auto& [uniform_name, texture] : this->m_textures.at(texture_group_id))
+	{
+		this->RemoveUniform(uniform_name);
+	}
+	this->m_textures.erase(texture_group_id);
 }
 
 bool ShaderProgram::SetDefine(std::string key, std::string value, bool defer_recompilation)

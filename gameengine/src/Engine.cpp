@@ -16,13 +16,18 @@
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
 
+#include "render/TargetType.h"
+#include "render/texture/Texture.h"
+#include "render/texture/TextureFiltering.h"
+#include "render/texture/TextureFormat.h"
+
 #include "scene/model/Model.h"
 
 const std::size_t GAMEENGINE_PATCH_SIZE = 16;
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
 
-void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
+void Engine::LoadTexture(LocalTexture texture)
 {
 	auto it = this->m_textures_static.find(texture.GetReference());
 	bool texture_found = it != this->m_textures_static.end();
@@ -30,42 +35,30 @@ void Engine::LoadTexture(LocalTexture texture, std::string uniform_name)
 	bool reload_texture_data = false;
 	if (texture_found)
 	{
-		reload_texture_data = std::get<1>(it->second) != texture;
-		if (reload_texture_data)
+		if (std::get<1>(it->second) != texture)
 		{
-			glBindTexture(GL_TEXTURE_2D, std::get<0>(it->second).id);
+			reload_texture_data = true;
+			std::get<1>(it->second) = texture;
 		}
 	}
 	else
 	{
-		GLuint texture_id;
-		glGenTextures(1, &texture_id);
-		glBindTexture(GL_TEXTURE_2D, texture_id);
+		std::shared_ptr<Texture> loaded_texture = std::make_shared<Texture>(Texture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
+		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
+		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
+		loaded_texture->SetFormat(TextureFormat::RGB8);
 
-		//wrapping
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		//filter
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture.GetMinFilter() == LocalTexture::Filter::Nearest ? GL_NEAREST : GL_LINEAR); //shrinking filter
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture.GetMagFilter() == LocalTexture::Filter::Nearest ? GL_NEAREST : GL_LINEAR); //enlarging filter
-
-		LoadedTexture texture_data;
-		texture_data.id = texture_id;
-		texture_data.type = GL_TEXTURE_2D;
-		texture_data.uniform_name = uniform_name;
-
-		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(texture_data, texture)));
+		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
 		reload_texture_data = true;
 	}
 
 	if (reload_texture_data)
 	{
-		std::tuple dimensions = texture.GetDimensions();
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, std::get<0>(dimensions), std::get<1>(dimensions), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.GetData());
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, NULL);
+		std::vector<const void*> pixels;
+		pixels.push_back(texture.GetData());
+		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetDimensions(texture.GetDimensions());
+		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(TextureFormat::RGB, pixels);
 	}
 }
 
@@ -284,9 +277,7 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 		//create the proper context
 		ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(4).MinorVersion(3);
 
-#ifdef _DEBUG
 		ctx_attrs.DebugCtx();
-#endif
 
 		ctx_attrs.EndList();
 
@@ -346,11 +337,6 @@ Engine::~Engine()
 	for (RenderController* render_controller : this->m_render_controllers)
 	{
 		delete render_controller;
-	}
-
-	for (const auto& [reference, loaded_texture] : this->m_textures_static)
-	{
-		glDeleteTextures(1, &std::get<0>(loaded_texture).id);
 	}
 
 	for (const auto& [reference, loaded_geometries] : this->m_model_geometry)
@@ -418,12 +404,12 @@ void Engine::Render()
 		// load model textures
 		for (Model* model : this->GetScene()->GetModels())
 		{
-			this->LoadTexture(model->GetColourTexture(), "colourTexture");
-			this->LoadTexture(model->GetNormalTexture(), "normalTexture");
-			this->LoadTexture(model->GetSpecularTexture(), "specularTexture");
-			this->LoadTexture(model->GetReflectionTexture(), "reflectionIntensityTexture");
-			this->LoadTexture(model->GetSkyboxMaskTexture(), "skyboxMaskTexture");
-			this->LoadTexture(model->GetDisplacementTexture(), "displacementTexture");
+			this->LoadTexture(model->GetColourTexture());
+			this->LoadTexture(model->GetNormalTexture());
+			this->LoadTexture(model->GetSpecularTexture());
+			this->LoadTexture(model->GetReflectionTexture());
+			this->LoadTexture(model->GetSkyboxMaskTexture());
+			this->LoadTexture(model->GetDisplacementTexture());
 		}
 
 		//load required cubemaps and unload unused ones
@@ -686,9 +672,14 @@ void Engine::Render()
 	}
 }
 
-LoadedTexture Engine::GetTexture(TextureReference reference) const
+std::shared_ptr<Texture> Engine::GetTexture(TextureReference reference) const
 {
 	return std::get<0>(this->m_textures_static.at(reference));
+}
+
+std::shared_ptr<Texture> Engine::GetTexture(const LocalTexture& texture) const
+{
+	return this->GetTexture(texture.GetReference());
 }
 
 std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureReference reference) const
@@ -749,16 +740,14 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 
 	for (auto& [render_info, loaded_geometry] : geometry)
 	{
-		GLenum render_mode = predraw(render_info, loaded_geometry);
-
 		this->BindVAO(loaded_geometry);
-
+		GLenum render_mode = predraw(render_info, loaded_geometry);
 		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.buffer_len / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
 		glDrawArrays(render_mode, 0, num_elements);
 	}
 
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+	glBindVertexArray(GL_NONE);
+	glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 }
 
 void Engine::BindVAO(LoadedGeometry loaded_geometry)
