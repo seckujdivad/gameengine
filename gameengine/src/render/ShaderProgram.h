@@ -26,6 +26,13 @@ public:
 		GLenum type = GL_NONE;
 	};
 
+	struct GLTexture
+	{
+		GLuint id = GL_NONE;
+		GLenum target = GL_NONE;
+		std::string uniform_name;
+	};
+
 private:
 	GLuint m_program_id = GL_NONE; //OpenGL identifier of the program the shaders have been linked into
 	GLint m_max_texture_units = 16; //minimum value required by the spec
@@ -33,7 +40,7 @@ private:
 	std::vector<ShaderSource> m_sources;
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
-	std::unordered_map<int, std::vector<std::tuple<Texture*, std::string>>> m_textures;
+	std::unordered_map<int, std::unordered_map<std::string, Texture*>> m_textures;
 	std::unordered_map<std::string, std::string> m_defines;
 
 	bool m_recompile_required = true;
@@ -97,3 +104,5 @@ public:
 
 	std::optional<std::string> CheckProgramValidity() const;
 };
+
+void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture);

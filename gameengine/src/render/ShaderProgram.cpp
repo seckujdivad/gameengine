@@ -214,13 +214,6 @@ void ShaderProgram::Select(int texture_group_id)
 			}
 		}
 
-		struct GLTexture
-		{
-			GLuint id = GL_NONE;
-			GLenum target = GL_NONE;
-			std::string uniform_name;
-		};
-
 		std::vector<GLTexture> textures;
 		textures.reserve(num_textures);
 
@@ -245,7 +238,7 @@ void ShaderProgram::Select(int texture_group_id)
 
 		for (int targeted_group : valid_targeted_groups)
 		{
-			for (const auto& [texture, uniform_name] : this->m_textures.at(targeted_group))
+			for (const auto& [uniform_name, texture] : this->m_textures.at(targeted_group))
 			{
 				GLTexture gl_texture;
 				gl_texture.id = texture->GetTexture();
@@ -264,7 +257,7 @@ void ShaderProgram::Select(int texture_group_id)
 		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(textures.at(i).target, textures.at(i).id);
+			BindOnlyThisTexture(textures.at(i));
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
 
 #ifdef _DEBUG
@@ -275,6 +268,8 @@ void ShaderProgram::Select(int texture_group_id)
 #endif
 		}
 	}
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 GLuint ShaderProgram::GetUniform(std::string name)
@@ -488,28 +483,25 @@ void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, T
 {
 	this->AddUniformName(uniform_name);
 
-	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
+	bool add_new = false;
+	if (this->m_textures.count(texture_group_id) == 0)
 	{
-		this->m_textures.insert(std::pair(texture_group_id, std::vector<std::tuple<Texture*, std::string>>()));
-		this->m_textures.at(texture_group_id).push_back(std::tuple(texture, uniform_name));
+		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, Texture*>()));
+		add_new = true;
 	}
 	else
 	{
-		bool found_match = false;
-		std::vector<std::tuple<Texture*, std::string>>& textures = this->m_textures.at(texture_group_id);
-		for (std::size_t i = 0; (i < textures.size()) && !found_match; i++)
-		{
-			if (std::get<1>(textures.at(i)) == uniform_name)
-			{
-				found_match = true;
-				textures.at(i) = std::tuple(texture, uniform_name);
-			}
-		}
+		add_new = this->m_textures.at(texture_group_id).count(uniform_name) == 0;
 
-		if (!found_match)
+		if (!add_new && (this->m_textures.at(texture_group_id).at(uniform_name) != texture))
 		{
-			textures.push_back(std::tuple(texture, uniform_name));
+			this->m_textures.at(texture_group_id).at(uniform_name) = texture;
 		}
+	}
+
+	if (add_new)
+	{
+		this->m_textures.at(texture_group_id).insert(std::pair(uniform_name, texture));
 	}
 }
 
@@ -615,4 +607,37 @@ ShaderProgram::ShaderSource::ShaderSource(std::string source, GLenum type) : sou
 
 ShaderProgram::ShaderSource::ShaderSource(GLenum type, std::string source) : type(type), source(source)
 {
+}
+
+void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture)
+{
+	const GLenum targets[] = {
+		GL_TEXTURE_2D,
+		GL_TEXTURE_CUBE_MAP
+	};
+
+#ifdef _DEBUG
+	bool target_found = false;
+#endif
+
+	for (GLenum target : targets)
+	{
+		glBindTexture(target, GL_NONE);
+
+#ifdef _DEBUG
+		if (target == texture.target)
+		{
+			target_found = true;
+		}
+#endif
+	}
+
+#ifdef _DEBUG
+	if (!target_found)
+	{
+		throw std::invalid_argument("Unknown target: " + std::to_string(static_cast<int>(texture.target)));
+	}
+#endif
+
+	glBindTexture(texture.target, texture.id);
 }
