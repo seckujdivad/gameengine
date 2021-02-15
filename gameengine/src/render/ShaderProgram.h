@@ -10,8 +10,6 @@
 
 #include "../GLComponents.h"
 
-#include "LoadedTexture.h"
-
 class Texture;
 
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
@@ -35,7 +33,7 @@ private:
 	std::vector<ShaderSource> m_sources;
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
-	std::unordered_map<int, std::vector<LoadedTexture>> m_textures;
+	std::unordered_map<int, std::vector<std::tuple<Texture*, std::string>>> m_textures;
 	std::unordered_map<std::string, std::string> m_defines;
 
 	bool m_recompile_required = true;

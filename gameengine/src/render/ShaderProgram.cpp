@@ -3,6 +3,8 @@
 #include <stdexcept>
 
 #include "../LogMessage.h"
+#include "texture/Texture.h"
+#include "TargetType.h"
 
 ShaderProgram::ShaderProgram()
 {
@@ -212,7 +214,14 @@ void ShaderProgram::Select(int texture_group_id)
 			}
 		}
 
-		std::vector<LoadedTexture> textures;
+		struct GLTexture
+		{
+			GLuint id = GL_NONE;
+			GLenum target = GL_NONE;
+			std::string uniform_name;
+		};
+
+		std::vector<GLTexture> textures;
 		textures.reserve(num_textures);
 
 		/*
@@ -228,17 +237,22 @@ void ShaderProgram::Select(int texture_group_id)
 		* TODO: remove dummy texture requirement
 		*/
 		{
-			LoadedTexture dummy;
+			GLTexture dummy;
 			dummy.id = NULL;
-			dummy.type = GL_TEXTURE_2D;
+			dummy.target = GL_TEXTURE_2D;
 			textures.push_back(dummy);
 		}
 
 		for (int targeted_group : valid_targeted_groups)
 		{
-			for (LoadedTexture& texture : this->m_textures.at(targeted_group))
+			for (const auto& [texture, uniform_name] : this->m_textures.at(targeted_group))
 			{
-				textures.push_back(texture);
+				GLTexture gl_texture;
+				gl_texture.id = texture->GetTexture();
+				gl_texture.target = GetTargetEnum(texture->GetTargetType());
+				gl_texture.uniform_name = uniform_name;
+
+				textures.push_back(gl_texture);
 			}
 		}
 
@@ -250,7 +264,7 @@ void ShaderProgram::Select(int texture_group_id)
 		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(textures.at(i).type, textures.at(i).id);
+			glBindTexture(textures.at(i).target, textures.at(i).id);
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i);
 
 #ifdef _DEBUG
@@ -474,32 +488,27 @@ void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, T
 {
 	this->AddUniformName(uniform_name);
 
-	LoadedTexture loaded_texture;
-	loaded_texture.id = texture->GetTexture();
-	loaded_texture.type = GetTargetEnum(texture->GetTargetType());
-	loaded_texture.uniform_name = uniform_name;
-
 	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
 	{
-		this->m_textures.insert(std::pair(texture_group_id, std::vector<LoadedTexture>()));
-		this->m_textures.at(texture_group_id).push_back(loaded_texture);
+		this->m_textures.insert(std::pair(texture_group_id, std::vector<std::tuple<Texture*, std::string>>()));
+		this->m_textures.at(texture_group_id).push_back(std::tuple(texture, uniform_name));
 	}
 	else
 	{
 		bool found_match = false;
-		std::vector<LoadedTexture>& textures = this->m_textures.at(texture_group_id);
+		std::vector<std::tuple<Texture*, std::string>>& textures = this->m_textures.at(texture_group_id);
 		for (std::size_t i = 0; (i < textures.size()) && !found_match; i++)
 		{
-			if (textures.at(i).uniform_name == uniform_name)
+			if (std::get<1>(textures.at(i)) == uniform_name)
 			{
 				found_match = true;
-				textures.at(i) = loaded_texture;
+				textures.at(i) = std::tuple(texture, uniform_name);
 			}
 		}
 
 		if (!found_match)
 		{
-			textures.push_back(loaded_texture);
+			textures.push_back(std::tuple(texture, uniform_name));
 		}
 	}
 }
