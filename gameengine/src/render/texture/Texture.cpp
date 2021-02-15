@@ -96,10 +96,18 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 
 GLint Texture::GetPreferredFormat(bool force)
 {
+	return GetTextureFormatEnum(this->GetFormat());
+
 	if (force || (this->m_preferred_format == GL_NONE))
 	{
 		glGetInternalformativ(GetTargetEnum(this->GetTargetType()), GetTextureFormatEnum(this->GetFormat()), GL_TEXTURE_IMAGE_FORMAT, 1, &this->m_preferred_format);
 	}
+
+	if (this->m_preferred_format == GL_NONE)
+	{
+		throw std::runtime_error("Invalid format");
+	}
+
 	return this->m_preferred_format;
 }
 
