@@ -58,7 +58,7 @@ void Engine::LoadTexture(LocalTexture texture)
 		std::vector<const void*> pixels;
 		pixels.push_back(texture.GetData());
 		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetDimensions(texture.GetDimensions());
-		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(TextureFormat::RGB, pixels);
+		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(TextureFormat::RGB8, pixels);
 	}
 }
 
