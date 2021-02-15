@@ -60,7 +60,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		}
 
 		RenderTargetConfig::PostProcess::CompositeLayer layer;
-		layer.texture = &render_texture->GetOutputTextures()->colour.at(0);
+		layer.id = render_texture->GetOutputTextures()->colour.at(0).GetTexture();
 		std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
 
 		this->m_renderers.push_back(std::move(renderer));
@@ -79,7 +79,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	RenderTargetConfig canvas_config = { RenderTargetMode::Postprocess, RenderTargetConfig::PostProcess() };
 
 	RenderTargetConfig::PostProcess::CompositeLayer passthrough_layer;
-	passthrough_layer.texture = &this->m_texture_final->GetOutputTextures()->colour.at(0);
+	passthrough_layer.id = this->m_texture_final->GetOutputTextures()->colour.at(0).GetTexture();
 	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
 
 	this->m_canvas->SetConfig(canvas_config);

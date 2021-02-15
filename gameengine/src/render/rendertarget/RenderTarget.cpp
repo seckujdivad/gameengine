@@ -389,8 +389,16 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			this->m_shader_program->SetUniform(root_name + "shadow_bias", point_light->GetShadowBias());
 
 			std::string cubemap_name = "light_shadow_cubemaps[" + std::to_string(i) + "]";
+
+			this->m_shader_program->AddUniformName(cubemap_name);
 			std::shared_ptr<RenderTextureGroup> texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
-			this->m_shader_program->SetTexture(-1, cubemap_name, &texture->depth.value());
+
+			LoadedTexture loaded_texture;
+			loaded_texture.id = texture->depth->GetTexture();
+			loaded_texture.type = GL_TEXTURE_CUBE_MAP;
+			loaded_texture.uniform_name = cubemap_name;
+
+			this->m_shader_program->SetTexture(-1, loaded_texture);
 		}
 
 		//scene approximation
@@ -406,28 +414,34 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		//previous render result
-		bool render_output_valid;
 		if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
 		{
-			render_output_valid = false;
+			this->m_shader_program->SetUniform("render_output_valid", false);
 		}
 		else
 		{
-			render_output_valid = this->FramebufferContainsRenderOutput();
+			this->m_shader_program->SetUniform("render_output_valid", this->FramebufferContainsRenderOutput());
 		}
-		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
 
 		this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
 		this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
 
 		//load textures from the previous frame (if in normal rendering mode)
-		this->m_shader_program->SetTexture(-1, "render_output_colour", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0));
+		LoadedTexture texture;
+		texture.type = GetTargetEnum(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->GetTargetType());
+		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0).GetTexture();
+		texture.uniform_name = "render_output_colour";
+		this->m_shader_program->SetTexture(-1, texture);
 
-		this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
+		texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth->GetTexture();
+		texture.uniform_name = "render_output_depth";
+		this->m_shader_program->SetTexture(-1, texture);
 
 		for (int i = 1; i < static_cast<int>(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.size()); i++)
 		{
-			this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i - 1) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i));
+			texture.id = std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i).GetTexture();
+			texture.uniform_name = "render_output_data[" + std::to_string(i - 1) + "]";
+			this->m_shader_program->SetTexture(-1, texture);
 		}
 	}
 
@@ -453,7 +467,12 @@ void RenderTarget::Render_Setup_FlatQuad()
 		{
 			const RenderTargetConfig::PostProcess::CompositeLayer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
 
-			this->m_shader_program->SetTexture(-1, "layers_texture[" + std::to_string(i) + "]", layer.texture);
+			LoadedTexture texture;
+			texture.id = layer.id;
+			texture.type = GL_TEXTURE_2D;
+			texture.uniform_name = "layers_texture[" + std::to_string(i) + "]";
+
+			this->m_shader_program->SetTexture(-1, texture);
 
 			const std::string prefix = "layers[" + std::to_string(i) + "].";
 			this->m_shader_program->SetUniform(prefix + "colour_translate", layer.colour_translate);
@@ -471,18 +490,13 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 	if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "colourTexture", this->GetEngine()->GetTexture(model->GetColourTexture()).get());
+		LoadedTexture texture = this->GetEngine()->GetTexture(model->GetColourTexture().GetReference());
+		texture.uniform_name = "colourTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
-		//textures
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "normalTexture", this->GetEngine()->GetTexture(model->GetNormalTexture()).get());
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "specularTexture", this->GetEngine()->GetTexture(model->GetSpecularTexture()).get());
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflectionIntensityTexture", this->GetEngine()->GetTexture(model->GetReflectionTexture()).get());
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxMaskTexture", this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture()).get());
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "displacementTexture", this->GetEngine()->GetTexture(model->GetDisplacementTexture()).get());
-
 		Material& material = model->GetMaterial();
 		//material
 		this->m_shader_program->SetUniform("mat_diffuse", material.diffuse);
@@ -500,23 +514,40 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
 		this->m_shader_program->SetUniform("mat_ssr_refinements", material.ssr.refinements);
 
+		//textures
+		LoadedTexture texture;
+
+		texture = this->GetEngine()->GetTexture(model->GetNormalTexture().GetReference());
+		texture.uniform_name = "normalTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+		texture = this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference());
+		texture.uniform_name = "specularTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+		texture = this->GetEngine()->GetTexture(model->GetReflectionTexture().GetReference());
+		texture.uniform_name = "reflectionIntensityTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+		texture = this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference());
+		texture.uniform_name = "skyboxMaskTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
+		texture = this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference());
+		texture.uniform_name = "displacementTexture";
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
+
 		//reflections
-		bool reflections_enabled;
 		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections)
 		{
-			reflections_enabled = false;
+			this->m_shader_program->SetUniform("reflections_enabled", false);
 		}
 		else
 		{
-			reflections_enabled = material.reflections_enabled;
+			this->m_shader_program->SetUniform("reflections_enabled", material.reflections_enabled);
 		}
 
-		this->m_shader_program->SetUniform("reflections_enabled", reflections_enabled);
-
 		std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
-
-		this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
-
 		for (int i = 0; i < static_cast<int>(reflections.size()); i++)
 		{
 			Reflection* reflection = std::get<0>(reflections.at(i));
@@ -532,21 +563,33 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 			std::shared_ptr<RenderTextureGroup> reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
 
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", &reflection_output->colour.at(0));
+			LoadedTexture texture;
+			texture.type = GetTargetEnum(reflection_output->GetTargetType());
+
+			texture.id = reflection_output->colour.at(0).GetTexture();
+			texture.uniform_name = "reflection_cubemaps[" + std::to_string(i) + "]";
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 			{
-				int index = (i * GAMEENGINE_NUM_DATA_TEX) + j;
-				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_data_cubemaps[" + std::to_string(index) + "]", &(reflection_output->colour.at(j + 1)));
+				texture.id = reflection_output->colour.at(j + 1).GetTexture();
+				texture.uniform_name = "reflection_data_cubemaps[" + std::to_string((i * (static_cast<int>(reflection_output->colour.size()) - 1)) + j) + "]";
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), texture);
 			}
 		}
+
+		this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
 
 		//skybox cubemap
 		Skybox* skybox = model->GetSkybox();
 		if (skybox != nullptr)
 		{
 			std::shared_ptr<RenderTextureGroup> render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxTexture", &render_texture->colour.at(0));
+			LoadedTexture loaded_texture;
+			loaded_texture.id = render_texture->colour.at(0).GetTexture();
+			loaded_texture.type = GetTargetEnum(render_texture->GetTargetType());
+			loaded_texture.uniform_name = "skyboxTexture";
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), loaded_texture);
 		}
 	}
 

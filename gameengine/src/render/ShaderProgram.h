@@ -10,7 +10,7 @@
 
 #include "../GLComponents.h"
 
-class Texture;
+#include "LoadedTexture.h"
 
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
@@ -33,7 +33,7 @@ private:
 	std::vector<ShaderSource> m_sources;
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
-	std::unordered_map<int, std::unordered_map<std::string, Texture*>> m_textures;
+	std::unordered_map<int, std::vector<LoadedTexture>> m_textures;
 	std::unordered_map<std::string, std::string> m_defines;
 
 	bool m_recompile_required = true;
@@ -89,9 +89,7 @@ public:
 		}
 	};
 
-	void SetTexture(int texture_group_id, std::string uniform, Texture* texture);
-	void ClearAllTextures();
-	void ClearTextureGroup(int texture_group_id);
+	void SetTexture(int texture_group_id, LoadedTexture texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, std::string value, bool defer_recompilation = true);
