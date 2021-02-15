@@ -11,17 +11,22 @@
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
 {
 	//pad pixel data with nullptr
-	std::size_t min_num_pixel_arrays = 0;
+	std::size_t req_num_pixel_arrays = 0;
 	switch (this->GetTargetType())
 	{
-	case (TargetType::Texture_2D): min_num_pixel_arrays = 1; break;
-	case (TargetType::Texture_Cubemap): min_num_pixel_arrays = 6; break;
+	case (TargetType::Texture_2D): req_num_pixel_arrays = 1; break;
+	case (TargetType::Texture_Cubemap): req_num_pixel_arrays = 6; break;
 	default: throw std::invalid_argument("Unrecognised target type");
 	}
 
-	for (std::size_t i = pixels.size(); i < min_num_pixel_arrays; i++)
+	for (std::size_t i = pixels.size(); i < req_num_pixel_arrays; i++)
 	{
 		pixels.push_back(nullptr);
+	}
+
+	if (pixels.size() > req_num_pixel_arrays)
+	{
+		throw std::invalid_argument("Too many pixel arrays provided - " + std::to_string(req_num_pixel_arrays) + " required");
 	}
 
 	bool pixel_data_provided = false;
@@ -75,9 +80,9 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 	if (create) //these parameters don't change
 	{
 		const GLint wrapping_mode = GL_CLAMP_TO_EDGE;
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, wrapping_mode);
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapping_mode);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapping_mode);
-		glTexParameteri(target, GL_TEXTURE_WRAP_R, wrapping_mode);
 	}
 
 	if (create || pixel_data_provided)
