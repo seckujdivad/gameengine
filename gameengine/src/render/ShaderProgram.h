@@ -12,6 +12,8 @@
 
 #include "LoadedTexture.h"
 
+class Texture;
+
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
 class ShaderProgram
@@ -89,7 +91,7 @@ public:
 		}
 	};
 
-	void SetTexture(int texture_group_id, LoadedTexture texture);
+	void SetTexture(int texture_group_id, std::string uniform_name, Texture* texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, std::string value, bool defer_recompilation = true);

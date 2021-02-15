@@ -470,14 +470,19 @@ void ShaderProgram::SetUniform(std::string name, glm::dmat3 mat, bool demote)
 	}
 }
 
-void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
+void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, Texture* texture)
 {
-	this->AddUniformName(texture.uniform_name);
+	this->AddUniformName(uniform_name);
+
+	LoadedTexture loaded_texture;
+	loaded_texture.id = texture->GetTexture();
+	loaded_texture.type = GetTargetEnum(texture->GetTargetType());
+	loaded_texture.uniform_name = uniform_name;
 
 	if (this->m_textures.find(texture_group_id) == this->m_textures.end())
 	{
 		this->m_textures.insert(std::pair(texture_group_id, std::vector<LoadedTexture>()));
-		this->m_textures.at(texture_group_id).push_back(texture);
+		this->m_textures.at(texture_group_id).push_back(loaded_texture);
 	}
 	else
 	{
@@ -485,16 +490,16 @@ void ShaderProgram::SetTexture(int texture_group_id, LoadedTexture texture)
 		std::vector<LoadedTexture>& textures = this->m_textures.at(texture_group_id);
 		for (std::size_t i = 0; (i < textures.size()) && !found_match; i++)
 		{
-			if (textures.at(i).uniform_name == texture.uniform_name)
+			if (textures.at(i).uniform_name == uniform_name)
 			{
 				found_match = true;
-				textures.at(i) = texture;
+				textures.at(i) = loaded_texture;
 			}
 		}
 
 		if (!found_match)
 		{
-			textures.push_back(texture);
+			textures.push_back(loaded_texture);
 		}
 	}
 }
