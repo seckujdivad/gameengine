@@ -100,6 +100,7 @@ public:
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, std::string value, bool defer_recompilation = true);
+	std::string GetDefine(std::string key) const;
 	bool RemoveDefine(std::string key, bool defer_recompilation = true);
 
 	std::optional<std::string> CheckProgramValidity() const;

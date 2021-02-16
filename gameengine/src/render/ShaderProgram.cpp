@@ -537,6 +537,11 @@ bool ShaderProgram::SetDefine(std::string key, std::string value, bool defer_rec
 	return recompile_required && defer_recompilation;
 }
 
+std::string ShaderProgram::GetDefine(std::string key) const
+{
+	return this->m_defines.at(key);
+}
+
 bool ShaderProgram::RemoveDefine(std::string key, bool defer_recompilation)
 {
 	bool recompile_required = false;
