@@ -291,6 +291,9 @@
     <ClInclude Include="src\render\TargetType.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\texture\TexturePreset.h">
+      <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

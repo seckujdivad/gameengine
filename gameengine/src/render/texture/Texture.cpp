@@ -6,6 +6,7 @@
 #include "TextureType.h"
 #include "TextureFormat.h"
 #include "TextureFiltering.h"
+#include "TexturePreset.h"
 #include "../TargetType.h"
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
@@ -282,16 +283,6 @@ TextureFiltering Texture::GetMagFiltering() const
 	return this->m_filtering_mag;
 }
 
-void Texture::SetTargetType(TargetType target)
-{
-	if (target != this->m_target)
-	{
-		this->m_target = target;
-		this->GetPreferredFormat(true);
-		this->ConfigureTexture(false);
-	}
-}
-
 TargetType Texture::GetTargetType() const
 {
 	return this->m_target;
@@ -326,6 +317,31 @@ void Texture::SetPixels(TextureFormat pixel_format, std::vector<const void*> pix
 	this->ConfigureTexture(false, pixel_format, pixels);
 }
 
+void Texture::SetPixels(TexturePreset preset)
+{
+	if (this->GetTargetType() != GetPresetTargetType(preset))
+	{
+		throw std::invalid_argument("Target type doesn't match the required target type of this preset");
+	}
+
+	if ((preset == TexturePreset::BlackCubemap) || (preset == TexturePreset::Black2DTexture))
+	{
+		std::vector<unsigned char> black_texture;
+		black_texture.reserve(3);
+		for (int i = 0; i < 3; i++)
+		{
+			black_texture.push_back(0);
+		}
+
+		this->SetDimensions(std::tuple(1, 1));
+		this->SetPixels(TextureFormat::RGB, std::vector<const void*>({ black_texture.data() }));
+	}
+	else
+	{
+		throw std::invalid_argument("Unknown texture preset " + std::to_string(static_cast<int>(preset)));
+	}
+}
+
 void Texture::CopyTo(Texture& dest) const
 {
 	dest.m_dimensions = this->m_dimensions;
@@ -356,4 +372,14 @@ void Texture::CopyTo(Texture& dest) const
 void Texture::CopyFrom(const Texture& src)
 {
 	src.CopyTo(*this);
+}
+
+TargetType GetPresetTargetType(TexturePreset preset)
+{
+	switch (preset)
+	{
+	case TexturePreset::BlackCubemap: return TargetType::Texture_Cubemap;
+	case TexturePreset::Black2DTexture: return TargetType::Texture_2D;
+	default: throw std::invalid_argument("Unknown texture preset " + std::to_string(static_cast<int>(preset)));
+	}
 }

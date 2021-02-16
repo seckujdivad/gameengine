@@ -218,6 +218,7 @@
     <ClInclude Include="src\render\texture\Texture.h" />
     <ClInclude Include="src\render\texture\TextureFiltering.h" />
     <ClInclude Include="src\render\texture\TextureFormat.h" />
+    <ClInclude Include="src\render\texture\TexturePreset.h" />
     <ClInclude Include="src\render\texture\TextureType.h" />
     <ClInclude Include="src\Resource.h" />
     <ClInclude Include="src\scene\Camera.h" />

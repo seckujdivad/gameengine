@@ -10,6 +10,7 @@ enum class TextureType;
 enum class TextureFormat;
 enum class TextureFiltering;
 enum class TargetType;
+enum class TexturePreset;
 
 class Texture
 {
@@ -63,7 +64,6 @@ public:
 	void SetMagFiltering(TextureFiltering mag_filtering);
 	TextureFiltering GetMagFiltering() const;
 
-	void SetTargetType(TargetType target);
 	TargetType GetTargetType() const;
 
 	void SetGenerateMipMaps(bool generate_mipmaps);
@@ -73,7 +73,10 @@ public:
 	void BindTexture() const;
 
 	void SetPixels(TextureFormat pixel_format, std::vector<const void*> pixels);
+	void SetPixels(TexturePreset preset);
 
 	void CopyTo(Texture& dest) const;
 	void CopyFrom(const Texture& src);
 };
+
+TargetType GetPresetTargetType(TexturePreset preset);
