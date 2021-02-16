@@ -20,6 +20,8 @@
 #include "../TargetType.h"
 #include "../../LogMessage.h"
 
+#include "../texture/TexturePreset.h"
+
 #include "RenderTexture.h"
 
 void RenderTarget::RenderScene(std::vector<Model*> models)
@@ -540,11 +542,17 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 		//skybox cubemap
 		Skybox* skybox = model->GetSkybox();
-		if (skybox != nullptr)
+		Texture* skybox_texture;
+		if (skybox == nullptr)
+		{
+			skybox_texture = this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get();
+		}
+		else
 		{
 			std::shared_ptr<RenderTextureGroup> render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxTexture", &render_texture->colour.at(0));
+			skybox_texture = &render_texture->colour.at(0);
 		}
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxTexture", skybox_texture);
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
