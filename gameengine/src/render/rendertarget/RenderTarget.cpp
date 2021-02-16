@@ -533,8 +533,20 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 			{
-				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * (static_cast<int>(reflection_output->colour.size()) - 1)) + j) + "]";
+				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, &reflection_output->colour.at(j + 1));
+			}
+		}
+
+		int required_reflections = std::stoi(this->m_shader_program->GetDefine("REFLECTION_NUM"));
+		for (int i = static_cast<int>(reflections.size()); i < required_reflections; i++)
+		{
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get());
+
+			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
+			{
+				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get());
 			}
 		}
 
