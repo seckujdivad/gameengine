@@ -99,6 +99,8 @@ void ShaderProgram::Recompile(bool force)
 		this->m_uniforms.clear();
 		this->AddUniformNames(uniform_names);
 
+		this->m_textures.clear();
+
 		this->Select();
 
 		this->m_recompile_required = false;
