@@ -545,7 +545,8 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		Texture* skybox_texture;
 		if (skybox == nullptr)
 		{
-			skybox_texture = this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get();
+			std::shared_ptr<Texture> texture = this->GetEngine()->GetTexture(TexturePreset::BlackCubemap);
+			skybox_texture = texture.get();
 		}
 		else
 		{
