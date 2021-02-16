@@ -682,6 +682,18 @@ std::shared_ptr<Texture> Engine::GetTexture(const LocalTexture& texture) const
 	return std::get<0>(this->m_textures_static.at(texture.GetReference()));
 }
 
+std::shared_ptr<Texture> Engine::GetTexture(TexturePreset preset)
+{
+	if (this->m_textures_static_presets.count(preset) == 0)
+	{
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>(Texture::Preset::Colour, GetPresetTargetType(preset));
+		texture->SetPixels(preset);
+		this->m_textures_static_presets.insert(std::pair(preset, texture));
+	}
+
+	return this->m_textures_static_presets.at(preset);
+}
+
 std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureReference reference) const
 {
 	for (RenderController* controller : this->m_render_controllers)
