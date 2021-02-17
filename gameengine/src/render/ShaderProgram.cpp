@@ -159,7 +159,7 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &buffer_len);
 		if (buffer_len > 1)
 		{
-			std::unique_ptr<GLchar[]> log_string = std::make_unique<GLchar[]>(buffer_len + 1);
+			std::unique_ptr<GLchar[]> log_string = std::make_unique<GLchar[]>(std::size_t(buffer_len) + 1);
 			glGetShaderInfoLog(shader_id, buffer_len, 0, log_string.get());
 
 			LogMessage("Shader log: " + std::string(log_string.get()));
