@@ -4,6 +4,8 @@
 
 #include "../rendertarget/RenderTarget.h"
 #include "../rendertarget/RenderTexture.h"
+#include "../rendertarget/RenderTargetConfig.h"
+#include "../rendertarget/RenderTargetMode.h"
 
 NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {

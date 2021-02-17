@@ -1,7 +1,18 @@
 #include "RenderTargetConfig.h"
 
+#include "RenderTextureData.h"
+#include "RenderTargetMode.h"
+
 #include <stdexcept>
 #include <string>
+
+RenderTargetConfig::RenderTargetConfig() : mode(RenderTargetMode::Default)
+{
+}
+
+RenderTargetConfig::RenderTargetConfig(RenderTargetMode mode, ModeData mode_data) : mode(mode), mode_data(mode_data)
+{
+}
 
 void RenderTargetConfig::SetMode(RenderTargetMode mode)
 {

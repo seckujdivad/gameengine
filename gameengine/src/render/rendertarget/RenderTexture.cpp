@@ -7,6 +7,7 @@
 #include "../texture/TextureFormat.h"
 #include "../TargetType.h"
 #include "RenderTextureData.h"
+#include "RenderTargetMode.h"
 
 void RenderTexture::PostRenderEvent()
 {

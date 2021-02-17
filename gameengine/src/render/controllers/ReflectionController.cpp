@@ -7,6 +7,7 @@
 #include "../../scene/Cubemap.h"
 #include "../renderer/NormalRenderer.h"
 #include "../TargetType.h"
+#include "../rendertarget/RenderTextureData.h"
 
 std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {

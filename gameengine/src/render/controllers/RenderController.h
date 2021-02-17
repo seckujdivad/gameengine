@@ -1,11 +1,12 @@
 #pragma once
 
 #include <unordered_set>
+#include <memory>
 
 #include "../../scene/Referenceable.h"
-#include "../rendertarget/RenderTextureData.h"
 
 class Engine;
+class RenderTextureGroup;
 
 enum class RenderControllerType //runtime type determination is essential
 {

@@ -5,6 +5,7 @@
 #include "../../scene/Cubemap.h"
 #include "../renderer/WrapperRenderer.h"
 #include "../TargetType.h"
+#include "../rendertarget/RenderTextureData.h"
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {

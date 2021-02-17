@@ -2,11 +2,14 @@
 
 #include <vector>
 #include <variant>
+#include <memory>
 
 #include <glm/glm.hpp>
 
-#include "RenderTextureData.h"
-#include "RenderTargetMode.h"
+class RenderTextureGroup;
+class Texture;
+enum class RenderTargetMode;
+enum class RenderTargetModeType;
 
 struct RenderTargetConfig
 {
@@ -47,8 +50,13 @@ struct RenderTargetConfig
 
 	};
 
-	RenderTargetMode mode = RenderTargetMode::Default;
-	std::variant<Normal_DepthOnly, Normal_Draw, Wireframe, Shadow, PostProcess, Textured> mode_data;
+	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Wireframe, Shadow, PostProcess, Textured>;
+
+	RenderTargetConfig();
+	RenderTargetConfig(RenderTargetMode mode, ModeData mode_data);
+
+	RenderTargetMode mode;
+	ModeData mode_data;
 
 	bool clear_fbo = true;
 
