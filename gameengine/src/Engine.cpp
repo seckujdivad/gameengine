@@ -45,8 +45,8 @@ void Engine::LoadTexture(LocalTexture texture)
 	else
 	{
 		std::shared_ptr<Texture> loaded_texture = std::make_shared<Texture>(Texture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
-		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Nearest);
-		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Nearest);
+		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
+		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
 
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
