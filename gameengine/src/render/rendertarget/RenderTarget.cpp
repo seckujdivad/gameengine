@@ -411,26 +411,42 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		//previous render result
-		if (this->GetTargetType() == GL_TEXTURE_CUBE_MAP)
+		bool render_output_valid = false;
+		if (this->GetTargetType() == GL_TEXTURE_2D)
 		{
-			this->m_shader_program->SetUniform("render_output_valid", false);
+			render_output_valid = this->FramebufferContainsRenderOutput();
+		}
+
+		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
+
+		if (render_output_valid)
+		{
+			this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
+			this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+
+			//load textures from the previous frame (if in normal rendering mode)
+			this->m_shader_program->SetTexture(-1, "render_output_colour", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0));
+
+			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
+
+			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			{
+				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i + 1));
+			}
 		}
 		else
 		{
-			this->m_shader_program->SetUniform("render_output_valid", this->FramebufferContainsRenderOutput());
-		}
+			this->m_shader_program->SetUniform("render_output_x", 1);
+			this->m_shader_program->SetUniform("render_output_y", 1);
 
-		this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
-		this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+			this->m_shader_program->SetTexture(-1, "render_output_colour", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
 
-		//load textures from the previous frame (if in normal rendering mode)
-		this->m_shader_program->SetTexture(-1, "render_output_colour", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0));
+			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(TextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
 
-		this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
-
-		for (int i = 1; i < static_cast<int>(std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.size()); i++)
-		{
-			this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i - 1) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i));
+			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			{
+				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
+			}
 		}
 	}
 
