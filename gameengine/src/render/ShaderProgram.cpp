@@ -206,7 +206,7 @@ void ShaderProgram::Select(int texture_group_id)
 		}
 
 		std::vector<int> valid_targeted_groups;
-		std::size_t num_textures = 0;
+		std::size_t num_textures = 1;
 		for (int targeted_group : targeted_groups)
 		{
 			if (this->m_textures.count(targeted_group) > 0)
@@ -218,6 +218,25 @@ void ShaderProgram::Select(int texture_group_id)
 
 		std::vector<GLTexture> textures;
 		textures.reserve(num_textures);
+
+		/*
+		* Without an invalid dummy texture in texture unit 0, OpenGL will produce an invalid program texture usage error
+		* This is a short term fix for the problem. I suspect that it has something to do with the default behaviour of
+		* texture unit 0 - it is automatically activated and uninitialised texture uniforms will use it. Based on this
+		* logic, there is an unlinked texture somewhere (maybe the skybox texture?) that is linking to whatever is in
+		* texture unit 0.
+		* 
+		* If my reasoning is correct, having a dummy texture could be useful to prevent unlinked textures from generating
+		* errors. Either way, there are more pressing issues than this.
+		* 
+		* TODO: remove dummy texture requirement
+		*/
+		{
+			GLTexture dummy;
+			dummy.id = NULL;
+			dummy.target = GL_TEXTURE_2D;
+			textures.push_back(dummy);
+		}
 
 		for (int targeted_group : valid_targeted_groups)
 		{
