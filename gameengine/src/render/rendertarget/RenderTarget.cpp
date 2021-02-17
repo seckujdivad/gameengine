@@ -311,21 +311,22 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		//reflections
 		this->m_shader_program->SetDefine("REFLECTION_NUM", static_cast<int>(this->GetEngine()->GetScene()->GetReflections().size()));
+	}
 
+	if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly || this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+	{
 		//determine if any models might need to discard fragments
+		bool frags_may_be_discarded = false;
+
+		for (Model* model : models)
 		{
-			bool frags_may_be_discarded = false;
-
-			for (Model* model : models)
+			if (model->GetMaterial().displacement.discard_out_of_range)
 			{
-				if (model->GetMaterial().displacement.discard_out_of_range)
-				{
-					frags_may_be_discarded = true;
-				}
+				frags_may_be_discarded = true;
 			}
-
-			this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? 1 : 0);
 		}
+
+		this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? 1 : 0);
 	}
 
 	if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
@@ -493,6 +494,15 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "colourTexture", this->GetEngine()->GetTexture(model->GetColourTexture().GetReference()).get());
 	}
 
+	if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly || this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+	{
+		Material& material = model->GetMaterial();
+		this->m_shader_program->SetUniform("mat_displacement_multiplier", material.displacement.multiplier);
+		this->m_shader_program->SetUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
+
+		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "displacementTexture", this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference()).get());
+	}
+
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
 		Material& material = model->GetMaterial();
@@ -500,8 +510,6 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetUniform("mat_diffuse", material.diffuse);
 		this->m_shader_program->SetUniform("mat_specular", material.specular);
 		this->m_shader_program->SetUniform("mat_specular_highlight", material.specular_highlight);
-		this->m_shader_program->SetUniform("mat_displacement_multiplier", material.displacement.multiplier);
-		this->m_shader_program->SetUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
 
 		//screen space reflections
 		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == GL_TEXTURE_2D));
@@ -517,7 +525,6 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "specularTexture", this->GetEngine()->GetTexture(model->GetSpecularTexture().GetReference()).get());
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflectionIntensityTexture", this->GetEngine()->GetTexture(model->GetReflectionTexture().GetReference()).get());
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxMaskTexture", this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference()).get());
-		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "displacementTexture", this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference()).get());
 
 		//reflections
 		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections)
