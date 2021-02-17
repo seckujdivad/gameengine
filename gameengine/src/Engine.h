@@ -64,7 +64,7 @@ private:
 	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<Texture>, LocalTexture>> m_textures_static;
 	std::unordered_map<TexturePreset, std::shared_ptr<Texture>, TexturePreset::Hash> m_textures_static_presets;
 
-	std::vector<RenderController*> m_render_controllers;
+	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
 	//loaded geometry
 	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry;
@@ -79,7 +79,7 @@ private:
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
 	void AddRenderController(RenderController* render_controller);
-	RenderController* GetRenderController(RenderTextureReference reference);
+	RenderController* GetRenderController(RenderTextureReference reference) const;
 
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 

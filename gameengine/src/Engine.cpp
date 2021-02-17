@@ -186,16 +186,16 @@ Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertice
 
 void Engine::AddRenderController(RenderController* render_controller)
 {
-	this->m_render_controllers.push_back(render_controller);
+	this->m_render_controllers.push_back(std::unique_ptr<RenderController>(render_controller));
 }
 
-RenderController* Engine::GetRenderController(RenderTextureReference reference)
+RenderController* Engine::GetRenderController(RenderTextureReference reference) const
 {
-	for (RenderController* render_controller : this->m_render_controllers)
+	for (const std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 	{
 		if (render_controller->GetReference() == reference)
 		{
-			return render_controller;
+			return render_controller.get();
 		}
 	}
 	return nullptr;
@@ -334,11 +334,6 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 
 Engine::~Engine()
 {
-	for (RenderController* render_controller : this->m_render_controllers)
-	{
-		delete render_controller;
-	}
-
 	for (const auto& [reference, loaded_geometries] : this->m_model_geometry)
 	{
 		for (auto& [render_info, loaded_geometry] : loaded_geometries)
@@ -420,7 +415,7 @@ void Engine::Render()
 			std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
 			std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
 
-			for (RenderController* render_controller : this->m_render_controllers)
+			for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 			{
 				if (render_controller->GetType() == RenderControllerType::Reflection)
 				{
@@ -514,7 +509,6 @@ void Engine::Render()
 
 			for (int i = 0; i < static_cast<int>(cubemap_indices.size()); i++)
 			{
-				delete this->m_render_controllers.at(i);
 				this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
 			}
 		}
@@ -636,7 +630,7 @@ void Engine::Render()
 			std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>> reference_direct_dependencies;
 			std::vector<RenderController*> essential_draws;
 
-			for (RenderController* render_controller : this->m_render_controllers)
+			for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 			{
 				bool is_essential_draw = render_controller->IsEssentialDraw();
 				draw_required.insert(std::pair(render_controller->GetReference(), is_essential_draw));
@@ -644,7 +638,7 @@ void Engine::Render()
 
 				if (is_essential_draw)
 				{
-					essential_draws.push_back(render_controller);
+					essential_draws.push_back(render_controller.get());
 				}
 			}
 			
@@ -701,7 +695,7 @@ std::shared_ptr<Texture> Engine::GetTexture(TexturePreset preset)
 
 std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureReference reference) const
 {
-	for (RenderController* controller : this->m_render_controllers)
+	for (const std::unique_ptr<RenderController>& controller : this->m_render_controllers)
 	{
 		if (controller->GetReference() == reference)
 		{
@@ -792,13 +786,13 @@ void Engine::MakeContextCurrent(bool force) const
 		if (this->m_glcontext_canvas == nullptr)
 		{
 			bool context_set = false;
-			for (RenderController* render_controller : this->m_render_controllers)
+			for (const std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 			{
 				if (!context_set)
 				{
 					if (render_controller->GetType() == RenderControllerType::EngineCanvas)
 					{
-						EngineCanvasController* engine_canvas_controller = dynamic_cast<EngineCanvasController*>(render_controller);
+						EngineCanvasController* engine_canvas_controller = dynamic_cast<EngineCanvasController*>(render_controller.get());
 						engine_canvas_controller->GetEngineCanvas()->MakeOpenGLFocus();
 						context_set = true;
 					}
