@@ -141,7 +141,7 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 	//add preprocessor defines
 	for (const auto& [key, value] : this->m_defines)
 	{
-		processed_source = "#define " + key + " " + value + "\n" + processed_source;
+		processed_source = "#define " + key + " " + ShaderProgram::ConvertDefine<std::string>(value) + "\n" + processed_source;
 	}
 
 	processed_source = first_line + "\n" + processed_source;
@@ -507,7 +507,7 @@ void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, T
 	}
 }
 
-bool ShaderProgram::SetDefine(std::string key, std::string value, bool defer_recompilation)
+bool ShaderProgram::SetDefine(std::string key, DefineType value, bool defer_recompilation)
 {
 	bool recompile_required = false;
 
@@ -537,9 +537,70 @@ bool ShaderProgram::SetDefine(std::string key, std::string value, bool defer_rec
 	return recompile_required && defer_recompilation;
 }
 
-std::string ShaderProgram::GetDefine(std::string key) const
+template<>
+ShaderProgram::DefineType ShaderProgram::GetDefine<ShaderProgram::DefineType>(std::string key) const
 {
 	return this->m_defines.at(key);
+}
+
+template<typename T>
+T ShaderProgram::GetDefine(std::string key) const
+{
+	return this->ConvertDefine<T>(this->GetDefine<DefineType>(key));
+}
+
+template std::string ShaderProgram::GetDefine<std::string>(std::string key) const;
+template int ShaderProgram::GetDefine<int>(std::string key) const;
+
+template<>
+bool ShaderProgram::DefineTypesMatch<std::string>(DefineType value)
+{
+	return value.index() == 0;
+}
+
+template<>
+bool ShaderProgram::DefineTypesMatch<int>(DefineType value)
+{
+	return value.index() == 1;
+}
+
+template<typename T>
+T ShaderProgram::ConvertDefine(DefineType value)
+{
+	if (ShaderProgram::DefineTypesMatch<T>(value))
+	{
+		return std::get<T>(value);
+	}
+	else
+	{
+		return ShaderProgram::ConvertDefine_Inner<T>(value);
+	}
+}
+
+template<>
+std::string ShaderProgram::ConvertDefine_Inner<std::string>(DefineType value)
+{
+	if (ShaderProgram::DefineTypesMatch<int>(value))
+	{
+		return std::to_string(std::get<int>(value));
+	}
+	else
+	{
+		throw std::invalid_argument("Invalid type");
+	}
+}
+
+template<>
+int ShaderProgram::ConvertDefine_Inner<int>(DefineType value)
+{
+	if (ShaderProgram::DefineTypesMatch<int>(value))
+	{
+		return std::stoi(std::get<std::string>(value));
+	}
+	else
+	{
+		throw std::invalid_argument("Invalid type");
+	}
 }
 
 bool ShaderProgram::RemoveDefine(std::string key, bool defer_recompilation)

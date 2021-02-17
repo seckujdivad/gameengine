@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include <variant>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -33,6 +34,8 @@ public:
 		std::string uniform_name;
 	};
 
+	using DefineType = std::variant<std::string, int>;
+
 private:
 	GLuint m_program_id = GL_NONE; //OpenGL identifier of the program the shaders have been linked into
 	GLint m_max_texture_units = 16; //minimum value required by the spec
@@ -41,7 +44,7 @@ private:
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
 	std::unordered_map<int, std::unordered_map<std::string, Texture*>> m_textures;
-	std::unordered_map<std::string, std::string> m_defines;
+	std::unordered_map<std::string, DefineType> m_defines;
 
 	bool m_recompile_required = true;
 
@@ -49,6 +52,9 @@ private:
 
 	std::string GetInfoLog() const;
 	bool IsValid() const;
+
+	template<typename T>
+	static T ConvertDefine_Inner(DefineType value);
 
 public:
 	ShaderProgram();
@@ -99,9 +105,17 @@ public:
 	void SetTexture(int texture_group_id, std::string uniform_name, Texture* texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
-	bool SetDefine(std::string key, std::string value, bool defer_recompilation = true);
-	std::string GetDefine(std::string key) const;
+	bool SetDefine(std::string key, DefineType value, bool defer_recompilation = true);
 	bool RemoveDefine(std::string key, bool defer_recompilation = true);
+
+	template<typename T>
+	T GetDefine(std::string key) const;
+
+	template<typename T>
+	static bool DefineTypesMatch(DefineType value);
+
+	template<typename T>
+	static T ConvertDefine(DefineType value);
 
 	std::optional<std::string> CheckProgramValidity() const;
 };

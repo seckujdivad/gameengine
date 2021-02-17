@@ -304,13 +304,13 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
 		//point lights
-		this->m_shader_program->SetDefine("POINT_LIGHT_NUM", std::to_string(this->GetEngine()->GetScene()->GetPointLights().size()));
+		this->m_shader_program->SetDefine("POINT_LIGHT_NUM", static_cast<int>(this->GetEngine()->GetScene()->GetPointLights().size()));
 
 		//OBB approximations
-		this->m_shader_program->SetDefine("APPROXIMATION_OBB_NUM", std::to_string(this->GetEngine()->GetScene()->GetOBBApproximations().size()));
+		this->m_shader_program->SetDefine("APPROXIMATION_OBB_NUM", static_cast<int>(this->GetEngine()->GetScene()->GetOBBApproximations().size()));
 
 		//reflections
-		this->m_shader_program->SetDefine("REFLECTION_NUM", std::to_string(this->GetEngine()->GetScene()->GetReflections().size()));
+		this->m_shader_program->SetDefine("REFLECTION_NUM", static_cast<int>(this->GetEngine()->GetScene()->GetReflections().size()));
 
 		//determine if any models might need to discard fragments
 		{
@@ -324,7 +324,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 				}
 			}
 
-			this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? "1" : "0");
+			this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? 1 : 0);
 		}
 	}
 
@@ -333,7 +333,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
 		//data textures
-		this->m_shader_program->SetDefine("DATA_TEX_NUM", std::to_string(GAMEENGINE_NUM_DATA_TEX));
+		this->m_shader_program->SetDefine("DATA_TEX_NUM", GAMEENGINE_NUM_DATA_TEX);
 	}
 
 	this->m_shader_program->Recompile();
@@ -461,7 +461,7 @@ void RenderTarget::Render_Setup_FlatQuad()
 	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
 	{
 		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
-		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", std::to_string(num_layers));
+		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", static_cast<int>(num_layers));
 	}
 
 	this->m_shader_program->Recompile();
@@ -554,7 +554,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			}
 		}
 
-		int required_reflections = std::stoi(this->m_shader_program->GetDefine("REFLECTION_NUM"));
+		int required_reflections = this->m_shader_program->GetDefine<int>("REFLECTION_NUM");
 		for (int i = static_cast<int>(reflections.size()); i < required_reflections; i++)
 		{
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
