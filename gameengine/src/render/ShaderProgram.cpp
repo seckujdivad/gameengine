@@ -241,7 +241,7 @@ void ShaderProgram::Select(int texture_group_id)
 		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
 			glActiveTexture(GL_TEXTURE1 + i);
-			BindOnlyThisTexture(textures.at(i));
+			textures.at(i).Bind();
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i + 1);
 
 #ifdef _DEBUG
@@ -664,12 +664,12 @@ ShaderProgram::ShaderSource::ShaderSource(GLenum type, std::string source) : typ
 {
 }
 
-void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture)
+void ShaderProgram::GLTexture::Bind() const
 {
 	const GLenum targets[] = {
 		GL_TEXTURE_2D,
 		GL_TEXTURE_CUBE_MAP
-	};
+};
 
 #ifdef _DEBUG
 	bool target_found = false;
@@ -680,7 +680,7 @@ void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture)
 		glBindTexture(target, GL_NONE);
 
 #ifdef _DEBUG
-		if (target == texture.target)
+		if (target == this->target)
 		{
 			target_found = true;
 		}
@@ -690,9 +690,9 @@ void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture)
 #ifdef _DEBUG
 	if (!target_found)
 	{
-		throw std::invalid_argument("Unknown target: " + std::to_string(static_cast<int>(texture.target)));
+		throw std::invalid_argument("Unknown target: " + std::to_string(static_cast<int>(this->target)));
 	}
 #endif
 
-	glBindTexture(texture.target, texture.id);
+	glBindTexture(this->target, this->id);
 }

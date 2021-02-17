@@ -32,6 +32,8 @@ public:
 		GLuint id = GL_NONE;
 		GLenum target = GL_NONE;
 		std::string uniform_name;
+
+		void Bind() const;
 	};
 
 	using DefineType = std::variant<std::string, int>;
@@ -119,5 +121,3 @@ public:
 
 	std::optional<std::string> CheckProgramValidity() const;
 };
-
-void BindOnlyThisTexture(const ShaderProgram::GLTexture& texture);
