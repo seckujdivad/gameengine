@@ -10,3 +10,5 @@ enum class TargetType
 
 TargetType GetTargetType(GLenum target);
 GLenum GetTargetEnum(TargetType target);
+
+int GetNumTextures(TargetType target);

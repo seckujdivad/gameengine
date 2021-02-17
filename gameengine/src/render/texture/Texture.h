@@ -6,11 +6,13 @@
 
 #include "../../GLComponents.h"
 
+#include "TexturePreset.h"
+
 enum class TextureType;
 enum class TextureFormat;
 enum class TextureFiltering;
 enum class TargetType;
-enum class TexturePreset;
+enum class TextureDataPreset;
 
 class Texture
 {
@@ -39,8 +41,12 @@ private:
 	void ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format = std::optional<TextureFormat>(), std::vector<const void*> pixels = {});
 	GLint GetPreferredFormat(bool force = false);
 
+	void SetPreset(Preset preset, bool configure = true);
+
 public:
 	Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions = std::tuple<int, int>(1, 1), bool generate_mipmaps = false);
+	Texture(TextureDataPreset preset, TargetType target, bool generate_mipmaps = false);
+	Texture(TexturePreset preset, bool generate_mipmaps = false);
 	Texture(const Texture& copy_from);
 	Texture& operator=(const Texture& copy_from);
 	Texture(Texture&& move_from) noexcept;
@@ -73,10 +79,8 @@ public:
 	void BindTexture() const;
 
 	void SetPixels(TextureFormat pixel_format, std::vector<const void*> pixels);
-	void SetPixels(TexturePreset preset);
+	void SetPixels(TextureDataPreset preset);
 
 	void CopyTo(Texture& dest) const;
 	void CopyFrom(const Texture& src);
 };
-
-TargetType GetPresetTargetType(TexturePreset preset);

@@ -291,6 +291,9 @@
     <ClInclude Include="src\render\TargetType.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\texture\TextureDataPreset.h">
+      <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
     <ClInclude Include="src\render\texture\TexturePreset.h">
       <Filter>Header Files\render\texture</Filter>
     </ClInclude>
@@ -474,6 +477,9 @@
       <Filter>Source Files\render\texture</Filter>
     </ClCompile>
     <ClCompile Include="src\render\texture\TextureType.cpp">
+      <Filter>Source Files\render\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\texture\TexturePreset.cpp">
       <Filter>Source Files\render\texture</Filter>
     </ClCompile>
   </ItemGroup>

@@ -20,7 +20,7 @@
 #include "../TargetType.h"
 #include "../../LogMessage.h"
 
-#include "../texture/TexturePreset.h"
+#include "../texture/TextureDataPreset.h"
 
 #include "RenderTexture.h"
 
@@ -541,12 +541,12 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		int required_reflections = std::stoi(this->m_shader_program->GetDefine("REFLECTION_NUM"));
 		for (int i = static_cast<int>(reflections.size()); i < required_reflections; i++)
 		{
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get());
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 
 			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
 			{
 				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
-				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TexturePreset::BlackCubemap).get());
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 			}
 		}
 
@@ -557,7 +557,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		Texture* skybox_texture;
 		if (skybox == nullptr)
 		{
-			std::shared_ptr<Texture> texture = this->GetEngine()->GetTexture(TexturePreset::BlackCubemap);
+			std::shared_ptr<Texture> texture = this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap);
 			skybox_texture = texture.get();
 		}
 		else

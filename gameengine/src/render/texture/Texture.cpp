@@ -6,7 +6,7 @@
 #include "TextureType.h"
 #include "TextureFormat.h"
 #include "TextureFiltering.h"
-#include "TexturePreset.h"
+#include "TextureDataPreset.h"
 #include "../TargetType.h"
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
@@ -117,7 +117,7 @@ GLint Texture::GetPreferredFormat(bool force)
 	return this->m_preferred_format;
 }
 
-Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps)
+void Texture::SetPreset(Preset preset, bool configure)
 {
 	if (preset == Preset::Colour)
 	{
@@ -144,8 +144,21 @@ Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensio
 	{
 		throw std::invalid_argument("Unknown preset " + std::to_string(static_cast<int>(preset)));
 	}
+}
 
+Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps)
+{
+	this->SetPreset(preset, false);
 	this->ConfigureTexture(true);
+}
+
+Texture::Texture(TextureDataPreset preset, TargetType target, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps)
+{
+	this->SetPixels(preset);
+}
+
+Texture::Texture(TexturePreset preset, bool generate_mipmaps) : Texture(preset.preset, preset.target, generate_mipmaps)
+{
 }
 
 Texture::Texture(const Texture& copy_from)
@@ -317,24 +330,44 @@ void Texture::SetPixels(TextureFormat pixel_format, std::vector<const void*> pix
 	this->ConfigureTexture(false, pixel_format, pixels);
 }
 
-void Texture::SetPixels(TexturePreset preset)
+void Texture::SetPixels(TextureDataPreset preset)
 {
-	if (this->GetTargetType() != GetPresetTargetType(preset))
+	if (preset == TextureDataPreset::Black)
 	{
-		throw std::invalid_argument("Target type doesn't match the required target type of this preset");
-	}
+		this->SetDimensions(std::tuple(1, 1));
 
-	if ((preset == TexturePreset::BlackCubemap) || (preset == TexturePreset::Black2DTexture))
-	{
-		std::vector<unsigned char> black_texture;
+		this->SetPreset(Preset::Colour);
+		std::vector<unsigned char> black_texture; //make sure it stays allocated
 		black_texture.reserve(3);
 		for (int i = 0; i < 3; i++)
 		{
 			black_texture.push_back(0);
 		}
 
+		std::vector<const void*> pixel_arrays;
+		for (int i = 0; i < GetNumTextures(this->GetTargetType()); i++)
+		{
+			pixel_arrays.push_back(black_texture.data());
+		}
+
+		this->SetPixels(TextureFormat::RGB, pixel_arrays);
+	}
+	else if (preset == TextureDataPreset::ZeroDepth)
+	{
 		this->SetDimensions(std::tuple(1, 1));
-		this->SetPixels(TextureFormat::RGB, std::vector<const void*>({ black_texture.data() }));
+		this->SetPreset(Preset::Depth);
+
+		std::vector<float> zerodepth_texture;
+		zerodepth_texture.reserve(1);
+		zerodepth_texture.push_back(0.0f);
+
+		std::vector<const void*> pixel_arrays;
+		for (int i = 0; i < GetNumTextures(this->GetTargetType()); i++)
+		{
+			pixel_arrays.push_back(zerodepth_texture.data());
+		}
+
+		this->SetPixels(TextureFormat::Depth, pixel_arrays);
 	}
 	else
 	{
@@ -372,14 +405,4 @@ void Texture::CopyTo(Texture& dest) const
 void Texture::CopyFrom(const Texture& src)
 {
 	src.CopyTo(*this);
-}
-
-TargetType GetPresetTargetType(TexturePreset preset)
-{
-	switch (preset)
-	{
-	case TexturePreset::BlackCubemap: return TargetType::Texture_Cubemap;
-	case TexturePreset::Black2DTexture: return TargetType::Texture_2D;
-	default: throw std::invalid_argument("Unknown texture preset " + std::to_string(static_cast<int>(preset)));
-	}
 }

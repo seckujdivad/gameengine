@@ -22,3 +22,13 @@ GLenum GetTargetEnum(TargetType target)
 	default: throw std::invalid_argument("Unknown target: " + std::to_string(static_cast<int>(target)));
 	}
 }
+
+int GetNumTextures(TargetType target)
+{
+	switch (target)
+	{
+	case TargetType::Texture_2D: return 1;
+	case TargetType::Texture_Cubemap: return 6;
+	default: throw std::invalid_argument("Unknown target");
+	}
+}

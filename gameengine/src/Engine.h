@@ -17,6 +17,7 @@
 
 #include "render/rendertarget/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
+#include "render/texture/TexturePreset.h"
 
 #include "scene/Referenceable.h"
 #include "scene/SceneChild.h"
@@ -29,7 +30,6 @@ class Scene;
 class RenderTarget;
 class Model;
 class Texture;
-enum class TexturePreset;
 
 class Engine : public SceneChild
 {
@@ -62,7 +62,7 @@ private:
 	bool m_single_context_mode = false;
 
 	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<Texture>, LocalTexture>> m_textures_static;
-	std::unordered_map<TexturePreset, std::shared_ptr<Texture>> m_textures_static_presets;
+	std::unordered_map<TexturePreset, std::shared_ptr<Texture>, TexturePreset::Hash> m_textures_static_presets;
 
 	std::vector<RenderController*> m_render_controllers;
 
@@ -101,6 +101,7 @@ public:
 
 	std::shared_ptr<Texture> GetTexture(TextureReference reference) const;
 	std::shared_ptr<Texture> GetTexture(const LocalTexture& texture) const;
+	std::shared_ptr<Texture> GetTexture(TextureDataPreset preset, TargetType target);
 	std::shared_ptr<Texture> GetTexture(TexturePreset preset);
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
 

@@ -216,6 +216,7 @@
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\render\TargetType.h" />
     <ClInclude Include="src\render\texture\Texture.h" />
+    <ClInclude Include="src\render\texture\TextureDataPreset.h" />
     <ClInclude Include="src\render\texture\TextureFiltering.h" />
     <ClInclude Include="src\render\texture\TextureFormat.h" />
     <ClInclude Include="src\render\texture\TexturePreset.h" />
@@ -281,6 +282,7 @@
     <ClCompile Include="src\render\texture\Texture.cpp" />
     <ClCompile Include="src\render\texture\TextureFiltering.cpp" />
     <ClCompile Include="src\render\texture\TextureFormat.cpp" />
+    <ClCompile Include="src\render\texture\TexturePreset.cpp" />
     <ClCompile Include="src\render\texture\TextureType.cpp" />
     <ClCompile Include="src\Resource.cpp" />
     <ClCompile Include="src\scene\Camera.cpp" />
