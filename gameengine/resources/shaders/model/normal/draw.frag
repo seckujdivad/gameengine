@@ -195,16 +195,13 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 			//at an intersection, one of the values is pinned (at a minimum or maximum) while the other two are inside the range of their maximum and minimum
 			float pinned_value = (j == 0) ? 0.0f : obb_dimensions[i];
 			float lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
-			//intersection_index = (lambda > 0.0) ? 1 : 0;
 
-			float second_axis_value = fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]);
-			float third_axis_value = fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]);
-			if ((0.0f <= second_axis_value) && (second_axis_value <= obb_dimensions[(i + 1) % 3]) &&
-				(0.0f <= third_axis_value) && (third_axis_value <= obb_dimensions[(i + 2) % 3]))
+			vec2 other_components = vec2(fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]), fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]));
+			if (all(greaterThanEqual(other_components, vec2(0.0f))) && all(lessThanEqual(other_components, vec2(obb_dimensions[(i + 1) % 3], obb_dimensions[(i + 2) % 3]))))
 			{
 				intersections[intersection_index][i] = pinned_value;
-				intersections[intersection_index][(i + 1) % 3] = second_axis_value;
-				intersections[intersection_index][(i + 2) % 3] = third_axis_value;
+				intersections[intersection_index][(i + 1) % 3] = other_components[0];
+				intersections[intersection_index][(i + 2) % 3] = other_components[1];
 				lambdas[intersection_index] = lambda;
 				intersection_index++;
 			}
