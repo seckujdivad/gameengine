@@ -370,10 +370,8 @@ void main()
 
 							vec3 position = PerspDiv(transformed_start + (lambda * transformed_direction));
 
-							if ((position[(i + 1) % 3] > -1.0f)
-								&& (position[(i + 1) % 3] < 1.0f)
-								&& (position[(i + 2) % 3] > -1.0f)
-								&& (position[(i + 2) % 3] < 1.0f))
+							vec2 other_components = vec2(position[(i + 1) % 3], position[(i + 2) % 3]);
+							if (all(greaterThan(other_components, vec2(-1.0f))) && all(lessThan(other_components, vec2(1.0f))))
 							{
 								lambdas[intersection_index] = lambda;
 								intersection_index++;
