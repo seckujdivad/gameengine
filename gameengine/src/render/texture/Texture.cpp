@@ -8,6 +8,7 @@
 #include "TextureFiltering.h"
 #include "TextureDataPreset.h"
 #include "../TargetType.h"
+#include "../rendertarget/RenderTargetMode.h"
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
 {
@@ -405,4 +406,40 @@ void Texture::CopyTo(Texture& dest) const
 void Texture::CopyFrom(const Texture& src)
 {
 	src.CopyTo(*this);
+}
+
+std::optional<int> GetNumColourTextures(RenderTargetMode mode)
+{
+	if (mode == RenderTargetMode::Default)
+	{
+		throw std::invalid_argument("Default mode can't be rendered");
+	}
+	else if (mode == RenderTargetMode::Normal_DepthOnly)
+	{
+		return std::optional<int>();
+	}
+	else if (mode == RenderTargetMode::Normal_Draw)
+	{
+		return 2;
+	}
+	else if (mode == RenderTargetMode::PostProcess)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::Shadow)
+	{
+		return 0;
+	}
+	else if (mode == RenderTargetMode::Textured)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::Wireframe)
+	{
+		return 1;
+	}
+	else
+	{
+		throw std::invalid_argument("Unknown mode");
+	}
 }

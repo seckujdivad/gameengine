@@ -334,7 +334,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		|| (this->GetRenderMode() == RenderTargetMode::Textured))
 	{
 		//data textures
-		this->m_shader_program->SetDefine("DATA_TEX_NUM", GAMEENGINE_NUM_DATA_TEX);
+		this->m_shader_program->SetDefine("DATA_TEX_NUM", GetNumColourTextures(this->GetRenderMode()).value() - 1);
 	}
 
 	this->m_shader_program->Recompile();
@@ -430,7 +430,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
 
-			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value() - 1; i++)
 			{
 				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i + 1));
 			}
@@ -444,7 +444,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(TextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
 
-			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value() - 1; i++)
 			{
 				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
 			}
@@ -536,6 +536,8 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform("reflections_enabled", material.reflections_enabled);
 		}
 
+		int num_data_tex = GetNumColourTextures(RenderTargetMode::Normal_Draw).value() - 1;
+
 		std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
 		for (int i = 0; i < static_cast<int>(reflections.size()); i++)
 		{
@@ -554,9 +556,9 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", &reflection_output->colour.at(0));
 
-			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
+			for (int j = 0; j < num_data_tex; j++)
 			{
-				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
+				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * num_data_tex) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, &reflection_output->colour.at(j + 1));
 			}
 		}
@@ -566,9 +568,9 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		{
 			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 
-			for (int j = 0; j < GAMEENGINE_NUM_DATA_TEX; j++)
+			for (int j = 0; j < num_data_tex; j++)
 			{
-				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * GAMEENGINE_NUM_DATA_TEX) + j) + "]";
+				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * num_data_tex) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 			}
 		}
@@ -847,7 +849,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"render_output_y"
 				});
 
-			for (int i = 0; i < GAMEENGINE_NUM_DATA_TEX; i++)
+			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_Draw).value() - 1; i++)
 			{
 				this->m_shader_program->AddUniformName("render_output_data[" + std::to_string(i) + "]");
 			}
