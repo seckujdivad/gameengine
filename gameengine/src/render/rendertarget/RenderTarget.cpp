@@ -247,14 +247,14 @@ GLuint RenderTarget::GetFramebuffer() const
 	return this->m_fbo;
 }
 
-void RenderTarget::SetTargetType(GLenum target_type)
+void RenderTarget::SetTargetType(TargetType target_type)
 {
-	this->m_fbo_target_type = target_type;
+	this->m_fbo_target = target_type;
 }
 
-GLenum RenderTarget::GetTargetType() const
+TargetType RenderTarget::GetTargetType() const
 {
-	return this->m_fbo_target_type;
+	return this->m_fbo_target;
 }
 
 bool RenderTarget::FramebufferContainsRenderOutput() const
@@ -341,7 +341,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 	//load "constant" uniforms (uniforms constant between models like camera data) into program
 	// cubemap uniforms
-	bool is_cubemap = this->GetTargetType() == GL_TEXTURE_CUBE_MAP;
+	bool is_cubemap = this->GetTargetType() == TargetType::Texture_Cubemap;
 	this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
 
 	if (is_cubemap)
@@ -413,7 +413,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		//previous render result
 		bool render_output_valid = false;
-		if (this->GetTargetType() == GL_TEXTURE_2D)
+		if (this->GetTargetType() == TargetType::Texture_2D)
 		{
 			render_output_valid = this->FramebufferContainsRenderOutput();
 		}
@@ -512,7 +512,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetUniform("mat_specular_highlight", material.specular_highlight);
 
 		//screen space reflections
-		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == GL_TEXTURE_2D));
+		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == TargetType::Texture_2D));
 		this->m_shader_program->SetUniform("mat_ssr_resolution", material.ssr.resolution);
 		this->m_shader_program->SetUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
 		this->m_shader_program->SetUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);

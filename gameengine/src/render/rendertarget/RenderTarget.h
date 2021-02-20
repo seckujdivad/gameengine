@@ -13,6 +13,7 @@
 #include "RenderTargetConfig.h"
 #include "../renderable/Renderable.h"
 #include "../../scene/Referenceable.h"
+#include "../TargetType.h"
 
 class Engine;
 class Model;
@@ -25,9 +26,9 @@ public:
 	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
 
 private:
-	GLuint m_fbo = NULL;
+	GLuint m_fbo = 0;
 	bool m_fbo_contains_render = false;
-	GLenum m_fbo_target_type = GL_TEXTURE_2D;
+	TargetType m_fbo_target = TargetType::Texture_2D;
 
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;
@@ -48,7 +49,7 @@ protected:
 
 	void SetFramebuffer(GLuint fbo);
 	GLuint GetFramebuffer() const;
-	void SetTargetType(GLenum target_type);
+	void SetTargetType(TargetType target_type);
 
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
@@ -73,7 +74,7 @@ public:
 
 	Engine* GetEngine() const;
 
-	GLenum GetTargetType() const;
+	TargetType GetTargetType() const;
 
 	void SetConfig(RenderTargetConfig config);
 	void SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config);
