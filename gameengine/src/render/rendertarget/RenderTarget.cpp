@@ -72,7 +72,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 			glEnable(GL_DEPTH_TEST);
 			break;
-		case RenderTargetMode::Postprocess:
+		case RenderTargetMode::PostProcess:
 			glDisable(GL_CULL_FACE);
 
 			glDisable(GL_DEPTH_TEST);
@@ -175,7 +175,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 					throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
 				}
 			}
-			else if (this->GetRenderMode() == RenderTargetMode::Postprocess)
+			else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 			{
 				if (info.primitive_type == Geometry::PrimitiveType::Triangles)
 				{
@@ -459,7 +459,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 void RenderTarget::Render_Setup_FlatQuad()
 {
-	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
+	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
 		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
 		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", static_cast<int>(num_layers));
@@ -467,7 +467,7 @@ void RenderTarget::Render_Setup_FlatQuad()
 
 	this->m_shader_program->Recompile();
 
-	if (this->GetRenderMode() == RenderTargetMode::Postprocess)
+	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
 		for (size_t i = 0; i < std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
 		{
@@ -724,7 +724,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 {
 	if (this->m_config.mode != config.mode)
 	{
-		if (config.mode == RenderTargetMode::Postprocess)
+		if (config.mode == RenderTargetMode::PostProcess)
 		{
 			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
 		}
@@ -770,7 +770,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 	}
-	else if (this->GetRenderMode() == RenderTargetMode::Postprocess)
+	else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER));
@@ -906,7 +906,7 @@ void RenderTarget::SetModeConfig(RenderTargetConfig::Shadow mode_config)
 void RenderTarget::SetModeConfig(RenderTargetConfig::PostProcess mode_config)
 {
 	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Postprocess;
+	config.mode = RenderTargetMode::PostProcess;
 	config.mode_data = mode_config;
 	this->SetConfig(config);
 }

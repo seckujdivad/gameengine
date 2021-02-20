@@ -24,10 +24,6 @@ struct RenderTargetConfig
 		bool draw_reflections = true;
 	};
 
-	struct Normal_Postprocess
-	{
-	};
-
 	struct Wireframe
 	{
 		bool draw_back_faces = true;
@@ -54,7 +50,7 @@ struct RenderTargetConfig
 
 	};
 
-	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Normal_Postprocess, Wireframe, Shadow, PostProcess, Textured>;
+	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Wireframe, Shadow, PostProcess, Textured>;
 
 	RenderTargetConfig();
 	RenderTargetConfig(RenderTargetMode mode, ModeData mode_data);

@@ -38,7 +38,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			this->colour.push_back(Texture(Texture::Preset::Data, target));
 		}
 	}
-	else if (mode == RenderTargetMode::Postprocess)
+	else if (mode == RenderTargetMode::PostProcess)
 	{
 		this->colour.push_back(Texture(Texture::Preset::Colour, target));
 	}

@@ -5,10 +5,9 @@ enum class RenderTargetMode
 	Default,
 	Normal_DepthOnly,
 	Normal_Draw,
-	Normal_Postprocess,
 	Wireframe,
 	Shadow,
-	Postprocess,
+	PostProcess,
 	Textured
 };
 
