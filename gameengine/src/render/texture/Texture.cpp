@@ -443,3 +443,15 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 		throw std::invalid_argument("Unknown mode");
 	}
 }
+
+int GetNumAttachedColourTextures(RenderTargetMode mode)
+{
+	if (mode == RenderTargetMode::Normal_DepthOnly)
+	{
+		return GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw);
+	}
+	else
+	{
+		return GetNumColourTextures(mode).value();
+	}
+}

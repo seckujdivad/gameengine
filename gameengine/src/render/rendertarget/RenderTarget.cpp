@@ -329,14 +329,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		this->m_shader_program->SetDefine("SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING", frags_may_be_discarded ? 1 : 0);
 	}
 
-	if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-		|| (this->GetRenderMode() == RenderTargetMode::Wireframe)
-		|| (this->GetRenderMode() == RenderTargetMode::Textured))
-	{
-		//data textures
-		this->m_shader_program->SetDefine("DATA_TEX_NUM", GetNumColourTextures(this->GetRenderMode()).value() - 1);
-	}
-
 	this->m_shader_program->Recompile();
 
 	//load "constant" uniforms (uniforms constant between models like camera data) into program
@@ -426,28 +418,24 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
 
 			//load textures from the previous frame (if in normal rendering mode)
-			this->m_shader_program->SetTexture(-1, "render_output_colour", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(0));
+			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
+			{
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i));
+			}
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
-
-			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value() - 1; i++)
-			{
-				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i + 1));
-			}
 		}
 		else
 		{
 			this->m_shader_program->SetUniform("render_output_x", 1);
 			this->m_shader_program->SetUniform("render_output_y", 1);
 
-			this->m_shader_program->SetTexture(-1, "render_output_colour", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
+			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
+			{
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
+			}
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(TextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
-
-			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value() - 1; i++)
-			{
-				this->m_shader_program->SetTexture(-1, "render_output_data[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
-			}
 		}
 	}
 
@@ -536,7 +524,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform("reflections_enabled", material.reflections_enabled);
 		}
 
-		int num_data_tex = GetNumColourTextures(RenderTargetMode::Normal_Draw).value() - 1;
+		int num_colour_tex = GetNumColourTextures(RenderTargetMode::Normal_Draw).value();
 
 		std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
 		for (int i = 0; i < static_cast<int>(reflections.size()); i++)
@@ -553,24 +541,19 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform(prefix + "iterations", reflection->GetIterations());
 
 			std::shared_ptr<RenderTextureGroup> reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
-
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", &reflection_output->colour.at(0));
-
-			for (int j = 0; j < num_data_tex; j++)
+			for (int j = 0; j < num_colour_tex; j++)
 			{
-				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * num_data_tex) + j) + "]";
-				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, &reflection_output->colour.at(j + 1));
+				std::string uniform_name = "reflection_cubemaps[" + std::to_string((i * num_colour_tex) + j) + "]";
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, &reflection_output->colour.at(j));
 			}
 		}
 
 		int required_reflections = this->m_shader_program->GetDefine<int>("REFLECTION_NUM");
 		for (int i = static_cast<int>(reflections.size()); i < required_reflections; i++)
 		{
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
-
-			for (int j = 0; j < num_data_tex; j++)
+			for (int j = 0; j < num_colour_tex; j++)
 			{
-				std::string uniform_name = "reflection_data_cubemaps[" + std::to_string((i * num_data_tex) + j) + "]";
+				std::string uniform_name = "reflection_cubemaps[" + std::to_string((i * num_colour_tex) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 			}
 		}
@@ -784,6 +767,21 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	}
 
 	this->m_shader_program->SetShaderSources(shaders);
+
+	if (this->GetRenderMode() != RenderTargetMode::Default)
+	{
+		int num_colour_textures = 0;
+		if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
+		{
+			num_colour_textures = GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw);
+		}
+		else
+		{
+			num_colour_textures = GetNumAttachedColourTextures(this->GetRenderMode());
+		}
+		this->m_shader_program->SetDefine("NUM_TEXTURES", num_colour_textures);
+	}
+
 	this->m_shader_program->Recompile();
 
 	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
@@ -843,15 +841,14 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"skyboxMaskTexture",
 				"skyboxTexture",
 				"render_output_valid",
-				"render_output_colour",
 				"render_output_depth",
 				"render_output_x",
 				"render_output_y"
 				});
 
-			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_Draw).value() - 1; i++)
+			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_Draw).value(); i++)
 			{
-				this->m_shader_program->AddUniformName("render_output_data[" + std::to_string(i) + "]");
+				this->m_shader_program->AddUniformName("render_output_colour[" + std::to_string(i) + "]");
 			}
 		}
 		else if (this->GetRenderMode() == RenderTargetMode::Wireframe)

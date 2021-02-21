@@ -88,3 +88,4 @@ public:
 };
 
 std::optional<int> GetNumColourTextures(RenderTargetMode mode); //returning no value means this mode links into textures from another mode
+int GetNumAttachedColourTextures(RenderTargetMode mode);
