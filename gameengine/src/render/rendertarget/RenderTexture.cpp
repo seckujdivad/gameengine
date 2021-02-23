@@ -142,6 +142,11 @@ bool RenderTexture::SwapBuffers()
 	return true;
 }
 
+bool RenderTexture::DoAutoSwapBuffers() const
+{
+	return this->m_auto_swap_buffers;
+}
+
 void RenderTexture::SetNormalModePreviousFrameToSelf()
 {
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)

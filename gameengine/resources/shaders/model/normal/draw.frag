@@ -108,6 +108,7 @@ uniform struct Reflection
 uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_TEXTURES];
+uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform int reflection_count;
 
 //scene approximation
@@ -264,6 +265,16 @@ vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tan
 
 	float interpolation_weight = current_depth_sample_translated / (current_depth_sample_translated / prev_depth_sample_translated);
 	return mix(prev_uv, current_uv, interpolation_weight);
+}
+
+float GetDistanceFromDepth(float depth, float clip_near, float clip_far)
+{
+	return (2.0f * clip_near * clip_far) / (clip_near + clip_far - (((2.0f * depth) - 1.0f) * (clip_far - clip_near)));
+}
+
+float GetDistanceFromReflection(int index, float depth_sample)
+{
+	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
 }
 
 void main()
@@ -453,24 +464,23 @@ void main()
 				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
 				{
 					vec3 sample_vector = reflect(-fragtocam, normal);
-					float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
 					vec3 offset = geomSceneSpacePos - reflections[reflection_index].position;
 
 					for (int i = 0; i < reflections[reflection_index].iterations; i++)
 					{
-						float depth_sample = texture(reflection_cubemaps[(reflection_index * NUM_TEXTURES) + 1], sample_vector).g;
+						float depth_sample = texture(reflection_depth_cubemaps[reflection_index], sample_vector).r;
 						if (depth_sample == 1.0f)
 						{
 							i = reflections[reflection_index].iterations; //exit loop
 						}
 						else
 						{
-							depth_sample = (depth_sample * sample_space_length) + reflections[reflection_index].clip_near;
+							depth_sample = GetDistanceFromReflection(reflection_index, depth_sample);
 							sample_vector = (normalize(sample_vector) * depth_sample) + offset;
 						}
 					}
 
-					reflection_colour = (texture(reflection_cubemaps[(reflection_index * NUM_TEXTURES) + 1], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_TEXTURES], sample_vector).rgb;
+					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_TEXTURES], sample_vector).rgb;
 				}
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
@@ -569,7 +579,7 @@ void main()
 								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
 								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_TEXTURES], sample_vector).rgb;
-								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_cubemaps[(i * NUM_TEXTURES) + 1], sample_vector).g == 1.0f));
+								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
 							}
 
 							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;
@@ -605,12 +615,8 @@ void main()
 	//      all 4 channels assigned, alpha is currently ignored
 	//    1:
 	//      r: 1 or 0: whether or not fragment should be shown in screen space reflections
-	//      g: pseudo-depth - fragment depth except if the fragment is part of the skybox, in which case the depth is 1 (as far away as possible)
 	// depth: left to opengl
 
 	//output whether or not to draw reflections on certain fragments in the next frame
 	colour_out[1].r = mat_ssr_show_this ? 1.0f : 0.0f;
-
-	//store the pseudo-depth (depth accounting for skyboxes)
-	colour_out[1].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragCoord.z;
 }

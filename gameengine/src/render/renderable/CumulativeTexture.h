@@ -24,7 +24,7 @@ public:
 	CumulativeTexture(std::vector<Renderer*> renderers);
 
 	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
-	void Render(int index = 0, bool continuous_draw = false) const;
+	void Render(int index = 0, bool continuous_draw = false, std::optional<std::vector<Model*>> models = std::optional<std::vector<Model*>>()) const;
 
 	void SetFetchModelsFunction(FetchModelsFunction func);
 

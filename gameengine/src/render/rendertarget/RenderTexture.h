@@ -45,6 +45,7 @@ public:
 	std::shared_ptr<RenderTextureGroup> GetWriteTextures() const;
 
 	bool SwapBuffers() override;
+	bool DoAutoSwapBuffers() const;
 
 	void SetNormalModePreviousFrameToSelf();
 

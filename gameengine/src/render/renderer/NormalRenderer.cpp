@@ -45,7 +45,6 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		}
 		else
 		{
-			this->GetDepthOnlyTarget()->CopyFrom(src_renderer->GetDepthOnlyTarget());
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
 		}
 	}
@@ -67,6 +66,8 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
 	this->GetTarget()->Render(models, continuous_draw);
+	this->m_rt_depth_only->SwapBuffers();
+	this->GetTarget()->SwapBuffers();
 }
 
 RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
