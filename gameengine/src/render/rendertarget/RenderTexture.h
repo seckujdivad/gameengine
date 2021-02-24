@@ -49,5 +49,5 @@ public:
 
 	void SetNormalModePreviousFrameToSelf();
 
-	void CopyFrom(const RenderTarget* src) const override;
+	void CopyFrom(const RenderTarget* src) override;
 };

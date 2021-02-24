@@ -677,7 +677,7 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 	return result;
 }
 
-void RenderTarget::CopyFrom(const RenderTarget* src) const
+void RenderTarget::CopyFrom(const RenderTarget* src)
 {
 	if ((this != src) && (this->GetFramebuffer() != src->GetFramebuffer()))
 	{
@@ -697,7 +697,7 @@ void RenderTarget::CopyFrom(const RenderTarget* src) const
 	}
 }
 
-void RenderTarget::CopyTo(const RenderTarget* dest) const
+void RenderTarget::CopyTo(RenderTarget* dest) const
 {
 	dest->CopyFrom(this);
 }
@@ -920,7 +920,7 @@ void RenderTarget::SetModeConfig(RenderTargetConfig::Textured mode_config)
 	this->SetConfig(config);
 }
 
-RenderTargetConfig RenderTarget::GetConfig() const
+const RenderTargetConfig& RenderTarget::GetConfig() const
 {
 	return this->m_config;
 }

@@ -159,7 +159,7 @@ void RenderTexture::SetNormalModePreviousFrameToSelf()
 	}
 }
 
-void RenderTexture::CopyFrom(const RenderTarget* src) const
+void RenderTexture::CopyFrom(const RenderTarget* src)
 {
 	if (this != src)
 	{
@@ -171,16 +171,8 @@ void RenderTexture::CopyFrom(const RenderTarget* src) const
 		}
 		else
 		{
-			src_tex->m_texture_write->CopyTo(*this->m_texture_write.get());
-
-			if (src_tex->m_texture_read.has_value() != this->m_texture_read.has_value())
-			{
-				throw std::invalid_argument("One texture is double buffered and the other isn't");
-			}
-			else if (src_tex->m_texture_read.has_value())
-			{
-				src_tex->m_texture_read.value()->CopyTo(*this->m_texture_read.value().get());
-			}
+			src_tex->GetOutputTextures()->CopyTo(*this->GetWriteTextures().get());
+			this->SwapBuffers();
 		}
 	}
 }

@@ -21,8 +21,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Target must inherit from RenderTexture");
 	}
 
-	RenderTargetConfig config;
+	RenderTargetConfig config; 
 	config.SetMode(RenderTargetMode::Normal_DepthOnly);
+	config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
 	this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, std::optional<RenderTextureGroup*>(), true, false);
 	this->m_rt_depth_only->SetWriteTarget(target_texture);
@@ -45,6 +46,7 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		}
 		else
 		{
+			src_renderer->GetDrawTarget()->SwapBuffers();
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
 		}
 	}
@@ -61,13 +63,18 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 
 void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 {
+	if (this->GetDepthOnlyTarget()->GetConfig().clear_fbo != this->GetTarget()->GetConfig().clear_fbo)
+	{
+		RenderTargetConfig config = this->GetDepthOnlyTarget()->GetConfig();
+		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		this->GetDepthOnlyTarget()->SetConfig(config);
+	}
+
 	this->m_rt_depth_only->SetCamera(this->GetTarget()->GetCamera());
 	this->m_rt_depth_only->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
 	this->GetTarget()->Render(models, continuous_draw);
-	this->m_rt_depth_only->SwapBuffers();
-	this->GetTarget()->SwapBuffers();
 }
 
 RenderTexture* NormalRenderer::GetDepthOnlyTarget() const

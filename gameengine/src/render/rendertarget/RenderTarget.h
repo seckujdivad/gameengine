@@ -83,7 +83,7 @@ public:
 	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
 	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);
 	void SetModeConfig(RenderTargetConfig::Textured mode_config);
-	RenderTargetConfig GetConfig() const;
+	const RenderTargetConfig& GetConfig() const;
 	RenderTargetMode GetRenderMode() const;
 
 	bool FramebufferContainsRenderOutput() const;
@@ -98,6 +98,6 @@ public:
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const;
 
-	virtual void CopyFrom(const RenderTarget* src) const;
-	void CopyTo(const RenderTarget* dest) const;
+	virtual void CopyFrom(const RenderTarget* src);
+	void CopyTo(RenderTarget* dest) const;
 };
