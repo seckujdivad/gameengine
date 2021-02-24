@@ -46,7 +46,6 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		}
 		else
 		{
-			src_renderer->GetDrawTarget()->SwapBuffers();
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
 		}
 	}
