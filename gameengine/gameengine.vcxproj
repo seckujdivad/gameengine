@@ -213,7 +213,6 @@
     <ClInclude Include="src\render\rendertarget\target\RenderTargetMode.h" />
     <ClInclude Include="src\render\rendertarget\texture\RenderTexture.h" />
     <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroup.h" />
-    <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroupFilter.h" />
     <ClInclude Include="src\render\ShaderProgram.h" />
     <ClInclude Include="src\render\TargetType.h" />
     <ClInclude Include="src\render\texture\Texture.h" />

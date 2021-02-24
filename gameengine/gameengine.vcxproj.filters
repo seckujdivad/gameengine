@@ -315,9 +315,6 @@
     <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroup.h">
       <Filter>Header Files\render\rendertarget\texture</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroupFilter.h">
-      <Filter>Header Files\render\rendertarget\texture</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
