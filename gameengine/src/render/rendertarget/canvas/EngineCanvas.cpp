@@ -8,8 +8,8 @@
 #error
 #endif
 
-#include "../../Engine.h"
-#include "../../scene/Camera.h"
+#include "../../../Engine.h"
+#include "../../../scene/Camera.h"
 
 EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args, wxGLContext* context, Engine* engine, RenderTargetConfig config)
 	: wxGLCanvas(parent, args, id),

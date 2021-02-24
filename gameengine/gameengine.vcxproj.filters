@@ -103,6 +103,24 @@
     <Filter Include="Source Files\render\texture">
       <UniqueIdentifier>{2ccc4255-e285-43f0-8cf9-e2f9e5e02417}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\rendertarget\target">
+      <UniqueIdentifier>{a8a1b43d-a711-415e-a057-0772a297bf81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\rendertarget\texture">
+      <UniqueIdentifier>{d9f15eb7-1514-41bc-a054-a8a41a79813a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\rendertarget\canvas">
+      <UniqueIdentifier>{c5421a20-e02b-4758-8346-57edb797fa09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\rendertarget\texture">
+      <UniqueIdentifier>{65fcd61c-9c7d-41b7-92ec-060ddca8a44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\rendertarget\target">
+      <UniqueIdentifier>{5e8da71f-e28f-4f2a-8cf9-083154efc3c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\rendertarget\canvas">
+      <UniqueIdentifier>{cb745a0f-f3cc-4d2c-bbeb-bf0c95d28500}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -237,24 +255,6 @@
     <ClInclude Include="src\LogMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\rendertarget\RenderTarget.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\rendertarget\EngineCanvas.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\rendertarget\RenderTexture.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\rendertarget\RenderTargetConfig.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\rendertarget\RenderTargetMode.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\rendertarget\RenderTextureData.h">
-      <Filter>Header Files\render\rendertarget</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\renderable\Renderable.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
@@ -296,6 +296,27 @@
     </ClInclude>
     <ClInclude Include="src\render\texture\TexturePreset.h">
       <Filter>Header Files\render\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\canvas\EngineCanvas.h">
+      <Filter>Header Files\render\rendertarget\canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\target\RenderTarget.h">
+      <Filter>Header Files\render\rendertarget\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\target\RenderTargetConfig.h">
+      <Filter>Header Files\render\rendertarget\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\target\RenderTargetMode.h">
+      <Filter>Header Files\render\rendertarget\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\texture\RenderTexture.h">
+      <Filter>Header Files\render\rendertarget\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroup.h">
+      <Filter>Header Files\render\rendertarget\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroupFilter.h">
+      <Filter>Header Files\render\rendertarget\texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -428,26 +449,8 @@
     <ClCompile Include="src\LogMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\rendertarget\RenderTarget.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\rendertarget\EngineCanvas.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\rendertarget\RenderTexture.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\rendertarget\RenderTargetMode.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\rendertarget\RenderTextureData.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\renderable\Renderable.cpp">
       <Filter>Source Files\render\renderable</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\rendertarget\RenderTargetConfig.cpp">
-      <Filter>Source Files\render\rendertarget</Filter>
     </ClCompile>
     <ClCompile Include="src\render\renderer\NormalRenderer.cpp">
       <Filter>Source Files\render\renderer</Filter>
@@ -481,6 +484,24 @@
     </ClCompile>
     <ClCompile Include="src\render\texture\TexturePreset.cpp">
       <Filter>Source Files\render\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\texture\RenderTexture.cpp">
+      <Filter>Source Files\render\rendertarget\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\texture\RenderTextureGroup.cpp">
+      <Filter>Source Files\render\rendertarget\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\target\RenderTarget.cpp">
+      <Filter>Source Files\render\rendertarget\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\target\RenderTargetConfig.cpp">
+      <Filter>Source Files\render\rendertarget\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\target\RenderTargetMode.cpp">
+      <Filter>Source Files\render\rendertarget\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\rendertarget\canvas\EngineCanvas.cpp">
+      <Filter>Source Files\render\rendertarget\canvas</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

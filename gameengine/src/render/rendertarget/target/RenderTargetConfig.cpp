@@ -1,6 +1,6 @@
 #include "RenderTargetConfig.h"
 
-#include "RenderTextureData.h"
+#include "../texture/RenderTextureGroup.h"
 #include "RenderTargetMode.h"
 
 #include <stdexcept>

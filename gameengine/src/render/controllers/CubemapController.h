@@ -8,7 +8,7 @@
 #include "../renderable/CumulativeTexture.h"
 #include "../../scene/Referenceable.h"
 #include "../../scene/Cubemap.h"
-#include "../rendertarget/RenderTargetMode.h"
+#include "../rendertarget/target/RenderTargetMode.h"
 
 class Camera;
 class Model;

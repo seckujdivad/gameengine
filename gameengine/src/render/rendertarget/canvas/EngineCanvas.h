@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../GLComponents.h"
+#include "../../../GLComponents.h"
 
 #include <wx/wx.h>
 #include <wx/dcclient.h>
 
-#include "RenderTarget.h"
+#include "../target/RenderTarget.h"
 
 class EngineCanvas : public wxGLCanvas, public RenderTarget
 {

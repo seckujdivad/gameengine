@@ -1,9 +1,9 @@
-#include "RenderTextureData.h"
+#include "RenderTextureGroup.h"
 
 #include <stdexcept>
 
-#include "RenderTargetMode.h"
-#include "../TargetType.h"
+#include "../target/RenderTargetMode.h"
+#include "../../TargetType.h"
 
 const Texture& RenderTextureGroup::GetATexture() const
 {

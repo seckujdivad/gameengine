@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTarget.h"
-#include "../rendertarget/RenderTexture.h"
-#include "../rendertarget/RenderTargetConfig.h"
-#include "../rendertarget/RenderTargetMode.h"
+#include "../rendertarget/target/RenderTarget.h"
+#include "../rendertarget/texture/RenderTexture.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetMode.h"
 
 NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {

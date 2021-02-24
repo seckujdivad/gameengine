@@ -2,12 +2,12 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTexture.h"
+#include "../rendertarget/texture/RenderTexture.h"
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderer/NormalRenderer.h"
 #include "../TargetType.h"
-#include "../rendertarget/RenderTextureData.h"
+#include "../rendertarget/texture/RenderTextureGroup.h"
 
 std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {

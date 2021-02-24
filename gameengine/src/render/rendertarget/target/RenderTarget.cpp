@@ -6,23 +6,24 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "../ShaderProgram.h"
-#include "../../Engine.h"
-#include "../../Resource.h"
-#include "../../scene/Camera.h"
-#include "../../scene/Scene.h"
-#include "../../scene/OrientedBoundingBox.h"
-#include "../../scene/Skybox.h"
-#include "../../scene/light/PointLight.h"
-#include "../../scene/model/Model.h"
-#include "../../scene/model/geometry/PresetGeometry.h"
-#include "../../scene/model/geometry/Patch.h"
-#include "../TargetType.h"
-#include "../../LogMessage.h"
+#include "../../ShaderProgram.h"
+#include "../../../Engine.h"
+#include "../../../Resource.h"
+#include "../../../scene/Camera.h"
+#include "../../../scene/Scene.h"
+#include "../../../scene/OrientedBoundingBox.h"
+#include "../../../scene/Skybox.h"
+#include "../../../scene/light/PointLight.h"
+#include "../../../scene/model/Model.h"
+#include "../../../scene/model/geometry/PresetGeometry.h"
+#include "../../../scene/model/geometry/Patch.h"
+#include "../../TargetType.h"
+#include "../../../LogMessage.h"
 
-#include "../texture/TextureDataPreset.h"
+#include "../../texture/TextureDataPreset.h"
 
-#include "RenderTexture.h"
+#include "../texture/RenderTexture.h"
+#include "../texture/RenderTextureGroup.h"
 
 void RenderTarget::RenderScene(std::vector<Model*> models)
 {

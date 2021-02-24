@@ -1,9 +1,12 @@
 #include "EngineCanvasController.h"
 
+#include <stdexcept>
+
 #include "../../Engine.h"
 #include "../../scene/Scene.h"
-#include "../rendertarget/EngineCanvas.h"
-#include "../rendertarget/RenderTexture.h"
+#include "../rendertarget/canvas/EngineCanvas.h"
+#include "../rendertarget/texture/RenderTexture.h"
+#include "../rendertarget/texture/RenderTextureGroup.h"
 #include "../renderer/WrapperRenderer.h"
 #include "../renderer/NormalRenderer.h"
 #include "../TargetType.h"

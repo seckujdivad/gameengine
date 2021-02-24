@@ -8,8 +8,8 @@
 
 #include "scene/Scene.h"
 
-#include "render/rendertarget/RenderTarget.h"
-#include "render/rendertarget/EngineCanvas.h"
+#include "render/rendertarget/target/RenderTarget.h"
+#include "render/rendertarget/canvas/EngineCanvas.h"
 
 #include "render/controllers/RenderController.h"
 #include "render/controllers/ShadowController.h"

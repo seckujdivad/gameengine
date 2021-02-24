@@ -10,7 +10,7 @@
 #include "Engine.h"
 #include "generic/std_glm.h"
 #include "generic/LoadFile.h"
-#include "render/rendertarget/EngineCanvas.h"
+#include "render/rendertarget/canvas/EngineCanvas.h"
 #include "scene/Scene.h"
 #include "scene/model/Model.h"
 #include "scene/Camera.h"

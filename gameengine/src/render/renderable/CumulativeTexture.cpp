@@ -2,8 +2,8 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTexture.h"
-#include "../rendertarget/RenderTextureData.h"
+#include "../rendertarget/texture/RenderTexture.h"
+#include "../rendertarget/texture/RenderTextureGroup.h"
 #include "../../scene/Scene.h"
 #include "../../Engine.h"
 #include "../renderer/Renderer.h"

@@ -2,12 +2,14 @@
 
 #include <stdexcept>
 
-#include "../../Engine.h"
-#include "../texture/TextureType.h"
-#include "../texture/TextureFormat.h"
-#include "../TargetType.h"
-#include "RenderTextureData.h"
-#include "RenderTargetMode.h"
+#include "../../../GLComponents.h"
+
+#include "../../../Engine.h"
+#include "../../texture/TextureType.h"
+#include "../../texture/TextureFormat.h"
+#include "../../TargetType.h"
+#include "RenderTextureGroup.h"
+#include "../target/RenderTargetMode.h"
 
 void RenderTexture::PostRenderEvent()
 {

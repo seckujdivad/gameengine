@@ -8,7 +8,7 @@
 #include "TextureFiltering.h"
 #include "TextureDataPreset.h"
 #include "../TargetType.h"
-#include "../rendertarget/RenderTargetMode.h"
+#include "../rendertarget/target/RenderTargetMode.h"
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
 {
@@ -416,7 +416,7 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 	}
 	else if (mode == RenderTargetMode::Normal_DepthOnly)
 	{
-		return std::optional<int>();
+		return 1;
 	}
 	else if (mode == RenderTargetMode::Normal_Draw)
 	{

@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Renderer.h"
-#include "../rendertarget/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
 
 class RenderTexture;
 

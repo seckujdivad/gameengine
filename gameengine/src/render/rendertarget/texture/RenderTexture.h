@@ -1,18 +1,17 @@
 #pragma once
 
-#include "../../GLComponents.h"
-
 #include <vector>
 #include <tuple>
 #include <string>
 #include <memory>
 #include <optional>
 
-#include "RenderTarget.h"
-#include "../../scene/Referenceable.h"
-#include "../texture/Texture.h"
+#include "../target/RenderTarget.h"
+#include "../../../scene/Referenceable.h"
+#include "../../texture/Texture.h"
 
 class Engine;
+class RenderTextureGroup;
 
 class RenderTexture : public RenderTarget, public Referenceable<RenderTextureReference>
 {

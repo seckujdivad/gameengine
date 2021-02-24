@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
-#include "../rendertarget/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
 
 class WrapperRenderer : public Renderer
 {
