@@ -145,3 +145,29 @@ RenderTextureGroup::Identifiers RenderTextureGroup::GetIdentifiers() const
 	
 	return result;
 }
+
+void RenderTextureGroup::AttachToFBO(GLuint fbo) const
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	std::vector<GLenum> attachments;
+	for (int i = 0; i < static_cast<int>(this->colour.size()); i++)
+	{
+		const Texture& texture = this->colour.at(i);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture.GetTexture(), 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+	}
+	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
+
+	if (this->depth.has_value())
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->depth.value().GetTexture(), 0);
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

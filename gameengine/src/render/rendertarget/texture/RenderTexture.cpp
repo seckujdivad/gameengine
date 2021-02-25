@@ -39,7 +39,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		GLuint fbo;
 		glGenFramebuffers(1, &fbo);
 		this->SetFramebuffer(fbo);
-		this->AttachTexturesToFramebuffer();
+		this->GetWriteTextures()->AttachToFBO(fbo);
 	}
 }
 
@@ -50,34 +50,6 @@ RenderTexture::~RenderTexture()
 		GLuint fbo = this->GetFramebuffer();
 		glDeleteFramebuffers(1, &fbo);
 	}
-}
-
-void RenderTexture::AttachTexturesToFramebuffer()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, this->GetFramebuffer());
-
-	std::vector<GLenum> attachments;
-
-	for (int i = 0; i < static_cast<int>(this->m_texture_write.get()->colour.size()); i++)
-	{
-		Texture& texture = this->m_texture_write.get()->colour.at(i);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture.GetTexture(), 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-	}
-
-	if (this->m_texture_write.get()->depth.has_value())
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.get()->depth.value().GetTexture(), 0);
-	}
-
-	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 std::tuple<int, int> RenderTexture::GetOutputSize() const

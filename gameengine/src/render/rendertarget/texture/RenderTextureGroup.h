@@ -40,4 +40,6 @@ public:
 	void ForEachTexture(std::function<void(Texture& texture)> foreach);
 
 	Identifiers GetIdentifiers() const;
+
+	void AttachToFBO(GLuint fbo) const;
 };

@@ -23,8 +23,6 @@ private:
 	std::shared_ptr<RenderTextureGroup> m_texture_write;
 	std::optional<std::shared_ptr<RenderTextureGroup>> m_texture_read;
 
-	void AttachTexturesToFramebuffer();
-
 	void PostRenderEvent() override;
 
 public:
