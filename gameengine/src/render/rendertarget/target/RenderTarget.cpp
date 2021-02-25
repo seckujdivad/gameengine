@@ -890,6 +890,16 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				});
 		}
 	}
+	else
+	{
+		if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+		{
+			this->m_shader_program->AddUniformNames({
+				//fragment
+				"draw_frame_depth"
+				});
+		}
+	}
 }
 
 void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config)
