@@ -31,7 +31,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 		RenderTargetMode render_target_mode;
 		if (composite.mode == RenderMode::Normal)
 		{
-			render_target_mode = RenderTargetMode::Normal_Draw;
+			render_target_mode = RenderTargetMode::Normal_PostProcess;
 		}
 		else if (composite.mode == RenderMode::Wireframe)
 		{
@@ -50,13 +50,12 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 
 		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(render_target_mode, TargetType::Texture_2D);
 
-		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, textures.get(), true));
+		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, textures.get()));
 		RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 
 		std::unique_ptr<Renderer> renderer;
 		if (composite.mode == RenderMode::Normal)
 		{
-			render_texture->SetNormalModePreviousFrameToSelf();
 			renderer = std::make_unique<NormalRenderer>(this->m_engine, render_texture);
 		}
 		else
@@ -95,9 +94,9 @@ void EngineCanvasController::Render()
 {
 	//resize textures to make sure that all textures in the chain are the same size/drawing at the same resolution
 	std::tuple new_output_size = this->m_canvas->GetOutputSize();
-	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
+	for (std::unique_ptr<Renderer>& renderer : this->m_renderers)
 	{
-		factory->SetOutputSize(new_output_size);
+		renderer->SetOutputSize(new_output_size);
 	}
 	this->m_texture_final->SetOutputSize(new_output_size);
 

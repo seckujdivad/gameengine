@@ -35,7 +35,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 	if (this->m_engine->GetScene() != nullptr)
 	{
 #ifdef _DEBUG
-		if ((this->m_fbo != NULL) && !glIsFramebuffer(this->m_fbo))
+		if ((this->m_fbo != 0) && !glIsFramebuffer(this->m_fbo))
 		{
 			throw std::runtime_error("FBO provided is not an FBO");
 		}
@@ -74,6 +74,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glEnable(GL_DEPTH_TEST);
 			break;
 		case RenderTargetMode::PostProcess:
+		case RenderTargetMode::Normal_PostProcess:
 			glDisable(GL_CULL_FACE);
 
 			glDisable(GL_DEPTH_TEST);
@@ -120,7 +121,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		glClearDepth(1.0);
 
 		if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-			|| this->RenderModeIsFSQuadRendering())
+			|| (this->RenderModeIsFSQuadRendering() && this->GetRenderMode() != RenderTargetMode::Normal_PostProcess))
 		{
 			glDepthMask(GL_FALSE);
 		}
@@ -129,8 +130,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			glDepthMask(GL_TRUE);
 		}
 
-		if ((this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
-			|| (this->GetRenderMode() == RenderTargetMode::Shadow))
+		if (this->GetRenderMode() == RenderTargetMode::Shadow)
 		{
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		}
@@ -176,7 +176,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 					throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
 				}
 			}
-			else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+			else
 			{
 				if (info.primitive_type == Geometry::PrimitiveType::Triangles)
 				{
@@ -186,10 +186,6 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				{
 					throw std::runtime_error("The only primitive type supported by postprocess rendering is triangles");
 				}
-			}
-			else
-			{
-				throw std::runtime_error("Render mode " + std::to_string(static_cast<int>(this->GetRenderMode())) + " can't render geometry");
 			}
 
 #ifdef _DEBUG
@@ -312,6 +308,9 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		//reflections
 		this->m_shader_program->SetDefine("REFLECTION_NUM", static_cast<int>(this->GetEngine()->GetScene()->GetReflections().size()));
+
+		this->m_shader_program->SetDefine("NUM_NORMAL_DEPTHONLY_TEXTURES", GetNumAttachedColourTextures(RenderTargetMode::Normal_DepthOnly));
+		this->m_shader_program->SetDefine("NUM_NORMAL_TEXTURES", GetNumAttachedColourTextures(RenderTargetMode::Normal_PostProcess));
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly || this->GetRenderMode() == RenderTargetMode::Normal_Draw)
@@ -419,12 +418,12 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
 
 			//load textures from the previous frame (if in normal rendering mode)
-			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
+			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->colour.at(i));
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->colour.at(i));
 			}
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame->depth.value());
+			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->depth.value());
 		}
 		else
 		{
@@ -453,6 +452,10 @@ void RenderTarget::Render_Setup_FlatQuad()
 		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
 		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", static_cast<int>(num_layers));
 	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+	{
+		this->m_shader_program->SetDefine("NUM_NORMAL_DRAW_TEXTURES", GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw));
+	}
 
 	this->m_shader_program->Recompile();
 
@@ -468,6 +471,16 @@ void RenderTarget::Render_Setup_FlatQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_translate", layer.colour_translate);
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+	{
+		std::shared_ptr<RenderTextureGroup>& draw_frame = std::get<RenderTargetConfig::Normal_PostProcess>(this->m_config.mode_data).draw_frame;
+		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
+		{
+			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", &draw_frame->colour.at(i));
+		}
+
+		this->m_shader_program->SetTexture(-1, "draw_frame_depth", &draw_frame->depth.value());
 	}
 }
 
@@ -488,6 +501,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		Material& material = model->GetMaterial();
 		this->m_shader_program->SetUniform("mat_displacement_multiplier", material.displacement.multiplier);
 		this->m_shader_program->SetUniform("mat_displacement_discard_out_of_range", material.displacement.discard_out_of_range);
+		this->m_shader_program->SetUniform("mat_ssr_show_this", material.ssr.appear_in_ssr);
 
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "displacementTexture", this->GetEngine()->GetTexture(model->GetDisplacementTexture().GetReference()).get());
 	}
@@ -525,7 +539,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform("reflections_enabled", material.reflections_enabled);
 		}
 
-		int num_colour_tex = GetNumColourTextures(RenderTargetMode::Normal_Draw).value();
+		int num_colour_tex = GetNumColourTextures(RenderTargetMode::Normal_PostProcess).value();
 
 		std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
 		for (int i = 0; i < static_cast<int>(reflections.size()); i++)
@@ -712,7 +726,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 {
 	if (this->m_config.mode != config.mode)
 	{
-		if (config.mode == RenderTargetMode::PostProcess)
+		if ((config.mode == RenderTargetMode::PostProcess || config.mode == RenderTargetMode::Normal_PostProcess) && this->m_postprocess_model.get() == nullptr)
 		{
 			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
 		}
@@ -760,8 +774,13 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_FRAGSHADER), GL_FRAGMENT_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_VERTSHADER), GL_VERTEX_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_VERTSHADER), GL_VERTEX_SHADER));
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+	{
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_VERTSHADER), GL_VERTEX_SHADER));
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
@@ -849,7 +868,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"render_output_y"
 				});
 
-			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_Draw).value(); i++)
+			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
 				this->m_shader_program->AddUniformName("render_output_colour[" + std::to_string(i) + "]");
 			}

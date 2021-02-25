@@ -6,7 +6,8 @@ enum class TextureType
 {
 	Float,
 	HalfFloat,
-	UnsignedByte
+	UnsignedByte,
+	Integer,
 };
 
 TextureType GetTextureType(GLenum type);

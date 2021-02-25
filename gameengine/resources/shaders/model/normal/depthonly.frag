@@ -4,6 +4,12 @@
 #define SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING 1
 #endif
 
+#if !defined(NUM_TEXTURES)
+#define NUM_TEXTURES 2
+#endif
+
+layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
+
 in vec3 geomTangentSpacePos;
 in vec2 geomUV;
 in vec3 geomTangentSpaceCameraPos;
@@ -12,6 +18,7 @@ uniform sampler2D displacementTexture;
 
 uniform float mat_displacement_multiplier;
 uniform bool mat_displacement_discard_out_of_range;
+uniform bool mat_ssr_show_this;
 
 //not my algorithm - https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
 vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tangent_space_view_direction must be normalised
@@ -71,4 +78,6 @@ void main()
 		}
 #endif
 	}
+
+	colour_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
 }

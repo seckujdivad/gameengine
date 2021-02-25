@@ -12,15 +12,14 @@
 std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {
 	RenderTargetConfig config;
-	config.SetMode(RenderTargetMode::Normal_Draw);
+	config.SetMode(RenderTargetMode::Normal_PostProcess);
 	config.clear_fbo = layer == 0;
 
-	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_Draw, TargetType::Texture_Cubemap);
+	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_PostProcess, TargetType::Texture_Cubemap);
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, textures.get(), true, true);
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, textures.get());
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
-	render_texture->SetNormalModePreviousFrameToSelf();
 
 	this->m_textures.push_back(std::move(std::unique_ptr<RenderTexture>(render_texture)));
 
@@ -31,10 +30,11 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
 	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
+	NormalRenderer* normal_renderer = dynamic_cast<NormalRenderer*>(renderer);
 
 	bool updated = false;
 	
-	RenderTargetConfig config = renderer->GetTarget()->GetConfig();
+	RenderTargetConfig config = normal_renderer->GetDrawTarget()->GetConfig();
 	if (reflection->GetDrawShadows() != std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows)
 	{
 		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).draw_shadows = reflection->GetDrawShadows();
@@ -49,7 +49,7 @@ bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 
 	if (updated)
 	{
-		renderer->GetTarget()->SetConfig(config);
+		normal_renderer->GetDrawTarget()->SetConfig(config);
 	}
 
 	return updated;

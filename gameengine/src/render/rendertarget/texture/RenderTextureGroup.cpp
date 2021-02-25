@@ -27,7 +27,9 @@ RenderTextureGroup::RenderTextureGroup()
 
 RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 {
-	if ((mode == RenderTargetMode::Normal_Draw)
+	if ((mode == RenderTargetMode::Normal_DepthOnly)
+		|| (mode == RenderTargetMode::Normal_Draw)
+		|| (mode == RenderTargetMode::Normal_PostProcess)
 		|| (mode == RenderTargetMode::Wireframe)
 		|| (mode == RenderTargetMode::Textured)
 		|| (mode == RenderTargetMode::PostProcess)
@@ -39,7 +41,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			for (int i = 0; i < num_colour_textures.value(); i++)
 			{
 				Texture::Preset preset;
-				if (i == 0)
+				if (i == 0 && mode != RenderTargetMode::Normal_DepthOnly)
 				{
 					preset = Texture::Preset::Colour;
 				}

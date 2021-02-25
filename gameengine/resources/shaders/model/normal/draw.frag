@@ -9,6 +9,14 @@
 #define NUM_TEXTURES 2
 #endif
 
+#if !defined(NUM_NORMAL_DEPTHONLY_TEXTURES)
+#define NUM_NORMAL_DEPTHONLY_TEXTURES 1
+#endif
+
+#if !defined(NUM_NORMAL_TEXTURES)
+#define NUM_NORMAL_TEXTURES 1
+#endif
+
 #if !defined(APPROXIMATION_OBB_NUM)
 #define APPROXIMATION_OBB_NUM 1
 #endif
@@ -107,7 +115,7 @@ uniform struct Reflection
 
 uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
-uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_TEXTURES];
+uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_NORMAL_TEXTURES];
 uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform int reflection_count;
 
@@ -128,7 +136,7 @@ uniform samplerCube skyboxTexture;
 
 //previous render result
 uniform bool render_output_valid;
-uniform sampler2D render_output_colour[NUM_TEXTURES];
+uniform sampler2D render_output_colour[NUM_NORMAL_DEPTHONLY_TEXTURES];
 uniform sampler2D render_output_depth;
 uniform int render_output_x;
 uniform int render_output_y;
@@ -340,6 +348,8 @@ void main()
 	//apply lighting to fragment
 	colour_out[0] = vec4(frag_intensity, 1.0f) * colour_out[0];
 
+	colour_out[1].xy = vec2(gl_FragCoord.xy / vec2(render_output_x, render_output_y));
+
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
@@ -413,21 +423,21 @@ void main()
 				vec3 ss_position = ss_start_pos;
 				float hit_pos = 0.0f;
 
+				vec2 tex_pos;
 				while (!ssr_reflection_applied && hit_pos < 1.0f)
 				{
 					//convert screen space position to use texture UV space coordinates
-					const vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
 					const vec3 scene_space_search = PerspDiv(cam_transform_inverse * vec4(ss_position, 1.0f));
 					const vec3 scene_space_sample = PerspDiv(cam_transform_inverse * vec4(ss_position.xy, sample_depth, 1.0f));
 					const float depth_diff = length(scene_space_sample - scene_space_search);
 
-					if ((depth_diff < depth_acceptance) && (texture(render_output_colour[1], tex_pos.xy).r > 0.5f)) //a hit was found
+					if ((depth_diff < depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
 					{
 						//if the search increment is as small as is allowed then use this hit as the final location
 						ssr_reflection_applied = search_level == 0;
-						reflection_colour = float(search_level == 0) * texture(render_output_colour[0], tex_pos.xy).rgb;
 
 						//make the search finer
 						hit_pos -= hit_increment;
@@ -441,6 +451,13 @@ void main()
 
 					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
 					ss_position.z = 1.0f / mix(1.0f / ss_start_pos.z, 1.0f / ss_end_pos.z, hit_pos);
+				}
+
+				if (ssr_reflection_applied)
+				{
+					colour_out[1].xy = tex_pos.xy;
+					reflection_colour = vec3(0.0f);
+					reflection_intensity = vec3(0.0f);
 				}
 			}
 		}
@@ -480,7 +497,7 @@ void main()
 						}
 					}
 
-					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_TEXTURES], sample_vector).rgb;
+					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;
 				}
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
@@ -578,7 +595,7 @@ void main()
 							{
 								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
-								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_TEXTURES], sample_vector).rgb;
+								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_NORMAL_TEXTURES], sample_vector).rgb;
 								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
 							}
 
@@ -608,15 +625,4 @@ void main()
 
 	//this shader can't produce translucent fragments
 	colour_out[0].a = 1.0f;
-	
-	//texture usage:
-	// colour:
-	//    0:
-	//      all 4 channels assigned, alpha is currently ignored
-	//    1:
-	//      r: 1 or 0: whether or not fragment should be shown in screen space reflections
-	// depth: left to opengl
-
-	//output whether or not to draw reflections on certain fragments in the next frame
-	colour_out[1].r = mat_ssr_show_this ? 1.0f : 0.0f;
 }

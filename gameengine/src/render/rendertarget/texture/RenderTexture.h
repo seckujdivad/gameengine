@@ -44,7 +44,5 @@ public:
 	bool SwapBuffers() override;
 	bool DoAutoSwapBuffers() const;
 
-	void SetNormalModePreviousFrameToSelf();
-
 	void CopyFrom(const RenderTarget* src) override;
 };

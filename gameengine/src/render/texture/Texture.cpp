@@ -103,18 +103,15 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 
 GLint Texture::GetPreferredFormat(bool force)
 {
-	return GetTextureFormatEnum(this->GetFormat());
-
 	if (force || (this->m_preferred_format == GL_NONE))
 	{
 		glGetInternalformativ(GetTargetEnum(this->GetTargetType()), GetTextureFormatEnum(this->GetFormat()), GL_TEXTURE_IMAGE_FORMAT, 1, &this->m_preferred_format);
-	}
 
-	if (this->m_preferred_format == GL_NONE)
-	{
-		throw std::runtime_error("Invalid format");
+		if (this->m_preferred_format == GL_NONE)
+		{
+			this->m_preferred_format = GetTextureFormatEnum(this->GetFormat());
+		}
 	}
-
 	return this->m_preferred_format;
 }
 
@@ -130,7 +127,7 @@ void Texture::SetPreset(Preset preset, bool configure)
 	else if (preset == Preset::Data)
 	{
 		this->m_type = TextureType::HalfFloat;
-		this->m_format = TextureFormat::RGBA;
+		this->m_format = TextureFormat::RGBA16F;
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
@@ -422,6 +419,10 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 	{
 		return 2;
 	}
+	else if (mode == RenderTargetMode::Normal_PostProcess)
+	{
+		return 1;
+	}
 	else if (mode == RenderTargetMode::PostProcess)
 	{
 		return 1;
@@ -446,12 +447,5 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 
 int GetNumAttachedColourTextures(RenderTargetMode mode)
 {
-	if (mode == RenderTargetMode::Normal_DepthOnly)
-	{
-		return GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw);
-	}
-	else
-	{
-		return GetNumColourTextures(mode).value();
-	}
+	return GetNumColourTextures(mode).value();
 }

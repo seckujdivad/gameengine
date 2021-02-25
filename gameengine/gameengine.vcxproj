@@ -329,8 +329,10 @@
     <None Include="resources\shaders\model\textured.frag" />
     <None Include="resources\shaders\model\wireframe.frag" />
     <None Include="resources\shaders\model\wireframe.geom" />
-    <None Include="resources\shaders\postprocess.frag" />
-    <None Include="resources\shaders\postprocess.vert" />
+    <None Include="resources\shaders\postprocess\compositor.frag" />
+    <None Include="resources\shaders\postprocess\compositor.vert" />
+    <None Include="resources\shaders\postprocess\normal.frag" />
+    <None Include="resources\shaders\postprocess\normal.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
