@@ -30,55 +30,33 @@ vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 #if TARGET_IS_CUBEMAP == 1
 	vec3 cubemap_coords = vec3((coords - 0.5f) * 2.0f, 1.0f);
 
+	const vec3 axis_mults[6] = vec3[6](
+		vec3(-1.0f, -1.0f, 1.0f), //x+: flip x and y (face space), +x face
+		vec3(1.0f, -1.0f, -1.0f), //x-
+		vec3(1.0f, 1.0f, 1.0f), //y+
+		vec3(1.0f, -1.0f, -1.0f), //y-
+		vec3(1.0f, -1.0f, 1.0f), //z+
+		vec3(-1.0f, -1.0f, -1.0f) //z-
+	);
+
+	const ivec3 axis_remaps[6] = ivec3[6](
+		ivec3(2, 1, 0), //x+: res x = in z, res y = in y, res z = in x
+		ivec3(2, 1, 0), //x-
+		ivec3(0, 2, 1), //y+
+		ivec3(0, 2, 1), //y-
+		ivec3(0, 1, 2), //z+
+		ivec3(0, 1, 2) //z-
+	);
+
 	//mult is applied first, then remap
-	vec3 axis_mult = vec3(1.0f);
-	ivec3 axis_remap = ivec3(0, 1, 2);
-
-	if (gl_Layer == 0) //x+
-	{
-		axis_mult = vec3(-1.0f, -1.0f, 1.0f); //flip x and y (face space), +x face
-		axis_remap = ivec3(2, 1, 0); //res x = in z, res y = in y, res z = in x
-	}
-	else if (gl_Layer == 1) //x-
-	{
-		axis_mult = vec3(1.0f, -1.0f, -1.0f);
-		axis_remap = ivec3(2, 1, 0);
-	}
-	else if (gl_Layer == 2) //y+
-	{
-		axis_mult = vec3(1.0f, 1.0f, 1.0f);
-		axis_remap = ivec3(0, 2, 1);
-	}
-	else if (gl_Layer == 3) //y-
-	{
-		axis_mult = vec3(1.0f, -1.0f, -1.0f);
-		axis_remap = ivec3(0, 2, 1);
-	}
-	else if (gl_Layer == 4) //z+
-	{
-		axis_mult = vec3(1.0f, -1.0f, 1.0f);
-		axis_remap = ivec3(0, 1, 2);
-	}
-	else if (gl_Layer == 5) //z-
-	{
-		axis_mult = vec3(-1.0f, -1.0f, -1.0f);
-		axis_remap = ivec3(0, 1, 2);
-	}
-	else
-	{
-		axis_mult = vec3(1.0f);
-		axis_remap = ivec3(0, 1, 2);
-	}
-
 	vec3 cubemap_coords_transformed = vec3(0.0f);
 	for (int i = 0; i < 3; i++)
 	{
-		int index = axis_remap[i];
-		cubemap_coords_transformed[i] = cubemap_coords[index] * axis_mult[index];
+		int index = axis_remaps[gl_Layer][i];
+		cubemap_coords_transformed[i] = cubemap_coords[index] * axis_mults[gl_Layer][index];
 	}
 
 	return texture(to_sample, cubemap_coords_transformed);
-	//return texture(to_sample, vec3(coords, gl_Layer));
 #else
 	return texture(to_sample, coords);
 #endif
