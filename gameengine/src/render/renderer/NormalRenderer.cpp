@@ -69,6 +69,8 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		}
 		else
 		{
+			this->GetDepthOnlyTarget()->CopyFrom(src_renderer->GetDepthOnlyTarget());
+			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
 			this->GetTarget()->CopyFrom(src_renderer->GetTarget());
 		}
 	}

@@ -55,6 +55,8 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		this->m_shader_program->Select();
 
+		this->m_shader_program->SetDefine("TARGET_IS_CUBEMAP", static_cast<int>(this->GetTargetType() == TargetType::Texture_Cubemap));
+
 		if (this->RenderModeIsModelRendering())
 		{
 			this->Render_Setup_Model(models);
@@ -63,6 +65,9 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		{
 			this->Render_Setup_FlatQuad();
 		}
+
+		//cubemap uniforms
+		this->m_shader_program->SetUniform("is_cubemap", this->GetTargetType() == TargetType::Texture_Cubemap);
 
 		switch (this->GetRenderMode())
 		{
@@ -332,11 +337,8 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	this->m_shader_program->Recompile();
 
 	//load "constant" uniforms (uniforms constant between models like camera data) into program
-	// cubemap uniforms
-	bool is_cubemap = this->GetTargetType() == TargetType::Texture_Cubemap;
-	this->m_shader_program->SetUniform("is_cubemap", is_cubemap);
-
-	if (is_cubemap)
+	// cubemaps
+	if (this->GetTargetType() == TargetType::Texture_Cubemap)
 	{
 		this->m_shader_program->SetUniform("cubemap_transform", std::vector(this->m_cubemap_rotations.begin(), this->m_cubemap_rotations.end()));
 	}
@@ -349,7 +351,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		this->m_shader_program->SetUniform("cubemap_transform[4]", glm::mat4(1.0f));
 		this->m_shader_program->SetUniform("cubemap_transform[5]", glm::mat4(1.0f));
 	}
-
 	// camera
 	this->m_shader_program->SetUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
 	this->m_shader_program->SetUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
@@ -412,11 +413,11 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
 
+		this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
+		this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+
 		if (render_output_valid)
 		{
-			this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
-			this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
-
 			//load textures from the previous frame (if in normal rendering mode)
 			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
@@ -427,9 +428,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 		else
 		{
-			this->m_shader_program->SetUniform("render_output_x", 1);
-			this->m_shader_program->SetUniform("render_output_y", 1);
-
 			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
 			{
 				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
@@ -780,6 +778,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_VERTSHADER), GL_VERTEX_SHADER));
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Default)

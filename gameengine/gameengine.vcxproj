@@ -332,6 +332,7 @@
     <None Include="resources\shaders\postprocess\compositor.frag" />
     <None Include="resources\shaders\postprocess\compositor.vert" />
     <None Include="resources\shaders\postprocess\normal.frag" />
+    <None Include="resources\shaders\postprocess\normal.geom" />
     <None Include="resources\shaders\postprocess\normal.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

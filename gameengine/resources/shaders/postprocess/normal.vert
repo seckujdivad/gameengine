@@ -1,13 +1,13 @@
-#version 400 core
+#version 430 core
 layout (location = 0) in vec3 inPos;
 layout (location = 2) in vec2 inUV;
 
-out vec2 globalUV;
-out vec2 globalPosition;
+out vec2 vertUV;
+out vec4 vertPos;
 
 void main()
 {
-	globalUV = inUV;
+	vertUV = inUV;
 
-	gl_Position = vec4(inPos, 1.0f);
+	vertPos = vec4(inPos, 1.0f);
 }

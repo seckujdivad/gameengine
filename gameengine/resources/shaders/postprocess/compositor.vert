@@ -3,7 +3,6 @@ layout (location = 0) in vec3 inPos;
 layout (location = 2) in vec2 inUV;
 
 out vec2 globalUV;
-out vec2 globalPosition;
 
 void main()
 {

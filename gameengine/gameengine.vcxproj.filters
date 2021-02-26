@@ -567,5 +567,8 @@
     <None Include="resources\shaders\postprocess\normal.vert">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
+    <None Include="resources\shaders\postprocess\normal.geom">
+      <Filter>Resource Files\shaders\postprocess</Filter>
+    </None>
   </ItemGroup>
 </Project>
