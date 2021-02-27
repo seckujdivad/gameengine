@@ -5,7 +5,7 @@
 #endif
 
 #if !defined(NUM_NORMAL_DRAW_TEXTURES)
-#define NUM_NORMAL_DRAW_TEXTURES 2
+#define NUM_NORMAL_DRAW_TEXTURES 3
 #endif
 
 #if !defined(TARGET_IS_CUBEMAP)
@@ -66,10 +66,26 @@ void main()
 {
 	const vec4 skybox_colour = vec4(vec3(0.0f), 0.0f); //transparent background
 
+	//get and write out depth
 	float depth = SampleTarget(draw_frame_depth, geomUV).r;
 	gl_FragDepth = depth;
+	bool resample_is_skybox = depth == 1.0f;
 
+	//get resample UV location
 	vec2 ssr_sample_uv = SampleTarget(draw_frame[1], geomUV).xy;
 
-	colour_out[0] = depth == 1.0f ? skybox_colour : SampleTarget(draw_frame[0], ssr_sample_uv);
+	//sample the reflection intensity
+	vec4 refl_intensity;
+	bool apply_refl_intensity;
+	{
+		vec4 tex_sample = SampleTarget(draw_frame[2], geomUV);
+		refl_intensity = vec4(tex_sample.rgb, 0.0f);
+		apply_refl_intensity = tex_sample.a > 0.5f;
+	}
+
+	vec4 colour_sample =  SampleTarget(draw_frame[0], geomUV);
+	vec4 colour_resample =  SampleTarget(draw_frame[0], ssr_sample_uv);
+	vec4 final_sample = apply_refl_intensity ? colour_sample + (colour_resample * refl_intensity) : colour_resample;
+
+	colour_out[0] = resample_is_skybox ? skybox_colour : final_sample;
 }

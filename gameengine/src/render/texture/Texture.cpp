@@ -124,10 +124,17 @@ void Texture::SetPreset(Preset preset, bool configure)
 		this->m_filtering_min = TextureFiltering::Linear;
 		this->m_filtering_mag = TextureFiltering::Linear;
 	}
-	else if (preset == Preset::Data)
+	else if (preset == Preset::Data_MediumP)
 	{
 		this->m_type = TextureType::HalfFloat;
 		this->m_format = TextureFormat::RGBA16F;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
+	}
+	else if (preset == Preset::Data_LowP)
+	{
+		this->m_type = TextureType::UnsignedByte;
+		this->m_format = TextureFormat::RGBA;
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
@@ -417,7 +424,7 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 	}
 	else if (mode == RenderTargetMode::Normal_Draw)
 	{
-		return 2;
+		return 3;
 	}
 	else if (mode == RenderTargetMode::Normal_PostProcess)
 	{

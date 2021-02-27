@@ -22,7 +22,8 @@ public:
 	enum class Preset
 	{
 		Colour,
-		Data,
+		Data_MediumP,
+		Data_LowP,
 		Depth
 	};
 

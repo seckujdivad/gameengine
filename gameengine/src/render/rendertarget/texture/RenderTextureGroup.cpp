@@ -28,7 +28,6 @@ RenderTextureGroup::RenderTextureGroup()
 RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 {
 	if ((mode == RenderTargetMode::Normal_DepthOnly)
-		|| (mode == RenderTargetMode::Normal_Draw)
 		|| (mode == RenderTargetMode::Normal_PostProcess)
 		|| (mode == RenderTargetMode::Wireframe)
 		|| (mode == RenderTargetMode::Textured)
@@ -47,7 +46,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 				}
 				else
 				{
-					preset = Texture::Preset::Data;
+					preset = Texture::Preset::Data_LowP;
 				}
 				this->colour.push_back(Texture(preset, target));
 			}
@@ -61,6 +60,28 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 		{
 			this->depth = Texture(Texture::Preset::Depth, target);
 		}
+	}
+	else if (mode == RenderTargetMode::Normal_Draw)
+	{
+		int num_colour_textures = GetNumAttachedColourTextures(mode);
+		for (int i = 0; i < num_colour_textures; i++)
+		{
+			Texture::Preset preset;
+			if (i == 0)
+			{
+				preset = Texture::Preset::Colour;
+			}
+			else if (i == 1)
+			{
+				preset = Texture::Preset::Data_MediumP;
+			}
+			else
+			{
+				preset = Texture::Preset::Data_LowP;
+			}
+			this->colour.push_back(Texture(preset, target));
+		}
+		this->depth = Texture(Texture::Preset::Depth, target);
 	}
 	else
 	{

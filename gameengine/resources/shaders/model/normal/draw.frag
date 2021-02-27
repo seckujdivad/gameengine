@@ -6,7 +6,7 @@
 #endif
 
 #if !defined(NUM_TEXTURES)
-#define NUM_TEXTURES 2
+#define NUM_TEXTURES 3
 #endif
 
 #if !defined(NUM_NORMAL_DEPTHONLY_TEXTURES)
@@ -352,9 +352,9 @@ void main()
 
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
+	bool ssr_reflection_applied = false;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
-		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)
 		{
 			if (length(geomCamSpacePos) < mat_ssr_max_distance)
@@ -457,7 +457,6 @@ void main()
 				{
 					colour_out[1].xy = tex_pos.xy;
 					reflection_colour = vec3(0.0f);
-					reflection_intensity = vec3(0.0f);
 				}
 			}
 		}
@@ -625,4 +624,10 @@ void main()
 
 	//this shader can't produce translucent fragments
 	colour_out[0].a = 1.0f;
+
+	//pass on the reflection intensity
+	{
+		colour_out[2].rgb = reflection_intensity;
+		colour_out[2].a = float(ssr_reflection_applied);
+	}
 }
