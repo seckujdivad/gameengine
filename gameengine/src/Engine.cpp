@@ -893,8 +893,6 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	case GL_DEBUG_TYPE_PERFORMANCE: err_type = "performance"; break;
 	case GL_DEBUG_TYPE_OTHER: err_type = "other"; break;
 	case GL_DEBUG_TYPE_MARKER: err_type = "marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP: err_type = "push group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP: err_type = "pop group"; break;
 
 		//default
 	default: err_type = std::to_string(type) + " - unknown"; break;
