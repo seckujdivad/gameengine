@@ -12,7 +12,9 @@ class EngineCanvas : public wxGLCanvas, public RenderTarget
 private:
 	//rendering
 	wxGLContext* m_glcontext;
-	void Paint(wxPaintEvent& evt);
+
+	void OnPaint(wxPaintEvent& evt);
+	void OnSize(wxSizeEvent& evt);
 
 	//mouse look
 	Camera* m_camera_controlled = nullptr;

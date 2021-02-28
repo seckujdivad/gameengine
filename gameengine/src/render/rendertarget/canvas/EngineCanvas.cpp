@@ -24,7 +24,8 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	this->Bind(wxEVT_TIMER, &EngineCanvas::CameraControlMainloop, this);
 	this->m_timer_mainloop->Start(10);
 
-	this->Bind(wxEVT_PAINT, &EngineCanvas::Paint, this);
+	this->Bind(wxEVT_PAINT, &EngineCanvas::OnPaint, this);
+	this->Bind(wxEVT_SIZE, &EngineCanvas::OnSize, this);
 	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
 	this->Bind(wxEVT_KEY_DOWN, &EngineCanvas::KeyDown, this);
 	this->Bind(wxEVT_LEFT_DOWN, &EngineCanvas::Clicked, this);
@@ -36,7 +37,13 @@ EngineCanvas::~EngineCanvas()
 	delete this->m_timer_mainloop;
 }
 
-void EngineCanvas::Paint(wxPaintEvent& evt)
+void EngineCanvas::OnPaint(wxPaintEvent& evt)
+{
+	this->GetEngine()->Render();
+	evt.Skip();
+}
+
+void EngineCanvas::OnSize(wxSizeEvent& evt)
 {
 	this->GetEngine()->Render();
 	evt.Skip();
