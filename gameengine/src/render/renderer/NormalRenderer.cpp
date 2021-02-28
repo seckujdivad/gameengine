@@ -2,16 +2,17 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTarget.h"
-#include "../rendertarget/RenderTexture.h"
-#include "../rendertarget/RenderTargetConfig.h"
-#include "../rendertarget/RenderTargetMode.h"
+#include "../rendertarget/target/RenderTarget.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetMode.h"
+#include "../rendertarget/texture/RenderTexture.h"
+#include "../rendertarget/texture/RenderTextureGroup.h"
 
 NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {
-	if (this->GetTarget()->GetRenderMode() != RenderTargetMode::Normal_Draw)
+	if (this->GetTarget()->GetRenderMode() != RenderTargetMode::Normal_PostProcess)
 	{
-		throw std::invalid_argument("Provided target must have mode Normal_Draw");
+		throw std::invalid_argument("Provided target must have mode Normal_PostProcess");
 	}
 
 	RenderTexture* target_texture = dynamic_cast<RenderTexture*>(target);
@@ -21,16 +22,39 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Target must inherit from RenderTexture");
 	}
 
-	RenderTargetConfig config;
-	config.SetMode(RenderTargetMode::Normal_DepthOnly);
+	{
+		RenderTargetConfig config;
+		config.SetMode(RenderTargetMode::Normal_DepthOnly);
+		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
-	this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, std::optional<RenderTextureGroup*>(), true, false);
-	this->m_rt_depth_only->SetWriteTarget(target_texture);
+		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
+
+		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+	}
+
+	{
+		RenderTargetConfig config;
+		config.SetMode(RenderTargetMode::Normal_Draw);
+		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = this->GetDepthOnlyTarget()->GetOutputTextures();
+
+		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
+
+		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+	}
+
+	{
+		RenderTargetConfig config = this->GetTarget()->GetConfig();
+		std::get<RenderTargetConfig::Normal_PostProcess>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
+		this->GetTarget()->SetConfig(config);
+	}
 }
 
 bool NormalRenderer::SetOutputSize(std::tuple<int, int> dimensions)
 {
-	return this->GetTarget()->SetOutputSize(dimensions) || this->m_rt_depth_only->SetOutputSize(dimensions);
+	this->m_rt_depth_only->SetOutputSize(dimensions);
+	this->m_rt_draw->SetOutputSize(dimensions);
+	return this->GetTarget()->SetOutputSize(dimensions);
 }
 
 void NormalRenderer::CopyFrom(const Renderer* src) const
@@ -47,6 +71,7 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		{
 			this->GetDepthOnlyTarget()->CopyFrom(src_renderer->GetDepthOnlyTarget());
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
+			this->GetTarget()->CopyFrom(src_renderer->GetTarget());
 		}
 	}
 }
@@ -55,18 +80,45 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 {
 	std::unordered_set<RenderTextureReference> references = this->GetDepthOnlyTarget()->GetRenderTextureDependencies();
 
-	std::unordered_set<RenderTextureReference> draw_references = this->GetDrawTarget()->GetRenderTextureDependencies();
-	references.insert(draw_references.begin(), draw_references.end());
+	{
+		std::unordered_set<RenderTextureReference> draw_references = this->GetDrawTarget()->GetRenderTextureDependencies();
+		references.insert(draw_references.begin(), draw_references.end());
+	}
+
+	{
+		std::unordered_set<RenderTextureReference> postprocess_references = this->GetTarget()->GetRenderTextureDependencies();
+		references.insert(postprocess_references.begin(), postprocess_references.end());
+	}
+
 	return references;
 }
 
 void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 {
+	if (this->GetDepthOnlyTarget()->GetConfig().clear_fbo != this->GetTarget()->GetConfig().clear_fbo)
+	{
+		RenderTargetConfig config = this->GetDepthOnlyTarget()->GetConfig();
+		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		this->GetDepthOnlyTarget()->SetConfig(config);
+	}
+
 	this->m_rt_depth_only->SetCamera(this->GetTarget()->GetCamera());
 	this->m_rt_depth_only->SetOutputSize(this->GetTarget()->GetOutputSize());
 
+	if (this->GetDrawTarget()->GetConfig().clear_fbo != this->GetTarget()->GetConfig().clear_fbo)
+	{
+		RenderTargetConfig config = this->GetDrawTarget()->GetConfig();
+		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		this->GetDrawTarget()->SetConfig(config);
+	}
+
+	this->m_rt_draw->SetCamera(this->GetTarget()->GetCamera());
+	this->m_rt_draw->SetOutputSize(this->GetTarget()->GetOutputSize());
+
 	this->m_rt_depth_only->Render(models, continuous_draw);
-	this->GetTarget()->Render(models, continuous_draw);
+	this->m_rt_depth_only->GetWriteTextures()->depth.value().CopyTo(this->m_rt_draw->GetWriteTextures()->depth.value());
+	this->m_rt_draw->Render(models, continuous_draw);
+	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
 }
 
 RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
@@ -76,5 +128,5 @@ RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
 
 RenderTexture* NormalRenderer::GetDrawTarget() const
 {
-	return dynamic_cast<RenderTexture*>(this->GetTarget());
+	return this->m_rt_draw.get();
 }

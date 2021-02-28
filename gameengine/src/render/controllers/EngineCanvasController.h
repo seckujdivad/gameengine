@@ -6,7 +6,7 @@
 
 #include "RenderController.h"
 #include "../RenderMode.h"
-#include "../rendertarget/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
 #include "../renderer/Renderer.h"
 
 #include <glm/glm.hpp>

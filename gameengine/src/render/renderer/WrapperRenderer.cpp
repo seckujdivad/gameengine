@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTarget.h"
+#include "../rendertarget/target/RenderTarget.h"
 
 WrapperRenderer::WrapperRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {

@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-#include "../rendertarget/RenderTarget.h"
+#include "../rendertarget/target/RenderTarget.h"
 
 Renderer::Renderer(Engine* engine, RenderTarget* target) : m_engine(engine), m_target(target)
 {

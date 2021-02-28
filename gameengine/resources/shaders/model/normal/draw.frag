@@ -5,8 +5,16 @@
 #define POINT_LIGHT_NUM 1
 #endif
 
-#if !defined(DATA_TEX_NUM)
-#define DATA_TEX_NUM 1
+#if !defined(NUM_TEXTURES)
+#define NUM_TEXTURES 3
+#endif
+
+#if !defined(NUM_NORMAL_DEPTHONLY_TEXTURES)
+#define NUM_NORMAL_DEPTHONLY_TEXTURES 1
+#endif
+
+#if !defined(NUM_NORMAL_TEXTURES)
+#define NUM_NORMAL_TEXTURES 1
 #endif
 
 #if !defined(APPROXIMATION_OBB_NUM)
@@ -22,8 +30,7 @@
 #endif
 
 //shader input-output
-layout(location = 0) out vec4 frag_out;
-layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
+layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
 in vec3 geomMdlSpacePos;
 in vec3 geomSceneSpacePos;
@@ -108,8 +115,8 @@ uniform struct Reflection
 
 uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
-uniform samplerCube reflection_cubemaps[REFLECTION_NUM];
-uniform samplerCube reflection_data_cubemaps[REFLECTION_NUM * DATA_TEX_NUM];
+uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_NORMAL_TEXTURES];
+uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
 uniform int reflection_count;
 
 //scene approximation
@@ -129,9 +136,8 @@ uniform samplerCube skyboxTexture;
 
 //previous render result
 uniform bool render_output_valid;
-uniform sampler2D render_output_colour;
+uniform sampler2D render_output_colour[NUM_NORMAL_DEPTHONLY_TEXTURES];
 uniform sampler2D render_output_depth;
-uniform sampler2D render_output_data[DATA_TEX_NUM];
 uniform int render_output_x;
 uniform int render_output_y;
 
@@ -269,6 +275,16 @@ vec2 ParallaxMapUV(const vec2 uv, const vec3 tangent_space_view_direction) //tan
 	return mix(prev_uv, current_uv, interpolation_weight);
 }
 
+float GetDistanceFromDepth(float depth, float clip_near, float clip_far)
+{
+	return (2.0f * clip_near * clip_far) / (clip_near + clip_far - (((2.0f * depth) - 1.0f) * (clip_far - clip_near)));
+}
+
+float GetDistanceFromReflection(int index, float depth_sample)
+{
+	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
+}
+
 void main()
 {
 	vec2 parallax_uv;
@@ -293,7 +309,7 @@ void main()
 	}
 	
 	//get base colour
-	frag_out = texture(colourTexture, parallax_uv);
+	colour_out[0] = texture(colourTexture, parallax_uv);
 
 	//apply ambient light
 	vec3 frag_intensity = vec3(0.0f);
@@ -330,13 +346,15 @@ void main()
 	}
 
 	//apply lighting to fragment
-	frag_out = vec4(frag_intensity, 1.0f) * frag_out;
+	colour_out[0] = vec4(frag_intensity, 1.0f) * colour_out[0];
+
+	colour_out[1].xy = vec2(gl_FragCoord.xy / vec2(render_output_x, render_output_y));
 
 	//reflections
 	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
+	bool ssr_reflection_applied = false;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
-		bool ssr_reflection_applied = false;
 		if (render_output_valid && mat_ssr_enabled)
 		{
 			if (length(geomCamSpacePos) < mat_ssr_max_distance)
@@ -405,21 +423,21 @@ void main()
 				vec3 ss_position = ss_start_pos;
 				float hit_pos = 0.0f;
 
+				vec2 tex_pos;
 				while (!ssr_reflection_applied && hit_pos < 1.0f)
 				{
 					//convert screen space position to use texture UV space coordinates
-					const vec2 tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
 
 					const vec3 scene_space_search = PerspDiv(cam_transform_inverse * vec4(ss_position, 1.0f));
 					const vec3 scene_space_sample = PerspDiv(cam_transform_inverse * vec4(ss_position.xy, sample_depth, 1.0f));
 					const float depth_diff = length(scene_space_sample - scene_space_search);
 
-					if ((depth_diff < depth_acceptance) && (texture(render_output_data[0], tex_pos.xy).r > 0.5f)) //a hit was found
+					if ((depth_diff < depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
 					{
 						//if the search increment is as small as is allowed then use this hit as the final location
 						ssr_reflection_applied = search_level == 0;
-						reflection_colour = float(search_level == 0) * texture(render_output_colour, tex_pos.xy).rgb;
 
 						//make the search finer
 						hit_pos -= hit_increment;
@@ -433,6 +451,12 @@ void main()
 
 					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
 					ss_position.z = 1.0f / mix(1.0f / ss_start_pos.z, 1.0f / ss_end_pos.z, hit_pos);
+				}
+
+				if (ssr_reflection_applied)
+				{
+					colour_out[1].xy = tex_pos.xy;
+					reflection_colour = vec3(0.0f);
 				}
 			}
 		}
@@ -456,24 +480,23 @@ void main()
 				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
 				{
 					vec3 sample_vector = reflect(-fragtocam, normal);
-					float sample_space_length = reflections[reflection_index].clip_far - reflections[reflection_index].clip_near;
 					vec3 offset = geomSceneSpacePos - reflections[reflection_index].position;
 
 					for (int i = 0; i < reflections[reflection_index].iterations; i++)
 					{
-						float depth_sample = texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g;
+						float depth_sample = texture(reflection_depth_cubemaps[reflection_index], sample_vector).r;
 						if (depth_sample == 1.0f)
 						{
 							i = reflections[reflection_index].iterations; //exit loop
 						}
 						else
 						{
-							depth_sample = (depth_sample * sample_space_length) + reflections[reflection_index].clip_near;
+							depth_sample = GetDistanceFromReflection(reflection_index, depth_sample);
 							sample_vector = (normalize(sample_vector) * depth_sample) + offset;
 						}
 					}
 
-					reflection_colour = (texture(reflection_data_cubemaps[reflection_index * DATA_TEX_NUM], sample_vector).g == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index], sample_vector).rgb;
+					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;
 				}
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
@@ -571,8 +594,8 @@ void main()
 							{
 								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
-								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i], sample_vector).rgb;
-								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_data_cubemaps[i * DATA_TEX_NUM], sample_vector).g == 1.0f));
+								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_NORMAL_TEXTURES], sample_vector).rgb;
+								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
 							}
 
 							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;
@@ -592,27 +615,19 @@ void main()
 		}
 	}
 
-	frag_out += vec4(reflection_intensity * reflection_colour, 0.0f);
+	colour_out[0] += vec4(reflection_intensity * reflection_colour, 0.0f);
 
 	//apply skybox
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
-	frag_out *= vec4(1.0f - skybox_intensity, 1.0f);
-	frag_out += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos + cam_translate.xyz).rgb, 0.0f);
+	colour_out[0] *= vec4(1.0f - skybox_intensity, 1.0f);
+	colour_out[0] += vec4(skybox_intensity * texture(skyboxTexture, geomSceneSpacePos + cam_translate.xyz).rgb, 0.0f);
 
 	//this shader can't produce translucent fragments
-	frag_out.a = 1.0f;
-	
-	//texture usage:
-	// colour: all 4 channels assigned, alpha is currently ignored
-	// depth: left to opengl
-	// data:
-	//    0:
-	//      r: 1 or 0: whether or not fragment should be shown in screen space reflections
-	//      g: pseudo-depth - fragment depth except if the fragment is part of the skybox, in which case the depth is 1 (as far away as possible)
+	colour_out[0].a = 1.0f;
 
-	//output whether or not to draw reflections on certain fragments in the next frame
-	data_out[0].r = mat_ssr_show_this ? 1.0f : 0.0f;
-
-	//store the pseudo-depth (depth accounting for skyboxes)
-	data_out[0].g = (skybox_intensity == vec3(1.0f, 1.0f, 1.0f)) ? 1.0f : gl_FragCoord.z;
+	//pass on the reflection intensity
+	{
+		colour_out[2].rgb = reflection_intensity;
+		colour_out[2].a = float(ssr_reflection_applied);
+	}
 }

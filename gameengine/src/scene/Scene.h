@@ -7,7 +7,7 @@
 #include "OrientedBoundingBox.h"
 #include "Nameable.h"
 #include "Referenceable.h"
-#include "../render/rendertarget/RenderTargetMode.h"
+#include "../render/rendertarget/target/RenderTargetMode.h"
 #include "Cubemap.h"
 
 class Model;

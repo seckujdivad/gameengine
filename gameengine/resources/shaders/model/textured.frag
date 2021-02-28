@@ -1,11 +1,10 @@
 #version 430 core
 
-#if !defined(DATA_TEX_NUM)
-#define DATA_TEX_NUM 1
+#if !defined(NUM_TEXTURES)
+#define NUM_TEXTURES 1
 #endif
 
-layout(location = 0) out vec4 frag_out;
-layout(location = 1) out vec4 data_out[DATA_TEX_NUM];
+layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
 in vec3 geomMdlSpacePos;
 in vec3 geomSceneSpacePos;
@@ -28,5 +27,5 @@ uniform sampler2D colourTexture;
 
 void main()
 {
-	frag_out = texture(colourTexture, geomUV);
+	colour_out[0] = texture(colourTexture, geomUV);
 }

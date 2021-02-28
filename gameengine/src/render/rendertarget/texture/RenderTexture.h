@@ -1,18 +1,17 @@
 #pragma once
 
-#include "../../GLComponents.h"
-
 #include <vector>
 #include <tuple>
 #include <string>
 #include <memory>
 #include <optional>
 
-#include "RenderTarget.h"
-#include "../../scene/Referenceable.h"
-#include "../texture/Texture.h"
+#include "../target/RenderTarget.h"
+#include "../../../scene/Referenceable.h"
+#include "../../texture/Texture.h"
 
 class Engine;
+class RenderTextureGroup;
 
 class RenderTexture : public RenderTarget, public Referenceable<RenderTextureReference>
 {
@@ -23,8 +22,6 @@ private:
 
 	std::shared_ptr<RenderTextureGroup> m_texture_write;
 	std::optional<std::shared_ptr<RenderTextureGroup>> m_texture_read;
-
-	void AttachTexturesToFramebuffer();
 
 	void PostRenderEvent() override;
 
@@ -45,8 +42,7 @@ public:
 	std::shared_ptr<RenderTextureGroup> GetWriteTextures() const;
 
 	bool SwapBuffers() override;
+	bool DoAutoSwapBuffers() const;
 
-	void SetNormalModePreviousFrameToSelf();
-
-	void CopyFrom(const RenderTarget* src) const override;
+	void CopyFrom(const RenderTarget* src) override;
 };

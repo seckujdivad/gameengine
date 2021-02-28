@@ -15,7 +15,6 @@
 
 #include "GLComponents.h"
 
-#include "render/rendertarget/RenderTextureData.h"
 #include "render/controllers/EngineCanvasController.h"
 #include "render/texture/TexturePreset.h"
 

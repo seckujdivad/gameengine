@@ -2,8 +2,8 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/RenderTexture.h"
-#include "../rendertarget/RenderTextureData.h"
+#include "../rendertarget/texture/RenderTexture.h"
+#include "../rendertarget/texture/RenderTextureGroup.h"
 #include "../../scene/Scene.h"
 #include "../../Engine.h"
 #include "../renderer/Renderer.h"
@@ -23,30 +23,44 @@ CumulativeTexture::CumulativeTexture(std::vector<Renderer*> renderers) : m_rende
 
 void CumulativeTexture::Render(std::vector<Model*> models, bool continuous_draw)
 {
-	this->Render(0, continuous_draw);
+	this->Render(0, continuous_draw, models);
 }
 
-void CumulativeTexture::Render(int index, bool continuous_draw) const
+void CumulativeTexture::Render(int index, bool continuous_draw, std::optional<std::vector<Model*>> models) const
 {
+	if (this->m_renderers.size() == 0)
+	{
+		throw std::invalid_argument("CumulativeTexture has no renderers");
+	}
+
 	if ((index < 0) || (index >= static_cast<int>(this->m_renderers.size())))
 	{
-		throw std::invalid_argument("\"index\" must be between 0 and " + std::to_string(static_cast<int>(this->m_renderers.size()) - 1) + " but is " + std::to_string(index));
+		throw std::invalid_argument("\"index\" must be a member of Z U [0, " + std::to_string(static_cast<int>(this->m_renderers.size()) - 1) + "] but is " + std::to_string(index));
 	}
 
 	bool propagate_draws = false;
 	for (int i = index; i < static_cast<int>(this->m_renderers.size()); i++)
 	{
-		std::vector<Model*> models = this->m_fetch_models_function(i);
-		bool draw_required = (models.size() > 0) || (!this->m_renderers.at(i)->GetTarget()->FramebufferContainsRenderOutput()) || this->m_renderers.at(i)->GetTarget()->IsFBOClearedOnRender();
+		RenderTarget* target = this->m_renderers.at(i)->GetTarget();
 
-		if ((i != 0) && (propagate_draws || draw_required))
+		std::vector<Model*> models_to_draw;
+		if (models.has_value())
 		{
-			this->m_renderers.at(i - 1)->CopyTo(this->m_renderers.at(i));
+			models_to_draw = models.value();
+		}
+		else
+		{
+			models_to_draw = this->m_fetch_models_function(i);
 		}
 
-		if (draw_required)
+		if (propagate_draws || models_to_draw.size() > 0 || !target->FramebufferContainsRenderOutput() || target->IsFBOClearedOnRender())
 		{
-			this->m_renderers.at(i)->Render(models, continuous_draw);
+			if (i != 0 && !target->IsFBOClearedOnRender())
+			{
+				this->m_renderers.at(i - 1)->CopyTo(this->m_renderers.at(i));
+			}
+
+			this->m_renderers.at(i)->Render(models_to_draw, continuous_draw);
 			propagate_draws = true;
 		}
 	}

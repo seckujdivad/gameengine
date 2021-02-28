@@ -14,13 +14,16 @@ enum class TextureFiltering;
 enum class TargetType;
 enum class TextureDataPreset;
 
+enum class RenderTargetMode;
+
 class Texture
 {
 public:
 	enum class Preset
 	{
 		Colour,
-		Data,
+		Data_MediumP,
+		Data_LowP,
 		Depth
 	};
 
@@ -84,3 +87,6 @@ public:
 	void CopyTo(Texture& dest) const;
 	void CopyFrom(const Texture& src);
 };
+
+std::optional<int> GetNumColourTextures(RenderTargetMode mode); //returning no value means this mode links into textures from another mode
+int GetNumAttachedColourTextures(RenderTargetMode mode);

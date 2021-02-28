@@ -2,12 +2,14 @@
 
 #include <stdexcept>
 
-#include "../../Engine.h"
-#include "../texture/TextureType.h"
-#include "../texture/TextureFormat.h"
-#include "../TargetType.h"
-#include "RenderTextureData.h"
-#include "RenderTargetMode.h"
+#include "../../../GLComponents.h"
+
+#include "../../../Engine.h"
+#include "../../texture/TextureType.h"
+#include "../../texture/TextureFormat.h"
+#include "../../TargetType.h"
+#include "RenderTextureGroup.h"
+#include "../target/RenderTargetMode.h"
 
 void RenderTexture::PostRenderEvent()
 {
@@ -37,7 +39,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		GLuint fbo;
 		glGenFramebuffers(1, &fbo);
 		this->SetFramebuffer(fbo);
-		this->AttachTexturesToFramebuffer();
+		this->GetWriteTextures()->AttachToFBO(fbo);
 	}
 }
 
@@ -48,34 +50,6 @@ RenderTexture::~RenderTexture()
 		GLuint fbo = this->GetFramebuffer();
 		glDeleteFramebuffers(1, &fbo);
 	}
-}
-
-void RenderTexture::AttachTexturesToFramebuffer()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, this->GetFramebuffer());
-
-	std::vector<GLenum> attachments;
-
-	for (int i = 0; i < static_cast<int>(this->m_texture_write.get()->colour.size()); i++)
-	{
-		Texture& texture = this->m_texture_write.get()->colour.at(i);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture.GetTexture(), 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-	}
-
-	if (this->m_texture_write.get()->depth.has_value())
-	{
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->m_texture_write.get()->depth.value().GetTexture(), 0);
-	}
-
-	glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("Framebuffer is not complete: " + GL_CHECK_ERROR() + " - " + std::to_string(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 std::tuple<int, int> RenderTexture::GetOutputSize() const
@@ -142,19 +116,12 @@ bool RenderTexture::SwapBuffers()
 	return true;
 }
 
-void RenderTexture::SetNormalModePreviousFrameToSelf()
+bool RenderTexture::DoAutoSwapBuffers() const
 {
-	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-	{
-		std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).previous_frame = this->GetOutputTextures();
-	}
-	else
-	{
-		throw std::runtime_error("Render mode must be \"Normal_Draw\", not " + std::to_string(static_cast<int>(this->GetRenderMode())));
-	}
+	return this->m_auto_swap_buffers;
 }
 
-void RenderTexture::CopyFrom(const RenderTarget* src) const
+void RenderTexture::CopyFrom(const RenderTarget* src)
 {
 	if (this != src)
 	{
@@ -166,16 +133,8 @@ void RenderTexture::CopyFrom(const RenderTarget* src) const
 		}
 		else
 		{
-			src_tex->m_texture_write->CopyTo(*this->m_texture_write.get());
-
-			if (src_tex->m_texture_read.has_value() != this->m_texture_read.has_value())
-			{
-				throw std::invalid_argument("One texture is double buffered and the other isn't");
-			}
-			else if (src_tex->m_texture_read.has_value())
-			{
-				src_tex->m_texture_read.value()->CopyTo(*this->m_texture_read.value().get());
-			}
+			src_tex->GetOutputTextures()->CopyTo(*this->GetWriteTextures().get());
+			this->SwapBuffers();
 		}
 	}
 }

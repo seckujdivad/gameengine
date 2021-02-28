@@ -12,7 +12,8 @@ RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode)
 	case RenderTargetMode::Shadow:
 	case RenderTargetMode::Textured:
 		return RenderTargetModeType::Model;
-	case RenderTargetMode::Postprocess:
+	case RenderTargetMode::Normal_PostProcess:
+	case RenderTargetMode::PostProcess:
 		return RenderTargetModeType::FSQuad;
 	default:
 		throw std::invalid_argument("Unknown render target mode");

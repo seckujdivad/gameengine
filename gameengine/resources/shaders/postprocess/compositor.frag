@@ -4,7 +4,11 @@
 #define COMPOSITE_LAYER_NUM 1
 #endif
 
-layout(location = 0) out vec4 frag_out;
+#if !defined(NUM_TEXTURES)
+#define NUM_TEXTURES 1
+#endif
+
+layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
 in vec2 globalUV;
 
@@ -19,7 +23,7 @@ uniform CompositeLayer layers[COMPOSITE_LAYER_NUM];
 
 void main()
 {
-	frag_out = vec4(vec3(1.0f), 1.0f);
+	colour_out[0] = vec4(vec3(1.0f), 1.0f);
 
 	for (int i = 0; i < COMPOSITE_LAYER_NUM; i++)
 	{
@@ -28,9 +32,9 @@ void main()
 		if (texture_sample.a > 0.0f)
 		{
 			vec4 output_sample;
-			output_sample.a = texture_sample.a + (frag_out.a * (1 - texture_sample.a));
-			output_sample.rgb = ((texture_sample.rgb * texture_sample.a) + (frag_out.rgb * frag_out.a * (1 - texture_sample.a))) / output_sample.a;
-			frag_out = output_sample;
+			output_sample.a = texture_sample.a + (colour_out[0].a * (1 - texture_sample.a));
+			output_sample.rgb = ((texture_sample.rgb * texture_sample.a) + (colour_out[0].rgb * colour_out[0].a * (1 - texture_sample.a))) / output_sample.a;
+			colour_out[0] = output_sample;
 		}
 	}
 }

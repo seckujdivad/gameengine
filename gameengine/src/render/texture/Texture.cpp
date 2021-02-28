@@ -8,6 +8,7 @@
 #include "TextureFiltering.h"
 #include "TextureDataPreset.h"
 #include "../TargetType.h"
+#include "../rendertarget/target/RenderTargetMode.h"
 
 void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
 {
@@ -102,18 +103,15 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 
 GLint Texture::GetPreferredFormat(bool force)
 {
-	return GetTextureFormatEnum(this->GetFormat());
-
 	if (force || (this->m_preferred_format == GL_NONE))
 	{
 		glGetInternalformativ(GetTargetEnum(this->GetTargetType()), GetTextureFormatEnum(this->GetFormat()), GL_TEXTURE_IMAGE_FORMAT, 1, &this->m_preferred_format);
-	}
 
-	if (this->m_preferred_format == GL_NONE)
-	{
-		throw std::runtime_error("Invalid format");
+		if (this->m_preferred_format == GL_NONE)
+		{
+			this->m_preferred_format = GetTextureFormatEnum(this->GetFormat());
+		}
 	}
-
 	return this->m_preferred_format;
 }
 
@@ -126,9 +124,16 @@ void Texture::SetPreset(Preset preset, bool configure)
 		this->m_filtering_min = TextureFiltering::Linear;
 		this->m_filtering_mag = TextureFiltering::Linear;
 	}
-	else if (preset == Preset::Data)
+	else if (preset == Preset::Data_MediumP)
 	{
 		this->m_type = TextureType::HalfFloat;
+		this->m_format = TextureFormat::RGBA16F;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
+	}
+	else if (preset == Preset::Data_LowP)
+	{
+		this->m_type = TextureType::UnsignedByte;
 		this->m_format = TextureFormat::RGBA;
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
@@ -405,4 +410,49 @@ void Texture::CopyTo(Texture& dest) const
 void Texture::CopyFrom(const Texture& src)
 {
 	src.CopyTo(*this);
+}
+
+std::optional<int> GetNumColourTextures(RenderTargetMode mode)
+{
+	if (mode == RenderTargetMode::Default)
+	{
+		throw std::invalid_argument("Default mode can't be rendered");
+	}
+	else if (mode == RenderTargetMode::Normal_DepthOnly)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::Normal_Draw)
+	{
+		return 3;
+	}
+	else if (mode == RenderTargetMode::Normal_PostProcess)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::PostProcess)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::Shadow)
+	{
+		return 0;
+	}
+	else if (mode == RenderTargetMode::Textured)
+	{
+		return 1;
+	}
+	else if (mode == RenderTargetMode::Wireframe)
+	{
+		return 1;
+	}
+	else
+	{
+		throw std::invalid_argument("Unknown mode");
+	}
+}
+
+int GetNumAttachedColourTextures(RenderTargetMode mode)
+{
+	return GetNumColourTextures(mode).value();
 }

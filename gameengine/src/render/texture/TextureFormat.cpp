@@ -13,6 +13,8 @@ TextureFormat GetTextureFormat(GLint format)
 	case GL_RGB: return TextureFormat::RGB;
 	case GL_RGBA: return TextureFormat::RGBA;
 	case GL_RGB8: return TextureFormat::RGB8;
+	case GL_RGBA16F: return TextureFormat::RGBA16F;
+	case GL_RGBA32F: return TextureFormat::RGBA32F;
 	default: throw std::invalid_argument("Unknown texture format " + std::to_string(format));
 	}
 }
@@ -27,6 +29,8 @@ GLint GetTextureFormatEnum(TextureFormat format)
 	case TextureFormat::RGB: return GL_RGB;
 	case TextureFormat::RGBA: return GL_RGBA;
 	case TextureFormat::RGB8: return GL_RGB8;
+	case TextureFormat::RGBA16F: return GL_RGBA16F;
+	case TextureFormat::RGBA32F: return GL_RGBA32F;
 	default: throw std::invalid_argument("Unknown texture format " + std::to_string(static_cast<int>(format)));
 	}
 }

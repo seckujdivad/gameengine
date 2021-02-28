@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Renderer.h"
-#include "../rendertarget/RenderTargetConfig.h"
+#include "../rendertarget/target/RenderTargetConfig.h"
 
 class RenderTexture;
 
@@ -11,6 +11,7 @@ class NormalRenderer : public Renderer
 {
 private:
 	std::unique_ptr<RenderTexture> m_rt_depth_only;
+	std::unique_ptr<RenderTexture> m_rt_draw;
 
 public:
 	NormalRenderer(Engine* engine, RenderTarget* target);
