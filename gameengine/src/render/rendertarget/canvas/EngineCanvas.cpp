@@ -230,7 +230,8 @@ void EngineCanvas::SetVerticalSync(bool enabled)
 
 std::tuple<int, int> EngineCanvas::GetOutputSize() const
 {
-	return std::tuple(this->GetSize().GetX(), this->GetSize().GetY());
+	wxSize window_size = this->GetSize();
+	return std::tuple(window_size.GetX(), window_size.GetY());
 }
 
 bool EngineCanvas::SetOutputSize(std::tuple<int, int> dimensions)
