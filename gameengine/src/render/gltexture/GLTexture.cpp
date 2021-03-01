@@ -5,10 +5,10 @@
 
 #include "GLTextureType.h"
 #include "GLTextureFormat.h"
-#include "GLTextureFiltering.h"
 #include "GLTextureDataPreset.h"
 #include "../TargetType.h"
 #include "../rendertarget/target/RenderTargetMode.h"
+#include "../../scene/texture/TextureFiltering.h"
 
 void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format, std::vector<const void*> pixels)
 {
@@ -121,29 +121,29 @@ void GLTexture::SetPreset(Preset preset, bool configure)
 	{
 		this->m_type = GLTextureType::UnsignedByte;
 		this->m_format = GLTextureFormat::RGBA;
-		this->m_filtering_min = GLTextureFiltering::Linear;
-		this->m_filtering_mag = GLTextureFiltering::Linear;
+		this->m_filtering_min = TextureFiltering::Linear;
+		this->m_filtering_mag = TextureFiltering::Linear;
 	}
 	else if (preset == Preset::Data_MediumP)
 	{
 		this->m_type = GLTextureType::HalfFloat;
 		this->m_format = GLTextureFormat::RGBA16F;
-		this->m_filtering_min = GLTextureFiltering::Nearest;
-		this->m_filtering_mag = GLTextureFiltering::Nearest;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Data_LowP)
 	{
 		this->m_type = GLTextureType::UnsignedByte;
 		this->m_format = GLTextureFormat::RGBA;
-		this->m_filtering_min = GLTextureFiltering::Nearest;
-		this->m_filtering_mag = GLTextureFiltering::Nearest;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Depth)
 	{
 		this->m_type = GLTextureType::Float;
 		this->m_format = GLTextureFormat::Depth;
-		this->m_filtering_min = GLTextureFiltering::Nearest;
-		this->m_filtering_mag = GLTextureFiltering::Nearest;
+		this->m_filtering_min = TextureFiltering::Nearest;
+		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else
 	{
@@ -252,7 +252,7 @@ GLTextureFormat GLTexture::GetFormat() const
 	return this->m_format;
 }
 
-void GLTexture::SetFiltering(GLTextureFiltering filtering)
+void GLTexture::SetFiltering(TextureFiltering filtering)
 {
 	bool reconfigure = false;
 	if (filtering != this->m_filtering_min)
@@ -273,7 +273,7 @@ void GLTexture::SetFiltering(GLTextureFiltering filtering)
 	}
 }
 
-void GLTexture::SetMinFiltering(GLTextureFiltering min_filtering)
+void GLTexture::SetMinFiltering(TextureFiltering min_filtering)
 {
 	if (min_filtering != this->m_filtering_min)
 	{
@@ -282,12 +282,12 @@ void GLTexture::SetMinFiltering(GLTextureFiltering min_filtering)
 	}
 }
 
-GLTextureFiltering GLTexture::GetMinFiltering() const
+TextureFiltering GLTexture::GetMinFiltering() const
 {
 	return this->m_filtering_min;
 }
 
-void GLTexture::SetMagFiltering(GLTextureFiltering mag_filtering)
+void GLTexture::SetMagFiltering(TextureFiltering mag_filtering)
 {
 	if (mag_filtering != this->m_filtering_mag)
 	{
@@ -296,7 +296,7 @@ void GLTexture::SetMagFiltering(GLTextureFiltering mag_filtering)
 	}
 }
 
-GLTextureFiltering GLTexture::GetMagFiltering() const
+TextureFiltering GLTexture::GetMagFiltering() const
 {
 	return this->m_filtering_mag;
 }

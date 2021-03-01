@@ -10,9 +10,10 @@
 
 enum class GLTextureType;
 enum class GLTextureFormat;
-enum class GLTextureFiltering;
 enum class TargetType;
 enum class GLTextureDataPreset;
+
+enum class TextureFiltering;
 
 enum class RenderTargetMode;
 
@@ -32,8 +33,8 @@ private:
 
 	GLTextureType m_type;
 	GLTextureFormat m_format;
-	GLTextureFiltering m_filtering_min;
-	GLTextureFiltering m_filtering_mag;
+	TextureFiltering m_filtering_min;
+	TextureFiltering m_filtering_mag;
 	TargetType m_target;
 	bool m_generate_mipmaps;
 
@@ -65,13 +66,13 @@ public:
 	void SetFormat(GLTextureFormat format);
 	GLTextureFormat GetFormat() const;
 
-	void SetFiltering(GLTextureFiltering filtering);
+	void SetFiltering(TextureFiltering filtering);
 
-	void SetMinFiltering(GLTextureFiltering min_filtering);
-	GLTextureFiltering GetMinFiltering() const;
+	void SetMinFiltering(TextureFiltering min_filtering);
+	TextureFiltering GetMinFiltering() const;
 
-	void SetMagFiltering(GLTextureFiltering mag_filtering);
-	GLTextureFiltering GetMagFiltering() const;
+	void SetMagFiltering(TextureFiltering mag_filtering);
+	TextureFiltering GetMagFiltering() const;
 
 	TargetType GetTargetType() const;
 

@@ -7,6 +7,8 @@
 #include "LogMessage.h"
 
 #include "scene/Scene.h"
+#include "scene/model/Model.h"
+#include "scene/texture/TextureFiltering.h"
 
 #include "render/rendertarget/target/RenderTarget.h"
 #include "render/rendertarget/canvas/EngineCanvas.h"
@@ -17,12 +19,9 @@
 #include "render/controllers/ReflectionController.h"
 
 #include "render/gltexture/GLTexture.h"
-#include "render/gltexture/GLTextureFiltering.h"
 #include "render/gltexture/GLTextureFormat.h"
 
 #include "render/TargetType.h"
-
-#include "scene/model/Model.h"
 
 const std::size_t GAMEENGINE_PATCH_SIZE = 16;
 
@@ -45,8 +44,8 @@ void Engine::LoadTexture(Texture texture)
 	else
 	{
 		std::shared_ptr<GLTexture> loaded_texture = std::make_shared<GLTexture>(GLTexture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
-		loaded_texture->SetMinFiltering(texture.GetMinFilter() == Texture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
-		loaded_texture->SetMagFiltering(texture.GetMagFilter() == Texture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
+		loaded_texture->SetMinFiltering(texture.GetMinFilter() == Texture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
+		loaded_texture->SetMagFiltering(texture.GetMagFilter() == Texture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
 
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
