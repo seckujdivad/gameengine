@@ -8,6 +8,8 @@
 #include "../Referenceable.h"
 #include "../RevisableResource.h"
 
+enum class TextureFiltering;
+
 class Texture : public Referenceable<TextureReference>, public RevisableResource
 {
 public:
@@ -18,16 +20,10 @@ public:
 		Vector
 	};
 
-	enum class Filter
-	{
-		Nearest,
-		Linear
-	};
-
 private:
 	Type m_type = Type::None;
-	Filter m_filter_mag = Filter::Nearest;
-	Filter m_filter_min = Filter::Nearest;
+	TextureFiltering m_filter_mag;
+	TextureFiltering m_filter_min;
 
 	std::vector<unsigned char> m_data;
 
@@ -47,10 +43,10 @@ public:
 	std::tuple<int, int> GetDimensions() const;
 	const unsigned char* GetData() const;
 
-	void SetMagFilter(Filter filter);
-	Filter GetMagFilter() const;
-	void SetMinFilter(Filter filter);
-	Filter GetMinFilter() const;
+	void SetMagFilter(TextureFiltering filter);
+	TextureFiltering GetMagFilter() const;
+	void SetMinFilter(TextureFiltering filter);
+	TextureFiltering GetMinFilter() const;
 
 	bool operator==(const Texture& second) const;
 	bool operator!=(const Texture& second) const;

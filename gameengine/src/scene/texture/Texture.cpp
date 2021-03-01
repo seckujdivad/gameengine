@@ -2,9 +2,11 @@
 
 #include <stdexcept>
 
+#include "TextureFiltering.h"
+
 const int NUM_TEXTURE_CHANNELS = 3;
 
-Texture::Texture(TextureReference reference) : Referenceable<TextureReference>(reference)
+Texture::Texture(TextureReference reference) : Referenceable<TextureReference>(reference), m_filter_min(TextureFiltering::Nearest), m_filter_mag(TextureFiltering::Nearest)
 {
 }
 
@@ -79,7 +81,7 @@ const unsigned char* Texture::GetData() const
 	}
 }
 
-void Texture::SetMagFilter(Filter filter)
+void Texture::SetMagFilter(TextureFiltering filter)
 {
 	if (filter != this->m_filter_mag)
 	{
@@ -89,12 +91,12 @@ void Texture::SetMagFilter(Filter filter)
 	}
 }
 
-Texture::Filter Texture::GetMagFilter() const
+TextureFiltering Texture::GetMagFilter() const
 {
 	return this->m_filter_mag;
 }
 
-void Texture::SetMinFilter(Filter filter)
+void Texture::SetMinFilter(TextureFiltering filter)
 {
 	if (filter != this->m_filter_min)
 	{
@@ -104,7 +106,7 @@ void Texture::SetMinFilter(Filter filter)
 	}
 }
 
-Texture::Filter Texture::GetMinFilter() const
+TextureFiltering Texture::GetMinFilter() const
 {
 	return this->m_filter_min;
 }
