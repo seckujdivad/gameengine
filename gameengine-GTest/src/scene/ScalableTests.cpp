@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "scene/Scalable.h"
+#include "scene/transformations/Scalable.h"
 
 TEST(ScalableTests, Scale_SetGet_Individual)
 {

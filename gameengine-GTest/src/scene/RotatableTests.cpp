@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "scene/Rotatable.h"
+#include "scene/transformations/Rotatable.h"
 
 TEST(RotatableTests, Rotation_SetGet_Individual)
 {

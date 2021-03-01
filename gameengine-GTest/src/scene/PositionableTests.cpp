@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "scene/Positionable.h"
+#include "scene/transformations/Positionable.h"
 
 TEST(PositionableTests, Position_SetGet_Individual)
 {
