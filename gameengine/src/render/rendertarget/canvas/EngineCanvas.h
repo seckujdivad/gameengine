@@ -68,4 +68,6 @@ public:
 	Camera* GetControlledCamera() const;
 
 	bool SwapBuffers() override;
+
+	void Draw(bool continuous_draw = false);
 };

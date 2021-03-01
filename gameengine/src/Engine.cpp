@@ -389,7 +389,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(RenderMode mode, wxWindowID id
 	return this->GenerateNewCanvas(std::vector({ mode }), id, parent);
 }
 
-void Engine::Render()
+void Engine::Render(bool continuous_draw)
 {
 	if (this->GetScene() != nullptr)
 	{
@@ -655,7 +655,7 @@ void Engine::Render()
 			//tell controllers to redraw themselves (if required)
 			for (RenderController* render_controller : to_draw)
 			{
-				render_controller->Render();
+				render_controller->Render(continuous_draw);
 			}
 
 			for (RenderController* render_controller : to_draw)

@@ -25,7 +25,7 @@ public:
 	RenderController(Engine* engine, RenderTextureReference reference);
 	virtual ~RenderController();
 
-	virtual void Render() = 0;
+	virtual void Render(bool continuous_draw = false) = 0;
 	virtual void PostRender();
 
 	virtual std::shared_ptr<RenderTextureGroup> GetRenderTexture() const = 0;

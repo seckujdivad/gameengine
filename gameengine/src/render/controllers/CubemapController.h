@@ -36,7 +36,7 @@ public:
 	CubemapController(Engine* engine, RenderTextureReference reference);
 	virtual ~CubemapController();
 
-	void Render() override;
+	void Render(bool continuous_draw) override;
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture() const override;
 	virtual RenderControllerType GetType() const = 0;
 

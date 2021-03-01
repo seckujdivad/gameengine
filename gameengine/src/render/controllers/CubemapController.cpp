@@ -91,7 +91,7 @@ CubemapController::~CubemapController()
 {
 }
 
-void CubemapController::Render()
+void CubemapController::Render(bool continuous_draw)
 {
 	int redraw_level = -1; //the texture that the redraw starts at - -1 means no redraw at all
 

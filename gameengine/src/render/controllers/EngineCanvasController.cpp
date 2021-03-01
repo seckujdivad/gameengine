@@ -78,7 +78,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	m_canvas(canvas)
 {
 	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::PostProcess, TargetType::Texture_2D);
-	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), textures.get(), false);
+	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), textures.get());
 
 	RenderTargetConfig canvas_config;
 	canvas_config.SetMode(RenderTargetMode::PostProcess);
@@ -90,7 +90,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	this->m_canvas->SetConfig(canvas_config);
 }
 
-void EngineCanvasController::Render()
+void EngineCanvasController::Render(bool continuous_draw)
 {
 	//resize textures to make sure that all textures in the chain are the same size/drawing at the same resolution
 	std::tuple new_output_size = this->m_canvas->GetOutputSize();
@@ -105,11 +105,11 @@ void EngineCanvasController::Render()
 	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
 	{
 		factory->SetCamera(this->m_canvas->GetControlledCamera());
-		factory->Render(models);
+		factory->Render(models, continuous_draw);
 	}
 
-	this->m_texture_final->Render({});
-	this->m_canvas->Render({}, true);
+	this->m_texture_final->Render({}, continuous_draw);
+	this->m_canvas->Render({}, continuous_draw);
 }
 
 std::shared_ptr<RenderTextureGroup> EngineCanvasController::GetRenderTexture() const

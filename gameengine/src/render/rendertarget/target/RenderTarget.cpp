@@ -647,7 +647,7 @@ void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
 {
 	if (this->m_engine->GetScene() != nullptr)
 	{
-		if (continuous_draw)
+		if (this->m_fbo_contains_render && this->m_last_draw_was_continuous)
 		{
 			this->PostRenderEvent();
 		}
@@ -661,6 +661,8 @@ void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
 		}
 
 		this->CheckParentContext();
+
+		this->m_last_draw_was_continuous = continuous_draw;
 	}
 }
 

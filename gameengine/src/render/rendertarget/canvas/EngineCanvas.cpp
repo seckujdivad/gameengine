@@ -39,13 +39,13 @@ EngineCanvas::~EngineCanvas()
 
 void EngineCanvas::OnPaint(wxPaintEvent& evt)
 {
-	this->GetEngine()->Render();
+	this->Draw(false);
 	evt.Skip();
 }
 
 void EngineCanvas::OnSize(wxSizeEvent& evt)
 {
-	this->GetEngine()->Render();
+	this->Update();
 	evt.Skip();
 }
 
@@ -132,7 +132,7 @@ void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
 {
 	if (this->m_loop_render)
 	{
-		this->GetEngine()->Render();
+		this->Draw(true);
 		evt.RequestMore();
 		evt.Skip();
 	}
@@ -267,4 +267,9 @@ Camera* EngineCanvas::GetControlledCamera() const
 bool EngineCanvas::SwapBuffers()
 {
 	return this->wxGLCanvas::SwapBuffers();
+}
+
+void EngineCanvas::Draw(bool continuous_draw)
+{
+	this->GetEngine()->Render(continuous_draw);
 }

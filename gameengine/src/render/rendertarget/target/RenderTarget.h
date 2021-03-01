@@ -29,6 +29,8 @@ private:
 	GLuint m_fbo = 0;
 	bool m_fbo_contains_render = false;
 	TargetType m_fbo_target = TargetType::Texture_2D;
+	
+	bool m_last_draw_was_continuous;
 
 	Camera* m_camera = nullptr;
 	Engine* m_engine = nullptr;

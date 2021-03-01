@@ -96,7 +96,7 @@ public:
 	EngineCanvasController* GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 	EngineCanvasController* GenerateNewCanvas(RenderMode mode, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 
-	void Render();
+	void Render(bool continuous_draw = false);
 
 	std::shared_ptr<Texture> GetTexture(TextureReference reference) const;
 	std::shared_ptr<Texture> GetTexture(const LocalTexture& texture) const;
