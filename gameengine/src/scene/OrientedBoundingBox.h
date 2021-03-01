@@ -3,9 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "Positionable.h"
-#include "Rotatable.h"
-#include "Scalable.h"
+#include "transformations/Positionable.h"
+#include "transformations/Rotatable.h"
+#include "transformations/Scalable.h"
 #include "Nameable.h"
 
 class OrientedBoundingBox : public Nameable, public Positionable, public Rotatable, public Scalable

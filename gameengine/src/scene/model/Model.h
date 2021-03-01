@@ -5,9 +5,9 @@
 
 #include <glm/glm.hpp>
 
-#include "../Positionable.h"
-#include "../Rotatable.h"
-#include "../Scalable.h"
+#include "../transformations/Positionable.h"
+#include "../transformations/Rotatable.h"
+#include "../transformations/Scalable.h"
 #include "../Nameable.h"
 #include "Material.h"
 #include "../Referenceable.h"

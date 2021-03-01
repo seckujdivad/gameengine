@@ -124,6 +124,12 @@
     <Filter Include="Resource Files\shaders\postprocess">
       <UniqueIdentifier>{8cc2c4d6-5fee-454d-a949-899f803e192f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\scene\transformations">
+      <UniqueIdentifier>{9042b082-15df-403d-b8cd-28c1da0a3371}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\transformations">
+      <UniqueIdentifier>{36a72220-90d5-42e2-bc10-a4ca74844f89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -153,19 +159,7 @@
     <ClInclude Include="src\scene\Scene.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\Positionable.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\Rotatable.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\Scalable.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\Nameable.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\LocallyMovable.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\model\Reflection.h">
@@ -318,6 +312,18 @@
     <ClInclude Include="src\render\rendertarget\texture\RenderTextureGroup.h">
       <Filter>Header Files\render\rendertarget\texture</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\transformations\LocallyMovable.h">
+      <Filter>Header Files\scene\transformations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\transformations\Positionable.h">
+      <Filter>Header Files\scene\transformations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\transformations\Rotatable.h">
+      <Filter>Header Files\scene\transformations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\transformations\Scalable.h">
+      <Filter>Header Files\scene\transformations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -347,19 +353,7 @@
     <ClCompile Include="src\scene\Scene.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\Positionable.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\Rotatable.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\Scalable.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\Nameable.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\LocallyMovable.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\model\Reflection.cpp">
@@ -502,6 +496,18 @@
     </ClCompile>
     <ClCompile Include="src\render\rendertarget\canvas\EngineCanvas.cpp">
       <Filter>Source Files\render\rendertarget\canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\transformations\LocallyMovable.cpp">
+      <Filter>Source Files\scene\transformations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\transformations\Positionable.cpp">
+      <Filter>Source Files\scene\transformations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\transformations\Rotatable.cpp">
+      <Filter>Source Files\scene\transformations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\transformations\Scalable.cpp">
+      <Filter>Source Files\scene\transformations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

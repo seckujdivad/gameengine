@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Referenceable.h"
-#include "Positionable.h"
+#include "transformations/Positionable.h"
 
 enum class CubemapType
 {

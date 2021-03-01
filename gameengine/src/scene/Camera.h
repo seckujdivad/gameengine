@@ -5,7 +5,7 @@
 
 #include <tuple>
 
-#include "LocallyMovable.h"
+#include "transformations/LocallyMovable.h"
 #include "Nameable.h"
 #include "Referenceable.h"
 
