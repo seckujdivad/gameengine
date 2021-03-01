@@ -5,8 +5,8 @@
 #include "../../../GLComponents.h"
 
 #include "../../../Engine.h"
-#include "../../texture/TextureType.h"
-#include "../../texture/TextureFormat.h"
+#include "../../gltexture/GLTextureType.h"
+#include "../../gltexture/GLTextureFormat.h"
 #include "../../TargetType.h"
 #include "RenderTextureGroup.h"
 #include "../target/RenderTargetMode.h"

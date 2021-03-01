@@ -16,7 +16,7 @@
 #include "GLComponents.h"
 
 #include "render/controllers/EngineCanvasController.h"
-#include "render/texture/TexturePreset.h"
+#include "render/gltexture/GLTexturePreset.h"
 
 #include "scene/Referenceable.h"
 #include "scene/SceneChild.h"
@@ -28,7 +28,7 @@ class EngineCanvas;
 class Scene;
 class RenderTarget;
 class Model;
-class Texture;
+class GLTexture;
 
 class Engine : public SceneChild
 {
@@ -60,8 +60,8 @@ private:
 
 	bool m_single_context_mode = false;
 
-	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<Texture>, LocalTexture>> m_textures_static;
-	std::unordered_map<TexturePreset, std::shared_ptr<Texture>, TexturePreset::Hash> m_textures_static_presets;
+	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<GLTexture>, LocalTexture>> m_textures_static;
+	std::unordered_map<GLTexturePreset, std::shared_ptr<GLTexture>, GLTexturePreset::Hash> m_textures_static_presets;
 
 	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
@@ -98,10 +98,10 @@ public:
 
 	void Render(bool continuous_draw = false);
 
-	std::shared_ptr<Texture> GetTexture(TextureReference reference) const;
-	std::shared_ptr<Texture> GetTexture(const LocalTexture& texture) const;
-	std::shared_ptr<Texture> GetTexture(TextureDataPreset preset, TargetType target);
-	std::shared_ptr<Texture> GetTexture(TexturePreset preset);
+	std::shared_ptr<GLTexture> GetTexture(TextureReference reference) const;
+	std::shared_ptr<GLTexture> GetTexture(const LocalTexture& texture) const;
+	std::shared_ptr<GLTexture> GetTexture(GLTextureDataPreset preset, TargetType target);
+	std::shared_ptr<GLTexture> GetTexture(GLTexturePreset preset);
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
 
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);

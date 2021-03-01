@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include "../LogMessage.h"
-#include "texture/Texture.h"
+#include "gltexture/GLTexture.h"
 #include "TargetType.h"
 
 ShaderProgram::ShaderProgram()
@@ -217,14 +217,14 @@ void ShaderProgram::Select(int texture_group_id)
 			}
 		}
 
-		std::vector<GLTexture> textures;
+		std::vector<GLTextureUnmanaged> textures;
 		textures.reserve(num_textures);
 
 		for (int targeted_group : valid_targeted_groups)
 		{
 			for (const auto& [uniform_name, texture] : this->m_textures.at(targeted_group))
 			{
-				GLTexture gl_texture;
+				GLTextureUnmanaged gl_texture;
 				gl_texture.id = texture->GetTexture();
 				gl_texture.target = GetTargetEnum(texture->GetTargetType());
 				gl_texture.uniform_name = uniform_name;
@@ -468,14 +468,14 @@ void ShaderProgram::SetUniform(std::string name, glm::dmat3 mat, bool demote)
 	}
 }
 
-void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, Texture* texture)
+void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, GLTexture* texture)
 {
 	this->AddUniformName(uniform_name);
 
 	bool add_new = false;
 	if (this->m_textures.count(texture_group_id) == 0)
 	{
-		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, Texture*>()));
+		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, GLTexture*>()));
 		add_new = true;
 	}
 	else
@@ -664,7 +664,7 @@ ShaderProgram::ShaderSource::ShaderSource(GLenum type, std::string source) : typ
 {
 }
 
-void ShaderProgram::GLTexture::Bind() const
+void ShaderProgram::GLTextureUnmanaged::Bind() const
 {
 	const GLenum targets[] = {
 		GL_TEXTURE_2D,

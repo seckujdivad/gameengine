@@ -1,6 +1,6 @@
 #pragma once
 
-enum class TextureDataPreset
+enum class GLTextureDataPreset
 {
 	Black,
 	ZeroDepth

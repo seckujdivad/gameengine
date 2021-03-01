@@ -5,7 +5,7 @@
 #include "../target/RenderTargetMode.h"
 #include "../../TargetType.h"
 
-const Texture& RenderTextureGroup::GetATexture() const
+const GLTexture& RenderTextureGroup::GetATexture() const
 {
 	if (this->depth.has_value())
 	{
@@ -39,16 +39,16 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 		{
 			for (int i = 0; i < num_colour_textures.value(); i++)
 			{
-				Texture::Preset preset;
+				GLTexture::Preset preset;
 				if (i == 0 && mode != RenderTargetMode::Normal_DepthOnly)
 				{
-					preset = Texture::Preset::Colour;
+					preset = GLTexture::Preset::Colour;
 				}
 				else
 				{
-					preset = Texture::Preset::Data_LowP;
+					preset = GLTexture::Preset::Data_LowP;
 				}
-				this->colour.push_back(Texture(preset, target));
+				this->colour.push_back(GLTexture(preset, target));
 			}
 		}
 		else
@@ -58,7 +58,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 
 		if (mode != RenderTargetMode::PostProcess)
 		{
-			this->depth = Texture(Texture::Preset::Depth, target);
+			this->depth = GLTexture(GLTexture::Preset::Depth, target);
 		}
 	}
 	else if (mode == RenderTargetMode::Normal_Draw)
@@ -66,22 +66,22 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 		int num_colour_textures = GetNumAttachedColourTextures(mode);
 		for (int i = 0; i < num_colour_textures; i++)
 		{
-			Texture::Preset preset;
+			GLTexture::Preset preset;
 			if (i == 0)
 			{
-				preset = Texture::Preset::Colour;
+				preset = GLTexture::Preset::Colour;
 			}
 			else if (i == 1)
 			{
-				preset = Texture::Preset::Data_MediumP;
+				preset = GLTexture::Preset::Data_MediumP;
 			}
 			else
 			{
-				preset = Texture::Preset::Data_LowP;
+				preset = GLTexture::Preset::Data_LowP;
 			}
-			this->colour.push_back(Texture(preset, target));
+			this->colour.push_back(GLTexture(preset, target));
 		}
-		this->depth = Texture(Texture::Preset::Depth, target);
+		this->depth = GLTexture(GLTexture::Preset::Depth, target);
 	}
 	else
 	{
@@ -101,7 +101,7 @@ void RenderTextureGroup::SetDimensions(std::tuple<int, int> dimensions)
 		this->depth->SetDimensions(dimensions);
 	}
 
-	for (Texture& texture : this->colour)
+	for (GLTexture& texture : this->colour)
 	{
 		texture.SetDimensions(dimensions);
 	}
@@ -140,9 +140,9 @@ void RenderTextureGroup::CopyTo(RenderTextureGroup& dest) const
 	}
 }
 
-void RenderTextureGroup::ForEachTexture(std::function<void(Texture& texture)> foreach)
+void RenderTextureGroup::ForEachTexture(std::function<void(GLTexture& texture)> foreach)
 {
-	for (Texture& texture : this->colour)
+	for (GLTexture& texture : this->colour)
 	{
 		foreach(texture);
 	}
@@ -156,7 +156,7 @@ void RenderTextureGroup::ForEachTexture(std::function<void(Texture& texture)> fo
 RenderTextureGroup::Identifiers RenderTextureGroup::GetIdentifiers() const
 {
 	Identifiers result = Identifiers();
-	for (const Texture& texture : this->colour)
+	for (const GLTexture& texture : this->colour)
 	{
 		result.colour.push_back(texture.GetTexture());
 	}
@@ -176,7 +176,7 @@ void RenderTextureGroup::AttachToFBO(GLuint fbo) const
 	std::vector<GLenum> attachments;
 	for (int i = 0; i < static_cast<int>(this->colour.size()); i++)
 	{
-		const Texture& texture = this->colour.at(i);
+		const GLTexture& texture = this->colour.at(i);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture.GetTexture(), 0);
 		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 	}

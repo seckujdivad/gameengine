@@ -8,7 +8,7 @@
 
 #include "../target/RenderTarget.h"
 #include "../../../scene/Referenceable.h"
-#include "../../texture/Texture.h"
+#include "../../gltexture/GLTexture.h"
 
 class Engine;
 class RenderTextureGroup;

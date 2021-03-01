@@ -16,9 +16,9 @@
 #include "render/controllers/SkyboxController.h"
 #include "render/controllers/ReflectionController.h"
 
-#include "render/texture/Texture.h"
-#include "render/texture/TextureFiltering.h"
-#include "render/texture/TextureFormat.h"
+#include "render/gltexture/GLTexture.h"
+#include "render/gltexture/GLTextureFiltering.h"
+#include "render/gltexture/GLTextureFormat.h"
 
 #include "render/TargetType.h"
 
@@ -44,9 +44,9 @@ void Engine::LoadTexture(LocalTexture texture)
 	}
 	else
 	{
-		std::shared_ptr<Texture> loaded_texture = std::make_shared<Texture>(Texture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
-		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
-		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? TextureFiltering::Nearest : TextureFiltering::Linear);
+		std::shared_ptr<GLTexture> loaded_texture = std::make_shared<GLTexture>(GLTexture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
+		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
+		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
 
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
@@ -56,7 +56,7 @@ void Engine::LoadTexture(LocalTexture texture)
 	if (reload_texture_data)
 	{
 		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetDimensions(texture.GetDimensions());
-		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(TextureFormat::RGB, std::vector<const void*>({ texture.GetData() }));
+		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(GLTextureFormat::RGB, std::vector<const void*>({ texture.GetData() }));
 	}
 }
 
@@ -666,26 +666,26 @@ void Engine::Render(bool continuous_draw)
 	}
 }
 
-std::shared_ptr<Texture> Engine::GetTexture(TextureReference reference) const
+std::shared_ptr<GLTexture> Engine::GetTexture(TextureReference reference) const
 {
 	return std::get<0>(this->m_textures_static.at(reference));
 }
 
-std::shared_ptr<Texture> Engine::GetTexture(const LocalTexture& texture) const
+std::shared_ptr<GLTexture> Engine::GetTexture(const LocalTexture& texture) const
 {
 	return std::get<0>(this->m_textures_static.at(texture.GetReference()));
 }
 
-std::shared_ptr<Texture> Engine::GetTexture(TextureDataPreset preset, TargetType target)
+std::shared_ptr<GLTexture> Engine::GetTexture(GLTextureDataPreset preset, TargetType target)
 {
-	return this->GetTexture(TexturePreset(target, preset));
+	return this->GetTexture(GLTexturePreset(target, preset));
 }
 
-std::shared_ptr<Texture> Engine::GetTexture(TexturePreset preset)
+std::shared_ptr<GLTexture> Engine::GetTexture(GLTexturePreset preset)
 {
 	if (this->m_textures_static_presets.count(preset) == 0)
 	{
-		std::shared_ptr<Texture> texture = std::make_shared<Texture>(preset);
+		std::shared_ptr<GLTexture> texture = std::make_shared<GLTexture>(preset);
 		texture->SetPixels(preset.preset);
 		this->m_textures_static_presets.insert(std::pair(preset, texture));
 	}

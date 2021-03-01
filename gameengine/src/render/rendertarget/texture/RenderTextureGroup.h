@@ -5,7 +5,7 @@
 #include <optional>
 #include <functional>
 
-#include "../../texture/Texture.h"
+#include "../../gltexture/GLTexture.h"
 
 enum class TargetType;
 enum class RenderTargetMode;
@@ -20,14 +20,14 @@ public:
 	};
 
 private:
-	const Texture& GetATexture() const;
+	const GLTexture& GetATexture() const;
 
 public:
 	RenderTextureGroup();
 	RenderTextureGroup(RenderTargetMode mode, TargetType target);
 
-	std::vector<Texture> colour;
-	std::optional<Texture> depth;
+	std::vector<GLTexture> colour;
+	std::optional<GLTexture> depth;
 
 	std::tuple<int, int> GetDimensions() const;
 	void SetDimensions(std::tuple<int, int> dimensions);
@@ -37,7 +37,7 @@ public:
 	void CopyFrom(const RenderTextureGroup& src);
 	void CopyTo(RenderTextureGroup& dest) const;
 
-	void ForEachTexture(std::function<void(Texture& texture)> foreach);
+	void ForEachTexture(std::function<void(GLTexture& texture)> foreach);
 
 	Identifiers GetIdentifiers() const;
 

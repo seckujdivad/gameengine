@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 
 class RenderTextureGroup;
-class Texture;
+class GLTexture;
 enum class RenderTargetMode;
 enum class RenderTargetModeType;
 
@@ -43,7 +43,7 @@ struct RenderTargetConfig
 	{
 		struct CompositeLayer
 		{
-			Texture* texture;
+			GLTexture* texture;
 			glm::vec4 colour_translate = glm::vec4(0.0f);
 			glm::vec4 colour_scale = glm::vec4(1.0f);
 		};

@@ -11,7 +11,7 @@
 
 #include "../GLComponents.h"
 
-class Texture;
+class GLTexture;
 
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
@@ -27,7 +27,10 @@ public:
 		GLenum type = GL_NONE;
 	};
 
-	struct GLTexture
+	using DefineType = std::variant<std::string, int>;
+
+private:
+	struct GLTextureUnmanaged
 	{
 		GLuint id = GL_NONE;
 		GLenum target = GL_NONE;
@@ -36,16 +39,13 @@ public:
 		void Bind() const;
 	};
 
-	using DefineType = std::variant<std::string, int>;
-
-private:
 	GLuint m_program_id = GL_NONE; //OpenGL identifier of the program the shaders have been linked into
 	GLint m_max_texture_units = 16; //minimum value required by the spec
 
 	std::vector<ShaderSource> m_sources;
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
-	std::unordered_map<int, std::unordered_map<std::string, Texture*>> m_textures;
+	std::unordered_map<int, std::unordered_map<std::string, GLTexture*>> m_textures;
 	std::unordered_map<std::string, DefineType> m_defines;
 
 	bool m_recompile_required = true;
@@ -104,7 +104,7 @@ public:
 		}
 	};
 
-	void SetTexture(int texture_group_id, std::string uniform_name, Texture* texture);
+	void SetTexture(int texture_group_id, std::string uniform_name, GLTexture* texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, DefineType value, bool defer_recompilation = true);

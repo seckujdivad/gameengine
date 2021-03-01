@@ -20,7 +20,7 @@
 #include "../../TargetType.h"
 #include "../../../LogMessage.h"
 
-#include "../../texture/TextureDataPreset.h"
+#include "../../gltexture/GLTextureDataPreset.h"
 
 #include "../texture/RenderTexture.h"
 #include "../texture/RenderTextureGroup.h"
@@ -430,10 +430,10 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		{
 			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_2D).get());
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_2D).get());
 			}
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(TextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
+			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
 		}
 	}
 
@@ -568,19 +568,19 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			for (int j = 0; j < num_colour_tex; j++)
 			{
 				std::string uniform_name = "reflection_cubemaps[" + std::to_string((i * num_colour_tex) + j) + "]";
-				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap).get());
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 			}
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(TextureDataPreset::ZeroDepth, TargetType::Texture_Cubemap).get());
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroDepth, TargetType::Texture_Cubemap).get());
 		}
 
 		this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
 
 		//skybox cubemap
 		Skybox* skybox = model->GetSkybox();
-		Texture* skybox_texture;
+		GLTexture* skybox_texture;
 		if (skybox == nullptr)
 		{
-			std::shared_ptr<Texture> texture = this->GetEngine()->GetTexture(TextureDataPreset::Black, TargetType::Texture_Cubemap);
+			std::shared_ptr<GLTexture> texture = this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_Cubemap);
 			skybox_texture = texture.get();
 		}
 		else

@@ -97,12 +97,6 @@
     <Filter Include="Header Files\render\renderer">
       <UniqueIdentifier>{c747aba1-c51b-4ab4-abf8-7894dbef5c44}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\render\texture">
-      <UniqueIdentifier>{dc8cd7a1-6a36-4380-b54c-97a5839d5d20}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\render\texture">
-      <UniqueIdentifier>{2ccc4255-e285-43f0-8cf9-e2f9e5e02417}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\render\rendertarget\target">
       <UniqueIdentifier>{a8a1b43d-a711-415e-a057-0772a297bf81}</UniqueIdentifier>
     </Filter>
@@ -129,6 +123,12 @@
     </Filter>
     <Filter Include="Source Files\scene\transformations">
       <UniqueIdentifier>{36a72220-90d5-42e2-bc10-a4ca74844f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\gltexture">
+      <UniqueIdentifier>{57a9d0f9-0022-4bc7-a8f0-cce16bb4ed7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\render\gltexture">
+      <UniqueIdentifier>{1eab6d6f-63f3-441f-98cd-0525c683b532}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -273,26 +273,8 @@
     <ClInclude Include="src\render\renderable\CumulativeTexture.h">
       <Filter>Header Files\render\renderable</Filter>
     </ClInclude>
-    <ClInclude Include="src\render\texture\Texture.h">
-      <Filter>Header Files\render\texture</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\texture\TextureFormat.h">
-      <Filter>Header Files\render\texture</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\texture\TextureFiltering.h">
-      <Filter>Header Files\render\texture</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\texture\TextureType.h">
-      <Filter>Header Files\render\texture</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\TargetType.h">
       <Filter>Header Files\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\texture\TextureDataPreset.h">
-      <Filter>Header Files\render\texture</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\texture\TexturePreset.h">
-      <Filter>Header Files\render\texture</Filter>
     </ClInclude>
     <ClInclude Include="src\render\rendertarget\canvas\EngineCanvas.h">
       <Filter>Header Files\render\rendertarget\canvas</Filter>
@@ -323,6 +305,24 @@
     </ClInclude>
     <ClInclude Include="src\scene\transformations\Scalable.h">
       <Filter>Header Files\scene\transformations</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTexture.h">
+      <Filter>Header Files\render\gltexture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTextureDataPreset.h">
+      <Filter>Header Files\render\gltexture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTextureFiltering.h">
+      <Filter>Header Files\render\gltexture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTextureFormat.h">
+      <Filter>Header Files\render\gltexture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTexturePreset.h">
+      <Filter>Header Files\render\gltexture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\gltexture\GLTextureType.h">
+      <Filter>Header Files\render\gltexture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -461,23 +461,8 @@
     <ClCompile Include="src\render\renderable\CumulativeTexture.cpp">
       <Filter>Source Files\render\renderable</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\texture\Texture.cpp">
-      <Filter>Source Files\render\texture</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\TargetType.cpp">
       <Filter>Source Files\render</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\texture\TextureFormat.cpp">
-      <Filter>Source Files\render\texture</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\texture\TextureFiltering.cpp">
-      <Filter>Source Files\render\texture</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\texture\TextureType.cpp">
-      <Filter>Source Files\render\texture</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\texture\TexturePreset.cpp">
-      <Filter>Source Files\render\texture</Filter>
     </ClCompile>
     <ClCompile Include="src\render\rendertarget\texture\RenderTexture.cpp">
       <Filter>Source Files\render\rendertarget\texture</Filter>
@@ -508,6 +493,21 @@
     </ClCompile>
     <ClCompile Include="src\scene\transformations\Scalable.cpp">
       <Filter>Source Files\scene\transformations</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTexture.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTextureFiltering.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTextureFormat.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTexturePreset.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTextureType.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

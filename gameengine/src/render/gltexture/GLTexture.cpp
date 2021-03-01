@@ -1,16 +1,16 @@
-#include "Texture.h"
+#include "GLTexture.h"
 
 #include <stdexcept>
 #include <string>
 
-#include "TextureType.h"
-#include "TextureFormat.h"
-#include "TextureFiltering.h"
-#include "TextureDataPreset.h"
+#include "GLTextureType.h"
+#include "GLTextureFormat.h"
+#include "GLTextureFiltering.h"
+#include "GLTextureDataPreset.h"
 #include "../TargetType.h"
 #include "../rendertarget/target/RenderTargetMode.h"
 
-void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_format, std::vector<const void*> pixels)
+void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format, std::vector<const void*> pixels)
 {
 	//pad pixel data with nullptr
 	std::size_t req_num_pixel_arrays = 0;
@@ -101,7 +101,7 @@ void Texture::ConfigureTexture(bool create, std::optional<TextureFormat> pixel_f
 	}
 }
 
-GLint Texture::GetPreferredFormat(bool force)
+GLint GLTexture::GetPreferredFormat(bool force)
 {
 	if (force || (this->m_preferred_format == GL_NONE))
 	{
@@ -115,35 +115,35 @@ GLint Texture::GetPreferredFormat(bool force)
 	return this->m_preferred_format;
 }
 
-void Texture::SetPreset(Preset preset, bool configure)
+void GLTexture::SetPreset(Preset preset, bool configure)
 {
 	if (preset == Preset::Colour)
 	{
-		this->m_type = TextureType::UnsignedByte;
-		this->m_format = TextureFormat::RGBA;
-		this->m_filtering_min = TextureFiltering::Linear;
-		this->m_filtering_mag = TextureFiltering::Linear;
+		this->m_type = GLTextureType::UnsignedByte;
+		this->m_format = GLTextureFormat::RGBA;
+		this->m_filtering_min = GLTextureFiltering::Linear;
+		this->m_filtering_mag = GLTextureFiltering::Linear;
 	}
 	else if (preset == Preset::Data_MediumP)
 	{
-		this->m_type = TextureType::HalfFloat;
-		this->m_format = TextureFormat::RGBA16F;
-		this->m_filtering_min = TextureFiltering::Nearest;
-		this->m_filtering_mag = TextureFiltering::Nearest;
+		this->m_type = GLTextureType::HalfFloat;
+		this->m_format = GLTextureFormat::RGBA16F;
+		this->m_filtering_min = GLTextureFiltering::Nearest;
+		this->m_filtering_mag = GLTextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Data_LowP)
 	{
-		this->m_type = TextureType::UnsignedByte;
-		this->m_format = TextureFormat::RGBA;
-		this->m_filtering_min = TextureFiltering::Nearest;
-		this->m_filtering_mag = TextureFiltering::Nearest;
+		this->m_type = GLTextureType::UnsignedByte;
+		this->m_format = GLTextureFormat::RGBA;
+		this->m_filtering_min = GLTextureFiltering::Nearest;
+		this->m_filtering_mag = GLTextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Depth)
 	{
-		this->m_type = TextureType::Float;
-		this->m_format = TextureFormat::Depth;
-		this->m_filtering_min = TextureFiltering::Nearest;
-		this->m_filtering_mag = TextureFiltering::Nearest;
+		this->m_type = GLTextureType::Float;
+		this->m_format = GLTextureFormat::Depth;
+		this->m_filtering_min = GLTextureFiltering::Nearest;
+		this->m_filtering_mag = GLTextureFiltering::Nearest;
 	}
 	else
 	{
@@ -151,39 +151,39 @@ void Texture::SetPreset(Preset preset, bool configure)
 	}
 }
 
-Texture::Texture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps)
+GLTexture::GLTexture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps)
 {
 	this->SetPreset(preset, false);
 	this->ConfigureTexture(true);
 }
 
-Texture::Texture(TextureDataPreset preset, TargetType target, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps)
+GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps)
 {
 	this->SetPixels(preset);
 }
 
-Texture::Texture(TexturePreset preset, bool generate_mipmaps) : Texture(preset.preset, preset.target, generate_mipmaps)
+GLTexture::GLTexture(GLTexturePreset preset, bool generate_mipmaps) : GLTexture(preset.preset, preset.target, generate_mipmaps)
 {
 }
 
-Texture::Texture(const Texture& copy_from)
+GLTexture::GLTexture(const GLTexture& copy_from)
 {
 	*this = copy_from;
 }
 
-Texture& Texture::operator=(const Texture& copy_from)
+GLTexture& GLTexture::operator=(const GLTexture& copy_from)
 {
 	this->CopyFrom(copy_from);
 
 	return *this;
 }
 
-Texture::Texture(Texture&& move_from) noexcept
+GLTexture::GLTexture(GLTexture&& move_from) noexcept
 {
 	*this = std::move(move_from);
 }
 
-Texture& Texture::operator=(Texture&& move_from) noexcept
+GLTexture& GLTexture::operator=(GLTexture&& move_from) noexcept
 {
 	this->m_dimensions = move_from.m_dimensions;
 	this->m_type = move_from.m_type;
@@ -201,7 +201,7 @@ Texture& Texture::operator=(Texture&& move_from) noexcept
 	return *this;
 }
 
-Texture::~Texture()
+GLTexture::~GLTexture()
 {
 	if (this->m_texture != GL_NONE)
 	{
@@ -209,7 +209,7 @@ Texture::~Texture()
 	}
 }
 
-void Texture::SetDimensions(std::tuple<int, int> dimensions)
+void GLTexture::SetDimensions(std::tuple<int, int> dimensions)
 {
 	if (dimensions != this->m_dimensions)
 	{
@@ -218,12 +218,12 @@ void Texture::SetDimensions(std::tuple<int, int> dimensions)
 	}
 }
 
-std::tuple<int, int> Texture::GetDimensions() const
+std::tuple<int, int> GLTexture::GetDimensions() const
 {
 	return this->m_dimensions;
 }
 
-void Texture::SetTextureType(TextureType type)
+void GLTexture::SetTextureType(GLTextureType type)
 {
 	if (type != this->m_type)
 	{
@@ -232,12 +232,12 @@ void Texture::SetTextureType(TextureType type)
 	}
 }
 
-TextureType Texture::GetTextureType() const
+GLTextureType GLTexture::GetTextureType() const
 {
 	return this->m_type;
 }
 
-void Texture::SetFormat(TextureFormat format)
+void GLTexture::SetFormat(GLTextureFormat format)
 {
 	if (format != this->m_format)
 	{
@@ -247,12 +247,12 @@ void Texture::SetFormat(TextureFormat format)
 	}
 }
 
-TextureFormat Texture::GetFormat() const
+GLTextureFormat GLTexture::GetFormat() const
 {
 	return this->m_format;
 }
 
-void Texture::SetFiltering(TextureFiltering filtering)
+void GLTexture::SetFiltering(GLTextureFiltering filtering)
 {
 	bool reconfigure = false;
 	if (filtering != this->m_filtering_min)
@@ -273,7 +273,7 @@ void Texture::SetFiltering(TextureFiltering filtering)
 	}
 }
 
-void Texture::SetMinFiltering(TextureFiltering min_filtering)
+void GLTexture::SetMinFiltering(GLTextureFiltering min_filtering)
 {
 	if (min_filtering != this->m_filtering_min)
 	{
@@ -282,12 +282,12 @@ void Texture::SetMinFiltering(TextureFiltering min_filtering)
 	}
 }
 
-TextureFiltering Texture::GetMinFiltering() const
+GLTextureFiltering GLTexture::GetMinFiltering() const
 {
 	return this->m_filtering_min;
 }
 
-void Texture::SetMagFiltering(TextureFiltering mag_filtering)
+void GLTexture::SetMagFiltering(GLTextureFiltering mag_filtering)
 {
 	if (mag_filtering != this->m_filtering_mag)
 	{
@@ -296,17 +296,17 @@ void Texture::SetMagFiltering(TextureFiltering mag_filtering)
 	}
 }
 
-TextureFiltering Texture::GetMagFiltering() const
+GLTextureFiltering GLTexture::GetMagFiltering() const
 {
 	return this->m_filtering_mag;
 }
 
-TargetType Texture::GetTargetType() const
+TargetType GLTexture::GetTargetType() const
 {
 	return this->m_target;
 }
 
-void Texture::SetGenerateMipMaps(bool generate_mipmaps)
+void GLTexture::SetGenerateMipMaps(bool generate_mipmaps)
 {
 	if (generate_mipmaps != this->m_generate_mipmaps)
 	{
@@ -315,29 +315,29 @@ void Texture::SetGenerateMipMaps(bool generate_mipmaps)
 	}
 }
 
-bool Texture::GetGenerateMipMaps() const
+bool GLTexture::GetGenerateMipMaps() const
 {
 	return false;
 }
 
-GLuint Texture::GetTexture() const
+GLuint GLTexture::GetTexture() const
 {
 	return this->m_texture;
 }
 
-void Texture::BindTexture() const
+void GLTexture::BindTexture() const
 {
 	glBindTexture(GetTargetEnum(this->GetTargetType()), this->GetTexture());
 }
 
-void Texture::SetPixels(TextureFormat pixel_format, std::vector<const void*> pixels)
+void GLTexture::SetPixels(GLTextureFormat pixel_format, std::vector<const void*> pixels)
 {
 	this->ConfigureTexture(false, pixel_format, pixels);
 }
 
-void Texture::SetPixels(TextureDataPreset preset)
+void GLTexture::SetPixels(GLTextureDataPreset preset)
 {
-	if (preset == TextureDataPreset::Black)
+	if (preset == GLTextureDataPreset::Black)
 	{
 		this->SetDimensions(std::tuple(1, 1));
 
@@ -355,9 +355,9 @@ void Texture::SetPixels(TextureDataPreset preset)
 			pixel_arrays.push_back(black_texture.data());
 		}
 
-		this->SetPixels(TextureFormat::RGB, pixel_arrays);
+		this->SetPixels(GLTextureFormat::RGB, pixel_arrays);
 	}
-	else if (preset == TextureDataPreset::ZeroDepth)
+	else if (preset == GLTextureDataPreset::ZeroDepth)
 	{
 		this->SetDimensions(std::tuple(1, 1));
 		this->SetPreset(Preset::Depth);
@@ -372,7 +372,7 @@ void Texture::SetPixels(TextureDataPreset preset)
 			pixel_arrays.push_back(zerodepth_texture.data());
 		}
 
-		this->SetPixels(TextureFormat::Depth, pixel_arrays);
+		this->SetPixels(GLTextureFormat::Depth, pixel_arrays);
 	}
 	else
 	{
@@ -380,7 +380,7 @@ void Texture::SetPixels(TextureDataPreset preset)
 	}
 }
 
-void Texture::CopyTo(Texture& dest) const
+void GLTexture::CopyTo(GLTexture& dest) const
 {
 	dest.m_dimensions = this->m_dimensions;
 	dest.m_type = this->m_type;
@@ -407,7 +407,7 @@ void Texture::CopyTo(Texture& dest) const
 	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
 }
 
-void Texture::CopyFrom(const Texture& src)
+void GLTexture::CopyFrom(const GLTexture& src)
 {
 	src.CopyTo(*this);
 }
