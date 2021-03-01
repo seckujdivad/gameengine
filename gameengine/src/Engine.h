@@ -20,7 +20,7 @@
 
 #include "scene/Referenceable.h"
 #include "scene/SceneChild.h"
-#include "scene/LocalTexture.h"
+#include "scene/texture/Texture.h"
 #include "scene/model/geometry/Geometry.h"
 #include "scene/model/geometry/PresetGeometry.h"
 
@@ -60,7 +60,7 @@ private:
 
 	bool m_single_context_mode = false;
 
-	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<GLTexture>, LocalTexture>> m_textures_static;
+	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<GLTexture>, Texture>> m_textures_static;
 	std::unordered_map<GLTexturePreset, std::shared_ptr<GLTexture>, GLTexturePreset::Hash> m_textures_static_presets;
 
 	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
@@ -82,7 +82,7 @@ private:
 
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
-	void LoadTexture(LocalTexture texture);
+	void LoadTexture(Texture texture);
 
 public:
 	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
@@ -99,7 +99,7 @@ public:
 	void Render(bool continuous_draw = false);
 
 	std::shared_ptr<GLTexture> GetTexture(TextureReference reference) const;
-	std::shared_ptr<GLTexture> GetTexture(const LocalTexture& texture) const;
+	std::shared_ptr<GLTexture> GetTexture(const Texture& texture) const;
 	std::shared_ptr<GLTexture> GetTexture(GLTextureDataPreset preset, TargetType target);
 	std::shared_ptr<GLTexture> GetTexture(GLTexturePreset preset);
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;

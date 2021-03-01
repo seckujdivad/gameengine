@@ -9,7 +9,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../scene/LocalTexture.h"
+#include "../scene/texture/Texture.h"
 #include "../scene/Referenceable.h"
 #include "../scene/Scene.h"
 #include "../scene/Cubemap.h"
@@ -80,9 +80,9 @@ dvec<dimensions> GetVector(const nlohmann::json& data, dvec<dimensions> default_
 	}
 }
 
-LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value, LocalTexture::Filter default_mag_filter, LocalTexture::Filter default_min_filter)
+Texture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value, Texture::Filter default_mag_filter, Texture::Filter default_min_filter)
 {
-	LocalTexture texture(reference);
+	Texture texture(reference);
 	texture.SetMagFilter(default_mag_filter);
 	texture.SetMinFilter(default_min_filter);
 
@@ -110,11 +110,11 @@ LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_p
 				std::string filter = data["magnify filter"].get<std::string>();
 				if (filter == "nearest")
 				{
-					texture.SetMagFilter(LocalTexture::Filter::Nearest);
+					texture.SetMagFilter(Texture::Filter::Nearest);
 				}
 				else if (filter == "linear")
 				{
-					texture.SetMagFilter(LocalTexture::Filter::Linear);
+					texture.SetMagFilter(Texture::Filter::Linear);
 				}
 				else
 				{
@@ -127,11 +127,11 @@ LocalTexture GetTexture(const nlohmann::json& data, std::filesystem::path root_p
 				std::string filter = data["shrink filter"].get<std::string>();
 				if (filter == "nearest")
 				{
-					texture.SetMinFilter(LocalTexture::Filter::Nearest);
+					texture.SetMinFilter(Texture::Filter::Nearest);
 				}
 				else if (filter == "linear")
 				{
-					texture.SetMinFilter(LocalTexture::Filter::Linear);
+					texture.SetMinFilter(Texture::Filter::Linear);
 				}
 				else
 				{
@@ -584,12 +584,12 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 				}
 
 				//load textures
-				model->GetColourTexture() = GetTexture(el.value()["textures"]["colour"], config.path.root, scene->GetNewTextureReference(), glm::vec3(1.0f), LocalTexture::Filter::Linear, LocalTexture::Filter::Linear);
-				model->GetNormalTexture() = GetTexture(el.value()["textures"]["normal"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f), LocalTexture::Filter::Linear, LocalTexture::Filter::Linear);
-				model->GetReflectionTexture() = GetTexture(el.value()["textures"]["reflection intensity"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), LocalTexture::Filter::Linear, LocalTexture::Filter::Linear);
-				model->GetSpecularTexture() = GetTexture(el.value()["textures"]["specular"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), LocalTexture::Filter::Linear, LocalTexture::Filter::Linear);
-				model->GetSkyboxMaskTexture() = GetTexture(el.value()["textures"]["skybox mask"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), LocalTexture::Filter::Nearest, LocalTexture::Filter::Nearest);
-				model->GetDisplacementTexture() = GetTexture(el.value()["textures"]["displacement"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), LocalTexture::Filter::Linear, LocalTexture::Filter::Linear);
+				model->GetColourTexture() = GetTexture(el.value()["textures"]["colour"], config.path.root, scene->GetNewTextureReference(), glm::vec3(1.0f), Texture::Filter::Linear, Texture::Filter::Linear);
+				model->GetNormalTexture() = GetTexture(el.value()["textures"]["normal"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f), Texture::Filter::Linear, Texture::Filter::Linear);
+				model->GetReflectionTexture() = GetTexture(el.value()["textures"]["reflection intensity"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), Texture::Filter::Linear, Texture::Filter::Linear);
+				model->GetSpecularTexture() = GetTexture(el.value()["textures"]["specular"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), Texture::Filter::Linear, Texture::Filter::Linear);
+				model->GetSkyboxMaskTexture() = GetTexture(el.value()["textures"]["skybox mask"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), Texture::Filter::Nearest, Texture::Filter::Nearest);
+				model->GetDisplacementTexture() = GetTexture(el.value()["textures"]["displacement"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), Texture::Filter::Linear, Texture::Filter::Linear);
 
 				//load phong material
 				model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));

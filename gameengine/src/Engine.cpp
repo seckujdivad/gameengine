@@ -28,7 +28,7 @@ const std::size_t GAMEENGINE_PATCH_SIZE = 16;
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
 
-void Engine::LoadTexture(LocalTexture texture)
+void Engine::LoadTexture(Texture texture)
 {
 	auto it = this->m_textures_static.find(texture.GetReference());
 	bool texture_found = it != this->m_textures_static.end();
@@ -45,8 +45,8 @@ void Engine::LoadTexture(LocalTexture texture)
 	else
 	{
 		std::shared_ptr<GLTexture> loaded_texture = std::make_shared<GLTexture>(GLTexture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
-		loaded_texture->SetMinFiltering(texture.GetMinFilter() == LocalTexture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
-		loaded_texture->SetMagFiltering(texture.GetMagFilter() == LocalTexture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
+		loaded_texture->SetMinFiltering(texture.GetMinFilter() == Texture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
+		loaded_texture->SetMagFiltering(texture.GetMagFilter() == Texture::Filter::Nearest ? GLTextureFiltering::Nearest : GLTextureFiltering::Linear);
 
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
@@ -671,7 +671,7 @@ std::shared_ptr<GLTexture> Engine::GetTexture(TextureReference reference) const
 	return std::get<0>(this->m_textures_static.at(reference));
 }
 
-std::shared_ptr<GLTexture> Engine::GetTexture(const LocalTexture& texture) const
+std::shared_ptr<GLTexture> Engine::GetTexture(const Texture& texture) const
 {
 	return std::get<0>(this->m_textures_static.at(texture.GetReference()));
 }

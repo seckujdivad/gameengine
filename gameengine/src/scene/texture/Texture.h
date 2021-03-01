@@ -5,10 +5,10 @@
 #include <tuple>
 #include <vector>
 
-#include "Referenceable.h"
-#include "RevisableResource.h"
+#include "../Referenceable.h"
+#include "../RevisableResource.h"
 
-class LocalTexture : public Referenceable<TextureReference>, public RevisableResource
+class Texture : public Referenceable<TextureReference>, public RevisableResource
 {
 public:
 	enum class Type
@@ -38,7 +38,7 @@ private:
 	glm::vec3 m_vec_colour = glm::vec3(0.0f);
 
 public:
-	LocalTexture(TextureReference reference);
+	Texture(TextureReference reference);
 
 	void SetVector(glm::vec3 colour);
 
@@ -52,6 +52,6 @@ public:
 	void SetMinFilter(Filter filter);
 	Filter GetMinFilter() const;
 
-	bool operator==(const LocalTexture& second) const;
-	bool operator!=(const LocalTexture& second) const;
+	bool operator==(const Texture& second) const;
+	bool operator!=(const Texture& second) const;
 };

@@ -21,21 +21,21 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 {
 	if (scene == nullptr)
 	{
-		this->m_texture_colour = LocalTexture(-1);
-		this->m_texture_reflection = LocalTexture(-1);
-		this->m_texture_specular = LocalTexture(-1);
-		this->m_texture_normal = LocalTexture(-1);
-		this->m_texture_skybox_mask = LocalTexture(-1);
-		this->m_texture_displacement = LocalTexture(-1);
+		this->m_texture_colour = Texture(-1);
+		this->m_texture_reflection = Texture(-1);
+		this->m_texture_specular = Texture(-1);
+		this->m_texture_normal = Texture(-1);
+		this->m_texture_skybox_mask = Texture(-1);
+		this->m_texture_displacement = Texture(-1);
 	}
 	else
 	{
-		this->m_texture_colour = LocalTexture(scene->GetNewTextureReference());
-		this->m_texture_reflection = LocalTexture(scene->GetNewTextureReference());
-		this->m_texture_specular = LocalTexture(scene->GetNewTextureReference());
-		this->m_texture_normal = LocalTexture(scene->GetNewTextureReference());
-		this->m_texture_skybox_mask = LocalTexture(scene->GetNewTextureReference());
-		this->m_texture_displacement = LocalTexture(scene->GetNewTextureReference());
+		this->m_texture_colour = Texture(scene->GetNewTextureReference());
+		this->m_texture_reflection = Texture(scene->GetNewTextureReference());
+		this->m_texture_specular = Texture(scene->GetNewTextureReference());
+		this->m_texture_normal = Texture(scene->GetNewTextureReference());
+		this->m_texture_skybox_mask = Texture(scene->GetNewTextureReference());
+		this->m_texture_displacement = Texture(scene->GetNewTextureReference());
 	}
 }
 
@@ -49,32 +49,32 @@ std::vector<std::shared_ptr<Geometry>> Model::GetGeometry()
 	return this->m_geometry;
 }
 
-LocalTexture& Model::GetColourTexture()
+Texture& Model::GetColourTexture()
 {
 	return this->m_texture_colour;
 }
 
-LocalTexture& Model::GetReflectionTexture()
+Texture& Model::GetReflectionTexture()
 {
 	return this->m_texture_reflection;
 }
 
-LocalTexture& Model::GetSpecularTexture()
+Texture& Model::GetSpecularTexture()
 {
 	return this->m_texture_specular;
 }
 
-LocalTexture& Model::GetNormalTexture()
+Texture& Model::GetNormalTexture()
 {
 	return this->m_texture_normal;
 }
 
-LocalTexture& Model::GetSkyboxMaskTexture()
+Texture& Model::GetSkyboxMaskTexture()
 {
 	return this->m_texture_skybox_mask;
 }
 
-LocalTexture& Model::GetDisplacementTexture()
+Texture& Model::GetDisplacementTexture()
 {
 	return this->m_texture_displacement;
 }

@@ -11,7 +11,7 @@
 #include "../Nameable.h"
 #include "Material.h"
 #include "../Referenceable.h"
-#include "../LocalTexture.h"
+#include "../texture/Texture.h"
 #include "../SceneChild.h"
 
 class Scene;
@@ -25,12 +25,12 @@ private:
 	Material m_material;
 
 	//textures - all need to be replaced before they can be used
-	LocalTexture m_texture_colour = LocalTexture(0);
-	LocalTexture m_texture_reflection = LocalTexture(0);
-	LocalTexture m_texture_specular = LocalTexture(0);
-	LocalTexture m_texture_normal = LocalTexture(0);
-	LocalTexture m_texture_skybox_mask = LocalTexture(0);
-	LocalTexture m_texture_displacement = LocalTexture(0);
+	Texture m_texture_colour = Texture(0);
+	Texture m_texture_reflection = Texture(0);
+	Texture m_texture_specular = Texture(0);
+	Texture m_texture_normal = Texture(0);
+	Texture m_texture_skybox_mask = Texture(0);
+	Texture m_texture_displacement = Texture(0);
 
 	//wireframe colour
 	int m_wireframe_colours_index = 0;
@@ -46,12 +46,12 @@ public:
 
 	std::vector<std::shared_ptr<Geometry>> GetGeometry();
 
-	LocalTexture& GetColourTexture();
-	LocalTexture& GetReflectionTexture();
-	LocalTexture& GetSpecularTexture();
-	LocalTexture& GetNormalTexture();
-	LocalTexture& GetSkyboxMaskTexture();
-	LocalTexture& GetDisplacementTexture();
+	Texture& GetColourTexture();
+	Texture& GetReflectionTexture();
+	Texture& GetSpecularTexture();
+	Texture& GetNormalTexture();
+	Texture& GetSkyboxMaskTexture();
+	Texture& GetDisplacementTexture();
 
 	void SetWireframeColours(std::vector<glm::vec3> colours);
 	void SetCurrentWireframeIndex(int index);

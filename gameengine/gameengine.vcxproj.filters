@@ -130,6 +130,12 @@
     <Filter Include="Header Files\render\gltexture">
       <UniqueIdentifier>{1eab6d6f-63f3-441f-98cd-0525c683b532}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\scene\texture">
+      <UniqueIdentifier>{6502deab-a9ef-4425-93d9-65b5c6363373}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\texture">
+      <UniqueIdentifier>{d6b4948b-7295-4771-82bf-84b5143a2899}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -184,9 +190,6 @@
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\Cubemap.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\LocalTexture.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="src\render\controllers\RenderController.h">
@@ -324,6 +327,9 @@
     <ClInclude Include="src\render\gltexture\GLTextureType.h">
       <Filter>Header Files\render\gltexture</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\texture\Texture.h">
+      <Filter>Header Files\scene\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -375,9 +381,6 @@
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Cubemap.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\LocalTexture.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="src\render\controllers\RenderController.cpp">
@@ -508,6 +511,9 @@
     </ClCompile>
     <ClCompile Include="src\render\gltexture\GLTextureType.cpp">
       <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\texture\Texture.cpp">
+      <Filter>Source Files\scene\texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

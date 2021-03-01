@@ -1,14 +1,14 @@
-#include "LocalTexture.h"
+#include "Texture.h"
 
 #include <stdexcept>
 
 const int NUM_TEXTURE_CHANNELS = 3;
 
-LocalTexture::LocalTexture(TextureReference reference) : Referenceable<TextureReference>(reference)
+Texture::Texture(TextureReference reference) : Referenceable<TextureReference>(reference)
 {
 }
 
-void LocalTexture::SetVector(glm::vec3 colour)
+void Texture::SetVector(glm::vec3 colour)
 {
 	if (this->m_type != Type::Vector || this->m_vec_colour != colour)
 	{
@@ -26,7 +26,7 @@ void LocalTexture::SetVector(glm::vec3 colour)
 	}
 }
 
-void LocalTexture::SetFullTexture(const unsigned char* data, std::tuple<int, int> dimensions)
+void Texture::SetFullTexture(const unsigned char* data, std::tuple<int, int> dimensions)
 {
 	if ((std::get<0>(dimensions) < 1) || (std::get<1>(dimensions) < 1))
 	{
@@ -45,7 +45,7 @@ void LocalTexture::SetFullTexture(const unsigned char* data, std::tuple<int, int
 	this->m_data.assign(data, data + array_size);
 }
 
-std::tuple<int, int> LocalTexture::GetDimensions() const
+std::tuple<int, int> Texture::GetDimensions() const
 {
 	if (this->m_type == Type::None)
 	{
@@ -67,7 +67,7 @@ std::tuple<int, int> LocalTexture::GetDimensions() const
 	return std::tuple(-1, -1);
 }
 
-const unsigned char* LocalTexture::GetData() const
+const unsigned char* Texture::GetData() const
 {
 	if (this->m_type == Type::None)
 	{
@@ -79,7 +79,7 @@ const unsigned char* LocalTexture::GetData() const
 	}
 }
 
-void LocalTexture::SetMagFilter(Filter filter)
+void Texture::SetMagFilter(Filter filter)
 {
 	if (filter != this->m_filter_mag)
 	{
@@ -89,12 +89,12 @@ void LocalTexture::SetMagFilter(Filter filter)
 	}
 }
 
-LocalTexture::Filter LocalTexture::GetMagFilter() const
+Texture::Filter Texture::GetMagFilter() const
 {
 	return this->m_filter_mag;
 }
 
-void LocalTexture::SetMinFilter(Filter filter)
+void Texture::SetMinFilter(Filter filter)
 {
 	if (filter != this->m_filter_min)
 	{
@@ -104,12 +104,12 @@ void LocalTexture::SetMinFilter(Filter filter)
 	}
 }
 
-LocalTexture::Filter LocalTexture::GetMinFilter() const
+Texture::Filter Texture::GetMinFilter() const
 {
 	return this->m_filter_min;
 }
 
-bool LocalTexture::operator==(const LocalTexture& second) const
+bool Texture::operator==(const Texture& second) const
 {
 	if (this == &second)
 	{
@@ -149,7 +149,7 @@ bool LocalTexture::operator==(const LocalTexture& second) const
 	return this->m_data == second.m_data;
 }
 
-bool LocalTexture::operator!=(const LocalTexture& second) const
+bool Texture::operator!=(const Texture& second) const
 {
 	return !(*this == second);
 }
