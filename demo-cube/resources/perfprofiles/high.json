@@ -9,7 +9,7 @@
     "model": {
       "material": {
         "ssr": {
-          "acceptable depth distance": [ 0.05 ],
+          "acceptable depth distance": [ 0.025 ],
           "distance limit": [ 20 ],
           "max camera distance": [ 10 ],
           "refinements": [ 4 ],

@@ -323,7 +323,7 @@ void main()
 	//sample specular map
 	vec3 sample_specular = texture(specularTexture, parallax_uv).rgb * mat_specular;
 
-	vec3 fragtocam = normalize(0 - vec3(cam_translate) - geomSceneSpacePos); //get direction from the fragment to the camera
+	vec3 fragtocam = normalize(0 - cam_translate.xyz - geomSceneSpacePos); //get direction from the fragment to the camera
 
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
@@ -429,12 +429,9 @@ void main()
 					//convert screen space position to use texture UV space coordinates
 					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
+					const float depth_diff = abs(GetDistanceFromDepth(sample_depth, cam_clip_near, cam_clip_far) - GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far));
 
-					const vec3 scene_space_search = PerspDiv(cam_transform_inverse * vec4(ss_position, 1.0f));
-					const vec3 scene_space_sample = PerspDiv(cam_transform_inverse * vec4(ss_position.xy, sample_depth, 1.0f));
-					const float depth_diff = length(scene_space_sample - scene_space_search);
-
-					if ((depth_diff < depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
+					if ((depth_diff <= depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
 					{
 						//if the search increment is as small as is allowed then use this hit as the final location
 						ssr_reflection_applied = search_level == 0;
