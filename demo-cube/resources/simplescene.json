@@ -63,7 +63,11 @@
       "textures": {
         "colour": {
           "magnify filter": "nearest",
-          "texture": "textures/unnamed.jpg",
+          "texture": {
+            "preset": "xor",
+            "mode": "hsv",
+            "dimensions":  256
+          },
           "shrink filter": "nearest"
         },
         "reflection intensity": 0.4,
