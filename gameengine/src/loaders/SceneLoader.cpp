@@ -25,11 +25,11 @@
 #include "models/PlyLoader.h"
 #include "models/BptLoader.h"
 
-template<unsigned int dimensions>
-using dvec = glm::vec<dimensions, glm::f64, glm::packed_highp>;
+template<unsigned int dimensions, typename T = double>
+using vec = glm::vec<dimensions, T, glm::packed_highp>;
 
-template<unsigned int dimensions>
-dvec<dimensions> GetVector(const nlohmann::json& data, dvec<dimensions> default_value)
+template<unsigned int dimensions, typename T = double>
+vec<dimensions, T> GetVector(const nlohmann::json& data, vec<dimensions, T> default_value)
 {
 	static_assert(dimensions > 0, "Dimensions must be greater than zero");
 	static_assert(dimensions < 5, "Dimensions must be 4 or below");
@@ -49,13 +49,13 @@ dvec<dimensions> GetVector(const nlohmann::json& data, dvec<dimensions> default_
 
 			if (is_nums)
 			{
-				std::vector<double> values;
+				std::vector<T> values;
 				for (auto& el : data.items())
 				{
-					values.push_back(el.value().get<double>());
+					values.push_back(el.value().get<T>());
 				}
 
-				dvec<dimensions> result = default_value;
+				vec<dimensions, T> result = default_value;
 				for (int i = 0; i < (int)std::min(static_cast<unsigned int>(values.size()), dimensions); i++)
 				{
 					result[i] = values.at(i);
@@ -75,7 +75,7 @@ dvec<dimensions> GetVector(const nlohmann::json& data, dvec<dimensions> default_
 	}
 	else if (data.is_number())
 	{
-		return dvec<dimensions>(data.get<double>());
+		return vec<dimensions, T>(data.get<T>());
 	}
 	else
 	{
