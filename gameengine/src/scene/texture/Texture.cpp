@@ -4,10 +4,40 @@
 
 #include "TextureFiltering.h"
 
-const int NUM_TEXTURE_CHANNELS = 3;
+constexpr std::size_t NUM_TEXTURE_CHANNELS = 3;
 
 Texture::Texture(TextureReference reference) : Referenceable<TextureReference>(reference), m_filter_min(TextureFiltering::Nearest), m_filter_mag(TextureFiltering::Nearest)
 {
+}
+
+void Texture::SetFullTexture(glm::vec3 colour, std::tuple<int, int> dimensions)
+{
+	const std::size_t pixels = std::size_t(std::get<0>(dimensions)) * std::size_t(std::get<1>(dimensions));
+
+	std::vector<glm::vec3> data;
+	data.reserve(pixels);
+	for (std::size_t i = 0; i < pixels; i++)
+	{
+		data.push_back(colour);
+	}
+
+	this->SetFullTexture(data, dimensions);
+}
+
+void Texture::SetFullTexture(std::vector<glm::vec3> colour, std::tuple<int, int> dimensions)
+{
+	std::vector<unsigned char> texture;
+	texture.reserve(NUM_TEXTURE_CHANNELS * colour.size());
+
+	for (glm::vec3 pixel : colour)
+	{
+		for (glm::size_t i = 0; i < NUM_TEXTURE_CHANNELS; i++)
+		{
+			texture.push_back(NormalisedFloatToByte(pixel[i]));
+		}
+	}
+
+	this->SetFullTexture(texture.data(), dimensions);
 }
 
 void Texture::SetVector(glm::vec3 colour)
@@ -21,9 +51,9 @@ void Texture::SetVector(glm::vec3 colour)
 
 		this->m_data.clear();
 		this->m_data.reserve(NUM_TEXTURE_CHANNELS);
-		for (int i = 0; i < NUM_TEXTURE_CHANNELS; i++)
+		for (int i = 0; i < static_cast<int>(NUM_TEXTURE_CHANNELS); i++)
 		{
-			this->m_data.push_back(static_cast<unsigned char>(this->m_vec_colour[i] * ((2 << 7) - 1)));
+			this->m_data.push_back(NormalisedFloatToByte(this->m_vec_colour[i]));
 		}
 	}
 }
@@ -40,7 +70,7 @@ void Texture::SetFullTexture(const unsigned char* data, std::tuple<int, int> dim
 	this->m_type = Type::FullTexture;
 	this->m_dimensions = dimensions;
 
-	std::size_t array_size = static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)) * static_cast<std::size_t>(NUM_TEXTURE_CHANNELS);
+	const std::size_t array_size = static_cast<std::size_t>(std::get<0>(dimensions)) * static_cast<std::size_t>(std::get<1>(dimensions)) * NUM_TEXTURE_CHANNELS;
 
 	this->m_data.clear();
 	this->m_data.reserve(array_size);
@@ -154,4 +184,9 @@ bool Texture::operator==(const Texture& second) const
 bool Texture::operator!=(const Texture& second) const
 {
 	return !(*this == second);
+}
+
+unsigned char NormalisedFloatToByte(float value)
+{
+	return static_cast<unsigned char>(value * static_cast<float>((2 << 7) - 1));
 }

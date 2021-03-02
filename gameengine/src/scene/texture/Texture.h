@@ -39,6 +39,8 @@ public:
 	void SetVector(glm::vec3 colour);
 
 	void SetFullTexture(const unsigned char* data, std::tuple<int, int> dimensions);
+	void SetFullTexture(std::vector<glm::vec3> colour, std::tuple<int, int> dimensions);
+	void SetFullTexture(glm::vec3 colour, std::tuple<int, int> dimensions);
 
 	std::tuple<int, int> GetDimensions() const;
 	const unsigned char* GetData() const;
@@ -51,3 +53,5 @@ public:
 	bool operator==(const Texture& second) const;
 	bool operator!=(const Texture& second) const;
 };
+
+unsigned char NormalisedFloatToByte(float value);
