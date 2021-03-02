@@ -422,6 +422,7 @@ void main()
 
 				vec3 ss_position = ss_start_pos;
 				float hit_pos = 0.0f;
+				int increments_at_this_level = 0;
 
 				vec2 tex_pos;
 				while (!ssr_reflection_applied && hit_pos < 1.0f)
@@ -441,6 +442,17 @@ void main()
 						hit_increment /= num_searches_on_refine;
 						depth_acceptance /= num_searches_on_refine;
 						search_level -= 1;
+						increments_at_this_level = 0;
+					}
+
+					increments_at_this_level++;
+
+					if (search_level != mat_ssr_refinements && increments_at_this_level - 1 > 2 * int(num_searches_on_refine))
+					{
+						hit_increment *= num_searches_on_refine;
+						depth_acceptance *= num_searches_on_refine;
+						search_level += 1;
+						increments_at_this_level = 0;
 					}
 
 					//find screen space position of next test
