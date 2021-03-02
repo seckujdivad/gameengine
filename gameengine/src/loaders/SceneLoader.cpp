@@ -9,15 +9,17 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../scene/texture/Texture.h"
-#include "../scene/texture/TextureFiltering.h"
 #include "../scene/Referenceable.h"
 #include "../scene/Scene.h"
 #include "../scene/Cubemap.h"
 #include "../scene/VisBox.h"
 #include "../scene/Skybox.h"
+#include "../scene/texture/Texture.h"
+#include "../scene/texture/TextureFiltering.h"
+#include "../scene/texture/Generators.h"
 #include "../scene/light/PointLight.h"
 #include "../scene/model/Model.h"
+
 #include "../generic/LoadFile.h"
 
 #include "models/PlyLoader.h"
