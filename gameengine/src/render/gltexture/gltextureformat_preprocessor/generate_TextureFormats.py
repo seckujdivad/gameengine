@@ -49,14 +49,15 @@ for num_channels, num_channels_identifier in enumerate(channel_configs):
 
 			format_logic_expanded = format_logic.format(var_names["pixel type"])
 			
-			inner_code = "else if ({} == {} && {} == {} && {}) ".format(var_names["num channels"], num_channels, var_names["bit depth"], bitdepth, format_logic_expanded)
-			inner_code += "{return " + final_enum + ";}"
+			condition = "else if ({} == {} && {} == {} && {})".format(var_names["num channels"], num_channels, var_names["bit depth"], bitdepth, format_logic_expanded)
+			inner_code_defined = "return {};".format(final_enum)
+			inner_code_undefined = "throw std::invalid_argument(\"The GLEW headers used when compiling didn't contain {}\");".format(final_enum)
 
-			final_str = "\n#ifdef {}\n\t{}\n#endif".format(final_enum, inner_code)
+			final_str = "\n\t{}\n\t{{\n#ifdef {}\n\t\t{}\n#else\n\t\t{}\n#endif\n\t}}".format(condition, final_enum, inner_code_defined, inner_code_undefined)
 			
 			file_out += final_str
 
-file_out += "\n\telse\n\t{\n\t\tthrow std::invalid_argument(\"Unknown format\");\n\t}\n}"
+file_out += "\n\telse\n\t{\n\t\tthrow std::invalid_argument(\"At least one argument was invalid and not caught by the wrapper function\");\n\t}\n}"
 
 with open(os.path.join(sys.path[0], "TextureFormats.cpp"), 'w') as file:
     file.write(file_out)
