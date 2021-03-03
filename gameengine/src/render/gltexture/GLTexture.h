@@ -7,9 +7,9 @@
 #include "../../GLComponents.h"
 
 #include "GLTexturePreset.h"
+#include "GLTextureFormat.h"
 
 enum class GLTextureType;
-enum class GLTextureFormat;
 enum class TargetType;
 enum class GLTextureDataPreset;
 
@@ -45,11 +45,11 @@ private:
 	void ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format = std::optional<GLTextureFormat>(), std::vector<const void*> pixels = {});
 	GLint GetPreferredFormat(bool force = false);
 
-	void SetPreset(Preset preset, bool configure = true);
+	void SetPreset(Preset preset, std::optional<int> num_channels = std::optional<int>(), bool configure = true);
 
 public:
-	GLTexture(Preset preset, TargetType target, std::tuple<int, int> dimensions = std::tuple<int, int>(1, 1), bool generate_mipmaps = false);
-	GLTexture(GLTextureDataPreset preset, TargetType target, bool generate_mipmaps = false);
+	GLTexture(Preset preset, TargetType target, std::optional<int> num_channels = std::optional<int>(), std::tuple<int, int> dimensions = std::tuple<int, int>(1, 1), bool generate_mipmaps = false);
+	GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels = std::optional<int>(), bool generate_mipmaps = false);
 	GLTexture(GLTexturePreset preset, bool generate_mipmaps = false);
 	GLTexture(const GLTexture& copy_from);
 	GLTexture& operator=(const GLTexture& copy_from);

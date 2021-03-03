@@ -203,6 +203,7 @@
     <ClInclude Include="src\render\gltexture\GLTexture.h" />
     <ClInclude Include="src\render\gltexture\GLTextureDataPreset.h" />
     <ClInclude Include="src\render\gltexture\GLTextureFormat.h" />
+    <ClInclude Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.h" />
     <ClInclude Include="src\render\gltexture\GLTexturePreset.h" />
     <ClInclude Include="src\render\gltexture\GLTextureType.h" />
     <ClInclude Include="src\render\renderable\CumulativeTexture.h" />
@@ -268,6 +269,7 @@
     <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexture.cpp" />
     <ClCompile Include="src\render\gltexture\GLTextureFormat.cpp" />
+    <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexturePreset.cpp" />
     <ClCompile Include="src\render\gltexture\GLTextureType.cpp" />
     <ClCompile Include="src\render\renderable\CumulativeTexture.cpp" />
@@ -336,6 +338,7 @@
     <None Include="resources\shaders\postprocess\normal.frag" />
     <None Include="resources\shaders\postprocess\normal.geom" />
     <None Include="resources\shaders\postprocess\normal.vert" />
+    <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

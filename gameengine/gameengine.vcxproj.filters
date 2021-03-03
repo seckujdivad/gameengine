@@ -136,6 +136,12 @@
     <Filter Include="Source Files\scene\texture">
       <UniqueIdentifier>{d6b4948b-7295-4771-82bf-84b5143a2899}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\gltexture\gltextureformat_preprocessor">
+      <UniqueIdentifier>{4adace34-954b-4528-9088-d8f6ea6c55ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\gltexture\gltextureformat_preprocessor">
+      <UniqueIdentifier>{fd3b9ba1-0b14-48f7-8d22-17621cb8d8c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -333,6 +339,9 @@
     <ClInclude Include="src\scene\texture\Generators.h">
       <Filter>Header Files\scene\texture</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.h">
+      <Filter>Header Files\render\gltexture\gltextureformat_preprocessor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -521,6 +530,9 @@
     <ClCompile Include="src\scene\texture\Generators.cpp">
       <Filter>Source Files\scene\texture</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp">
+      <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -587,6 +599,9 @@
     </None>
     <None Include="resources\shaders\postprocess\normal.geom">
       <Filter>Resource Files\shaders\postprocess</Filter>
+    </None>
+    <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py">
+      <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </None>
   </ItemGroup>
 </Project>

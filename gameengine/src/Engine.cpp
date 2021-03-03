@@ -20,6 +20,7 @@
 
 #include "render/gltexture/GLTexture.h"
 #include "render/gltexture/GLTextureFormat.h"
+#include "render/gltexture/GLTextureType.h"
 
 #include "render/TargetType.h"
 
@@ -43,7 +44,7 @@ void Engine::LoadTexture(Texture texture)
 	}
 	else
 	{
-		std::shared_ptr<GLTexture> loaded_texture = std::make_shared<GLTexture>(GLTexture::Preset::Colour, TargetType::Texture_2D, texture.GetDimensions(), true);
+		std::shared_ptr<GLTexture> loaded_texture = std::make_shared<GLTexture>(GLTexture::Preset::Colour, TargetType::Texture_2D, 3, texture.GetDimensions(), true);
 		loaded_texture->SetMinFiltering(texture.GetMinFilter());
 		loaded_texture->SetMagFiltering(texture.GetMagFilter());
 
@@ -55,7 +56,7 @@ void Engine::LoadTexture(Texture texture)
 	if (reload_texture_data)
 	{
 		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetDimensions(texture.GetDimensions());
-		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(GLTextureFormat::RGB, std::vector<const void*>({ texture.GetData() }));
+		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(GLTextureFormat_Colour(3, GLTextureType::UnsignedByte), std::vector<const void*>({ texture.GetData() }));
 	}
 }
 

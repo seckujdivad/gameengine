@@ -48,7 +48,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 				{
 					preset = GLTexture::Preset::Data_LowP;
 				}
-				this->colour.push_back(GLTexture(preset, target));
+				this->colour.push_back(GLTexture(preset, target, 4));
 			}
 		}
 		else
@@ -79,7 +79,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			{
 				preset = GLTexture::Preset::Data_LowP;
 			}
-			this->colour.push_back(GLTexture(preset, target));
+			this->colour.push_back(GLTexture(preset, target, 4));
 		}
 		this->depth = GLTexture(GLTexture::Preset::Depth, target);
 	}

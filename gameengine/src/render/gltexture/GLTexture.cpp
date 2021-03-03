@@ -115,33 +115,43 @@ GLint GLTexture::GetPreferredFormat(bool force)
 	return this->m_preferred_format;
 }
 
-void GLTexture::SetPreset(Preset preset, bool configure)
+void GLTexture::SetPreset(Preset preset, std::optional<int> num_channels, bool configure)
 {
+	int actual_num_channels;
+	if (num_channels.has_value())
+	{
+		actual_num_channels = num_channels.value();
+	}
+	else
+	{
+		actual_num_channels = 4;
+	}
+
 	if (preset == Preset::Colour)
 	{
 		this->m_type = GLTextureType::UnsignedByte;
-		this->m_format = GLTextureFormat::RGBA;
+		this->m_format = GLTextureFormat_Colour(actual_num_channels, this->m_type);
 		this->m_filtering_min = TextureFiltering::Linear;
 		this->m_filtering_mag = TextureFiltering::Linear;
 	}
 	else if (preset == Preset::Data_MediumP)
 	{
 		this->m_type = GLTextureType::HalfFloat;
-		this->m_format = GLTextureFormat::RGBA16F;
+		this->m_format = GLTextureFormat_Colour(actual_num_channels, this->m_type, 16);
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Data_LowP)
 	{
 		this->m_type = GLTextureType::UnsignedByte;
-		this->m_format = GLTextureFormat::RGBA;
+		this->m_format = GLTextureFormat_Colour(actual_num_channels, this->m_type, 8);
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
 	else if (preset == Preset::Depth)
 	{
 		this->m_type = GLTextureType::Float;
-		this->m_format = GLTextureFormat::Depth;
+		this->m_format = GLTextureFormat_Depth();
 		this->m_filtering_min = TextureFiltering::Nearest;
 		this->m_filtering_mag = TextureFiltering::Nearest;
 	}
@@ -151,13 +161,13 @@ void GLTexture::SetPreset(Preset preset, bool configure)
 	}
 }
 
-GLTexture::GLTexture(Preset preset, TargetType target, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps)
+GLTexture::GLTexture(Preset preset, TargetType target, std::optional<int> num_channels, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type))
 {
-	this->SetPreset(preset, false);
+	this->SetPreset(preset, num_channels, false);
 	this->ConfigureTexture(true);
 }
 
-GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps)
+GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type))
 {
 	this->SetPixels(preset);
 }
@@ -166,7 +176,7 @@ GLTexture::GLTexture(GLTexturePreset preset, bool generate_mipmaps) : GLTexture(
 {
 }
 
-GLTexture::GLTexture(const GLTexture& copy_from)
+GLTexture::GLTexture(const GLTexture& copy_from) : m_format(copy_from.m_format)
 {
 	*this = copy_from;
 }
@@ -178,7 +188,7 @@ GLTexture& GLTexture::operator=(const GLTexture& copy_from)
 	return *this;
 }
 
-GLTexture::GLTexture(GLTexture&& move_from) noexcept
+GLTexture::GLTexture(GLTexture&& move_from) noexcept : m_format(std::move(move_from.m_format))
 {
 	*this = std::move(move_from);
 }
@@ -341,7 +351,7 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 	{
 		this->SetDimensions(std::tuple(1, 1));
 
-		this->SetPreset(Preset::Colour);
+		this->SetPreset(Preset::Colour, 3);
 		std::vector<unsigned char> black_texture; //make sure it stays allocated
 		black_texture.reserve(3);
 		for (int i = 0; i < 3; i++)
@@ -355,7 +365,7 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 			pixel_arrays.push_back(black_texture.data());
 		}
 
-		this->SetPixels(GLTextureFormat::RGB, pixel_arrays);
+		this->SetPixels(GLTextureFormat_Colour(3, GLTextureType::UnsignedByte), pixel_arrays);
 	}
 	else if (preset == GLTextureDataPreset::ZeroDepth)
 	{
@@ -372,7 +382,7 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 			pixel_arrays.push_back(zerodepth_texture.data());
 		}
 
-		this->SetPixels(GLTextureFormat::Depth, pixel_arrays);
+		this->SetPixels(GLTextureFormat_Depth(), pixel_arrays);
 	}
 	else
 	{

@@ -2,17 +2,28 @@
 
 #include "../../GLComponents.h"
 
-enum class GLTextureFormat
+#include <variant>
+
+enum class GLTextureType;
+
+struct GLTextureFormat_Colour
 {
-	Depth,
-	R,
-	RG,
-	RGB,
-	RGBA,
-	RGB8,
-	RGBA16F,
-	RGBA32F
+	GLTextureFormat_Colour(int num_channels, GLTextureType type, int bit_depth = 0);
+
+	int num_channels;
+	GLTextureType type;
+	int bit_depth;
+
+	bool operator==(const GLTextureFormat_Colour& compare) const;
+	bool operator!=(const GLTextureFormat_Colour& compare) const;
 };
 
-GLTextureFormat GetTextureFormat(GLint format);
+struct GLTextureFormat_Depth
+{
+	bool operator==(const GLTextureFormat_Depth& compare) const;
+	bool operator!=(const GLTextureFormat_Depth& compare) const;
+};
+
+using GLTextureFormat = std::variant<GLTextureFormat_Colour, GLTextureFormat_Depth>;
+
 GLint GetTextureFormatEnum(GLTextureFormat format);
