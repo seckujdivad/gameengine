@@ -12,6 +12,29 @@ GLint GetTextureFormatEnum(GLTextureFormat format)
 	if (format.index() == 0)
 	{
 		GLTextureFormat_Colour& format_data = std::get<GLTextureFormat_Colour>(format);
+
+		if (format_data.num_channels < 1 || format_data.num_channels > 4)
+		{
+			throw std::invalid_argument("\"num_channels\" must be in range [1, 4]");
+		}
+
+		if (format_data.bit_depth != 0
+			&& format_data.bit_depth != 4
+			&& format_data.bit_depth != 8
+			&& format_data.bit_depth != 16
+			&& format_data.bit_depth != 32)
+		{
+			throw std::invalid_argument("\"bit_depth\" must be in set {0, 4, 8, 16, 32}");
+		}
+
+		if (format_data.type != GLTextureType::Float
+			&& format_data.type != GLTextureType::HalfFloat
+			&& format_data.type != GLTextureType::UnsignedByte
+			&& format_data.type != GLTextureType::Integer)
+		{
+			throw std::invalid_argument("\"type\" must be in set {Float, HalfFloat, UnsignedByte, Integer}");
+		}
+
 		return GetTextureFormatEnum(format_data.num_channels, format_data.type, format_data.bit_depth);
 	}
 	else
