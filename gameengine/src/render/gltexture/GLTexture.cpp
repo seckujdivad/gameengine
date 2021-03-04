@@ -109,7 +109,7 @@ GLint GLTexture::GetPreferredFormat(bool force)
 
 		if (this->m_preferred_format == GL_NONE)
 		{
-			this->m_preferred_format = GetTextureFormatEnum(this->GetFormat());
+			this->m_preferred_format = GetSimpleTextureFormatEnum(this->GetFormat());
 		}
 	}
 	return this->m_preferred_format;
