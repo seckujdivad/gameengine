@@ -43,6 +43,27 @@ GLint GetTextureFormatEnum(GLTextureFormat format)
 	}
 }
 
+GLint GetSimpleTextureFormatEnum(GLTextureFormat format)
+{
+	if (format.index() == 0)
+	{
+		GLTextureFormat_Colour& format_data = std::get<GLTextureFormat_Colour>(format);
+
+		switch (format_data.num_channels)
+		{
+		case 1: return GL_RED;
+		case 2: return GL_RG;
+		case 3: return GL_RGB;
+		case 4: return GL_RGBA;
+		default: throw std::invalid_argument("\"num_channels\" must be in range [1, 4]");
+		}
+	}
+	else
+	{
+		return GL_DEPTH_COMPONENT;
+	}
+}
+
 GLTextureFormat_Colour::GLTextureFormat_Colour(int num_channels, GLTextureType type, int bit_depth) : num_channels(num_channels), type(type), bit_depth(bit_depth)
 {
 }

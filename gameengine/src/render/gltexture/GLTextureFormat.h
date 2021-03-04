@@ -27,3 +27,4 @@ struct GLTextureFormat_Depth
 using GLTextureFormat = std::variant<GLTextureFormat_Colour, GLTextureFormat_Depth>;
 
 GLint GetTextureFormatEnum(GLTextureFormat format);
+GLint GetSimpleTextureFormatEnum(GLTextureFormat format);
