@@ -48,7 +48,14 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 				{
 					preset = GLTexture::Preset::Data_LowP;
 				}
-				this->colour.push_back(GLTexture(preset, target, 4));
+
+				int num_channels = 4;
+				if (i == 1 && mode == RenderTargetMode::Normal_DepthOnly)
+				{
+					num_channels = 1;
+				}
+
+				this->colour.push_back(GLTexture(preset, target, num_channels));
 			}
 		}
 		else
@@ -79,7 +86,14 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			{
 				preset = GLTexture::Preset::Data_LowP;
 			}
-			this->colour.push_back(GLTexture(preset, target, 4));
+
+			int num_channels = 4;
+			if (i == 1)
+			{
+				num_channels = 2;
+			}
+
+			this->colour.push_back(GLTexture(preset, target, num_channels));
 		}
 		this->depth = GLTexture(GLTexture::Preset::Depth, target);
 	}
