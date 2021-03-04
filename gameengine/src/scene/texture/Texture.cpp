@@ -31,7 +31,7 @@ void Texture::SetFullTexture(std::vector<glm::vec3> colour, std::tuple<int, int>
 
 	for (glm::vec3 pixel : colour)
 	{
-		for (glm::size_t i = 0; i < NUM_TEXTURE_CHANNELS; i++)
+		for (glm::length_t i = 0; i < NUM_TEXTURE_CHANNELS; i++)
 		{
 			texture.push_back(NormalisedFloatToByte(pixel[i]));
 		}
