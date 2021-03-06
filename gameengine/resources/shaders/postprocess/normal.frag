@@ -78,9 +78,9 @@ void main()
 	vec4 refl_intensity;
 	bool apply_refl_intensity;
 	{
-		vec4 tex_sample = SampleTarget(draw_frame[2], geomUV);
-		refl_intensity = vec4(tex_sample.rgb, 0.0f);
-		apply_refl_intensity = tex_sample.a > 0.5f;
+		vec2 tex_sample = SampleTarget(draw_frame[2], geomUV).rg;
+		refl_intensity = vec4(vec3(tex_sample.r), 0.0f);
+		apply_refl_intensity = tex_sample.g > 0.5f;
 	}
 
 	vec4 colour_sample =  SampleTarget(draw_frame[0], geomUV);

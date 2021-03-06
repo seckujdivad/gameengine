@@ -88,7 +88,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			}
 
 			int num_channels = 4;
-			if (i == 1)
+			if (i == 1 || i == 2)
 			{
 				num_channels = 2;
 			}

@@ -352,7 +352,7 @@ void main()
 	colour_out[1].xy = vec2(gl_FragCoord.xy / vec2(render_output_x, render_output_y));
 
 	//reflections
-	vec3 reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).rgb;
+	float reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).r;
 	bool ssr_reflection_applied = false;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
@@ -640,7 +640,7 @@ void main()
 			}
 			else
 			{
-				reflection_intensity = vec3(0.0f);
+				reflection_intensity = 0.0f;
 				reflection_colour = vec3(0.0f);
 			}
 		}
@@ -658,7 +658,7 @@ void main()
 
 	//pass on the reflection intensity
 	{
-		colour_out[2].rgb = reflection_intensity;
-		colour_out[2].a = float(ssr_reflection_applied);
+		colour_out[2].r = reflection_intensity;
+		colour_out[2].g = float(ssr_reflection_applied);
 	}
 }
