@@ -413,8 +413,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
 
-		this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
-		this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
+		this->m_shader_program->SetUniform("render_output_dimensions", glm::ivec2(std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize())));
 
 		if (render_output_valid)
 		{
@@ -869,8 +868,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"skyboxTexture",
 				"render_output_valid",
 				"render_output_depth",
-				"render_output_x",
-				"render_output_y"
+				"render_output_dimensions"
 				});
 
 			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)

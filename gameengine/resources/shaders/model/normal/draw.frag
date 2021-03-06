@@ -138,8 +138,7 @@ uniform samplerCube skyboxTexture;
 uniform bool render_output_valid;
 uniform sampler2D render_output_colour[NUM_NORMAL_DEPTHONLY_TEXTURES];
 uniform sampler2D render_output_depth;
-uniform int render_output_x;
-uniform int render_output_y;
+uniform ivec2 render_output_dimensions;
 
 //enums
 //ReflectionMode - scene/model/Reflection.h
@@ -349,7 +348,7 @@ void main()
 	colour_out[0] = vec4(frag_intensity, 1.0f) * colour_out[0];
 
 	//by default, this position should resample from itself
-	colour_out[1].xy = vec2(gl_FragCoord.xy / vec2(render_output_x, render_output_y));
+	colour_out[1].xy = vec2(gl_FragCoord.xy / render_output_dimensions);
 
 	//reflections
 	float reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).r;
@@ -422,10 +421,9 @@ void main()
 					const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
 
 					const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
-					const float divisor = (float(int(x_is_most_significant_direction) * render_output_x) * ss_direction.x)
-						+ (float(int(!x_is_most_significant_direction) * render_output_y) * ss_direction.y);
+					const vec2 divisors = render_output_dimensions * ss_direction.xy;
 
-					hit_increment = (2.0f * initial_pixel_stride) / abs(divisor);
+					hit_increment = (2.0f * initial_pixel_stride) / abs(divisors[int(!x_is_most_significant_direction)]);
 				}
 
 				/*
