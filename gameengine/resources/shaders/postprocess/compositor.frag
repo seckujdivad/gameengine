@@ -10,7 +10,7 @@
 
 layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
-in vec2 globalUV;
+in vec2 geomUV;
 
 uniform sampler2D layers_texture[COMPOSITE_LAYER_NUM];
 
@@ -27,7 +27,7 @@ void main()
 
 	for (int i = 0; i < COMPOSITE_LAYER_NUM; i++)
 	{
-		vec4 texture_sample = layers[i].colour_translate + (texture(layers_texture[i], globalUV) * layers[i].colour_scale);
+		vec4 texture_sample = layers[i].colour_translate + (texture(layers_texture[i], geomUV) * layers[i].colour_scale);
 
 		if (texture_sample.a > 0.0f)
 		{

@@ -293,7 +293,7 @@ bool RenderTarget::RenderModeIsModelRendering() const
 
 bool RenderTarget::RenderModeIsFSQuadRendering() const
 {
-	return !this->RenderModeIsModelRendering();
+	return !this->RenderModeIsModelRendering() && this->GetRenderMode() != RenderTargetMode::Default;
 }
 
 std::vector<Model*> RenderTarget::Render_GetModels_Model(std::vector<Model*> model_pool)
@@ -772,16 +772,20 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
 		}
 	}
-	else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+	else if (this->RenderModeIsFSQuadRendering())
 	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER), GL_FRAGMENT_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_VERTSHADER), GL_VERTEX_SHADER));
-	}
-	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
-	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_VERTSHADER), GL_VERTEX_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_DEFAULT_VERTSHADER), GL_VERTEX_SHADER));
+		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_DEFAULT_GEOMSHADER), GL_GEOMETRY_SHADER));
+		
+
+		if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+		{
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
+		else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+		{
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+		}
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
@@ -891,7 +895,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				});
 		}
 	}
-	else
+	else if (this->RenderModeIsFSQuadRendering())
 	{
 		if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 		{

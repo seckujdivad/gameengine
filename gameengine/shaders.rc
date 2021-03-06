@@ -1,12 +1,12 @@
 #include "resource.h"
 
 //postprocess
+RCID_TF_POSTPROCESS_DEFAULT_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/default.geom"
+RCID_TF_POSTPROCESS_DEFAULT_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/default.vert"
+
 RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/compositor.frag"
-RCID_TF_POSTPROCESS_COMPOSITOR_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/compositor.vert"
 
 RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/normal.frag"
-RCID_TF_POSTPROCESS_NORMAL_GEOMSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/normal.geom"
-RCID_TF_POSTPROCESS_NORMAL_VERTSHADER RCT_TEXTFILE "../gameengine/resources/shaders/postprocess/normal.vert"
 
 //default
 RCID_TF_DEFAULT_FRAGSHADER RCT_TEXTFILE "../gameengine/resources/shaders/default.frag"

@@ -334,10 +334,9 @@
     <None Include="resources\shaders\model\wireframe.frag" />
     <None Include="resources\shaders\model\wireframe.geom" />
     <None Include="resources\shaders\postprocess\compositor.frag" />
-    <None Include="resources\shaders\postprocess\compositor.vert" />
+    <None Include="resources\shaders\postprocess\default.geom" />
+    <None Include="resources\shaders\postprocess\default.vert" />
     <None Include="resources\shaders\postprocess\normal.frag" />
-    <None Include="resources\shaders\postprocess\normal.geom" />
-    <None Include="resources\shaders\postprocess\normal.vert" />
     <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
