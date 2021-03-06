@@ -117,7 +117,7 @@ Model* Scene::GetModel(std::string identifier) const
 	return nullptr;
 }
 
-std::vector<Model*> Scene::GetModels() const
+const std::vector<Model*>& Scene::GetModels() const
 {
 	return this->m_models;
 }
@@ -254,7 +254,7 @@ void Scene::Remove(PointLight* pointlight)
 	}
 }
 
-std::vector<PointLight*> Scene::GetPointLights() const
+const std::vector<PointLight*>& Scene::GetPointLights() const
 {
 	return this->m_pointlights;
 }
@@ -307,7 +307,7 @@ void Scene::Remove(Reflection* reflection)
 	}
 }
 
-std::vector<Reflection*> Scene::GetReflections() const
+const std::vector<Reflection*>& Scene::GetReflections() const
 {
 	return this->m_reflections;
 }
@@ -352,7 +352,7 @@ void Scene::Remove(Skybox* skybox)
 	}
 }
 
-std::vector<Skybox*> Scene::GetSkyboxes() const
+const std::vector<Skybox*>& Scene::GetSkyboxes() const
 {
 	return this->m_skyboxes;
 }
@@ -394,7 +394,7 @@ void Scene::Remove(VisBox* visbox)
 	}
 }
 
-std::vector<VisBox*> Scene::GetVisBoxes() const
+const std::vector<VisBox*>& Scene::GetVisBoxes() const
 {
 	return this->m_visboxes;
 }
@@ -510,7 +510,7 @@ void Scene::Remove(OrientedBoundingBox obb)
 	this->m_approximations.erase(std::find(this->m_approximations.begin(), this->m_approximations.end(), obb));
 }
 
-std::vector<OrientedBoundingBox> Scene::GetOBBApproximations() const
+const std::vector<OrientedBoundingBox>& Scene::GetOBBApproximations() const
 {
 	return this->m_approximations;
 }
