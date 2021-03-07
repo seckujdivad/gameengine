@@ -66,8 +66,9 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			this->Render_Setup_FlatQuad();
 		}
 
-		//cubemap uniforms
+		//global uniforms
 		this->m_shader_program->SetUniform("is_cubemap", this->GetTargetType() == TargetType::Texture_Cubemap);
+		this->m_shader_program->SetUniform("render_output_dimensions", glm::ivec2(std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize())));
 
 		switch (this->GetRenderMode())
 		{
@@ -412,8 +413,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
-
-		this->m_shader_program->SetUniform("render_output_dimensions", glm::ivec2(std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize())));
 
 		if (render_output_valid)
 		{

@@ -139,6 +139,7 @@ uniform bool render_output_valid;
 uniform sampler2D render_output_colour[NUM_NORMAL_DEPTHONLY_TEXTURES];
 uniform sampler2D render_output_depth;
 uniform ivec2 render_output_dimensions;
+uniform ivec2 render_ssr_region_dimensions;
 
 //enums
 //ReflectionMode - scene/model/Reflection.h
@@ -348,7 +349,7 @@ void main()
 	colour_out[0] = vec4(frag_intensity, 1.0f) * colour_out[0];
 
 	//by default, this position should resample from itself
-	colour_out[1].xy = vec2(gl_FragCoord.xy / render_output_dimensions);
+	colour_out[1].xy = vec2(0.0f);
 
 	//reflections
 	float reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).r;
@@ -644,8 +645,6 @@ void main()
 		}
 	}
 
-	colour_out[0] += vec4(reflection_intensity * reflection_colour, 0.0f);
-
 	//apply skybox
 	vec3 skybox_intensity = texture(skyboxMaskTexture, geomUV).rgb;
 	colour_out[0] *= vec4(1.0f - skybox_intensity, 1.0f);
@@ -656,7 +655,7 @@ void main()
 
 	//pass on the reflection intensity
 	{
-		colour_out[2].r = reflection_intensity;
-		colour_out[2].g = float(ssr_reflection_applied);
+		colour_out[2].rgb = reflection_colour;
+		colour_out[2].a = reflection_intensity;
 	}
 }

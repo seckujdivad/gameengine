@@ -25,6 +25,8 @@ in vec2 geomUV;
 uniform TARGET_TYPE draw_frame[NUM_NORMAL_DRAW_TEXTURES];
 uniform TARGET_TYPE draw_frame_depth;
 
+uniform ivec2 render_output_dimensions;
+
 vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 {
 #if TARGET_IS_CUBEMAP == 1
@@ -64,6 +66,8 @@ vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 
 void main()
 {
+	const vec2 QUARTER_PIXEL_THRESHOLD = vec2(0.25f / render_output_dimensions);
+	
 	const vec4 skybox_colour = vec4(vec3(0.0f), 0.0f); //transparent background
 
 	//get and write out depth
@@ -71,21 +75,60 @@ void main()
 	gl_FragDepth = depth;
 	bool resample_is_skybox = depth == 1.0f;
 
-	//get resample UV location
-	vec2 ssr_sample_uv = SampleTarget(draw_frame[1], geomUV).xy;
-
-	//sample the reflection intensity
-	vec4 refl_intensity;
-	bool apply_refl_intensity;
+	//get ssr sample
+	vec2 ssr_sample = SampleTarget(draw_frame[1], geomUV).xy;
+	bool ssr_hit_found = true;
+	if (all(lessThan(ssr_sample, QUARTER_PIXEL_THRESHOLD)))
 	{
-		vec2 tex_sample = SampleTarget(draw_frame[2], geomUV).rg;
-		refl_intensity = vec4(vec3(tex_sample.r), 0.0f);
-		apply_refl_intensity = tex_sample.g > 0.5f;
+		//do box sample of region
+		const vec2 float_dimensions = vec2(render_output_dimensions);
+		const vec2 pixel_pos = geomUV * float_dimensions;
+
+		//3x3 box sample
+		const int BOX_SAMPLE_SIZE = 3;
+		const int BOX_SAMPLE_RADIUS = BOX_SAMPLE_SIZE / 2;
+
+		int uv_samples_len = 0;
+		vec2 uv_samples[BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE];
+
+		for (int x = 0 - BOX_SAMPLE_RADIUS; x < BOX_SAMPLE_RADIUS + 1; x++)
+		{
+			for (int y = 0 - BOX_SAMPLE_RADIUS; y < BOX_SAMPLE_RADIUS + 1; y++)
+			{
+				vec2 pixel_offset = vec2(x, y);
+				vec2 sample_pos = (pixel_pos + pixel_offset) / float_dimensions;
+				vec2 uv_sample = SampleTarget(draw_frame[1], sample_pos).xy;
+				if (any(greaterThan(uv_sample, QUARTER_PIXEL_THRESHOLD))) //translate ssr sample
+				{
+					vec2 translated_sample = ((uv_sample * float_dimensions) - pixel_offset) / float_dimensions;
+					uv_samples[uv_samples_len] = translated_sample;
+					uv_samples_len++;
+				}
+			}
+		}
+
+		if (uv_samples_len == 0)
+		{
+			ssr_hit_found = false;
+		}
+		else
+		{
+			ssr_hit_found = true;
+
+			vec2 uv_samples_average = vec2(0.0f);
+			for (int i = 0; i < uv_samples_len; i++)
+			{
+				uv_samples_average += uv_samples[i];
+			}
+			uv_samples_average /= uv_samples_len;
+		}
 	}
 
-	vec4 colour_sample =  SampleTarget(draw_frame[0], geomUV);
-	vec4 colour_resample =  SampleTarget(draw_frame[0], ssr_sample_uv);
-	vec4 final_sample = apply_refl_intensity ? colour_sample + (colour_resample * refl_intensity) : colour_resample;
+	//apply ssr sample if it exists
+	vec4 draw_frame_2_sample = SampleTarget(draw_frame[2], geomUV);
+	vec3 reflection_colour = mix(draw_frame_2_sample.rgb, SampleTarget(draw_frame[0], ssr_sample).rgb, ssr_hit_found);
+	float reflection_intensity = draw_frame_2_sample.a;
 
-	colour_out[0] = resample_is_skybox ? skybox_colour : final_sample;
+	//calculate final colour
+	colour_out[0].rgba = resample_is_skybox ? skybox_colour : SampleTarget(draw_frame[0], geomUV).rgba + vec4(reflection_colour * reflection_intensity, 0.0f);
 }
