@@ -85,42 +85,96 @@ void main()
 		const vec2 pixel_pos = geomUV * float_dimensions;
 
 		//3x3 box sample
-		const int BOX_SAMPLE_SIZE = 3;
+		const int BOX_SAMPLE_SIZE = 7;
 		const int BOX_SAMPLE_RADIUS = BOX_SAMPLE_SIZE / 2;
 
-		int uv_samples_len = 0;
-		vec2 uv_samples[BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE];
+		float best_sample_len = BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE;
+		vec2 best_sample = vec2(0.0f);
+
+		float angles[BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE];
+		int angles_len = 0;
 
 		for (int x = 0 - BOX_SAMPLE_RADIUS; x < BOX_SAMPLE_RADIUS + 1; x++)
 		{
 			for (int y = 0 - BOX_SAMPLE_RADIUS; y < BOX_SAMPLE_RADIUS + 1; y++)
 			{
 				vec2 pixel_offset = vec2(x, y);
+
 				vec2 sample_pos = (pixel_pos + pixel_offset) / float_dimensions;
 				vec2 uv_sample = SampleTarget(draw_frame[1], sample_pos).xy;
-				if (any(greaterThan(uv_sample, QUARTER_PIXEL_THRESHOLD))) //translate ssr sample
+
+				float sample_len = length(pixel_offset);
+
+				if ((sample_len < best_sample_len) && all(greaterThan(uv_sample, QUARTER_PIXEL_THRESHOLD))) //translate ssr sample
 				{
-					vec2 translated_sample = ((uv_sample * float_dimensions) - pixel_offset) / float_dimensions;
-					uv_samples[uv_samples_len] = translated_sample;
-					uv_samples_len++;
+					best_sample = uv_sample;
+					best_sample_len = sample_len;
+
+					float angle_cosine = dot(vec2(1.0f, 0.0f), pixel_offset) / sample_len;
+					float angle = acos(angle_cosine);
+					angle = y >= 0 ? angle : mod((0.0f - angle), radians(360));
+
+					angles[angles_len] = angle;
+					angles_len++;
 				}
 			}
 		}
 
-		if (uv_samples_len == 0)
+		if (angles_len == 0)
 		{
 			ssr_hit_found = false;
 		}
+		else if (angles_len == 1)
+		{
+			if (BOX_SAMPLE_SIZE > 1)
+			{
+				ssr_hit_found = false;
+			}
+			else
+			{
+				ssr_hit_found = true;
+				ssr_sample = best_sample;
+			}
+		}
 		else
 		{
-			ssr_hit_found = true;
-
-			vec2 uv_samples_average = vec2(0.0f);
-			for (int i = 0; i < uv_samples_len; i++)
+			bool region_is_large_enough = true;
+			if (angles_len < (BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE) / 2) //less than half of the region is made up of samples
 			{
-				uv_samples_average += uv_samples[i];
+				float max_neighbour_angle = 0.0f;
+				for (int i = 0; i < angles_len; i++)
+				{
+					float neighbour_angle = radians(360);
+					for (int j = 0; j < angles_len; j++)
+					{
+						if (i != j)
+						{
+							float angle_diff = abs(angles[i] - angles[j]);
+							if (angle_diff < neighbour_angle)
+							{
+								neighbour_angle = angle_diff;
+							}
+						}
+					}
+
+					if (neighbour_angle > max_neighbour_angle)
+					{
+						max_neighbour_angle = neighbour_angle;
+					}
+				}
+
+				region_is_large_enough = max_neighbour_angle > radians(180);
 			}
-			uv_samples_average /= uv_samples_len;
+
+			if (region_is_large_enough)
+			{
+				ssr_hit_found = true;
+				ssr_sample = best_sample;
+			}
+			else
+			{
+				ssr_hit_found = false;
+			}
 		}
 	}
 
