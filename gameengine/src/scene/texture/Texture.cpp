@@ -121,9 +121,9 @@ glm::vec3 Texture::GetPixel(int x, int y) const
 {
 	std::size_t index = this->GetPixelIndex(x, y);
 	return BytesToVec({
-		index,
-		index + 1,
-		index + 2
+		this->m_data.at(index),
+		this->m_data.at(index + 1),
+		this->m_data.at(index + 2)
 		});
 }
 
