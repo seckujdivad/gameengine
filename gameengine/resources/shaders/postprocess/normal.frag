@@ -180,7 +180,7 @@ void main()
 
 	//apply ssr sample if it exists
 	vec4 draw_frame_2_sample = SampleTarget(draw_frame[2], geomUV);
-	vec3 reflection_colour = mix(draw_frame_2_sample.rgb, SampleTarget(draw_frame[0], ssr_sample).rgb, ssr_hit_found);
+	vec3 reflection_colour = ssr_hit_found ? SampleTarget(draw_frame[0], ssr_sample).rgb : draw_frame_2_sample.rgb;
 	float reflection_intensity = draw_frame_2_sample.a;
 
 	//calculate final colour
