@@ -240,6 +240,7 @@
     <ClInclude Include="src\scene\SceneApproximation.h" />
     <ClInclude Include="src\scene\SceneChild.h" />
     <ClInclude Include="src\scene\Skybox.h" />
+    <ClInclude Include="src\scene\texture\Filters.h" />
     <ClInclude Include="src\scene\texture\Generators.h" />
     <ClInclude Include="src\scene\texture\Texture.h" />
     <ClInclude Include="src\scene\texture\TextureFiltering.h" />
@@ -305,6 +306,7 @@
     <ClCompile Include="src\scene\SceneApproximation.cpp" />
     <ClCompile Include="src\scene\SceneChild.cpp" />
     <ClCompile Include="src\scene\Skybox.cpp" />
+    <ClCompile Include="src\scene\texture\Filters.cpp" />
     <ClCompile Include="src\scene\texture\Generators.cpp" />
     <ClCompile Include="src\scene\texture\Texture.cpp" />
     <ClCompile Include="src\scene\texture\TextureFiltering.cpp" />

@@ -342,6 +342,9 @@
     <ClInclude Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.h">
       <Filter>Header Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\texture\Filters.h">
+      <Filter>Header Files\scene\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -532,6 +535,9 @@
     </ClCompile>
     <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp">
       <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\texture\Filters.cpp">
+      <Filter>Source Files\scene\texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
