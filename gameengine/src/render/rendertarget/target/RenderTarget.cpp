@@ -66,9 +66,12 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			this->Render_Setup_FlatQuad();
 		}
 
+		const auto& [output_size_x, output_size_y] = this->GetOutputSize();
+		glm::ivec2 output_size = glm::ivec2(output_size_x, output_size_y);
+
 		//global uniforms
 		this->m_shader_program->SetUniform("is_cubemap", this->GetTargetType() == TargetType::Texture_Cubemap);
-		this->m_shader_program->SetUniform("render_output_dimensions", glm::ivec2(std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize())));
+		this->m_shader_program->SetUniform("render_output_dimensions", output_size);
 
 		switch (this->GetRenderMode())
 		{
@@ -114,7 +117,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		}
 
 		//prepare viewport
-		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
+		glViewport(0, 0, output_size.x, output_size.y);
 
 		glm::vec4 clear_colour = this->m_engine->GetScene()->GetClearColour();
 		glClearColor(
