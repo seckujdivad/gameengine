@@ -285,6 +285,23 @@ float GetDistanceFromReflection(int index, float depth_sample)
 	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
 }
 
+float GetFrom4x4OrderedDitherMatrix(ivec2 pos)
+{
+	pos %= 4;
+	const float values[16] = float[16](
+		0.0f,	8.0f,	2.0f,	10.0f,
+		12.0f,	4.0f,	14.0f,	6.0f,
+		3.0f,	11.0f,	1.0f,	9.0f,
+		15.0f,	7.0f,	13.0f,	5.0f
+	);
+	return (1.0f / 16.0f) * (values[pos.x + (pos.y * 4)] + 0.5f);
+}
+
+bool DrawSSROnPixel(ivec2 pos, float percentage_fill) //https://en.wikipedia.org/wiki/Ordered_dithering
+{
+	return (percentage_fill + GetFrom4x4OrderedDitherMatrix(pos) - 0.5f) >= 0.5f;
+}
+
 void main()
 {
 	vec2 parallax_uv;
@@ -352,142 +369,141 @@ void main()
 	colour_out[1].xy = vec2(0.0f);
 
 	//reflections
+	const ivec2 PIXEL_COORDS = ivec2(gl_FragCoord.xy - vec2(0.5f));
+
 	float reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).r;
 	bool ssr_reflection_applied = false;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
-		if (render_output_valid && mat_ssr_enabled)
+		if (render_output_valid && mat_ssr_enabled && DrawSSROnPixel(PIXEL_COORDS, 0.5f) && length(geomCamSpacePos) < mat_ssr_max_distance)
 		{
-			if (length(geomCamSpacePos) < mat_ssr_max_distance) //don't draw ssr beyond mat_ssr_max_distance from camera
+			const vec3 direction = normalize(reflect(-fragtocam, normal)); //direction to trace the reflections in
+			const vec3 start_pos = geomSceneSpacePos; //position to start the trace from
+
+			//find end pos - this is where the ray leaves the screen
+			//use an adapted oriented bounding box algorithm in screen space to find this point
+			vec3 end_pos;
 			{
-				const vec3 direction = normalize(reflect(-fragtocam, normal)); //direction to trace the reflections in
-				const vec3 start_pos = geomSceneSpacePos; //position to start the trace from
+				const vec4 start = vec4(start_pos, 1.0f);
+				const vec4 translate = vec4(direction, 0.0f);
 
-				//find end pos - this is where the ray leaves the screen
-				//use an adapted oriented bounding box algorithm in screen space to find this point
-				vec3 end_pos;
+				const vec4 transformed_start = cam_transform * start;
+				const vec4 transformed_direction = cam_transform * translate;
+
+				float lambdas[2] = float[2](-1.0f, -1.0f);
+				int intersection_index = 0;
+
+				for (int i = 0; i < 3; i++)
 				{
-					const vec4 start = vec4(start_pos, 1.0f);
-					const vec4 translate = vec4(direction, 0.0f);
-
-					const vec4 transformed_start = cam_transform * start;
-					const vec4 transformed_direction = cam_transform * translate;
-
-					float lambdas[2] = float[2](-1.0f, -1.0f);
-					int intersection_index = 0;
-
-					for (int i = 0; i < 3; i++)
+					for (int j = 0; j < 2; j++)
 					{
-						for (int j = 0; j < 2; j++)
+						float pinned_value = (j == 0) ? -1.0f : 1.0f;
+
+						float lambda = ((pinned_value * transformed_start.w) - transformed_start[i])
+							/ (transformed_direction[i] - (pinned_value * transformed_direction.w));
+
+						vec3 position = PerspDiv(transformed_start + (lambda * transformed_direction));
+
+						vec2 other_components = vec2(position[(i + 1) % 3], position[(i + 2) % 3]);
+						if (all(greaterThan(other_components, vec2(-1.0f))) && all(lessThan(other_components, vec2(1.0f))))
 						{
-							float pinned_value = (j == 0) ? -1.0f : 1.0f;
-
-							float lambda = ((pinned_value * transformed_start.w) - transformed_start[i])
-								/ (transformed_direction[i] - (pinned_value * transformed_direction.w));
-
-							vec3 position = PerspDiv(transformed_start + (lambda * transformed_direction));
-
-							vec2 other_components = vec2(position[(i + 1) % 3], position[(i + 2) % 3]);
-							if (all(greaterThan(other_components, vec2(-1.0f))) && all(lessThan(other_components, vec2(1.0f))))
-							{
-								lambdas[intersection_index] = lambda;
-								intersection_index++;
-							}
+							lambdas[intersection_index] = lambda;
+							intersection_index++;
 						}
 					}
-
-					float lambda = mix(lambdas[0], lambdas[1], lambdas[0] < lambdas[1]);
-					lambda = min(lambda, mat_ssr_max_cast_distance);
-					end_pos = start.xyz + (lambda * direction.xyz);
 				}
 
-				//apply perspective transformation to start and end points
-				const vec3 ss_start_pos = PerspDiv(cam_transform * vec4(start_pos, 1.0f));
-				const vec3 ss_end_pos = PerspDiv(cam_transform * vec4(end_pos, 1.0f));
+				float lambda = mix(lambdas[0], lambdas[1], lambdas[0] < lambdas[1]);
+				lambda = min(lambda, mat_ssr_max_cast_distance);
+				end_pos = start.xyz + (lambda * direction.xyz);
+			}
 
-				const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
+			//apply perspective transformation to start and end points
+			const vec3 ss_start_pos = PerspDiv(cam_transform * vec4(start_pos, 1.0f));
+			const vec3 ss_end_pos = PerspDiv(cam_transform * vec4(end_pos, 1.0f));
 
-				int search_level = mat_ssr_refinements; //number of levels of precision that can be dropped through before any hits become final
+			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
 
-				const float num_searches_on_refine = 2.0f; //number of searches to 
-				float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, mat_ssr_refinements);
+			int search_level = mat_ssr_refinements; //number of levels of precision that can be dropped through before any hits become final
+
+			const float num_searches_on_refine = 2.0f; //number of searches to 
+			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, mat_ssr_refinements);
 				
+			/*
+			Calculate the hit increment so that each step moves by initial_pixel_stride in one axis
+			and by less in the other (XY screen space). If initial_pixel_stride == 1, this essentially
+			becomes floating point Bresenham.
+			*/
+			float hit_increment;
+			{
+				const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
+
+				const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
+				const vec2 divisors = render_output_dimensions * ss_direction.xy;
+
+				hit_increment = (2.0f * initial_pixel_stride) / abs(divisors[int(!x_is_most_significant_direction)]);
+			}
+
+			/*
+			Traces a ray in the screen space, checking at regular intervals if that pixel's depth is in range
+			If it is, this counts as a hit. On a hit, the size of the intervals and the acceptance range are both
+			decreased. Also, the ray position moves back one interval. If another hit is found before twice the
+			original interval is traversed, the search is refined again. If not, the search goes back to being less
+			precise. Once the search level reaches 0, any hits found become the final result.
+			*/
+
+			vec3 ss_position = ss_start_pos; //current ray positon in screen space
+			float hit_pos = 0.0f; //fraction of the length of the ray covered
+			int increments_at_this_level = 0; //tracks the number of increments that have taken place since the search level was last changed
+
+			vec2 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
+			while (!ssr_reflection_applied && hit_pos < 1.0f) //repeat until either the ray reaches the edge of the screen or a reflection hit is found
+			{
+				//convert screen space position to use texture UV space coordinates
+				tex_pos = (ss_position.xy * 0.5f) + 0.5f;
+				const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
+				const float depth_diff = abs(GetDistanceFromDepth(sample_depth, cam_clip_near, cam_clip_far) - GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far));
+
+				if ((depth_diff <= depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
+				{
+					//if the search increment is as small as is allowed then use this hit as the final location
+					ssr_reflection_applied = search_level == 0;
+
+					//make the search finer
+					hit_pos -= hit_increment;
+					hit_increment /= num_searches_on_refine;
+					depth_acceptance /= num_searches_on_refine;
+					search_level -= 1;
+					increments_at_this_level = 0;
+				}
+
+				increments_at_this_level++;
+
 				/*
-				Calculate the hit increment so that each step moves by initial_pixel_stride in one axis
-				and by less in the other (XY screen space). If initial_pixel_stride == 1, this essentially
-				becomes floating point Bresenham.
+				No hits have been found at this level in 2x the length of the next largest interval
+				length - increase the level by 1 as the last hit was likely a near miss instead of
+				a true hit.
 				*/
-				float hit_increment;
+				if (search_level != mat_ssr_refinements && increments_at_this_level - 1 > 2 * int(num_searches_on_refine))
 				{
-					const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
-
-					const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
-					const vec2 divisors = render_output_dimensions * ss_direction.xy;
-
-					hit_increment = (2.0f * initial_pixel_stride) / abs(divisors[int(!x_is_most_significant_direction)]);
+					hit_increment *= num_searches_on_refine;
+					depth_acceptance *= num_searches_on_refine;
+					search_level += 1;
+					increments_at_this_level = 0;
 				}
 
-				/*
-				Traces a ray in the screen space, checking at regular intervals if that pixel's depth is in range
-				If it is, this counts as a hit. On a hit, the size of the intervals and the acceptance range are both
-				decreased. Also, the ray position moves back one interval. If another hit is found before twice the
-				original interval is traversed, the search is refined again. If not, the search goes back to being less
-				precise. Once the search level reaches 0, any hits found become the final result.
-				*/
+				//find screen space position of next test
+				hit_pos += hit_increment;
 
-				vec3 ss_position = ss_start_pos; //current ray positon in screen space
-				float hit_pos = 0.0f; //fraction of the length of the ray covered
-				int increments_at_this_level = 0; //tracks the number of increments that have taken place since the search level was last changed
+				//linearly interpolate position in screen space - see source list
+				ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
+				ss_position.z = 1.0f / mix(1.0f / ss_start_pos.z, 1.0f / ss_end_pos.z, hit_pos);
+			}
 
-				vec2 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
-				while (!ssr_reflection_applied && hit_pos < 1.0f) //repeat until either the ray reaches the edge of the screen or a reflection hit is found
-				{
-					//convert screen space position to use texture UV space coordinates
-					tex_pos = (ss_position.xy * 0.5f) + 0.5f;
-					const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
-					const float depth_diff = abs(GetDistanceFromDepth(sample_depth, cam_clip_near, cam_clip_far) - GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far));
-
-					if ((depth_diff <= depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
-					{
-						//if the search increment is as small as is allowed then use this hit as the final location
-						ssr_reflection_applied = search_level == 0;
-
-						//make the search finer
-						hit_pos -= hit_increment;
-						hit_increment /= num_searches_on_refine;
-						depth_acceptance /= num_searches_on_refine;
-						search_level -= 1;
-						increments_at_this_level = 0;
-					}
-
-					increments_at_this_level++;
-
-					/*
-					No hits have been found at this level in 2x the length of the next largest interval
-					length - increase the level by 1 as the last hit was likely a near miss instead of
-					a true hit.
-					*/
-					if (search_level != mat_ssr_refinements && increments_at_this_level - 1 > 2 * int(num_searches_on_refine))
-					{
-						hit_increment *= num_searches_on_refine;
-						depth_acceptance *= num_searches_on_refine;
-						search_level += 1;
-						increments_at_this_level = 0;
-					}
-
-					//find screen space position of next test
-					hit_pos += hit_increment;
-
-					//linearly interpolate position in screen space - see source list
-					ss_position.xy = mix(ss_start_pos.xy, ss_end_pos.xy, hit_pos);
-					ss_position.z = 1.0f / mix(1.0f / ss_start_pos.z, 1.0f / ss_end_pos.z, hit_pos);
-				}
-
-				if (ssr_reflection_applied)
-				{
-					colour_out[1].xy = tex_pos.xy; //set the position on screen to resample from
-					reflection_colour = vec3(0.0f);
-				}
+			if (ssr_reflection_applied)
+			{
+				colour_out[1].xy = tex_pos.xy; //set the position on screen to resample from
+				reflection_colour = vec3(0.0f);
 			}
 		}
 
