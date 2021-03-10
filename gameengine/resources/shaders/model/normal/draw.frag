@@ -651,8 +651,6 @@ void main()
 	colour_out[0].a = 1.0f;
 
 	//pass on the reflection intensity
-	{
-		colour_out[2].rgb = reflection_colour;
-		colour_out[2].a = reflection_intensity;
-	}
+	colour_out[2].rgb = reflection_colour;
+	colour_out[2].a = reflection_intensity;
 }
