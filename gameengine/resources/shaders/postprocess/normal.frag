@@ -27,6 +27,10 @@ uniform TARGET_TYPE draw_frame_depth;
 
 uniform ivec2 render_output_dimensions;
 
+const int BOX_SAMPLE_SIZE = 7;
+const int BOX_SAMPLE_RADIUS = BOX_SAMPLE_SIZE / 2;
+const int BOX_SAMPLE_AREA = BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE;
+
 vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 {
 #if TARGET_IS_CUBEMAP == 1
@@ -85,13 +89,10 @@ void main()
 		const vec2 pixel_pos = geomUV * float_dimensions;
 
 		//3x3 box sample
-		const int BOX_SAMPLE_SIZE = 7;
-		const int BOX_SAMPLE_RADIUS = BOX_SAMPLE_SIZE / 2;
-
-		float best_sample_len = BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE;
+		float best_sample_len = float(BOX_SAMPLE_AREA);
 		vec2 best_sample = vec2(0.0f);
 
-		float angles[BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE];
+		float angles[BOX_SAMPLE_AREA];
 		int angles_len = 0;
 
 		for (int x = 0 - BOX_SAMPLE_RADIUS; x < BOX_SAMPLE_RADIUS + 1; x++)
@@ -139,7 +140,7 @@ void main()
 		else
 		{
 			bool region_is_large_enough = true;
-			if (angles_len < (BOX_SAMPLE_SIZE * BOX_SAMPLE_SIZE) / 2) //less than half of the region is made up of samples
+			if (angles_len < BOX_SAMPLE_AREA / 2) //less than half of the region is made up of samples
 			{
 				float max_neighbour_angle = 0.0f;
 				for (int i = 0; i < angles_len; i++)
