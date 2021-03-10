@@ -529,6 +529,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		//screen space reflections
 		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == TargetType::Texture_2D));
 		this->m_shader_program->SetUniform("mat_ssr_resolution", material.ssr.resolution);
+		this->m_shader_program->SetUniform("mat_ssr_resolution_max_falloff", material.ssr.resolution_max_falloff);
 		this->m_shader_program->SetUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
 		this->m_shader_program->SetUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
 		this->m_shader_program->SetUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);

@@ -81,6 +81,7 @@ uniform bool mat_displacement_discard_out_of_range;
 // screen space reflections
 uniform bool mat_ssr_enabled;
 uniform float mat_ssr_resolution;
+uniform float mat_ssr_resolution_max_falloff;
 uniform float mat_ssr_max_distance;
 uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
@@ -454,7 +455,8 @@ void main()
 
 			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
 
-			int search_level = mat_ssr_refinements; //number of levels of precision that can be dropped through before any hits become final
+			int initial_search_level = mat_ssr_refinements; //number of levels of precision that can be dropped through before any hits become final
+			int search_level = initial_search_level;
 
 			const float num_searches_on_refine = 2.0f; //number of searches to 
 			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, mat_ssr_refinements);
@@ -466,7 +468,7 @@ void main()
 			*/
 			float hit_increment;
 			{
-				const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
+				const float initial_pixel_stride = mix(mat_ssr_resolution_max_falloff, 1.0f, SampleTarget(render_ssr_quality, ss_start_pos.xy).r) * mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
 
 				const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
 				const vec2 divisors = render_output_dimensions * ss_direction.xy;
@@ -514,7 +516,7 @@ void main()
 				length - increase the level by 1 as the last hit was likely a near miss instead of
 				a true hit.
 				*/
-				if (search_level != mat_ssr_refinements && increments_at_this_level - 1 > 2 * int(num_searches_on_refine))
+				if (search_level != initial_search_level && increments_at_this_level - 1 > 2 * int(num_searches_on_refine))
 				{
 					hit_increment *= num_searches_on_refine;
 					depth_acceptance *= num_searches_on_refine;
