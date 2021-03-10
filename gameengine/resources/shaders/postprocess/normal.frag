@@ -77,8 +77,8 @@ void main()
 
 	//get ssr sample
 	vec2 ssr_sample = SampleTarget(draw_frame[1], geomUV).xy;
-	bool ssr_hit_found = true;
-	if (all(lessThan(ssr_sample, QUARTER_PIXEL_THRESHOLD)))
+	bool ssr_hit_found = any(greaterThan(ssr_sample, QUARTER_PIXEL_THRESHOLD));
+	if (!ssr_hit_found)
 	{
 		//do box sample of region
 		const vec2 float_dimensions = vec2(render_output_dimensions);
