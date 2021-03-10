@@ -285,23 +285,6 @@ float GetDistanceFromReflection(int index, float depth_sample)
 	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
 }
 
-float GetFrom4x4OrderedDitherMatrix(ivec2 pos)
-{
-	pos %= 4;
-	const float values[16] = float[16](
-		0.0f,	8.0f,	2.0f,	10.0f,
-		12.0f,	4.0f,	14.0f,	6.0f,
-		3.0f,	11.0f,	1.0f,	9.0f,
-		15.0f,	7.0f,	13.0f,	5.0f
-	);
-	return (1.0f / 16.0f) * (values[pos.x + (pos.y * 4)] + 0.5f);
-}
-
-bool DrawSSROnPixel(ivec2 pos, float percentage_fill) //https://en.wikipedia.org/wiki/Ordered_dithering
-{
-	return (percentage_fill + GetFrom4x4OrderedDitherMatrix(pos) - 0.5f) >= 0.5f;
-}
-
 void main()
 {
 	vec2 parallax_uv;
@@ -369,13 +352,11 @@ void main()
 	colour_out[1].xy = vec2(0.0f);
 
 	//reflections
-	const ivec2 PIXEL_COORDS = ivec2(gl_FragCoord.xy - vec2(0.5f));
-
 	float reflection_intensity = texture(reflectionIntensityTexture, parallax_uv).r;
 	bool ssr_reflection_applied = false;
 	vec3 reflection_colour = vec3(0.0f, 0.0f, 0.0f);
 	{
-		if (render_output_valid && mat_ssr_enabled && DrawSSROnPixel(PIXEL_COORDS, 0.5f) && length(geomCamSpacePos) < mat_ssr_max_distance)
+		if (render_output_valid && mat_ssr_enabled && length(geomCamSpacePos) < mat_ssr_max_distance)
 		{
 			const vec3 direction = normalize(reflect(-fragtocam, normal)); //direction to trace the reflections in
 			const vec3 start_pos = geomSceneSpacePos; //position to start the trace from
