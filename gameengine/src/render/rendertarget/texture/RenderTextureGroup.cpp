@@ -4,6 +4,7 @@
 
 #include "../target/RenderTargetMode.h"
 #include "../../TargetType.h"
+#include "../../../scene/texture/TextureFiltering.h"
 
 const GLTexture& RenderTextureGroup::GetATexture() const
 {
@@ -99,7 +100,9 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 	}
 	else if (mode == RenderTargetMode::Normal_SSRQuality)
 	{
-		this->colour.push_back(GLTexture(GLTexture::Preset::Data_LowP, target, GetNumAttachedColourTextures(RenderTargetMode::Normal_SSRQuality)));
+		GLTexture texture = GLTexture(GLTexture::Preset::Data_LowP, target, GetNumAttachedColourTextures(RenderTargetMode::Normal_SSRQuality));
+		texture.SetFiltering(TextureFiltering::Linear);
+		this->colour.push_back(texture);
 	}
 	else
 	{
