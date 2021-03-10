@@ -606,5 +606,8 @@
     <None Include="resources\shaders\postprocess\normal.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
+    <None Include="resources\shaders\postprocess\normal_ssrquality.frag">
+      <Filter>Resource Files\shaders\postprocess</Filter>
+    </None>
   </ItemGroup>
 </Project>

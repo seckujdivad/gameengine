@@ -15,7 +15,7 @@ private:
 	double m_fov = 45.0;
 	std::tuple<double, double> m_clips = std::tuple(0.1, 100.0);
 	std::tuple<int, int> m_viewport_dimensions = std::tuple(1, 1);
-	glm::ivec2 m_ssr_region_dimensions = glm::ivec2(2, 2);
+	glm::ivec2 m_ssr_region_dimensions = glm::ivec2(1, 1);
 
 public:
 	Camera();

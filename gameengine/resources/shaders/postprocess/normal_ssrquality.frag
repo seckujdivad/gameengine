@@ -66,24 +66,5 @@ vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 
 void main()
 {
-	const vec2 QUARTER_PIXEL_THRESHOLD = vec2(0.25f / render_output_dimensions);
-	
-	const vec4 skybox_colour = vec4(vec3(0.0f), 0.0f); //transparent background
-
-	//get and write out depth
-	float depth = SampleTarget(draw_frame_depth, geomUV).r;
-	gl_FragDepth = depth;
-	bool resample_is_skybox = depth == 1.0f;
-
-	//get ssr sample
-	vec2 ssr_sample = SampleTarget(draw_frame[1], geomUV).xy;
-	bool ssr_hit_found = any(greaterThan(ssr_sample, QUARTER_PIXEL_THRESHOLD));
-
-	//apply ssr sample if it exists
-	vec4 draw_frame_2_sample = SampleTarget(draw_frame[2], geomUV);
-	vec3 reflection_colour = ssr_hit_found ? SampleTarget(draw_frame[0], ssr_sample).rgb : draw_frame_2_sample.rgb;
-	float reflection_intensity = draw_frame_2_sample.a;
-
-	//calculate final colour
-	colour_out[0].rgba = resample_is_skybox ? skybox_colour : SampleTarget(draw_frame[0], geomUV).rgba + vec4(reflection_colour * reflection_intensity, 0.0f);
+	colour_out[0].r = 1.0f;
 }

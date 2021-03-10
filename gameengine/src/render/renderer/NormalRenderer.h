@@ -12,6 +12,7 @@ class NormalRenderer : public Renderer
 private:
 	std::unique_ptr<RenderTexture> m_rt_depth_only;
 	std::unique_ptr<RenderTexture> m_rt_draw;
+	std::unique_ptr<RenderTexture> m_rt_ssrquality;
 
 public:
 	NormalRenderer(Engine* engine, RenderTarget* target);
@@ -25,4 +26,5 @@ public:
 
 	RenderTexture* GetDepthOnlyTarget() const;
 	RenderTexture* GetDrawTarget() const;
+	RenderTexture* GetSSRQualityTarget() const;
 };

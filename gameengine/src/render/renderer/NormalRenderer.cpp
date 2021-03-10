@@ -8,6 +8,8 @@
 #include "../rendertarget/texture/RenderTexture.h"
 #include "../rendertarget/texture/RenderTextureGroup.h"
 
+#include "../../scene/Camera.h"
+
 NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {
 	if (this->GetTarget()->GetRenderMode() != RenderTargetMode::Normal_PostProcess)
@@ -44,9 +46,25 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 	}
 
 	{
+		RenderTargetConfig config;
+		config.SetMode(RenderTargetMode::Normal_SSRQuality);
+		std::get<RenderTargetConfig::Normal_SSRQuality>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
+
+		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
+
+		this->m_rt_ssrquality = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+	}
+
+	{
 		RenderTargetConfig config = this->GetTarget()->GetConfig();
 		std::get<RenderTargetConfig::Normal_PostProcess>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
 		this->GetTarget()->SetConfig(config);
+	}
+
+	{
+		RenderTargetConfig config = this->GetDrawTarget()->GetConfig();
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).ssr_quality_frame = this->GetSSRQualityTarget()->GetOutputTextures();
+		this->GetDrawTarget()->SetConfig(config);
 	}
 }
 
@@ -54,6 +72,18 @@ bool NormalRenderer::SetOutputSize(std::tuple<int, int> dimensions)
 {
 	this->m_rt_depth_only->SetOutputSize(dimensions);
 	this->m_rt_draw->SetOutputSize(dimensions);
+
+	Camera* camera = this->GetTarget()->GetCamera();
+	std::tuple<int, int> ssr_quality_dimensions = std::tuple<int, int>(1, 1);
+	if (camera != nullptr)
+	{
+		glm::ivec2 ssr_region_size = camera->GetSSRRegionDimensions();
+		glm::ivec2 ssr_texture_size = glm::ivec2(glm::vec2(std::get<0>(dimensions), std::get<1>(dimensions)) / glm::vec2(ssr_region_size));
+		ssr_quality_dimensions = std::tuple<int, int>(std::max(ssr_texture_size.x, 1), std::max(ssr_texture_size.y, 1));
+	}
+
+	this->m_rt_ssrquality->SetOutputSize(ssr_quality_dimensions);
+
 	return this->GetTarget()->SetOutputSize(dimensions);
 }
 
@@ -71,6 +101,7 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 		{
 			this->GetDepthOnlyTarget()->CopyFrom(src_renderer->GetDepthOnlyTarget());
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
+			this->GetSSRQualityTarget()->CopyFrom(src_renderer->GetSSRQualityTarget());
 			this->GetTarget()->CopyFrom(src_renderer->GetTarget());
 		}
 	}
@@ -88,6 +119,11 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 	{
 		std::unordered_set<RenderTextureReference> postprocess_references = this->GetTarget()->GetRenderTextureDependencies();
 		references.insert(postprocess_references.begin(), postprocess_references.end());
+	}
+
+	{
+		std::unordered_set<RenderTextureReference> ssr_quality_references = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
+		references.insert(ssr_quality_references.begin(), ssr_quality_references.end());
 	}
 
 	return references;
@@ -119,6 +155,7 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_depth_only->GetWriteTextures()->depth.value().CopyTo(this->m_rt_draw->GetWriteTextures()->depth.value());
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
+	this->GetSSRQualityTarget()->Render(std::vector<Model*>(), continuous_draw);
 }
 
 RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
@@ -129,4 +166,9 @@ RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
 RenderTexture* NormalRenderer::GetDrawTarget() const
 {
 	return this->m_rt_draw.get();
+}
+
+RenderTexture* NormalRenderer::GetSSRQualityTarget() const
+{
+	return this->m_rt_ssrquality.get();
 }

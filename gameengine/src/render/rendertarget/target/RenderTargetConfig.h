@@ -20,8 +20,14 @@ struct RenderTargetConfig
 	struct Normal_Draw
 	{
 		std::shared_ptr<RenderTextureGroup> depth_frame;
+		std::shared_ptr<RenderTextureGroup> ssr_quality_frame;
 		bool draw_shadows = true;
 		bool draw_reflections = true;
+	};
+
+	struct Normal_SSRQuality
+	{
+		std::shared_ptr<RenderTextureGroup> draw_frame;
 	};
 
 	struct Normal_PostProcess
@@ -55,7 +61,7 @@ struct RenderTargetConfig
 
 	};
 
-	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Normal_PostProcess, Wireframe, Shadow, PostProcess, Textured>;
+	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Normal_SSRQuality, Normal_PostProcess, Wireframe, Shadow, PostProcess, Textured>;
 
 	RenderTargetConfig();
 	RenderTargetConfig(RenderTargetMode mode, ModeData mode_data);

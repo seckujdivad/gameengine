@@ -339,6 +339,7 @@
     <None Include="resources\shaders\postprocess\default.geom" />
     <None Include="resources\shaders\postprocess\default.vert" />
     <None Include="resources\shaders\postprocess\normal.frag" />
+    <None Include="resources\shaders\postprocess\normal_ssrquality.frag" />
     <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

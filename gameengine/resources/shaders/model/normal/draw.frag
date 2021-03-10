@@ -29,6 +29,16 @@
 #define SUPPORT_DISPLACEMENT_OUT_OF_RANGE_DISCARDING 1
 #endif
 
+#if !defined(TARGET_IS_CUBEMAP)
+#define TARGET_IS_CUBEMAP 1
+#endif
+
+#if TARGET_IS_CUBEMAP == 1
+#define TARGET_TYPE samplerCube
+#else
+#define TARGET_TYPE sampler2D
+#endif
+
 //shader input-output
 layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
@@ -76,6 +86,8 @@ uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
 uniform bool mat_ssr_show_this;
 uniform int mat_ssr_refinements;
+
+uniform TARGET_TYPE render_ssr_quality;
 
 //textures
 uniform sampler2D colourTexture;
@@ -147,6 +159,43 @@ const int ReflectionModeIterative = 0;
 const int ReflectionModeOBB = 1;
 
 //functions
+
+vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
+{
+#if TARGET_IS_CUBEMAP == 1
+	vec3 cubemap_coords = vec3((coords - 0.5f) * 2.0f, 1.0f);
+
+	const vec3 axis_mults[6] = vec3[6](
+		vec3(-1.0f, -1.0f, 1.0f), //x+: flip x and y (face space), +x face
+		vec3(1.0f, -1.0f, -1.0f), //x-
+		vec3(1.0f, 1.0f, 1.0f), //y+
+		vec3(1.0f, -1.0f, -1.0f), //y-
+		vec3(1.0f, -1.0f, 1.0f), //z+
+		vec3(-1.0f, -1.0f, -1.0f) //z-
+	);
+
+	const ivec3 axis_remaps[6] = ivec3[6](
+		ivec3(2, 1, 0), //x+: res x = in z, res y = in y, res z = in x
+		ivec3(2, 1, 0), //x-
+		ivec3(0, 2, 1), //y+
+		ivec3(0, 2, 1), //y-
+		ivec3(0, 1, 2), //z+
+		ivec3(0, 1, 2) //z-
+	);
+
+	//mult is applied first, then remap
+	vec3 cubemap_coords_transformed = vec3(0.0f);
+	for (int i = 0; i < 3; i++)
+	{
+		int index = axis_remaps[gl_Layer][i];
+		cubemap_coords_transformed[i] = cubemap_coords[index] * axis_mults[gl_Layer][index];
+	}
+
+	return texture(to_sample, cubemap_coords_transformed);
+#else
+	return texture(to_sample, coords);
+#endif
+}
 
 vec3 PerspDiv(const vec4 vec)
 {

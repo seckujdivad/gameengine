@@ -97,6 +97,10 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 		}
 		this->depth = GLTexture(GLTexture::Preset::Depth, target);
 	}
+	else if (mode == RenderTargetMode::Normal_SSRQuality)
+	{
+		this->colour.push_back(GLTexture(GLTexture::Preset::Data_LowP, target, GetNumAttachedColourTextures(RenderTargetMode::Normal_SSRQuality)));
+	}
 	else
 	{
 		throw std::invalid_argument("Can't generate RenderTextureGroup for mode " + std::to_string(static_cast<int>(mode)));

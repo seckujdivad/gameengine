@@ -56,16 +56,15 @@ protected:
 	virtual void PreRenderEvent(); //happens just before rendering
 	virtual void PostRenderEvent(); //happens just after rendering (deferred to before the next render when continuous_draw = true
 
-	static bool RenderModeIsModelRendering(RenderTargetMode mode);
 	bool RenderModeIsModelRendering() const;
 	bool RenderModeIsFSQuadRendering() const;
 
 	//rendering stages
 	std::vector<Model*> Render_GetModels_Model(std::vector<Model*> model_pool);
 	void Render_Setup_Model(std::vector<Model*> models);
-	void Render_Setup_FlatQuad();
+	void Render_Setup_FSQuad();
 	void Render_ForEachModel_Model(Model* model);
-	void Render_ForEachModel_Quad(Model* model);
+	void Render_ForEachModel_FSQuad(Model* model);
 
 public:
 	RenderTarget(Engine* engine, RenderTargetConfig config);
@@ -81,6 +80,7 @@ public:
 	void SetConfig(RenderTargetConfig config);
 	void SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config);
 	void SetModeConfig(RenderTargetConfig::Normal_Draw mode_config);
+	void SetModeConfig(RenderTargetConfig::Normal_SSRQuality mode_config);
 	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
 	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
 	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);
