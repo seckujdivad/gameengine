@@ -25,6 +25,7 @@ in vec2 geomUV;
 uniform TARGET_TYPE draw_frame[NUM_NORMAL_DRAW_TEXTURES];
 uniform TARGET_TYPE draw_frame_depth;
 
+uniform ivec2 render_draw_output_dimensions;
 uniform ivec2 render_output_dimensions;
 
 vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
@@ -66,5 +67,42 @@ vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 
 void main()
 {
-	colour_out[0].r = 1.0f;
+	//calculate % ssr hits
+	// sample each pixel in region
+	//   if uv vector == 0.0f then skip
+	//   else if uv vector == -1.0f then increment attempt count
+	//   else increment attempt count and increment hit count
+
+	vec2 region_size_scr = 1.0f / vec2(render_output_dimensions);
+	vec2 region_radius_scr = region_size_scr / 2.0f;
+	ivec2 region_start = ivec2((geomUV - region_radius_scr) * render_draw_output_dimensions);
+	ivec2 region_end = ivec2((geomUV + region_radius_scr) * render_draw_output_dimensions);
+
+	const vec2 QUARTER_PIXEL_DRAW_DIMENSIONS = 0.25f / vec2(render_draw_output_dimensions);
+
+	int ssr_attempt_count = 0;
+	int ssr_hit_count = 0;
+
+	for (int x = region_start.x; x < region_end.x; x++)
+	{
+		for (int y = region_start.y; y < region_end.y; y++)
+		{
+			ivec2 pixel_vec = ivec2(x, y);
+			vec2 sample_vec = pixel_vec / render_draw_output_dimensions;
+			vec2 ssr_uv_sample = SampleTarget(draw_frame[1], sample_vec).xy;
+
+			if (all(lessThan(ssr_uv_sample, 0.0f - QUARTER_PIXEL_DRAW_DIMENSIONS)))
+			{
+				ssr_attempt_count++;
+			}
+			else if (all(greaterThan(ssr_uv_sample, QUARTER_PIXEL_DRAW_DIMENSIONS)))
+			{
+				ssr_attempt_count++;
+				ssr_hit_count++;
+			}
+		}
+	}
+
+	colour_out[0].r = ssr_attempt_count == 0 ? 0.0f
+		: 1.0f - pow(1.0f - (float(ssr_hit_count) / float(ssr_attempt_count)), 2);
 }

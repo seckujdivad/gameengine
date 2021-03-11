@@ -101,7 +101,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 	else if (mode == RenderTargetMode::Normal_SSRQuality)
 	{
 		GLTexture texture = GLTexture(GLTexture::Preset::Data_LowP, target, GetNumAttachedColourTextures(RenderTargetMode::Normal_SSRQuality));
-		texture.SetFiltering(TextureFiltering::Linear);
+		//texture.SetFiltering(TextureFiltering::Linear);
 		this->colour.push_back(texture);
 	}
 	else

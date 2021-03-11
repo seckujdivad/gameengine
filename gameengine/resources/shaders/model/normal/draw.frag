@@ -408,6 +408,7 @@ void main()
 	{
 		if (render_output_valid && mat_ssr_enabled && length(geomCamSpacePos) < mat_ssr_max_distance)
 		{
+			colour_out[1].xy = vec2(-1.0f);
 			const vec3 direction = normalize(reflect(-fragtocam, normal)); //direction to trace the reflections in
 			const vec3 start_pos = geomSceneSpacePos; //position to start the trace from
 
@@ -468,7 +469,8 @@ void main()
 			*/
 			float hit_increment;
 			{
-				const float initial_pixel_stride = mix(mat_ssr_resolution_max_falloff, 1.0f, SampleTarget(render_ssr_quality, ss_start_pos.xy).r) * mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
+				float pixel_stride_factor = mix(mat_ssr_resolution_max_falloff, 1.0f, SampleTarget(render_ssr_quality, ss_start_pos.xy).r);
+				const float initial_pixel_stride = pixel_stride_factor * mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
 
 				const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
 				const vec2 divisors = render_output_dimensions * ss_direction.xy;

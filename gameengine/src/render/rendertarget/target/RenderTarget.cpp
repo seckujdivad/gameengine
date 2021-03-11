@@ -436,9 +436,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		//ssr quality
-		{
-			this->m_shader_program->SetTexture(-1, "render_ssr_quality", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).ssr_quality_frame->colour.at(0));
-		}
+		this->m_shader_program->SetTexture(-1, "render_ssr_quality", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).ssr_quality_frame->colour.at(0));
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
@@ -493,6 +491,9 @@ void RenderTarget::Render_Setup_FSQuad()
 		}
 
 		this->m_shader_program->SetTexture(-1, "draw_frame_depth", &draw_frame->depth.value());
+
+		const auto& [draw_size_x, draw_size_y] = draw_frame->GetDimensions();
+		this->m_shader_program->SetUniform("render_draw_output_dimensions", glm::ivec2(draw_size_x, draw_size_y));
 	}
 }
 
