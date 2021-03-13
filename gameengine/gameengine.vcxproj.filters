@@ -594,9 +594,6 @@
     <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py">
       <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </None>
-    <None Include="resources\shaders\postprocess\compositor.frag">
-      <Filter>Resource Files\shaders\postprocess</Filter>
-    </None>
     <None Include="resources\shaders\postprocess\default.geom">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
@@ -607,6 +604,9 @@
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
     <None Include="resources\shaders\postprocess\normal_ssrquality.frag">
+      <Filter>Resource Files\shaders\postprocess</Filter>
+    </None>
+    <None Include="resources\shaders\postprocess\generic.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
   </ItemGroup>

@@ -818,7 +818,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 
 			if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 			{
-				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER), GL_FRAGMENT_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_GENERIC_FRAGSHADER), GL_FRAGMENT_SHADER));
 			}
 			else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 			{
