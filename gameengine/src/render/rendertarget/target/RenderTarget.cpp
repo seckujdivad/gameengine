@@ -450,7 +450,7 @@ void RenderTarget::Render_Setup_FSQuad()
 	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
 		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
-		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", static_cast<int>(num_layers));
+		this->m_shader_program->SetDefine("LAYER_NUM", static_cast<int>(num_layers));
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
@@ -463,7 +463,7 @@ void RenderTarget::Render_Setup_FSQuad()
 	{
 		for (size_t i = 0; i < std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
 		{
-			const RenderTargetConfig::PostProcess::CompositeLayer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
+			const RenderTargetConfig::PostProcess::Layer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
 
 			this->m_shader_program->SetTexture(-1, "layers_texture[" + std::to_string(i) + "]", layer.texture);
 
@@ -471,6 +471,14 @@ void RenderTarget::Render_Setup_FSQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_translate", layer.colour_translate);
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
+
+		RenderTargetConfig::PostProcess::Mode mode = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).mode;
+		if (mode == RenderTargetConfig::PostProcess::Mode::Uninitialised)
+		{
+			throw std::invalid_argument("Given PostProcess config mode has not been initialised");
+		}
+
+		this->m_shader_program->SetUniform("mode", static_cast<int>(mode));
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
@@ -837,6 +845,17 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 
 		this->m_shader_program->Recompile();
 
+		this->m_shader_program->AddUniformNames({
+			//geometry
+			"cubemap_transform[0]",
+			"cubemap_transform[1]",
+			"cubemap_transform[2]",
+			"cubemap_transform[3]",
+			"cubemap_transform[4]",
+			"cubemap_transform[5]",
+			"is_cubemap"
+			});
+
 		if (this->RenderModeIsModelRendering())
 		{
 			this->m_shader_program->AddUniformNames({
@@ -855,15 +874,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				"tess_enable",
 				"tess_interp_mode",
 				"patch_size_u",
-				"patch_size_v",
-				//geometry
-				"cubemap_transform[0]",
-				"cubemap_transform[1]",
-				"cubemap_transform[2]",
-				"cubemap_transform[3]",
-				"cubemap_transform[4]",
-				"cubemap_transform[5]",
-				"is_cubemap"
+				"patch_size_v"
 				});
 
 			if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
@@ -927,6 +938,21 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 				this->m_shader_program->AddUniformNames({
 					//fragment
 					"draw_frame_depth"
+					});
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"draw_frame_depth",
+					"render_draw_output_dimensions"
+					});
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"mode"
 					});
 			}
 		}

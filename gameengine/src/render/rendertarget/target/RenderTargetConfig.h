@@ -47,13 +47,26 @@ struct RenderTargetConfig
 
 	struct PostProcess
 	{
-		struct CompositeLayer
+		enum class Mode
+		{
+			Uninitialised = -1,
+			/*
+			* Blends every layer together from the start to the end of "layers"
+			* Implicitly uses the background colour as the first layer, then
+			* blends with the first, second, third etc layer in "layers"
+			*/
+			AlphaBlend
+		};
+
+		struct Layer
 		{
 			GLTexture* texture;
 			glm::vec4 colour_translate = glm::vec4(0.0f);
 			glm::vec4 colour_scale = glm::vec4(1.0f);
 		};
-		std::vector<CompositeLayer> layers;
+
+		Mode mode = Mode::Uninitialised;
+		std::vector<Layer> layers;
 	};
 
 	struct Textured
