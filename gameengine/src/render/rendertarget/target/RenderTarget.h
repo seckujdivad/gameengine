@@ -78,15 +78,16 @@ public:
 	TargetType GetTargetType() const;
 
 	void SetConfig(RenderTargetConfig config);
-	void SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config);
-	void SetModeConfig(RenderTargetConfig::Normal_Draw mode_config);
-	void SetModeConfig(RenderTargetConfig::Normal_SSRQuality mode_config);
-	void SetModeConfig(RenderTargetConfig::Wireframe mode_config);
-	void SetModeConfig(RenderTargetConfig::Shadow mode_config);
-	void SetModeConfig(RenderTargetConfig::PostProcess mode_config);
-	void SetModeConfig(RenderTargetConfig::Textured mode_config);
 	const RenderTargetConfig& GetConfig() const;
 	RenderTargetMode GetRenderMode() const;
+
+	template<class T>
+	inline void SetModeConfig(T mode_config)
+	{
+		RenderTargetConfig config = this->m_config;
+		config.mode_data = mode_config;
+		this->SetConfig(config);
+	}
 
 	bool FramebufferContainsRenderOutput() const;
 	bool IsFBOClearedOnRender() const;

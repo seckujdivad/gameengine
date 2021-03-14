@@ -743,18 +743,18 @@ void RenderTarget::CopyTo(RenderTarget* dest) const
 
 RenderTargetMode RenderTarget::GetRenderMode() const
 {
-	return this->m_config.mode;
+	return this->m_config.GetMode();
 }
 
 void RenderTarget::SetConfig(RenderTargetConfig config)
 {
-	if (config.mode == RenderTargetMode::Default)
+	if (config.GetMode() == RenderTargetMode::Default)
 	{
 		this->m_postprocess_model.reset();
 	}
-	else if (this->m_config.mode != config.mode)
+	else if (this->m_config.GetMode() != config.GetMode())
 	{
-		if (GetRenderTargetModeType(config.mode) == RenderTargetModeType::FSQuad)
+		if (GetRenderTargetModeType(config.GetMode()) == RenderTargetModeType::FSQuad)
 		{
 			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
 		}
@@ -957,62 +957,6 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			}
 		}
 	}
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Normal_DepthOnly;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_Draw mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Normal_Draw;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_SSRQuality mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Normal_SSRQuality;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Wireframe mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Wireframe;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Shadow mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Shadow;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::PostProcess mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::PostProcess;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Textured mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Textured;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
 }
 
 const RenderTargetConfig& RenderTarget::GetConfig() const

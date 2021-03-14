@@ -13,6 +13,10 @@ enum class RenderTargetModeType;
 
 struct RenderTargetConfig
 {
+	struct Default
+	{
+	};
+
 	struct Normal_DepthOnly
 	{
 	};
@@ -95,17 +99,27 @@ struct RenderTargetConfig
 	{
 	};
 
-	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Normal_SSRQuality, Normal_PostProcess, Wireframe, Shadow, PostProcess, Textured>;
+	using ModeData = std::variant<Default, Normal_DepthOnly, Normal_Draw, Normal_SSRQuality, Normal_PostProcess, Wireframe, Shadow, PostProcess, Textured>;
 
 	RenderTargetConfig();
-	RenderTargetConfig(RenderTargetMode mode, ModeData mode_data);
+	RenderTargetConfig(RenderTargetMode mode);
+	RenderTargetConfig(ModeData mode_data);
 
-	RenderTargetMode mode;
 	ModeData mode_data;
-
 	bool clear_fbo = true;
 
 	void SetMode(RenderTargetMode mode);
-};
+	RenderTargetMode GetMode() const;
 
-void SetMode(RenderTargetConfig& config, RenderTargetMode mode);
+	template<class T>
+	inline T& Data()
+	{
+		return std::get<T>(this->mode_data);
+	}
+
+	template<class T>
+	inline const T& Data() const
+	{
+		return std::get<T>(this->mode_data);
+	}
+};

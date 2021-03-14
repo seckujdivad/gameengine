@@ -9,7 +9,7 @@
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
-	RenderTargetConfig config = { RenderTargetMode::Shadow, RenderTargetConfig::Shadow() };
+	RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::Shadow);
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
