@@ -369,7 +369,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		// shadows
 		bool shadows_enabled = true;
-		if (!std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_shadows)
+		if (!this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_shadows)
 		{
 			shadows_enabled = false;
 		}
@@ -420,10 +420,10 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			//load textures from the previous frame (if in normal rendering mode)
 			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->colour.at(i));
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().depth_frame->colour.at(i));
 			}
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->depth.value());
+			this->m_shader_program->SetTexture(-1, "render_output_depth", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().depth_frame->depth.value());
 		}
 		else
 		{
@@ -436,12 +436,12 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		//ssr quality
-		this->m_shader_program->SetTexture(-1, "render_ssr_quality", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).ssr_quality_frame->colour.at(0));
+		this->m_shader_program->SetTexture(-1, "render_ssr_quality", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().ssr_quality_frame->colour.at(0));
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
-		this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderTargetConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+		this->m_shader_program->SetUniform("draw_back_faces", this->m_config.Data<RenderTargetConfig::Wireframe>().draw_back_faces);
 	}
 }
 
@@ -474,7 +474,7 @@ void RenderTarget::Render_Setup_FSQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
 
-		RTCPostProcess::Mode mode = std::get<RTCPostProcess>(this->m_config.mode_data).GetMode();
+		RTCPostProcess::Mode mode = this->m_config.Data<RTCPostProcess>().GetMode();
 		if (mode == RTCPostProcess::Mode::Uninitialised)
 		{
 			throw std::runtime_error("Given PostProcess config mode has not been initialised");
@@ -497,7 +497,7 @@ void RenderTarget::Render_Setup_FSQuad()
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
-		std::shared_ptr<RenderTextureGroup>& draw_frame = std::get<RenderTargetConfig::Normal_PostProcess>(this->m_config.mode_data).draw_frame;
+		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_PostProcess>().draw_frame;
 		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
 		{
 			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", &draw_frame->colour.at(i));
@@ -507,7 +507,7 @@ void RenderTarget::Render_Setup_FSQuad()
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
 	{
-		std::shared_ptr<RenderTextureGroup>& draw_frame = std::get<RenderTargetConfig::Normal_SSRQuality>(this->m_config.mode_data).draw_frame;
+		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_SSRQuality>().draw_frame;
 		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
 		{
 			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", &draw_frame->colour.at(i));
@@ -567,7 +567,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxMaskTexture", this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference()).get());
 
 		//reflections
-		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections)
+		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
 		{
 			this->m_shader_program->SetUniform("reflections_enabled", false);
 		}
@@ -721,7 +721,7 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 			Cubemap* cubemap = std::get<0>(cubemap_data);
 			CubemapType cubemap_type = std::get<1>(cubemap_data);
 
-			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections))
+			if (!(cubemap_type == CubemapType::Reflection && !this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections))
 			{
 				result.insert(cubemap->GetReference());
 			}
