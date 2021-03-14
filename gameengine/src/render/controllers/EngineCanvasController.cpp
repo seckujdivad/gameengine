@@ -24,7 +24,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 	//make new textures
 	RenderTargetConfig postprocess_config;
 	postprocess_config.SetMode(RenderTargetMode::PostProcess);
-	std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).mode = RenderTargetConfig::PostProcess::Mode::AlphaBlend;
+	std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).data = RenderTargetConfig::PostProcess::AlphaBlend();
 
 	for (const CompositeLayer& composite : composite_layers)
 	{
@@ -83,7 +83,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 
 	RenderTargetConfig canvas_config;
 	canvas_config.SetMode(RenderTargetMode::PostProcess);
-	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).mode = RenderTargetConfig::PostProcess::Mode::AlphaBlend;
+	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).data = RenderTargetConfig::PostProcess::AlphaBlend();
 
 	RenderTargetConfig::PostProcess::Layer passthrough_layer;
 	passthrough_layer.texture = &this->m_texture_final->GetOutputTextures()->colour.at(0);

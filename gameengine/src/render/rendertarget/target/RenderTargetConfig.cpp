@@ -37,3 +37,8 @@ void SetMode(RenderTargetConfig& config, RenderTargetMode mode)
 
 	config.mode = mode;
 }
+
+RenderTargetConfig::PostProcess::Mode RenderTargetConfig::PostProcess::GetMode() const
+{
+	return static_cast<RenderTargetConfig::PostProcess::Mode>(this->data.index() - 1);
+}

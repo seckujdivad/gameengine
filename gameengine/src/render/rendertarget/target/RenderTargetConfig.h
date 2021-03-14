@@ -42,7 +42,6 @@ struct RenderTargetConfig
 
 	struct Shadow
 	{
-
 	};
 
 	struct PostProcess
@@ -50,6 +49,7 @@ struct RenderTargetConfig
 		enum class Mode
 		{
 			Uninitialised = -1,
+
 			/*
 			* Blends every layer together from the start to the end of "layers"
 			* Implicitly uses the background colour as the first layer, then
@@ -57,6 +57,30 @@ struct RenderTargetConfig
 			*/
 			AlphaBlend
 		};
+		
+		struct Uninitialised
+		{
+		};
+
+		struct AlphaBlend
+		{
+		};
+
+		std::variant<Uninitialised, AlphaBlend> data;
+
+		Mode GetMode() const;
+
+		template<class T>
+		inline T& Data()
+		{
+			return std::get<T>(this->data);
+		}
+
+		template<class T>
+		inline const T& Data() const
+		{
+			return std::get<T>(this->data);
+		}
 
 		struct Layer
 		{
@@ -64,14 +88,11 @@ struct RenderTargetConfig
 			glm::vec4 colour_translate = glm::vec4(0.0f);
 			glm::vec4 colour_scale = glm::vec4(1.0f);
 		};
-
-		Mode mode = Mode::Uninitialised;
 		std::vector<Layer> layers;
 	};
 
 	struct Textured
 	{
-
 	};
 
 	using ModeData = std::variant<Normal_DepthOnly, Normal_Draw, Normal_SSRQuality, Normal_PostProcess, Wireframe, Shadow, PostProcess, Textured>;

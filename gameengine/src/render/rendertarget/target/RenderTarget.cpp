@@ -472,7 +472,7 @@ void RenderTarget::Render_Setup_FSQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
 
-		RenderTargetConfig::PostProcess::Mode mode = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).mode;
+		RenderTargetConfig::PostProcess::Mode mode = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).GetMode();
 		if (mode == RenderTargetConfig::PostProcess::Mode::Uninitialised)
 		{
 			throw std::invalid_argument("Given PostProcess config mode has not been initialised");
