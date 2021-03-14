@@ -59,7 +59,12 @@ struct RenderTargetConfig
 			* Implicitly uses the background colour as the first layer, then
 			* blends with the first, second, third etc layer in "layers"
 			*/
-			AlphaBlend
+			AlphaBlend,
+
+			/*
+			* Applies a simple axb box blur to layer 0 (a, b = (2 * radius) + 1)
+			*/
+			BoxBlur
 		};
 		
 		struct Uninitialised
@@ -70,7 +75,12 @@ struct RenderTargetConfig
 		{
 		};
 
-		std::variant<Uninitialised, AlphaBlend> data;
+		struct BoxBlur
+		{
+			glm::ivec2 radius = glm::ivec2(0);
+		};
+
+		std::variant<Uninitialised, AlphaBlend, BoxBlur> data;
 
 		Mode GetMode() const;
 

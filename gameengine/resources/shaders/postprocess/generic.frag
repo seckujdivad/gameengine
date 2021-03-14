@@ -23,7 +23,13 @@ uniform Layer layers[LAYER_NUM];
 
 //post process mode
 const int modeAlphaBlend = 0;
+const int modeBoxBlur = 1;
 uniform int mode;
+
+uniform struct
+{
+	ivec2 radius;
+} modedata_BoxBlur;
 
 void main()
 {
@@ -43,5 +49,8 @@ void main()
 				colour_out[0] = output_sample;
 			}
 		}
+	}
+	else if (mode == modeBoxBlur)
+	{
 	}
 }

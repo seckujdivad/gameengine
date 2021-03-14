@@ -447,9 +447,11 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 void RenderTarget::Render_Setup_FSQuad()
 {
+	using RTCPostProcess = RenderTargetConfig::PostProcess;
+
 	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
-		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
+		size_t num_layers = this->m_config.Data<RTCPostProcess>().layers.size();
 		this->m_shader_program->SetDefine("LAYER_NUM", static_cast<int>(num_layers));
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
@@ -461,9 +463,9 @@ void RenderTarget::Render_Setup_FSQuad()
 
 	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
-		for (size_t i = 0; i < std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
+		for (size_t i = 0; i < this->m_config.Data<RTCPostProcess>().layers.size(); i++)
 		{
-			const RenderTargetConfig::PostProcess::Layer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
+			const RTCPostProcess::Layer& layer = this->m_config.Data<RTCPostProcess>().layers.at(i);
 
 			this->m_shader_program->SetTexture(-1, "layers_texture[" + std::to_string(i) + "]", layer.texture);
 
@@ -472,13 +474,26 @@ void RenderTarget::Render_Setup_FSQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
 
-		RenderTargetConfig::PostProcess::Mode mode = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).GetMode();
-		if (mode == RenderTargetConfig::PostProcess::Mode::Uninitialised)
+		RTCPostProcess::Mode mode = std::get<RTCPostProcess>(this->m_config.mode_data).GetMode();
+		if (mode == RTCPostProcess::Mode::Uninitialised)
 		{
-			throw std::invalid_argument("Given PostProcess config mode has not been initialised");
+			throw std::runtime_error("Given PostProcess config mode has not been initialised");
 		}
 
 		this->m_shader_program->SetUniform("mode", static_cast<int>(mode));
+
+		if (mode == RTCPostProcess::Mode::AlphaBlend)
+		{
+
+		}
+		else if (mode == RTCPostProcess::Mode::BoxBlur)
+		{
+			this->m_shader_program->SetUniform("modedata_BoxBlur.radius", this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().radius);
+		}
+		else
+		{
+			throw std::runtime_error("Unknown post process mode");
+		}
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
@@ -952,7 +967,9 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			{
 				this->m_shader_program->AddUniformNames({
 					//fragment
-					"mode"
+					"mode",
+					// mode: box blur
+					"modedata_BoxBlur.radius"
 					});
 			}
 		}
