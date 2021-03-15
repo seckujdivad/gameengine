@@ -44,7 +44,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_camera->SetFOV(90.0);
 	this->m_camera->SetRotation(90.0, 0.0, 0.0);
 	this->m_camera->SetClips({ 0.1, 50.0 });
-	this->m_camera->SetSSRRegionDimensions(glm::ivec2(16, 16));
+	this->m_camera->SetSSRRegionDimensions(glm::ivec2(64));
 
 	RenderMode render_mode = RenderMode::Normal;
 	int render_mode_index = 0;
