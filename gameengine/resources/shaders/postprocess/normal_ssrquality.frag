@@ -65,6 +65,8 @@ vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 #endif
 }
 
+const ivec2 PIXEL_JUMP = ivec2(1);
+
 void main()
 {
 	//calculate % ssr hits
@@ -82,12 +84,12 @@ void main()
 	int ssr_attempt_count = 0;
 	int ssr_hit_count = 0;
 
-	for (int x = region_start.x; x < region_end.x; x++)
+	for (int x = region_start.x; x < region_end.x; x += PIXEL_JUMP.x)
 	{
-		for (int y = region_start.y; y < region_end.y; y++)
+		for (int y = region_start.y; y < region_end.y; y += PIXEL_JUMP.y)
 		{
 			ivec2 pixel_vec = ivec2(x, y);
-			vec2 sample_vec = pixel_vec / render_draw_output_dimensions;
+			vec2 sample_vec = vec2(pixel_vec) / vec2(render_draw_output_dimensions);
 			vec2 ssr_uv_sample = SampleTarget(draw_frame[1], sample_vec).xy;
 
 			if (all(lessThan(ssr_uv_sample, 0.0f - QUARTER_PIXEL_DRAW_DIMENSIONS)))
@@ -96,12 +98,12 @@ void main()
 			}
 			else if (all(greaterThan(ssr_uv_sample, QUARTER_PIXEL_DRAW_DIMENSIONS)))
 			{
-				ssr_attempt_count++;
 				ssr_hit_count++;
+				ssr_attempt_count++;
 			}
 		}
 	}
 
-	colour_out[0].r = ssr_attempt_count == 0 ? 0.0f
-		: 1.0f - pow(1.0f - (float(ssr_hit_count) / float(ssr_attempt_count)), 2);
+	float perc_hits = float(ssr_hit_count) / float(ssr_attempt_count);
+	colour_out[0].r = ssr_attempt_count == 0 ? 0.0f : 1.0f - pow(1.0f - perc_hits, 2);
 }
