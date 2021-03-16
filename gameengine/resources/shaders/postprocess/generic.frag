@@ -27,6 +27,8 @@ struct Layer
 };
 uniform Layer layers[LAYER_NUM];
 
+uniform ivec2 render_output_dimensions;
+
 //post process mode
 const int modeAlphaBlend = 0;
 const int modeBoxBlur = 1;
@@ -96,5 +98,30 @@ void main()
 	}
 	else if (mode == modeBoxBlur)
 	{
+		vec4 value_sum = vec4(0.0f);
+		ivec2 box_dimensions = (modedata_BoxBlur.radius * 2) + 1;
+		int box_width = 0;
+		if (modedata_BoxBlur.is_first_pass)
+		{
+			box_width = box_dimensions.x;
+			float pixel_scaling_factor = 1.0f / render_output_dimensions.x;
+			for (int x = 0 - modedata_BoxBlur.radius.x; x < modedata_BoxBlur.radius.x + 1; x++)
+			{
+				value_sum += SampleTarget(layers_texture[0], geomUV + vec2(x * pixel_scaling_factor, 0.0f));
+			}
+		}
+		else
+		{
+			box_width = box_dimensions.y;
+			float pixel_scaling_factor = 1.0f / render_output_dimensions.y;
+			for (int y = 0 - modedata_BoxBlur.radius.y; y < modedata_BoxBlur.radius.y + 1; y++)
+			{
+				value_sum += SampleTarget(layers_texture[0], geomUV + vec2(0.0f, y * pixel_scaling_factor));
+			}
+		}
+
+		value_sum /= float(box_width);
+
+		colour_out[0].rgba = value_sum;
 	}
 }
