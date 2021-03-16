@@ -112,13 +112,18 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 	std::unordered_set<RenderTextureReference> references = this->GetDepthOnlyTarget()->GetRenderTextureDependencies();
 
 	{
-		std::unordered_set<RenderTextureReference> draw_references = this->GetDrawTarget()->GetRenderTextureDependencies();
-		references.insert(draw_references.begin(), draw_references.end());
+		std::unordered_set<RenderTextureReference> references_to_add = this->GetDrawTarget()->GetRenderTextureDependencies();
+		references.insert(references_to_add.begin(), references_to_add.end());
 	}
 
 	{
-		std::unordered_set<RenderTextureReference> postprocess_references = this->GetTarget()->GetRenderTextureDependencies();
-		references.insert(postprocess_references.begin(), postprocess_references.end());
+		std::unordered_set<RenderTextureReference> references_to_add = this->GetTarget()->GetRenderTextureDependencies();
+		references.insert(references_to_add.begin(), references_to_add.end());
+	}
+
+	{
+		std::unordered_set<RenderTextureReference> references_to_add = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
+		references.insert(references_to_add.begin(), references_to_add.end());
 	}
 
 	{
