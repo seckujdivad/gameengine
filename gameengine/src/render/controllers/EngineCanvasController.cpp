@@ -49,9 +49,9 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 
 		cfg.SetMode(render_target_mode);
 
-		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(render_target_mode, TargetType::Texture_2D);
+		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(render_target_mode, TargetType::Texture_2D);
 
-		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, textures.get()));
+		this->m_textures.push_back(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, cfg, textures));
 		RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
 
 		std::unique_ptr<Renderer> renderer;
@@ -78,8 +78,8 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	: RenderController(engine, reference),
 	m_canvas(canvas)
 {
-	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::PostProcess, TargetType::Texture_2D);
-	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), textures.get());
+	std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::PostProcess, TargetType::Texture_2D);
+	this->m_texture_final = std::make_unique<RenderTexture>(reference, engine, this->RemakeTextures(composites), textures);
 
 	RenderTargetConfig canvas_config;
 	canvas_config.SetMode(RenderTargetMode::PostProcess);

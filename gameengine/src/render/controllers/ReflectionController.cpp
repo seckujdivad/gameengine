@@ -15,9 +15,9 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 	config.SetMode(RenderTargetMode::Normal_PostProcess);
 	config.clear_fbo = layer == 0;
 
-	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_PostProcess, TargetType::Texture_Cubemap);
+	std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_PostProcess, TargetType::Texture_Cubemap);
 
-	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, textures.get());
+	RenderTexture* render_texture = new RenderTexture(this->GetReference(), this->m_engine, config, textures);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
 

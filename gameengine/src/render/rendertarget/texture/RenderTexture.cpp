@@ -19,7 +19,7 @@ void RenderTexture::PostRenderEvent()
 	}
 }
 
-RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, std::optional<RenderTextureGroup*> write_textures, bool simultaneous_read_write, bool auto_swap_buffers)
+RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, std::optional<std::shared_ptr<RenderTextureGroup>> write_textures, bool simultaneous_read_write, bool auto_swap_buffers)
 	:
 	RenderTarget(engine, config),
 	Referenceable<RenderTextureReference>(reference),
@@ -28,7 +28,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 {
 	if (this->m_owns_fbo)
 	{
-		this->m_texture_write = std::make_shared<RenderTextureGroup>(std::move(*write_textures.value()));
+		this->m_texture_write = write_textures.value();
 		this->SetTargetType(this->m_texture_write.get()->GetTargetType());
 
 		if (simultaneous_read_write)

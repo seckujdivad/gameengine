@@ -29,9 +29,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.SetMode(RenderTargetMode::Normal_DepthOnly);
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
-		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
+		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
 
-		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
 	{
@@ -40,9 +40,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = this->GetDepthOnlyTarget()->GetOutputTextures();
 
-		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
+		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
 
-		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
 	{
@@ -50,9 +50,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.SetMode(RenderTargetMode::Normal_SSRQuality);
 		std::get<RenderTargetConfig::Normal_SSRQuality>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
 
-		std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
+		std::shared_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
 
-		this->m_rt_ssrquality = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures.get());
+		this->m_rt_ssrquality = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
 	{
