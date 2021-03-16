@@ -73,8 +73,7 @@ void main()
 	//   else if uv vector == -1.0f then increment attempt count
 	//   else increment attempt count and increment hit count
 
-	vec2 region_size_scr = 1.0f / vec2(render_output_dimensions);
-	vec2 region_radius_scr = region_size_scr / 2.0f;
+	vec2 region_radius_scr = 0.5f / (vec2(render_draw_output_dimensions) / vec2(render_output_dimensions));
 	ivec2 region_start = ivec2((geomUV - region_radius_scr) * render_draw_output_dimensions);
 	ivec2 region_end = ivec2((geomUV + region_radius_scr) * render_draw_output_dimensions);
 
