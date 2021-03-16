@@ -155,7 +155,10 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_depth_only->GetWriteTextures()->depth.value().CopyTo(this->m_rt_draw->GetWriteTextures()->depth.value());
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
-	this->GetSSRQualityTarget()->Render(std::vector<Model*>(), continuous_draw);
+
+	if (this->GetDrawTarget()->GetConfig().Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
+	{
+	}
 }
 
 RenderTexture* NormalRenderer::GetDepthOnlyTarget() const
