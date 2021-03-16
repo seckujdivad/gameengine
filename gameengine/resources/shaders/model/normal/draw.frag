@@ -253,7 +253,10 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 			float lambda = (pinned_value - fragpos_oob[i]) / reflection_oob[i];
 
 			vec2 other_components = vec2(fragpos_oob[(i + 1) % 3] + (lambda * reflection_oob[(i + 1) % 3]), fragpos_oob[(i + 2) % 3] + (lambda * reflection_oob[(i + 2) % 3]));
-			if (all(greaterThanEqual(other_components, vec2(0.0f))) && all(lessThanEqual(other_components, vec2(obb_dimensions[(i + 1) % 3], obb_dimensions[(i + 2) % 3]))))
+			vec2 pin_min = vec2(0.0f);
+			vec2 pin_max = vec2(obb_dimensions[(i + 1) % 3], obb_dimensions[(i + 2) % 3]);
+
+			if (intersection_index < 2 && all(greaterThanEqual(other_components, pin_min)) && all(lessThanEqual(other_components, pin_max)))
 			{
 				intersections[intersection_index][i] = pinned_value;
 				intersections[intersection_index][(i + 1) % 3] = other_components[0];
