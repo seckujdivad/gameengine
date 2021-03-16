@@ -454,7 +454,7 @@ void RenderTarget::Render_Setup_FSQuad()
 		size_t num_layers = this->m_config.Data<RTCPostProcess>().layers.size();
 		this->m_shader_program->SetDefine("LAYER_NUM", static_cast<int>(num_layers));
 	}
-	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess || this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
 	{
 		this->m_shader_program->SetDefine("NUM_NORMAL_DRAW_TEXTURES", GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw));
 	}
@@ -489,6 +489,12 @@ void RenderTarget::Render_Setup_FSQuad()
 		else if (mode == RTCPostProcess::Mode::BoxBlur)
 		{
 			this->m_shader_program->SetUniform("modedata_BoxBlur.radius", this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().radius);
+			this->m_shader_program->SetUniform("modedata_BoxBlur.is_first_pass", this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().is_first_pass);
+
+			if (this->m_config.Data<RTCPostProcess>().layers.size() < 1)
+			{
+				throw std::runtime_error("Must provide at least 1 layer for box blur post processing");
+			}
 		}
 		else
 		{

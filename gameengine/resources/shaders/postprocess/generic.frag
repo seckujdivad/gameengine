@@ -29,6 +29,7 @@ uniform int mode;
 uniform struct
 {
 	ivec2 radius;
+	bool is_first_pass;
 } modedata_BoxBlur;
 
 void main()
