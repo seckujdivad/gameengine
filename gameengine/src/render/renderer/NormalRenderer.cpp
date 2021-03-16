@@ -56,6 +56,41 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 	}
 
 	{
+		for (int i = 0; i < 2; i++)
+		{
+			RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::PostProcess);
+			config.Data<RenderTargetConfig::PostProcess>().data = RenderTargetConfig::PostProcess::BoxBlur();
+			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::BoxBlur>().is_first_pass = i == 0;
+			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::BoxBlur>().radius = glm::ivec2(1);
+
+
+			RenderTargetConfig::PostProcess::Layer layer;
+			if (i == 0)
+			{
+				layer.texture = &this->m_rt_ssrquality->GetOutputTextures()->colour.at(0);
+			}
+			else if (i == 1)
+			{
+				layer.texture = &this->GetSSRBoxBlurTarget(0)->GetOutputTextures()->colour.at(0);
+			}
+
+			config.Data<RenderTargetConfig::PostProcess>().layers.push_back(layer);
+
+			std::shared_ptr<RenderTextureGroup> target_textures = nullptr;
+			if (i != -1)
+			{
+				target_textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
+			}
+			else if (i == 1)
+			{
+				target_textures = this->m_rt_ssrquality->GetOutputTextures();
+			}
+
+			this->m_rt_ssrquality_boxblur.at(i) = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, target_textures);
+		}
+	}
+
+	{
 		RenderTargetConfig config = this->GetTarget()->GetConfig();
 		std::get<RenderTargetConfig::Normal_PostProcess>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
 		this->GetTarget()->SetConfig(config);
@@ -63,7 +98,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 
 	{
 		RenderTargetConfig config = this->GetDrawTarget()->GetConfig();
-		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).ssr_quality_frame = this->GetSSRQualityTarget()->GetOutputTextures();
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).ssr_quality_frame = this->GetSSRBoxBlurTarget(1)->GetOutputTextures();
 		this->GetDrawTarget()->SetConfig(config);
 	}
 }
@@ -83,6 +118,10 @@ bool NormalRenderer::SetOutputSize(std::tuple<int, int> dimensions)
 	}
 
 	this->m_rt_ssrquality->SetOutputSize(ssr_quality_dimensions);
+	for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
+	{
+		render_texture->SetOutputSize(ssr_quality_dimensions);
+	}
 
 	return this->GetTarget()->SetOutputSize(dimensions);
 }
@@ -102,6 +141,7 @@ void NormalRenderer::CopyFrom(const Renderer* src) const
 			this->GetDepthOnlyTarget()->CopyFrom(src_renderer->GetDepthOnlyTarget());
 			this->GetDrawTarget()->CopyFrom(src_renderer->GetDrawTarget());
 			this->GetSSRQualityTarget()->CopyFrom(src_renderer->GetSSRQualityTarget());
+			this->GetSSRBoxBlurTarget(1)->CopyFrom(src_renderer->GetSSRBoxBlurTarget(1));
 			this->GetTarget()->CopyFrom(src_renderer->GetTarget());
 		}
 	}
@@ -126,9 +166,10 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 		references.insert(references_to_add.begin(), references_to_add.end());
 	}
 
+	for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
 	{
-		std::unordered_set<RenderTextureReference> ssr_quality_references = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
-		references.insert(ssr_quality_references.begin(), ssr_quality_references.end());
+		std::unordered_set<RenderTextureReference> references_to_add = render_texture->GetRenderTextureDependencies();
+		references.insert(references_to_add.begin(), references_to_add.end());
 	}
 
 	return references;
@@ -136,10 +177,12 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 
 void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 {
+	const RenderTargetConfig& target_config = this->GetTarget()->GetConfig();
+
 	if (this->GetDepthOnlyTarget()->GetConfig().clear_fbo != this->GetTarget()->GetConfig().clear_fbo)
 	{
 		RenderTargetConfig config = this->GetDepthOnlyTarget()->GetConfig();
-		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		config.clear_fbo = target_config.clear_fbo;
 		this->GetDepthOnlyTarget()->SetConfig(config);
 	}
 
@@ -149,7 +192,7 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	if (this->GetDrawTarget()->GetConfig().clear_fbo != this->GetTarget()->GetConfig().clear_fbo)
 	{
 		RenderTargetConfig config = this->GetDrawTarget()->GetConfig();
-		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
+		config.clear_fbo = target_config.clear_fbo;
 		this->GetDrawTarget()->SetConfig(config);
 	}
 
@@ -158,11 +201,17 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
 	this->m_rt_depth_only->GetWriteTextures()->depth.value().CopyTo(this->m_rt_draw->GetWriteTextures()->depth.value());
+
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
 
 	if (this->GetDrawTarget()->GetConfig().Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
 	{
+		this->m_rt_ssrquality->Render(std::vector<Model*>(), continuous_draw);
+		for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
+		{
+			render_texture->Render(std::vector<Model*>(), continuous_draw);
+		}
 	}
 }
 
@@ -179,4 +228,9 @@ RenderTexture* NormalRenderer::GetDrawTarget() const
 RenderTexture* NormalRenderer::GetSSRQualityTarget() const
 {
 	return this->m_rt_ssrquality.get();
+}
+
+RenderTexture* NormalRenderer::GetSSRBoxBlurTarget(int index) const
+{
+	return this->m_rt_ssrquality_boxblur.at(index).get();
 }
