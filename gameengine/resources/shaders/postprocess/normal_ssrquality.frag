@@ -105,5 +105,5 @@ void main()
 	}
 
 	float perc_hits = float(ssr_hit_count) / float(ssr_attempt_count);
-	colour_out[0].r = ssr_attempt_count == 0 ? 0.0f : 1.0f - pow(1.0f - perc_hits, 2);
+	colour_out[0].r = ssr_attempt_count == 0 ? 0.0f : 1.0f - pow(1.0f - perc_hits, 2.0f);
 }

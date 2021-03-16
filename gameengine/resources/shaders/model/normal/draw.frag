@@ -159,6 +159,8 @@ uniform ivec2 render_ssr_region_dimensions;
 const int ReflectionModeIterative = 0;
 const int ReflectionModeOBB = 1;
 
+const vec2 SCREEN_POS = vec2(gl_FragCoord.xy / vec2(render_output_dimensions));
+
 //functions
 
 vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
@@ -457,13 +459,15 @@ void main()
 			const vec3 ss_start_pos = PerspDiv(cam_transform * vec4(start_pos, 1.0f));
 			const vec3 ss_end_pos = PerspDiv(cam_transform * vec4(end_pos, 1.0f));
 
+			float ssr_quality = SampleTarget(render_ssr_quality, SCREEN_POS).r;
+
 			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
 
-			int initial_search_level = mat_ssr_refinements; //number of levels of precision that can be dropped through before any hits become final
+			int initial_search_level = int(mix(float(mat_ssr_refinements) * 2.0f, float(mat_ssr_refinements) * 1.0f, ssr_quality)); //number of levels of precision that can be dropped through before any hits become final
 			int search_level = initial_search_level;
 
 			const float num_searches_on_refine = 2.0f; //number of searches to 
-			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, mat_ssr_refinements);
+			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, initial_search_level);
 				
 			/*
 			Calculate the hit increment so that each step moves by initial_pixel_stride in one axis
@@ -472,8 +476,7 @@ void main()
 			*/
 			float hit_increment;
 			{
-				float pixel_stride_factor = mix(mat_ssr_resolution_max_falloff, 1.0f, SampleTarget(render_ssr_quality, ss_start_pos.xy).r);
-				const float initial_pixel_stride = pixel_stride_factor * mat_ssr_resolution * pow(num_searches_on_refine, mat_ssr_refinements);
+				const float initial_pixel_stride = mat_ssr_resolution * pow(num_searches_on_refine, initial_search_level);
 
 				const bool x_is_most_significant_direction = abs(ss_direction.x) > abs(ss_direction.y);
 				const vec2 divisors = render_output_dimensions * ss_direction.xy;
