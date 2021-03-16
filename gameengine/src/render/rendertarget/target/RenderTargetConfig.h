@@ -65,7 +65,13 @@ struct RenderTargetConfig
 			* Applies a simple axb box blur to layer 0 (a, b = (2 * radius) + 1)
 			* Either the horizontal or vertical part of the separable convolution
 			*/
-			BoxBlur
+			BoxBlur,
+
+			/*
+			* Calculates the maximum value in the box
+			* Same box description as in box blurs
+			*/
+			MaxBox
 		};
 		
 		struct Uninitialised
@@ -82,7 +88,13 @@ struct RenderTargetConfig
 			bool is_first_pass = true; //specifies whether this is the first or second pass of the separable filter
 		};
 
-		std::variant<Uninitialised, AlphaBlend, BoxBlur> data;
+		struct MaxBox
+		{
+			glm::ivec2 radius = glm::ivec2(0);
+			bool is_first_pass = true;
+		};
+
+		std::variant<Uninitialised, AlphaBlend, BoxBlur, MaxBox> data;
 
 		Mode GetMode() const;
 

@@ -486,14 +486,32 @@ void RenderTarget::Render_Setup_FSQuad()
 		{
 
 		}
-		else if (mode == RTCPostProcess::Mode::BoxBlur)
+		else if ((mode == RTCPostProcess::Mode::BoxBlur) || (mode == RTCPostProcess::Mode::MaxBox))
 		{
-			this->m_shader_program->SetUniform("modedata_BoxBlur.radius", this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().radius);
-			this->m_shader_program->SetUniform("modedata_BoxBlur.is_first_pass", this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().is_first_pass);
+			std::string prefix;
+			glm::ivec2 radius;
+			bool is_first_pass;
+			if (mode == RTCPostProcess::Mode::BoxBlur)
+			{
+				prefix = "modedata_BoxBlur.";
+
+				radius = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().radius;
+				is_first_pass = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().is_first_pass;
+			}
+			else if (mode == RTCPostProcess::Mode::MaxBox)
+			{
+				prefix = "modedata_MaxBox.";
+
+				radius = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::MaxBox>().radius;
+				is_first_pass = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::MaxBox>().is_first_pass;
+			}
+
+			this->m_shader_program->SetUniform(prefix + "radius", radius);
+			this->m_shader_program->SetUniform(prefix + "is_first_pass", is_first_pass);
 
 			if (this->m_config.Data<RTCPostProcess>().layers.size() < 1)
 			{
-				throw std::runtime_error("Must provide at least 1 layer for box blur post processing");
+				throw std::runtime_error("Must provide at least 1 layer");
 			}
 		}
 		else

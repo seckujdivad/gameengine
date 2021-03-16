@@ -32,6 +32,7 @@ uniform ivec2 render_output_dimensions;
 //post process mode
 const int modeAlphaBlend = 0;
 const int modeBoxBlur = 1;
+const int modeMaxBox = 2;
 uniform int mode;
 
 uniform struct
@@ -39,6 +40,12 @@ uniform struct
 	ivec2 radius;
 	bool is_first_pass;
 } modedata_BoxBlur;
+
+uniform struct
+{
+	ivec2 radius;
+	bool is_first_pass;
+} modedata_MaxBox;
 
 vec4 SampleTarget(TARGET_TYPE to_sample, vec2 coords)
 {
@@ -123,5 +130,28 @@ void main()
 		value_sum /= float(box_width);
 
 		colour_out[0].rgba = value_sum;
+	}
+	else if (mode == modeMaxBox)
+	{
+		vec4 value_max = vec4(0.0f);
+		ivec2 box_dimensions = (modedata_MaxBox.radius * 2) + 1;
+		if (modedata_MaxBox.is_first_pass)
+		{
+			float pixel_scaling_factor = 1.0f / render_output_dimensions.x;
+			for (int x = 0 - modedata_MaxBox.radius.x; x < modedata_MaxBox.radius.x + 1; x++)
+			{
+				value_max = max(value_max, SampleTarget(layers_texture[0], geomUV + vec2(x * pixel_scaling_factor, 0.0f)));
+			}
+		}
+		else
+		{
+			float pixel_scaling_factor = 1.0f / render_output_dimensions.y;
+			for (int y = 0 - modedata_MaxBox.radius.y; y < modedata_MaxBox.radius.y + 1; y++)
+			{
+				value_max = max(value_max, SampleTarget(layers_texture[0], geomUV + vec2(0.0f, y * pixel_scaling_factor)));
+			}
+		}
+
+		colour_out[0].rgba = value_max;
 	}
 }
