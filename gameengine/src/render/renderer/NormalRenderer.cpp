@@ -59,9 +59,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		for (int i = 0; i < 2; i++)
 		{
 			RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::PostProcess);
-			config.Data<RenderTargetConfig::PostProcess>().data = RenderTargetConfig::PostProcess::BoxBlur();
-			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::BoxBlur>().is_first_pass = i == 0;
-			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::BoxBlur>().radius = glm::ivec2(1);
+			config.Data<RenderTargetConfig::PostProcess>().data = RenderTargetConfig::PostProcess::MaxBox();
+			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().is_first_pass = i == 0;
+			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().radius = glm::ivec2(1);
 
 
 			RenderTargetConfig::PostProcess::Layer layer;
