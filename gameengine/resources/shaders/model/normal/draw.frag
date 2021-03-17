@@ -81,12 +81,12 @@ uniform bool mat_displacement_discard_out_of_range;
 // screen space reflections
 uniform bool mat_ssr_enabled;
 uniform float mat_ssr_resolution;
-uniform float mat_ssr_resolution_max_falloff;
 uniform float mat_ssr_max_distance;
 uniform float mat_ssr_max_cast_distance;
 uniform float mat_ssr_depth_acceptance;
 uniform bool mat_ssr_show_this;
-uniform int mat_ssr_refinements;
+uniform int mat_ssr_refinements_min;
+uniform int mat_ssr_refinements_max;
 
 uniform TARGET_TYPE render_ssr_quality;
 
@@ -463,7 +463,7 @@ void main()
 
 			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
 
-			int initial_search_level = int(mix(float(mat_ssr_refinements) * 2.0f, float(mat_ssr_refinements) * 1.0f, ssr_quality)); //number of levels of precision that can be dropped through before any hits become final
+			int initial_search_level = int(mix(float(mat_ssr_refinements_max), float(mat_ssr_refinements_min), ssr_quality)); //number of levels of precision that can be dropped through before any hits become final
 			int search_level = initial_search_level;
 
 			const float num_searches_on_refine = 2.0f; //number of searches to 

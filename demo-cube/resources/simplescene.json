@@ -257,7 +257,8 @@
     "appear in ssr": false,
     "distance limit": 0,
     "max camera distance": 0,
-    "refinements": 0,
+    "max refinements": 0,
+    "min refinements": 0,
     "resolution": 0
   },
   "visboxes": {

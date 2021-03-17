@@ -503,9 +503,14 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 					config.max_cam_distance = perf_data["scene"]["model"]["material"]["ssr"]["max camera distance"][data["max camera distance"].get<int>()].get<float>();
 				}
 
-				if (data.contains("refinements") && data["refinements"].is_number_integer())
+				if (data.contains("min refinements") && data["min refinements"].is_number_integer())
 				{
-					config.refinements = perf_data["scene"]["model"]["material"]["ssr"]["refinements"][data["refinements"].get<int>()].get<int>();
+					config.refinements_min = perf_data["scene"]["model"]["material"]["ssr"]["min refinements"][data["min refinements"].get<int>()].get<int>();
+				}
+
+				if (data.contains("max refinements") && data["max refinements"].is_number_integer())
+				{
+					config.refinements_max = perf_data["scene"]["model"]["material"]["ssr"]["max refinements"][data["max refinements"].get<int>()].get<int>();
 				}
 
 				if (data.contains("resolution") && data["resolution"].is_number())
