@@ -436,6 +436,10 @@ std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 	{
 		return 3;
 	}
+	else if (mode == RenderTargetMode::Normal_SSRQuality)
+	{
+		return 1;
+	}
 	else if (mode == RenderTargetMode::Normal_PostProcess)
 	{
 		return 1;

@@ -383,6 +383,11 @@ void ShaderProgram::SetUniform(std::string name, double value, bool demote)
 	}
 }
 
+void ShaderProgram::SetUniform(std::string name, glm::ivec2 vec)
+{
+	glUniform2iv(this->GetUniform(name), 1, glm::value_ptr(vec));
+}
+
 void ShaderProgram::SetUniform(std::string name, glm::vec2 vec)
 {
 	glUniform2fv(this->GetUniform(name), 1, glm::value_ptr(vec));
@@ -400,6 +405,11 @@ void ShaderProgram::SetUniform(std::string name, glm::dvec2 vec, bool demote)
 	}
 }
 
+void ShaderProgram::SetUniform(std::string name, glm::ivec3 vec)
+{
+	glUniform3iv(this->GetUniform(name), 1, glm::value_ptr(vec));
+}
+
 void ShaderProgram::SetUniform(std::string name, glm::vec3 vec)
 {
 	glUniform3fv(this->GetUniform(name), 1, glm::value_ptr(vec));
@@ -415,6 +425,11 @@ void ShaderProgram::SetUniform(std::string name, glm::dvec3 vec, bool demote)
 	{
 		glUniform3dv(this->GetUniform(name), 1, glm::value_ptr(vec));
 	}
+}
+
+void ShaderProgram::SetUniform(std::string name, glm::ivec4 vec)
+{
+	glUniform4iv(this->GetUniform(name), 1, glm::value_ptr(vec));
 }
 
 void ShaderProgram::SetUniform(std::string name, glm::vec4 vec)

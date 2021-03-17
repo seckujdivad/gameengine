@@ -12,6 +12,7 @@ RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode)
 	case RenderTargetMode::Shadow:
 	case RenderTargetMode::Textured:
 		return RenderTargetModeType::Model;
+	case RenderTargetMode::Normal_SSRQuality:
 	case RenderTargetMode::Normal_PostProcess:
 	case RenderTargetMode::PostProcess:
 		return RenderTargetModeType::FSQuad;

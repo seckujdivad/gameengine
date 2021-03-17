@@ -19,7 +19,7 @@ class CubemapController : public RenderController
 {
 protected:
 	std::vector<std::unique_ptr<Renderer>> m_renderers;
-	std::vector<std::unique_ptr<RenderTexture>> m_textures;
+	std::vector<std::shared_ptr<RenderTexture>> m_textures;
 	std::optional<CumulativeTexture> m_cumulative_texture;
 
 	int m_frame_counter;

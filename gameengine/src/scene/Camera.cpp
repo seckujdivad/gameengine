@@ -44,3 +44,13 @@ glm::dmat4 Camera::GetCombinedMatrix() const
 {
 	return this->GetPerspectiveMatrix() * this->GetRotationMatrixInverse() * this->GetTranslationMatrixInverse();
 }
+
+void Camera::SetSSRRegionDimensions(glm::ivec2 dimensions)
+{
+	this->m_ssr_region_dimensions = dimensions;
+}
+
+glm::ivec2 Camera::GetSSRRegionDimensions() const
+{
+	return this->m_ssr_region_dimensions;
+}

@@ -342,6 +342,9 @@
     <ClInclude Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.h">
       <Filter>Header Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\texture\Filters.h">
+      <Filter>Header Files\scene\texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -533,6 +536,9 @@
     <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp">
       <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\texture\Filters.cpp">
+      <Filter>Source Files\scene\texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -585,23 +591,23 @@
     <None Include="resources\shaders\model\normal\draw.frag">
       <Filter>Resource Files\shaders\model\normal</Filter>
     </None>
-    <None Include="resources\shaders\postprocess\compositor.frag">
+    <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py">
+      <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
+    </None>
+    <None Include="resources\shaders\postprocess\default.geom">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
-    <None Include="resources\shaders\postprocess\compositor.vert">
+    <None Include="resources\shaders\postprocess\default.vert">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
     <None Include="resources\shaders\postprocess\normal.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
-    <None Include="resources\shaders\postprocess\normal.vert">
+    <None Include="resources\shaders\postprocess\normal_ssrquality.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
     </None>
-    <None Include="resources\shaders\postprocess\normal.geom">
+    <None Include="resources\shaders\postprocess\generic.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
-    </None>
-    <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py">
-      <Filter>Source Files\render\gltexture\gltextureformat_preprocessor</Filter>
     </None>
   </ItemGroup>
 </Project>

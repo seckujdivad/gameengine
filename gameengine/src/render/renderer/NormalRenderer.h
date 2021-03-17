@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 
 #include "Renderer.h"
 #include "../rendertarget/target/RenderTargetConfig.h"
@@ -12,6 +13,8 @@ class NormalRenderer : public Renderer
 private:
 	std::unique_ptr<RenderTexture> m_rt_depth_only;
 	std::unique_ptr<RenderTexture> m_rt_draw;
+	std::unique_ptr<RenderTexture> m_rt_ssrquality;
+	std::array<std::unique_ptr<RenderTexture>, 2> m_rt_ssrquality_boxblur;
 
 public:
 	NormalRenderer(Engine* engine, RenderTarget* target);
@@ -25,4 +28,6 @@ public:
 
 	RenderTexture* GetDepthOnlyTarget() const;
 	RenderTexture* GetDrawTarget() const;
+	RenderTexture* GetSSRQualityTarget() const;
+	RenderTexture* GetSSRBoxBlurTarget(int index = 1) const;
 };

@@ -9,20 +9,20 @@
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
-	RenderTargetConfig config = { RenderTargetMode::Shadow, RenderTargetConfig::Shadow() };
+	RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::Shadow);
 	if (layer != 0)
 	{
 		config.clear_fbo = false;
 	}
 	
-	std::unique_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
+	std::shared_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
 
-	this->m_textures.push_back(std::move(std::make_unique<RenderTexture>(this->GetReference(), this->m_engine, config, textures.get(), false)));
-	RenderTexture* render_texture = (*this->m_textures.rbegin()).get();
+	std::shared_ptr<RenderTexture> render_texture = std::make_shared<RenderTexture>(this->GetReference(), this->m_engine, config, textures, false);
+	this->m_textures.push_back(render_texture);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
 	render_texture->SetCamera(this->m_camera.get());
 
-	std::unique_ptr<WrapperRenderer> renderer = std::make_unique<WrapperRenderer>(this->m_engine, render_texture);
+	std::unique_ptr<WrapperRenderer> renderer = std::make_unique<WrapperRenderer>(this->m_engine, render_texture.get());
 	return renderer;
 }
 

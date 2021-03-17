@@ -50,7 +50,14 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		else
 		{
 			models.clear();
-			models.push_back(this->m_postprocess_model.get());
+			if (this->m_postprocess_model == nullptr)
+			{
+				throw std::runtime_error("Post process full screen quad model has not been initialised");
+			}
+			else
+			{
+				models.push_back(this->m_postprocess_model.get());
+			}
 		}
 
 		this->m_shader_program->Select();
@@ -63,11 +70,15 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		}
 		else
 		{
-			this->Render_Setup_FlatQuad();
+			this->Render_Setup_FSQuad();
 		}
 
-		//cubemap uniforms
+		const auto& [output_size_x, output_size_y] = this->GetOutputSize();
+		glm::ivec2 output_size = glm::ivec2(output_size_x, output_size_y);
+
+		//global uniforms
 		this->m_shader_program->SetUniform("is_cubemap", this->GetTargetType() == TargetType::Texture_Cubemap);
+		this->m_shader_program->SetUniform("render_output_dimensions", output_size);
 
 		switch (this->GetRenderMode())
 		{
@@ -113,7 +124,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		}
 
 		//prepare viewport
-		glViewport(0, 0, std::get<0>(this->GetOutputSize()), std::get<1>(this->GetOutputSize()));
+		glViewport(0, 0, output_size.x, output_size.y);
 
 		glm::vec4 clear_colour = this->m_engine->GetScene()->GetClearColour();
 		glClearColor(
@@ -216,7 +227,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			}
 			else
 			{
-				this->Render_ForEachModel_Quad(model);
+				this->Render_ForEachModel_FSQuad(model);
 			}
 
 			this->GetEngine()->DrawModel(model, predraw);
@@ -277,23 +288,14 @@ void RenderTarget::PostRenderEvent()
 {
 }
 
-bool RenderTarget::RenderModeIsModelRendering(RenderTargetMode mode)
-{
-	return (mode == RenderTargetMode::Normal_DepthOnly)
-		|| (mode == RenderTargetMode::Normal_Draw)
-		|| (mode == RenderTargetMode::Shadow)
-		|| (mode == RenderTargetMode::Wireframe)
-		|| (mode == RenderTargetMode::Textured);
-}
-
 bool RenderTarget::RenderModeIsModelRendering() const
 {
-	return this->RenderModeIsModelRendering(this->GetRenderMode());
+	return GetRenderTargetModeType(this->GetRenderMode()) == RenderTargetModeType::Model;
 }
 
 bool RenderTarget::RenderModeIsFSQuadRendering() const
 {
-	return !this->RenderModeIsModelRendering();
+	return GetRenderTargetModeType(this->GetRenderMode()) == RenderTargetModeType::FSQuad;
 }
 
 std::vector<Model*> RenderTarget::Render_GetModels_Model(std::vector<Model*> model_pool)
@@ -367,7 +369,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		// shadows
 		bool shadows_enabled = true;
-		if (!std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_shadows)
+		if (!this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_shadows)
 		{
 			shadows_enabled = false;
 		}
@@ -413,18 +415,15 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		this->m_shader_program->SetUniform("render_output_valid", render_output_valid);
 
-		this->m_shader_program->SetUniform("render_output_x", std::get<0>(this->GetOutputSize()));
-		this->m_shader_program->SetUniform("render_output_y", std::get<1>(this->GetOutputSize()));
-
 		if (render_output_valid)
 		{
 			//load textures from the previous frame (if in normal rendering mode)
 			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->colour.at(i));
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().depth_frame->colour.at(i));
 			}
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", &std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).depth_frame->depth.value());
+			this->m_shader_program->SetTexture(-1, "render_output_depth", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().depth_frame->depth.value());
 		}
 		else
 		{
@@ -435,22 +434,27 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroDepth, TargetType::Texture_2D).get());
 		}
+
+		//ssr quality
+		this->m_shader_program->SetTexture(-1, "render_ssr_quality", &this->m_config.Data<RenderTargetConfig::Normal_Draw>().ssr_quality_frame->colour.at(0));
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
 	{
-		this->m_shader_program->SetUniform("draw_back_faces", std::get<RenderTargetConfig::Wireframe>(this->m_config.mode_data).draw_back_faces);
+		this->m_shader_program->SetUniform("draw_back_faces", this->m_config.Data<RenderTargetConfig::Wireframe>().draw_back_faces);
 	}
 }
 
-void RenderTarget::Render_Setup_FlatQuad()
+void RenderTarget::Render_Setup_FSQuad()
 {
+	using RTCPostProcess = RenderTargetConfig::PostProcess;
+
 	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
-		size_t num_layers = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size();
-		this->m_shader_program->SetDefine("COMPOSITE_LAYER_NUM", static_cast<int>(num_layers));
+		size_t num_layers = this->m_config.Data<RTCPostProcess>().layers.size();
+		this->m_shader_program->SetDefine("LAYER_NUM", static_cast<int>(num_layers));
 	}
-	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess || this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
 	{
 		this->m_shader_program->SetDefine("NUM_NORMAL_DRAW_TEXTURES", GetNumAttachedColourTextures(RenderTargetMode::Normal_Draw));
 	}
@@ -459,9 +463,9 @@ void RenderTarget::Render_Setup_FlatQuad()
 
 	if (this->GetRenderMode() == RenderTargetMode::PostProcess)
 	{
-		for (size_t i = 0; i < std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.size(); i++)
+		for (size_t i = 0; i < this->m_config.Data<RTCPostProcess>().layers.size(); i++)
 		{
-			const RenderTargetConfig::PostProcess::CompositeLayer& layer = std::get<RenderTargetConfig::PostProcess>(this->m_config.mode_data).layers.at(i);
+			const RTCPostProcess::Layer& layer = this->m_config.Data<RTCPostProcess>().layers.at(i);
 
 			this->m_shader_program->SetTexture(-1, "layers_texture[" + std::to_string(i) + "]", layer.texture);
 
@@ -469,16 +473,74 @@ void RenderTarget::Render_Setup_FlatQuad()
 			this->m_shader_program->SetUniform(prefix + "colour_translate", layer.colour_translate);
 			this->m_shader_program->SetUniform(prefix + "colour_scale", layer.colour_scale);
 		}
+
+		RTCPostProcess::Mode mode = this->m_config.Data<RTCPostProcess>().GetMode();
+		if (mode == RTCPostProcess::Mode::Uninitialised)
+		{
+			throw std::runtime_error("Given PostProcess config mode has not been initialised");
+		}
+
+		this->m_shader_program->SetUniform("mode", static_cast<int>(mode));
+
+		if (mode == RTCPostProcess::Mode::AlphaBlend)
+		{
+
+		}
+		else if ((mode == RTCPostProcess::Mode::BoxBlur) || (mode == RTCPostProcess::Mode::MaxBox))
+		{
+			std::string prefix;
+			glm::ivec2 radius;
+			bool is_first_pass;
+			if (mode == RTCPostProcess::Mode::BoxBlur)
+			{
+				prefix = "modedata_BoxBlur.";
+
+				radius = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().radius;
+				is_first_pass = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::BoxBlur>().is_first_pass;
+			}
+			else if (mode == RTCPostProcess::Mode::MaxBox)
+			{
+				prefix = "modedata_MaxBox.";
+
+				radius = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::MaxBox>().radius;
+				is_first_pass = this->m_config.Data<RTCPostProcess>().Data<RTCPostProcess::MaxBox>().is_first_pass;
+			}
+
+			this->m_shader_program->SetUniform(prefix + "radius", radius);
+			this->m_shader_program->SetUniform(prefix + "is_first_pass", is_first_pass);
+
+			if (this->m_config.Data<RTCPostProcess>().layers.size() < 1)
+			{
+				throw std::runtime_error("Must provide at least 1 layer");
+			}
+		}
+		else
+		{
+			throw std::runtime_error("Unknown post process mode");
+		}
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
 	{
-		std::shared_ptr<RenderTextureGroup>& draw_frame = std::get<RenderTargetConfig::Normal_PostProcess>(this->m_config.mode_data).draw_frame;
+		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_PostProcess>().draw_frame;
 		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
 		{
 			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", &draw_frame->colour.at(i));
 		}
 
 		this->m_shader_program->SetTexture(-1, "draw_frame_depth", &draw_frame->depth.value());
+	}
+	else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
+	{
+		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_SSRQuality>().draw_frame;
+		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
+		{
+			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", &draw_frame->colour.at(i));
+		}
+
+		this->m_shader_program->SetTexture(-1, "draw_frame_depth", &draw_frame->depth.value());
+
+		const auto& [draw_size_x, draw_size_y] = draw_frame->GetDimensions();
+		this->m_shader_program->SetUniform("render_draw_output_dimensions", glm::ivec2(draw_size_x, draw_size_y));
 	}
 }
 
@@ -515,6 +577,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		//screen space reflections
 		this->m_shader_program->SetUniform("mat_ssr_enabled", material.ssr_enabled && (this->GetTargetType() == TargetType::Texture_2D));
 		this->m_shader_program->SetUniform("mat_ssr_resolution", material.ssr.resolution);
+		this->m_shader_program->SetUniform("mat_ssr_resolution_max_falloff", material.ssr.resolution_max_falloff);
 		this->m_shader_program->SetUniform("mat_ssr_max_distance", material.ssr.max_cam_distance);
 		this->m_shader_program->SetUniform("mat_ssr_max_cast_distance", material.ssr.cast_distance_limit);
 		this->m_shader_program->SetUniform("mat_ssr_depth_acceptance", material.ssr.depth_acceptance);
@@ -528,7 +591,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxMaskTexture", this->GetEngine()->GetTexture(model->GetSkyboxMaskTexture().GetReference()).get());
 
 		//reflections
-		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections)
+		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw && !this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
 		{
 			this->m_shader_program->SetUniform("reflections_enabled", false);
 		}
@@ -599,7 +662,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 	this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 }
 
-void RenderTarget::Render_ForEachModel_Quad(Model* model)
+void RenderTarget::Render_ForEachModel_FSQuad(Model* model)
 {
 	this->m_shader_program->Select(-1); //select shader (and texture group)
 }
@@ -682,7 +745,7 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 			Cubemap* cubemap = std::get<0>(cubemap_data);
 			CubemapType cubemap_type = std::get<1>(cubemap_data);
 
-			if (!(cubemap_type == CubemapType::Reflection && !std::get<RenderTargetConfig::Normal_Draw>(this->m_config.mode_data).draw_reflections))
+			if (!(cubemap_type == CubemapType::Reflection && !this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections))
 			{
 				result.insert(cubemap->GetReference());
 			}
@@ -719,14 +782,18 @@ void RenderTarget::CopyTo(RenderTarget* dest) const
 
 RenderTargetMode RenderTarget::GetRenderMode() const
 {
-	return this->m_config.mode;
+	return this->m_config.GetMode();
 }
 
 void RenderTarget::SetConfig(RenderTargetConfig config)
 {
-	if (this->m_config.mode != config.mode)
+	if (config.GetMode() == RenderTargetMode::Default)
 	{
-		if ((config.mode == RenderTargetMode::PostProcess || config.mode == RenderTargetMode::Normal_PostProcess) && this->m_postprocess_model.get() == nullptr)
+		this->m_postprocess_model.reset();
+	}
+	else if (this->m_config.GetMode() != config.GetMode())
+	{
+		if (GetRenderTargetModeType(config.GetMode()) == RenderTargetModeType::FSQuad)
 		{
 			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
 		}
@@ -739,60 +806,71 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 	this->m_config = config;
 	this->m_fbo_contains_render = false;
 
-	std::vector<ShaderProgram::ShaderSource> shaders;
-	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
+	if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
-
-		if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
-		{
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_DEPTHONLY_FRAGSHADER), GL_FRAGMENT_SHADER));
-		}
-		else if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-		{
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_DRAW_FRAGSHADER), GL_FRAGMENT_SHADER));
-		}
-		else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
-		{
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
-		}
-		else if (this->GetRenderMode() == RenderTargetMode::Shadow)
-		{
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
-		}
-		else if (this->GetRenderMode() == RenderTargetMode::Textured)
-		{
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
-			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
-		}
-	}
-	else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
-	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_FRAGSHADER), GL_FRAGMENT_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_COMPOSITOR_VERTSHADER), GL_VERTEX_SHADER));
-	}
-	else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
-	{
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_GEOMSHADER), GL_GEOMETRY_SHADER));
-		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_VERTSHADER), GL_VERTEX_SHADER));
-	}
-	else if (this->GetRenderMode() == RenderTargetMode::Default)
-	{
+		std::vector<ShaderProgram::ShaderSource> shaders;
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_FRAGSHADER), GL_FRAGMENT_SHADER));
 		shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_DEFAULT_VERTSHADER), GL_VERTEX_SHADER));
+
+		this->m_shader_program->SetShaderSources(shaders);
+		this->m_shader_program->Recompile();
 	}
-
-	this->m_shader_program->SetShaderSources(shaders);
-
-	if (this->GetRenderMode() != RenderTargetMode::Default)
+	else
 	{
+		std::vector<ShaderProgram::ShaderSource> shaders;
+		if (this->RenderModeIsModelRendering())
+		{
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_VERTSHADER), GL_VERTEX_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSCONTROLSHADER), GL_TESS_CONTROL_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TESSEVALSHADER), GL_TESS_EVALUATION_SHADER));
+
+			if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_DEPTHONLY_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_NORMAL_DRAW_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_GEOMSHADER), GL_GEOMETRY_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_WIREFRAME_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Shadow)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_SHADOW_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Textured)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_GEOMSHADER), GL_GEOMETRY_SHADER));
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_MODEL_TEXTURED_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+		}
+		else if (this->RenderModeIsFSQuadRendering())
+		{
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_DEFAULT_VERTSHADER), GL_VERTEX_SHADER));
+			shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_DEFAULT_GEOMSHADER), GL_GEOMETRY_SHADER));
+
+			if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_GENERIC_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
+			{
+				shaders.push_back(ShaderProgram::ShaderSource(GetEmbeddedTextfile(RCID_TF_POSTPROCESS_NORMAL_SSRQUALITY_FRAGSHADER), GL_FRAGMENT_SHADER));
+			}
+		}
+
+		this->m_shader_program->SetShaderSources(shaders);
+
 		int num_colour_textures = 0;
 		if (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly)
 		{
@@ -803,29 +881,10 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			num_colour_textures = GetNumAttachedColourTextures(this->GetRenderMode());
 		}
 		this->m_shader_program->SetDefine("NUM_TEXTURES", num_colour_textures);
-	}
 
-	this->m_shader_program->Recompile();
+		this->m_shader_program->Recompile();
 
-	if (this->RenderModeIsModelRendering(this->GetRenderMode()))
-	{
 		this->m_shader_program->AddUniformNames({
-			//vertex
-			"mdl_translate",
-			"mdl_rotate",
-			"mdl_scale",
-			"cam_translate",
-			"cam_rotate",
-			"cam_persp",
-			"cam_clip_near",
-			"cam_clip_far",
-			"cam_transform",
-			"cam_transform_inverse",
-			//tesselation
-			"tess_enable",
-			"tess_interp_mode",
-			"patch_size_u",
-			"patch_size_v",
 			//geometry
 			"cubemap_transform[0]",
 			"cubemap_transform[1]",
@@ -836,119 +895,109 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 			"is_cubemap"
 			});
 
-		if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+		if (this->RenderModeIsModelRendering())
 		{
 			this->m_shader_program->AddUniformNames({
-				//fragment
-				"mat_diffuse",
-				"mat_specular",
-				"mat_specular_highlight",
-				"mat_displacement_multiplier",
-				"mat_displacement_discard_out_of_range",
-				"mat_ssr_enabled",
-				"mat_ssr_resolution",
-				"mat_ssr_max_distance",
-				"mat_ssr_max_cast_distance",
-				"mat_ssr_depth_acceptance",
-				"mat_ssr_show_this",
-				"mat_ssr_refinements",
-				"colourTexture",
-				"normalTexture",
-				"specularTexture",
-				"reflectionIntensityTexture",
-				"displacementTexture",
-				"light_ambient",
-				"light_shadow_draw",
-				"reflections_enabled",
-				"reflection_count",
-				"skyboxMaskTexture",
-				"skyboxTexture",
-				"render_output_valid",
-				"render_output_depth",
-				"render_output_x",
-				"render_output_y"
+				//vertex
+				"mdl_translate",
+				"mdl_rotate",
+				"mdl_scale",
+				"cam_translate",
+				"cam_rotate",
+				"cam_persp",
+				"cam_clip_near",
+				"cam_clip_far",
+				"cam_transform",
+				"cam_transform_inverse",
+				//tesselation
+				"tess_enable",
+				"tess_interp_mode",
+				"patch_size_u",
+				"patch_size_v"
 				});
 
-			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
+			if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 			{
-				this->m_shader_program->AddUniformName("render_output_colour[" + std::to_string(i) + "]");
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"mat_diffuse",
+					"mat_specular",
+					"mat_specular_highlight",
+					"mat_displacement_multiplier",
+					"mat_displacement_discard_out_of_range",
+					"mat_ssr_enabled",
+					"mat_ssr_resolution",
+					"mat_ssr_max_distance",
+					"mat_ssr_max_cast_distance",
+					"mat_ssr_depth_acceptance",
+					"mat_ssr_show_this",
+					"mat_ssr_refinements",
+					"colourTexture",
+					"normalTexture",
+					"specularTexture",
+					"reflectionIntensityTexture",
+					"displacementTexture",
+					"light_ambient",
+					"light_shadow_draw",
+					"reflections_enabled",
+					"reflection_count",
+					"skyboxMaskTexture",
+					"skyboxTexture",
+					"render_output_valid",
+					"render_output_depth",
+					"render_output_dimensions"
+					});
+
+				for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
+				{
+					this->m_shader_program->AddUniformName("render_output_colour[" + std::to_string(i) + "]");
+				}
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
+			{
+				this->m_shader_program->AddUniformNames({
+					//geometry
+					"draw_back_faces",
+					//fragment
+					"wireframe_colour"
+					});
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Textured)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"colourTexture"
+					});
 			}
 		}
-		else if (this->GetRenderMode() == RenderTargetMode::Wireframe)
+		else if (this->RenderModeIsFSQuadRendering())
 		{
-			this->m_shader_program->AddUniformNames({
-				//geometry
-				"draw_back_faces",
-				//fragment
-				"wireframe_colour"
-				});
-		}
-		else if (this->GetRenderMode() == RenderTargetMode::Textured)
-		{
-			this->m_shader_program->AddUniformNames({
-				//fragment
-				"colourTexture"
-				});
+			if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"draw_frame_depth"
+					});
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"draw_frame_depth",
+					"render_draw_output_dimensions"
+					});
+			}
+			else if (this->GetRenderMode() == RenderTargetMode::PostProcess)
+			{
+				this->m_shader_program->AddUniformNames({
+					//fragment
+					"mode",
+					// mode: box blur
+					"modedata_BoxBlur.radius"
+					});
+			}
 		}
 	}
-	else
-	{
-		if (this->GetRenderMode() == RenderTargetMode::Normal_PostProcess)
-		{
-			this->m_shader_program->AddUniformNames({
-				//fragment
-				"draw_frame_depth"
-				});
-		}
-	}
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_DepthOnly mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Normal_DepthOnly;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Normal_Draw mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Normal_Draw;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Wireframe mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Wireframe;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Shadow mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Shadow;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::PostProcess mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::PostProcess;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
-}
-
-void RenderTarget::SetModeConfig(RenderTargetConfig::Textured mode_config)
-{
-	RenderTargetConfig config = this->m_config;
-	config.mode = RenderTargetMode::Textured;
-	config.mode_data = mode_config;
-	this->SetConfig(config);
 }
 
 const RenderTargetConfig& RenderTarget::GetConfig() const

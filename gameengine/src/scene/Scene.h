@@ -55,23 +55,23 @@ public:
 	void RemoveModel(ModelReference reference);
 	Model* GetModel(ModelReference reference) const;
 	Model* GetModel(std::string identifier) const;
-	std::vector<Model*> GetModels() const;
+	const std::vector<Model*>& GetModels() const;
 	std::vector<Model*> GetModels(std::vector<ModelReference> references) const;
 	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderTargetMode mode, std::vector<Model*> model_pool) const;
 
 	void Add(PointLight* pointlight);
 	void Remove(PointLight* pointlight);
-	std::vector<PointLight*> GetPointLights() const;
+	const std::vector<PointLight*>& GetPointLights() const;
 
 	void Add(Reflection* reflection);
 	Reflection* GetReflection(std::string identifier) const;
 	void Remove(Reflection* reflection);
-	std::vector<Reflection*> GetReflections() const;
+	const std::vector<Reflection*>& GetReflections() const;
 
 	void Add(Skybox* skybox);
 	Skybox* GetSkybox(std::string identifier) const;
 	void Remove(Skybox* skybox);
-	std::vector<Skybox*> GetSkyboxes() const;
+	const std::vector<Skybox*>& GetSkyboxes() const;
 
 	void RemoveCubemap(RenderTextureReference reference);
 	std::tuple<Cubemap*, CubemapType> GetCubemap(RenderTextureReference reference) const;
@@ -80,11 +80,11 @@ public:
 	void Add(VisBox* visbox);
 	VisBox* GetVisBox(std::string identifier) const;
 	void Remove(VisBox* visbox);
-	std::vector<VisBox*> GetVisBoxes() const;
+	const std::vector<VisBox*>& GetVisBoxes() const;
 
 	void Add(OrientedBoundingBox obb);
 	void Remove(OrientedBoundingBox obb);
-	std::vector<OrientedBoundingBox> GetOBBApproximations() const;
+	const std::vector<OrientedBoundingBox>& GetOBBApproximations() const;
 
 	void SetClearColour(glm::vec4 colour);
 	glm::vec4 GetClearColour() const;

@@ -26,7 +26,7 @@ private:
 	void PostRenderEvent() override;
 
 public:
-	RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, std::optional<RenderTextureGroup*> write_textures = std::optional<RenderTextureGroup*>(), bool simultaneous_read_write = false, bool auto_swap_buffers = true);
+	RenderTexture(RenderTextureReference reference, Engine* engine, RenderTargetConfig config, std::optional<std::shared_ptr<RenderTextureGroup>> write_textures = std::optional<std::shared_ptr<RenderTextureGroup>>(), bool simultaneous_read_write = false, bool auto_swap_buffers = true);
 	RenderTexture(const RenderTexture&) = delete;
 	RenderTexture& operator=(const RenderTexture&) = delete;
 	RenderTexture(RenderTexture&&) noexcept = delete;

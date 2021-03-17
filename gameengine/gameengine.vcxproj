@@ -240,6 +240,7 @@
     <ClInclude Include="src\scene\SceneApproximation.h" />
     <ClInclude Include="src\scene\SceneChild.h" />
     <ClInclude Include="src\scene\Skybox.h" />
+    <ClInclude Include="src\scene\texture\Filters.h" />
     <ClInclude Include="src\scene\texture\Generators.h" />
     <ClInclude Include="src\scene\texture\Texture.h" />
     <ClInclude Include="src\scene\texture\TextureFiltering.h" />
@@ -305,6 +306,7 @@
     <ClCompile Include="src\scene\SceneApproximation.cpp" />
     <ClCompile Include="src\scene\SceneChild.cpp" />
     <ClCompile Include="src\scene\Skybox.cpp" />
+    <ClCompile Include="src\scene\texture\Filters.cpp" />
     <ClCompile Include="src\scene\texture\Generators.cpp" />
     <ClCompile Include="src\scene\texture\Texture.cpp" />
     <ClCompile Include="src\scene\texture\TextureFiltering.cpp" />
@@ -333,11 +335,11 @@
     <None Include="resources\shaders\model\textured.frag" />
     <None Include="resources\shaders\model\wireframe.frag" />
     <None Include="resources\shaders\model\wireframe.geom" />
-    <None Include="resources\shaders\postprocess\compositor.frag" />
-    <None Include="resources\shaders\postprocess\compositor.vert" />
+    <None Include="resources\shaders\postprocess\default.geom" />
+    <None Include="resources\shaders\postprocess\default.vert" />
+    <None Include="resources\shaders\postprocess\generic.frag" />
     <None Include="resources\shaders\postprocess\normal.frag" />
-    <None Include="resources\shaders\postprocess\normal.geom" />
-    <None Include="resources\shaders\postprocess\normal.vert" />
+    <None Include="resources\shaders\postprocess\normal_ssrquality.frag" />
     <None Include="src\render\gltexture\gltextureformat_preprocessor\generate_TextureFormats.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
