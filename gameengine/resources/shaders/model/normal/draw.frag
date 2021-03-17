@@ -159,7 +159,7 @@ uniform ivec2 render_ssr_region_dimensions;
 const int ReflectionModeIterative = 0;
 const int ReflectionModeOBB = 1;
 
-const vec2 SCREEN_POS = vec2(gl_FragCoord.xy / vec2(render_output_dimensions));
+vec2 SCREEN_POS = vec2(gl_FragCoord.xy / vec2(render_output_dimensions));
 
 //functions
 
