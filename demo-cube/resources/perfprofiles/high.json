@@ -12,8 +12,8 @@
           "acceptable depth distance": [ 0.025 ],
           "distance limit": [ 20 ],
           "max camera distance": [ 10 ],
-          "min refinements": [ 5 ],
-          "max refinements": [ 10 ],
+          "min refinements": [ 2 ],
+          "max refinements": [ 8 ],
           "resolution": [ 1 ]
         }
       }
