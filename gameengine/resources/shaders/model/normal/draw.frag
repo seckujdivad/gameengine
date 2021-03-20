@@ -230,13 +230,20 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 /*
 Finds the two points of intersection between an oriented bounding box and a line (if the points exist)
 */
-void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, vec3 obb_dimensions, mat3 obb_rotation, mat3 obb_rotation_inverse, out bool isvalid, out vec3 results[2])
+struct OBBRayIntersections
+{
+	int count;
+	vec3 positions[2];
+};
+
+OBBRayIntersections GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, vec3 obb_dimensions, mat3 obb_rotation, mat3 obb_rotation_inverse)
 {
 	vec3 obb_translation = obb_position - (obb_rotation * 0.5f * obb_dimensions);
 	vec3 reflection_oob = obb_rotation_inverse * normalize(direction);
 	vec3 fragpos_oob = obb_rotation_inverse * (start_pos - obb_translation);
 
-	int intersection_index = 0;
+	OBBRayIntersections intersections_data;
+	intersections_data.count = 0;
 
 	vec3 intersections[2];
 	intersections[0] = vec3(0.0f);
@@ -258,28 +265,28 @@ void GetFirstOBBIntersection(vec3 start_pos, vec3 direction, vec3 obb_position, 
 			vec2 pin_min = vec2(0.0f);
 			vec2 pin_max = vec2(obb_dimensions[(i + 1) % 3], obb_dimensions[(i + 2) % 3]);
 
-			if (intersection_index < 2 && all(greaterThanEqual(other_components, pin_min)) && all(lessThanEqual(other_components, pin_max)))
+			if (intersections_data.count < 2 && all(greaterThanEqual(other_components, pin_min)) && all(lessThanEqual(other_components, pin_max)))
 			{
-				intersections[intersection_index][i] = pinned_value;
-				intersections[intersection_index][(i + 1) % 3] = other_components[0];
-				intersections[intersection_index][(i + 2) % 3] = other_components[1];
-				lambdas[intersection_index] = lambda;
-				intersection_index++;
+				intersections[intersections_data.count][i] = pinned_value;
+				intersections[intersections_data.count][(i + 1) % 3] = other_components[0];
+				intersections[intersections_data.count][(i + 2) % 3] = other_components[1];
+				lambdas[intersections_data.count] = lambda;
+				intersections_data.count++;
 			}
 		}
 	}
 
-	results[0] = (obb_rotation * intersections[0]) + obb_translation;
-	results[1] = (obb_rotation * intersections[1]) + obb_translation;
+	intersections_data.positions[0] = (obb_rotation * intersections[0]) + obb_translation;
+	intersections_data.positions[1] = (obb_rotation * intersections[1]) + obb_translation;
 
 	if (lambdas[0] > lambdas[1])
 	{
-		vec3 swap = results[0];
-		results[0] = results[1];
-		results[1] = swap;
+		vec3 swap = intersections_data.positions[0];
+		intersections_data.positions[0] = intersections_data.positions[1];
+		intersections_data.positions[1] = swap;
 	}
-
-	isvalid = intersection_index >= 2;
+	
+	return intersections_data;
 }
 
 vec3 GenerateErrorPattern(vec3 primary, vec3 secondary)
@@ -593,28 +600,26 @@ void main()
 
 					for (int i = 0; i < APPROXIMATION_OBB_NUM; i++)
 					{
-						bool is_valid; //whether or not the line segment is junk data
-						vec3 intersections[2]; //start and end of line segment
-						GetFirstOBBIntersection(geomSceneSpacePos, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse, is_valid, intersections); //find where (if anywhere) the reflection passes through this specific OBB
+						OBBRayIntersections intersection_data = GetFirstOBBIntersection(geomSceneSpacePos, refl_dir, scene_approximations[i].position, scene_approximations[i].dimensions, scene_approximations[i].rotation, scene_approximations[i].rotation_inverse); //find where (if anywhere) the reflection passes through this specific OBB
 
 						//make sure that the line segment is aligned with the reflection vector (i.e. 0 -> 1 is aligned)
-						const bool swap_intersection_positions = dot(intersections[1] - intersections[0], refl_dir) < 0.0f;
+						const bool swap_intersection_positions = dot(intersection_data.positions[1] - intersection_data.positions[0], refl_dir) < 0.0f;
 						int first_intersection = swap_intersection_positions ? 1 : 0;
 						int second_intersection = swap_intersection_positions ? 0 : 1;
 
 						//write OBB intersection info into proper storage locations
-						all_intersections[i * 2] = intersections[first_intersection];
-						all_intersections[(i * 2) + 1] = intersections[second_intersection];
+						all_intersections[i * 2] = intersection_data.positions[first_intersection];
+						all_intersections[(i * 2) + 1] = intersection_data.positions[second_intersection];
 
-						valid_segments[i] = is_valid;
+						valid_segments[i] = intersection_data.count == 2;
 
 						//check if the line segment is both valid and overlaps the reflection point (i.e. starts on one side and ends on the other)
 						const float tolerance = 0.01f;
 						const vec3 tolerance_vec = tolerance * refl_dir;
-						const bool intersection_0_before_point = dot(intersections[first_intersection] - geomSceneSpacePos - tolerance_vec, refl_dir) < 0.0f;
-						const bool intersection_1_after_point = dot(intersections[second_intersection] - geomSceneSpacePos + tolerance_vec, refl_dir) > 0.0f;
+						const bool intersection_0_before_point = dot(intersection_data.positions[first_intersection] - geomSceneSpacePos - tolerance_vec, refl_dir) < 0.0f;
+						const bool intersection_1_after_point = dot(intersection_data.positions[second_intersection] - geomSceneSpacePos + tolerance_vec, refl_dir) > 0.0f;
 
-						search_index = is_valid && intersection_0_before_point && intersection_1_after_point ? i : search_index;
+						search_index = valid_segments[i] && intersection_0_before_point && intersection_1_after_point ? i : search_index;
 					}
 				
 					if (search_index == -1)
