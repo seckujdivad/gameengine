@@ -219,7 +219,7 @@
           "iterations": 0
         }
       },
-      "position": [ 0.01, 0, 0 ],
+      "position": [ 0, 0, 0 ],
       "static draw": [ "level" ],
       "texture": 1
     },
@@ -233,7 +233,7 @@
           "iterations": 0
         }
       },
-      "position": [ 10.01, 0, 0 ],
+      "position": [ 10, 0, 0 ],
       "static draw": [ "level" ],
       "texture": 1
     },
@@ -247,7 +247,7 @@
           "iterations": 0
         }
       },
-      "position": [ 20.01, 0, 0 ],
+      "position": [ 20, 0, 0 ],
       "static draw": [ "level" ],
       "texture": 1
     }
