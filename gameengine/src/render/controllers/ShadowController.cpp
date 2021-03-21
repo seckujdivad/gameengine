@@ -6,6 +6,7 @@
 #include "../renderer/WrapperRenderer.h"
 #include "../TargetType.h"
 #include "../rendertarget/texture/RenderTextureGroup.h"
+#include "../../scene/texture/TextureFiltering.h"
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
@@ -16,6 +17,7 @@ std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 	}
 	
 	std::shared_ptr<RenderTextureGroup> textures = std::make_unique<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
+	textures->depth->SetFiltering(TextureFiltering::Linear);
 
 	std::shared_ptr<RenderTexture> render_texture = std::make_shared<RenderTexture>(this->GetReference(), this->m_engine, config, textures, false);
 	this->m_textures.push_back(render_texture);
