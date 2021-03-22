@@ -385,6 +385,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			this->m_shader_program->SetUniform(root_name + "intensity", point_light->GetIntensity());
 			this->m_shader_program->SetUniform(root_name + "shadow_far_plane", std::get<1>(point_light->GetClips()));
 			this->m_shader_program->SetUniform(root_name + "shadow_bias", point_light->GetShadowBias());
+			this->m_shader_program->SetUniform(root_name + "texture_dimensions", std::get<0>(point_light->GetTextureDimensions()));
 
 			std::string cubemap_name = "light_shadow_cubemaps[" + std::to_string(i) + "]";
 

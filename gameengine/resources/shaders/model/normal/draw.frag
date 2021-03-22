@@ -106,6 +106,7 @@ struct PointLight
 	vec3 intensity;
 	float shadow_far_plane;
 	float shadow_bias;
+	int texture_dimensions;
 };
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
@@ -205,21 +206,47 @@ vec3 PerspDiv(const vec4 vec)
 	return vec.xyz / vec.w;
 }
 
+bool GetLightIsOccluded(vec3 fragpos, int lightindex, ivec3 pixel_offset)
+{
+	vec3 light_to_frag = fragpos - light_points[lightindex].position;
+	const float offset_factor = 6.0f; //distance (in pixels) between each sample in the sample grid
+	vec3 offset = (vec3(pixel_offset) / vec3(light_points[lightindex].texture_dimensions)) * offset_factor * 0.5f;
+	float max_dimension_size = max(max(abs(light_to_frag.x), abs(light_to_frag.y)), abs(light_to_frag.z));
+	vec3 light_to_frag_offset = light_to_frag + (offset * max_dimension_size);
+
+	float depth_sample = texture(light_shadow_cubemaps[lightindex], light_to_frag_offset).r;
+	float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
+	float frag_depth = length(light_to_frag_offset);
+
+	bool frag_in_range = depth_sample < 1.0f;
+	bool frag_obscured = (frag_depth - light_points[lightindex].shadow_bias) > corrected_depth_sample;
+	bool frag_in_shadow = frag_in_range && frag_obscured;
+
+	return frag_in_shadow;
+}
+
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
 	{
-		vec3 lighttofrag = fragpos - light_points[lightindex].position;
+		const int BOX_RADIUS = 1;
+		const int BOX_SIDE_LENGTH = 1 + (BOX_RADIUS * 2);
+		const int BOX_VOLUME = BOX_SIDE_LENGTH * BOX_SIDE_LENGTH * BOX_SIDE_LENGTH;
 
-		float depth_sample = texture(light_shadow_cubemaps[lightindex], lighttofrag).r;
-		float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
-		float frag_depth = length(lighttofrag);
+		float total = 0.0f;
+		for (int x = 0 - BOX_RADIUS; x < BOX_RADIUS + 1; x++)
+		{
+			for (int y = 0 - BOX_RADIUS; y < BOX_RADIUS + 1; y++)
+			{
+				for (int z = 0 - BOX_RADIUS; z < BOX_RADIUS + 1; z++)
+				{
+					ivec3 offset = ivec3(x, y, z);
+					total += float(!GetLightIsOccluded(fragpos, lightindex, offset));
+				}
+			}
+		}
 
-		bool frag_in_range = depth_sample < 1.0f;
-		bool frag_obscured = (frag_depth - light_points[lightindex].shadow_bias) > corrected_depth_sample;
-		bool frag_in_shadow = frag_in_range && frag_obscured;
-
-		return float(!frag_in_shadow);
+		return total / float(BOX_VOLUME);
 	}
 	else
 	{
