@@ -32,6 +32,7 @@ jobs:
         with:
           setupOnly: true
           vcpkgGitCommitId: c303dd024
+
       - run: $VCPKG_ROOT/vcpkg integrate install
         shell: bash
       
@@ -43,6 +44,10 @@ jobs:
           echo[ >> vcpkg/triplets/x86-windows.cmake
         shell: cmd
         name: Make sure that wxWidgets builds statically
+
+      - run: $VCPKG_ROOT/vcpkg update
+        shell: cmd
+        name: Ensure latest portfiles are used
 
       - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
         shell: bash
