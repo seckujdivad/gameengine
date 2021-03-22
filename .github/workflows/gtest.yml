@@ -46,7 +46,7 @@ jobs:
         name: Make sure that wxWidgets builds statically
 
       - run: $VCPKG_ROOT/vcpkg update
-        shell: cmd
+        shell: bash
         name: Ensure latest portfiles are used
 
       - run: $VCPKG_ROOT/vcpkg install @vcpkg_install.txt
