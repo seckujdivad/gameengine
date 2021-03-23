@@ -39,6 +39,8 @@
 #define TARGET_TYPE sampler2D
 #endif
 
+#define DO_SHADOW_BOXBLUR_PCF 1
+
 //shader input-output
 layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
@@ -229,24 +231,56 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
 	{
-		const int BOX_RADIUS = 1;
-		const int BOX_SIDE_LENGTH = 1 + (BOX_RADIUS * 2);
-		const int BOX_VOLUME = BOX_SIDE_LENGTH * BOX_SIDE_LENGTH * BOX_SIDE_LENGTH;
-
-		float total = 0.0f;
-		for (int x = 0 - BOX_RADIUS; x < BOX_RADIUS + 1; x++)
+#if defined(DO_SHADOW_BOXBLUR_PCF) && (DO_SHADOW_BOXBLUR_PCF == 1)
+		if (length(geomCamSpacePos) < 5.0f)
 		{
-			for (int y = 0 - BOX_RADIUS; y < BOX_RADIUS + 1; y++)
+			const int BOX_RADIUS = 1;
+			const int BOX_SIDE_LENGTH = 1 + (BOX_RADIUS * 2);
+			const int BOX_AREA = BOX_SIDE_LENGTH * BOX_SIDE_LENGTH;
+			const float BOX_AREA_FLOAT = float(BOX_AREA);
+
+			int total = 0;
 			{
-				for (int z = 0 - BOX_RADIUS; z < BOX_RADIUS + 1; z++)
+				int major_direction = abs(fragpos.y) > abs(fragpos.x) ? 1 : 0;
+				major_direction = abs(fragpos.z) > abs(fragpos[major_direction]) ? 2 : major_direction;
+				ivec3 offset_data = ivec3(0);
+
+//I wish there was a better way than using macros to unroll
+#if !defined(_INNER_MACRO)
+#define _INNER_MACRO(MINOR_EXT1, MINOR_EXT2) for (offset_data ## MINOR_EXT1 = 0 - BOX_RADIUS; offset_data ## MINOR_EXT1 < BOX_RADIUS + 1; offset_data ## MINOR_EXT1++) \
+					{ \
+						for (offset_data ## MINOR_EXT2 = 0 - BOX_RADIUS; offset_data ## MINOR_EXT2 < BOX_RADIUS + 1; offset_data ## MINOR_EXT2++) \
+						{ \
+							total += int(!GetLightIsOccluded(fragpos, lightindex, offset_data)); \
+						} \
+					}
+#endif
+
+				if (major_direction == 0)
 				{
-					ivec3 offset = ivec3(x, y, z);
-					total += float(!GetLightIsOccluded(fragpos, lightindex, offset));
+					_INNER_MACRO(.y, .z)
+				}
+				else if (major_direction == 1)
+				{
+					_INNER_MACRO(.x, .z)
+				}
+				else if (major_direction == 2)
+				{
+					_INNER_MACRO(.x, .y)
 				}
 			}
-		}
 
-		return total / float(BOX_VOLUME);
+#undef _INNER_MACRO
+
+			return float(total) / BOX_AREA_FLOAT;
+		}
+		else
+		{
+			return float(!GetLightIsOccluded(fragpos, lightindex, ivec3(0)));
+		}
+#else
+		return float(!GetLightIsOccluded(fragpos, lightindex, ivec3(0)));
+#endif
 	}
 	else
 	{
