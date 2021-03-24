@@ -422,6 +422,60 @@ void GLTexture::CopyFrom(const GLTexture& src)
 	src.CopyTo(*this);
 }
 
+void GLTexture::SetTexParameter(GLenum pname, GLint param)
+{
+	this->BindTexture();
+	glTexParameteri(GetTextureTypeEnum(this->GetTextureType()), pname, param);
+}
+
+void GLTexture::SetTexParameter(GLenum pname, std::vector<GLint> params)
+{
+	this->BindTexture();
+	glTexParameteriv(GetTextureTypeEnum(this->GetTextureType()), pname, params.data());
+}
+
+std::vector<GLint> GLTexture::GetTexParameteriv(GLenum pname, std::size_t num_params) const
+{
+	std::vector<GLint> result;
+	result.reserve(num_params);
+	for (std::size_t i = 0; i < num_params; i++)
+	{
+		result.push_back(GL_NONE);
+	}
+
+	this->BindTexture();
+	glGetTexParameteriv(GetTextureTypeEnum(this->GetTextureType()), pname, result.data());
+
+	return result;
+}
+
+std::vector<GLfloat> GLTexture::GetTexParameterfv(GLenum pname, std::size_t num_params) const
+{
+	std::vector<GLfloat> result;
+	result.reserve(num_params);
+	for (std::size_t i = 0; i < num_params; i++)
+	{
+		result.push_back(GL_NONE);
+	}
+
+	this->BindTexture();
+	glGetTexParameterfv(GetTextureTypeEnum(this->GetTextureType()), pname, result.data());
+
+	return result;
+}
+
+void GLTexture::SetTexParameter(GLenum pname, GLfloat param)
+{
+	this->BindTexture();
+	glTexParameterf(GetTextureTypeEnum(this->GetTextureType()), pname, param);
+}
+
+void GLTexture::SetTexParameter(GLenum pname, std::vector<GLfloat> params)
+{
+	this->BindTexture();
+	glTexParameterfv(GetTextureTypeEnum(this->GetTextureType()), pname, params.data());
+}
+
 std::optional<int> GetNumColourTextures(RenderTargetMode mode)
 {
 	if (mode == RenderTargetMode::Default)

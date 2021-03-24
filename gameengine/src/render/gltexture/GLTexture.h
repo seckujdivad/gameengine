@@ -87,6 +87,13 @@ public:
 
 	void CopyTo(GLTexture& dest) const;
 	void CopyFrom(const GLTexture& src);
+
+	void SetTexParameter(GLenum pname, GLint param);
+	void SetTexParameter(GLenum pname, std::vector<GLint> params);
+	void SetTexParameter(GLenum pname, GLfloat param);
+	void SetTexParameter(GLenum pname, std::vector<GLfloat> params);
+	std::vector<GLint> GetTexParameteriv(GLenum pname, std::size_t num_params) const;
+	std::vector<GLfloat> GetTexParameterfv(GLenum pname, std::size_t num_params) const;
 };
 
 std::optional<int> GetNumColourTextures(RenderTargetMode mode); //returning no value means this mode links into textures from another mode
