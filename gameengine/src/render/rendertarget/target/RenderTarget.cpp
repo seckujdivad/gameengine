@@ -342,7 +342,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 	// cubemaps
 	if (this->GetTargetType() == TargetType::Texture_Cubemap)
 	{
-		this->m_shader_program->SetUniform("cubemap_transform", std::vector(this->m_cubemap_rotations.begin(), this->m_cubemap_rotations.end()));
+		this->m_shader_program->SetUniform("cubemap_transform", this->m_cubemap_rotations.begin(), this->m_cubemap_rotations.end());
 	}
 	else
 	{

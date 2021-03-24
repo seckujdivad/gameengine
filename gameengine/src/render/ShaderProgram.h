@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <optional>
 #include <variant>
+#include <type_traits>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -98,13 +99,21 @@ public:
 	void SetUniform(std::string name, glm::mat3 mat);
 	void SetUniform(std::string name, glm::dmat3 mat, bool demote = true);
 
+	template<class Iterator, typename = std::enable_if_t<std::is_base_of_v<std::forward_iterator_tag, typename std::iterator_traits<Iterator>::iterator_category>>>
+	inline void SetUniform(std::string prefix, Iterator begin, Iterator end, int index_start = 0, int index_step = 1)
+	{
+		int i = 0;
+		for (auto it = begin; it != end; ++it)
+		{
+			this->SetUniform(prefix + "[" + std::to_string(index_start + (i * index_step)) + "]", *it);
+			i++;
+		}
+	}
+
 	template<typename T>
 	inline void SetUniform(std::string prefix, std::vector<T> values, int index_start = 0, int index_step = 1)
 	{
-		for (int i = 0; i < static_cast<int>(values.size()); i++)
-		{
-			this->SetUniform(prefix + "[" + std::to_string(index_start + (i * index_step)) + "]", values.at(i));
-		}
+		this->SetUniform(prefix, values.begin(), values.end(), index_start, index_step);
 	};
 
 	void SetTexture(int texture_group_id, std::string uniform_name, GLTexture* texture);
