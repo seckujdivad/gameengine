@@ -535,19 +535,24 @@ void main()
 			float hit_pos = 0.0f; //fraction of the length of the ray covered
 			int increments_at_this_level = 0; //tracks the number of increments that have taken place since the search level was last changed
 
-			vec3 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
+			vec2 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
 			while (!ssr_reflection_applied && hit_pos < 1.0f) //repeat until either the ray reaches the edge of the screen or a reflection hit is found
 			{
 				//convert screen space position to use texture UV space coordinates
-				tex_pos = (ss_position * 0.5f) + 0.5f;
-				float depth_max = GetDepthFromDistance(GetDistanceFromDepth(tex_pos.z, cam_clip_near, cam_clip_far) + half_acceptance, cam_clip_near, cam_clip_far);
-				float depth_min = GetDepthFromDistance(GetDistanceFromDepth(tex_pos.z, cam_clip_near, cam_clip_far) - half_acceptance, cam_clip_near, cam_clip_far);
+				float depth_max = GetDepthFromDistance(GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far) + half_acceptance, cam_clip_near, cam_clip_far);
+				float depth_min = GetDepthFromDistance(GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far) - half_acceptance, cam_clip_near, cam_clip_far);
+
+				const float EPSILON = 0.000001f;
+				depth_max = (depth_max * 0.5f) + 0.5f + EPSILON;
+				depth_min = (depth_min * 0.5f) + 0.5f - EPSILON;
+
+				tex_pos = (ss_position.xy * 0.5f) + 0.5f;
 
 				float max_hits = texture(render_output_depth, vec3(tex_pos.xy, depth_max)); //number of samples that are less than or equal to the maximum value
 				float min_hits = texture(render_output_depth, vec3(tex_pos.xy, depth_min)); //number of samples that are less than or equal to the minimum value
 				float samples_in_range = abs(max_hits - min_hits);
 
-				if ((samples_in_range > 0.0f) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
+				if ((samples_in_range > 0.5f) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
 				{
 					//if the search increment is as small as is allowed then use this hit as the final location
 					ssr_reflection_applied = search_level == 0;
