@@ -82,7 +82,7 @@ private:
 
 	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
-	void LoadTexture(Texture texture);
+	void LoadTexture(const Texture& texture);
 
 public:
 	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
