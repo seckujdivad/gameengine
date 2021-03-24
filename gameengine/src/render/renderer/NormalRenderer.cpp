@@ -9,6 +9,7 @@
 #include "../rendertarget/texture/RenderTextureGroup.h"
 
 #include "../../scene/Camera.h"
+#include "../../scene/texture/TextureFiltering.h"
 
 NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(engine, target)
 {
@@ -30,6 +31,9 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
+		textures->depth->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		textures->depth->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		textures->depth->SetFiltering(TextureFiltering::Linear);
 
 		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}

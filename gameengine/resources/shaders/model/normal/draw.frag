@@ -153,7 +153,7 @@ uniform samplerCube skyboxTexture;
 //previous render result
 uniform bool render_output_valid;
 uniform sampler2D render_output_colour[NUM_NORMAL_DEPTHONLY_TEXTURES];
-uniform sampler2D render_output_depth;
+uniform sampler2DShadow render_output_depth;
 uniform ivec2 render_output_dimensions;
 uniform ivec2 render_ssr_region_dimensions;
 
@@ -435,6 +435,11 @@ float GetDistanceFromDepth(float depth, float clip_near, float clip_far)
 	return (2.0f * clip_near * clip_far) / (clip_near + clip_far - (((2.0f * depth) - 1.0f) * (clip_far - clip_near)));
 }
 
+float GetDepthFromDistance(float dist, float clip_near, float clip_far)
+{
+	return ((clip_near + clip_far - ((2.0f * clip_near * clip_far) / dist)) / (clip_far - clip_near) + 1.0f) / 2.0f;
+}
+
 float GetDistanceFromReflection(int index, float depth_sample)
 {
 	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
@@ -568,7 +573,8 @@ void main()
 
 			const float num_searches_on_refine = 2.0f; //number of searches to 
 			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, initial_search_level);
-				
+			float half_acceptance = 0.5f * depth_acceptance;
+			
 			/*
 			Calculate the hit increment so that each step moves by initial_pixel_stride in one axis
 			and by less in the other (XY screen space). If initial_pixel_stride == 1, this essentially
@@ -596,24 +602,33 @@ void main()
 			float hit_pos = 0.0f; //fraction of the length of the ray covered
 			int increments_at_this_level = 0; //tracks the number of increments that have taken place since the search level was last changed
 
-			vec2 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
+			vec3 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
 			while (!ssr_reflection_applied && hit_pos < 1.0f) //repeat until either the ray reaches the edge of the screen or a reflection hit is found
 			{
 				//convert screen space position to use texture UV space coordinates
-				tex_pos = (ss_position.xy * 0.5f) + 0.5f;
-				const float sample_depth = (texture(render_output_depth, tex_pos.xy).r * 2.0f) - 1.0f;
-				const float depth_diff = abs(GetDistanceFromDepth(sample_depth, cam_clip_near, cam_clip_far) - GetDistanceFromDepth(ss_position.z, cam_clip_near, cam_clip_far));
+				tex_pos = (ss_position * 0.5f) + 0.5f;
+				float depth_max = GetDepthFromDistance(GetDistanceFromDepth(tex_pos.z, cam_clip_near, cam_clip_far) + half_acceptance, cam_clip_near, cam_clip_far);
+				float depth_min = GetDepthFromDistance(GetDistanceFromDepth(tex_pos.z, cam_clip_near, cam_clip_far) - half_acceptance, cam_clip_near, cam_clip_far);
 
-				if ((depth_diff <= depth_acceptance) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
+				float max_hits = texture(render_output_depth, vec3(tex_pos.xy, depth_max)); //number of samples that are less than or equal to the maximum value
+				float min_hits = texture(render_output_depth, vec3(tex_pos.xy, depth_min)); //number of samples that are less than or equal to the minimum value
+				float samples_in_range = abs(max_hits - min_hits);
+
+				if ((samples_in_range > 0.0f) && (texture(render_output_colour[0], tex_pos.xy).r > 0.5f)) //a hit was found
 				{
 					//if the search increment is as small as is allowed then use this hit as the final location
 					ssr_reflection_applied = search_level == 0;
 
 					//make the search finer
 					hit_pos -= hit_increment;
+
 					hit_increment /= num_searches_on_refine;
+
 					depth_acceptance /= num_searches_on_refine;
+					half_acceptance = depth_acceptance * 0.5f;
+
 					search_level -= 1;
+
 					increments_at_this_level = 0;
 				}
 
