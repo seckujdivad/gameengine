@@ -39,8 +39,6 @@
 #define TARGET_TYPE sampler2D
 #endif
 
-#define DO_SHADOW_BOXBLUR_PCF 1
-
 //shader input-output
 layout(location = 0) out vec4 colour_out[NUM_TEXTURES];
 
@@ -112,7 +110,7 @@ struct PointLight
 };
 
 uniform PointLight light_points[POINT_LIGHT_NUM];
-uniform samplerCube light_shadow_cubemaps[POINT_LIGHT_NUM];
+uniform samplerCubeShadow light_shadow_cubemaps[POINT_LIGHT_NUM];
 
 uniform bool light_shadow_draw;
 
@@ -208,79 +206,14 @@ vec3 PerspDiv(const vec4 vec)
 	return vec.xyz / vec.w;
 }
 
-bool GetLightIsOccluded(vec3 fragpos, int lightindex, ivec3 pixel_offset)
-{
-	vec3 light_to_frag = fragpos - light_points[lightindex].position;
-	const float offset_factor = 6.0f; //distance (in pixels) between each sample in the sample grid
-	vec3 offset = (vec3(pixel_offset) / vec3(light_points[lightindex].texture_dimensions)) * offset_factor * 0.5f;
-	float max_dimension_size = max(max(abs(light_to_frag.x), abs(light_to_frag.y)), abs(light_to_frag.z));
-	vec3 light_to_frag_offset = light_to_frag + (offset * max_dimension_size);
-
-	float depth_sample = texture(light_shadow_cubemaps[lightindex], light_to_frag_offset).r;
-	float corrected_depth_sample = depth_sample * light_points[lightindex].shadow_far_plane;
-	float frag_depth = length(light_to_frag_offset);
-
-	bool frag_in_range = depth_sample < 1.0f;
-	bool frag_obscured = (frag_depth - light_points[lightindex].shadow_bias) > corrected_depth_sample;
-	bool frag_in_shadow = frag_in_range && frag_obscured;
-
-	return frag_in_shadow;
-}
-
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
 	{
-#if defined(DO_SHADOW_BOXBLUR_PCF) && (DO_SHADOW_BOXBLUR_PCF == 1)
-		if (length(geomCamSpacePos) < 5.0f)
-		{
-			const int BOX_RADIUS = 1;
-			const int BOX_SIDE_LENGTH = 1 + (BOX_RADIUS * 2);
-			const int BOX_AREA = BOX_SIDE_LENGTH * BOX_SIDE_LENGTH;
-			const float BOX_AREA_FLOAT = float(BOX_AREA);
-
-			int total = 0;
-			{
-				int major_direction = abs(fragpos.y) > abs(fragpos.x) ? 1 : 0;
-				major_direction = abs(fragpos.z) > abs(fragpos[major_direction]) ? 2 : major_direction;
-				ivec3 offset_data = ivec3(0);
-
-//I wish there was a better way than using macros to unroll
-#if !defined(_INNER_MACRO)
-#define _INNER_MACRO(MINOR_EXT1, MINOR_EXT2) for (offset_data ## MINOR_EXT1 = 0 - BOX_RADIUS; offset_data ## MINOR_EXT1 < BOX_RADIUS + 1; offset_data ## MINOR_EXT1++) \
-					{ \
-						for (offset_data ## MINOR_EXT2 = 0 - BOX_RADIUS; offset_data ## MINOR_EXT2 < BOX_RADIUS + 1; offset_data ## MINOR_EXT2++) \
-						{ \
-							total += int(!GetLightIsOccluded(fragpos, lightindex, offset_data)); \
-						} \
-					}
-#endif
-
-				if (major_direction == 0)
-				{
-					_INNER_MACRO(.y, .z)
-				}
-				else if (major_direction == 1)
-				{
-					_INNER_MACRO(.x, .z)
-				}
-				else if (major_direction == 2)
-				{
-					_INNER_MACRO(.x, .y)
-				}
-			}
-
-#undef _INNER_MACRO
-
-			return float(total) / BOX_AREA_FLOAT;
-		}
-		else
-		{
-			return float(!GetLightIsOccluded(fragpos, lightindex, ivec3(0)));
-		}
-#else
-		return float(!GetLightIsOccluded(fragpos, lightindex, ivec3(0)));
-#endif
+		vec3 light_to_frag = fragpos - light_points[lightindex].position;
+		float target_depth = length(light_to_frag) - light_points[lightindex].shadow_bias;
+		float normalised_target_depth = target_depth / light_points[lightindex].shadow_far_plane;
+		return texture(light_shadow_cubemaps[lightindex], vec4(light_to_frag, normalised_target_depth));
 	}
 	else
 	{
