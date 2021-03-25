@@ -544,16 +544,30 @@ void main()
 			const vec3 ss_start_pos = PerspDiv(cam_transform * vec4(start_pos, 1.0f));
 			const vec3 ss_end_pos = PerspDiv(cam_transform * vec4(end_pos, 1.0f));
 
-			float ssr_quality = SampleTarget(render_ssr_quality, SCREEN_POS).r;
+			//get previous frame ssr hit percentage and apply some transformations to get better results
+			float ssr_hit_perc = SampleTarget(render_ssr_quality, SCREEN_POS).r;
+			if (ssr_hit_perc > 0.0f)
+			{
+				ssr_hit_perc = 1.0f - ((1.0f - ssr_hit_perc) * 0.75f);
+			}
 
-			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
+			/*
+			Test pixels are pixels that are selected to run at full quality
+			This means that regions that are too low quality to show any
+			reflections, but should be reflecting an object, are (often,
+			eventually) found.
+			*/
+			bool is_test_px = ivec2(gl_FragCoord.xy) % 32 == 0;
+			float mixer = is_test_px ? 1.0f : ssr_hit_perc;
+			int initial_search_level = int(mix(float(mat_ssr_refinements_max), float(mat_ssr_refinements_min), mixer)); //number of levels of precision that can be dropped through before any hits become final
 
-			int initial_search_level = int(mix(float(mat_ssr_refinements_max), float(mat_ssr_refinements_min), ssr_quality)); //number of levels of precision that can be dropped through before any hits become final
 			int search_level = initial_search_level;
 
 			const float num_searches_on_refine = 2.0f; //number of searches to 
 			float depth_acceptance = mat_ssr_depth_acceptance * pow(num_searches_on_refine, initial_search_level);
 			float half_acceptance = 0.5f * depth_acceptance;
+
+			const vec3 ss_direction = ss_end_pos - ss_start_pos; //screen space trace direction
 			
 			/*
 			Calculate the hit increment so that each step moves by initial_pixel_stride in one axis
