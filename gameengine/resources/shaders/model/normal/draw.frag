@@ -521,8 +521,7 @@ void main()
 					{
 						float pinned_value = (j == 0) ? -1.0f : 1.0f;
 
-						float lambda = ((pinned_value * transformed_start.w) - transformed_start[i])
-							/ (transformed_direction[i] - (pinned_value * transformed_direction.w));
+						float lambda = ((pinned_value * transformed_start.w) - transformed_start[i]) / (transformed_direction[i] - (pinned_value * transformed_direction.w));
 
 						vec3 position = PerspDiv(transformed_start + (lambda * transformed_direction));
 
@@ -535,7 +534,7 @@ void main()
 					}
 				}
 
-				float lambda = mix(lambdas[0], lambdas[1], lambdas[0] < lambdas[1]);
+				float lambda = max(lambdas[0], lambdas[1]);
 				lambda = min(lambda, mat_ssr_max_cast_distance);
 				end_pos = start.xyz + (lambda * direction.xyz);
 			}
