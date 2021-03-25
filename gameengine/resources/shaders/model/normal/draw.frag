@@ -548,7 +548,7 @@ void main()
 			float ssr_hit_perc = SampleTarget(render_ssr_quality, SCREEN_POS).r;
 			if (ssr_hit_perc > 0.0f)
 			{
-				ssr_hit_perc = 1.0f - ((1.0f - ssr_hit_perc) * 0.75f);
+				ssr_hit_perc = 1.0f - ((1.0f - ssr_hit_perc) * 0.25f);
 			}
 
 			/*

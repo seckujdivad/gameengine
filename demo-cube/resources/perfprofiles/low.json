@@ -13,7 +13,7 @@
           "distance limit": [ 10 ],
           "max camera distance": [ 8 ],
           "min refinements": [ 4 ],
-          "max refinements": [ 8 ],
+          "max refinements": [ 15 ],
           "resolution": [ 3 ]
         }
       }
