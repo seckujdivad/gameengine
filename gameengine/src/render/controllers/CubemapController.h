@@ -24,9 +24,9 @@ protected:
 
 	int m_frame_counter;
 
-	Cubemap* m_cubemap;
+	std::shared_ptr<Cubemap> m_cubemap;
 	std::unique_ptr<Camera> m_camera;
-
+	
 	void DerivedClassConstructedEvent(); //this MUST be called by the derived constructor
 
 	virtual std::unique_ptr<Renderer> GenerateRenderer(int layer) = 0;
@@ -40,7 +40,7 @@ public:
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture() const override;
 	virtual RenderControllerType GetType() const = 0;
 
-	virtual CubemapType GetCubemapType() const = 0;
+	virtual std::shared_ptr<Cubemap> GetTargetCubemap() const = 0;
 
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
 };

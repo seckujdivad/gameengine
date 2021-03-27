@@ -234,14 +234,14 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				Model* model = scene->GetModel(el2.value().get<std::string>());
-				if (model == nullptr)
+				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
+				if (model.has_value())
 				{
-					throw std::runtime_error("Cubemap static draw target '" + el2.value().get<std::string>() + "' does not exist");
+					cubemap->AddStaticModel(model.value()->GetReference());
 				}
 				else
 				{
-					cubemap->AddStaticModel(model->GetReference());
+					throw std::runtime_error("Cubemap static draw target '" + el2.value().get<std::string>() + "' does not exist");
 				}
 			}
 			else
@@ -257,14 +257,14 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				Model* model = scene->GetModel(el2.value().get<std::string>());
-				if (model == nullptr)
+				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
+				if (model.has_value())
 				{
-					throw std::runtime_error("Cubemap dynamic draw target '" + el2.value().get<std::string>() + "' does not exist");
+					cubemap->AddDynamicModel(model.value()->GetReference());
 				}
 				else
 				{
-					cubemap->AddDynamicModel(model->GetReference());
+					throw std::runtime_error("Cubemap dynamic draw target '" + el2.value().get<std::string>() + "' does not exist");
 				}
 			}
 			else
@@ -383,7 +383,6 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 
 	//initialise scene object
 	Scene* scene = new Scene();
-	scene->ManageChildren(true);
 
 	if (scene_data["metadata"].is_object())
 	{
@@ -421,7 +420,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		//first pass - load visboxes
 		for (auto& el : scene_data["visboxes"].items())
 		{
-			VisBox* visbox = new VisBox();
+			std::shared_ptr<VisBox> visbox = std::make_shared<VisBox>();
 			
 			visbox->SetIdentifier(el.key());
 			visbox->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
@@ -434,49 +433,56 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		//second pass - load visboxes into other visboxes
 		for (auto& el : scene_data["visboxes"].items())
 		{
-			VisBox* visbox = scene->GetVisBox(el.key());
-			
-			std::vector<std::string> pvs;
-			if (el.value()["pvs"].is_string())
+			std::optional<std::shared_ptr<VisBox>> visbox = scene->GetVisBox(el.key());
+
+			if (visbox.has_value())
 			{
-				pvs.push_back(el.value()["pvs"].get<std::string>());
-			}
-			else if (el.value()["pvs"].is_array())
-			{
-				for (auto& el2 : el.value()["pvs"].items())
+				std::vector<std::string> pvs;
+				if (el.value()["pvs"].is_string())
 				{
-					if (el2.value().is_string())
+					pvs.push_back(el.value()["pvs"].get<std::string>());
+				}
+				else if (el.value()["pvs"].is_array())
+				{
+					for (auto& el2 : el.value()["pvs"].items())
 					{
-						pvs.push_back(el2.value().get<std::string>());
+						if (el2.value().is_string())
+						{
+							pvs.push_back(el2.value().get<std::string>());
+						}
+						else
+						{
+							throw std::runtime_error("Visbox potentially visible set must be specified as a string or an array of strings");
+						}
+					}
+				}
+				else
+				{
+					throw std::runtime_error("Visbox potentially visible set must be specified as a string or an array of strings");
+				}
+
+				for (auto& el2 : pvs)
+				{
+					std::optional<std::shared_ptr<VisBox>> inner_visbox = scene->GetVisBox(el2);
+					if (inner_visbox.has_value())
+					{
+						visbox.value()->AddPotentiallyVisible(inner_visbox.value().get());
 					}
 					else
 					{
-						throw std::runtime_error("Visbox potentially visible set must be specified as a string or an array of strings");
+						throw std::runtime_error("Unknown visbox identifier '" + el2 + "' in PVS");
 					}
 				}
 			}
 			else
 			{
-				throw std::runtime_error("Visbox potentially visible set must be specified as a string or an array of strings");
-			}
-
-			for (auto& el2 : pvs)
-			{
-				VisBox* inner_visbox = scene->GetVisBox(el2);
-				if (inner_visbox == nullptr)
-				{
-					throw std::runtime_error("Unknown visbox identifier '" + el2 + "' in PVS");
-				}
-				else
-				{
-					visbox->AddPotentiallyVisible(inner_visbox);
-				}
+				throw std::runtime_error("VisBox '" + el.key() + " does not exist");
 			}
 		}
 	}
 
 	//load models without reflections in materials
-	std::vector<Model*> models; //models stored in the order that they appear in in the scene file
+	std::vector<std::shared_ptr<Model>> models; //models stored in the order that they appear in in the scene file
 	{
 		//function to apply an ssr config specified in json to a MaterialSSRConfig struct
 		auto ApplySSRConfig = [&perf_data](MaterialSSRConfig config, const nlohmann::json& data)
@@ -587,7 +593,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 					}
 				}
 
-				Model* model = new Model(scene->GetNewModelReference(), geometries, scene);
+				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), geometries, scene);
 
 				if (el.value()["identifier"].is_string())
 				{
@@ -690,15 +696,15 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 
 				for (auto& el2 : pvs_membership)
 				{
-					VisBox* visbox = scene->GetVisBox(el2);
+					std::optional<std::shared_ptr<VisBox>> visbox = scene->GetVisBox(el2);
 
-					if (visbox == nullptr)
+					if (visbox.has_value())
 					{
-						throw std::runtime_error("Unknown PVS identifier '" + el2 + "' used when specifying model PVS membership");
+						visbox.value()->AddMemberModel(model);
 					}
 					else
 					{
-						visbox->AddMemberModel(model);
+						throw std::runtime_error("Unknown PVS identifier '" + el2 + "' used when specifying model PVS membership");
 					}
 				}
 
@@ -711,7 +717,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 	//load all reflections with model ptrs
 	for (auto& el : scene_data["reflections"].items())
 	{
-		Reflection* reflection = new Reflection(scene->GetNewRenderTextureReference());
+		std::shared_ptr<Reflection> reflection = std::make_shared<Reflection>(scene->GetNewRenderTextureReference());
 
 		reflection->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 
@@ -741,7 +747,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 			reflection->SetDrawReflections(el.value()["draw reflections"].get<bool>());
 		}
 
-		ConfigureCubemap(el.value(), perf_data, reflection, scene);
+		ConfigureCubemap(el.value(), perf_data, reflection.get(), scene);
 
 		scene->Add(reflection);
 	}
@@ -752,7 +758,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		for (int i = 0; i < (int)scene_data["layout"].size(); i++)
 		{
 			auto& el = scene_data["layout"][i];
-			Model* model = models.at(i);
+			std::shared_ptr<Model> model = models.at(i);
 
 			if (el["reflections"].is_object() && el["reflections"]["alternative"].is_object())
 			{
@@ -806,14 +812,14 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 
 				for (auto& el2 : refl_names)
 				{
-					Reflection* reflection = scene->GetReflection(el2);
-					if (reflection == nullptr)
+					std::optional<std::shared_ptr<Reflection>> reflection = scene->GetReflection(el2);
+					if (reflection.has_value())
 					{
-						throw std::runtime_error("Couldn't resolve alternative reflection for model with identifier '" + el2 + "'");
+						model->GetMaterial().reflections.push_back(std::tuple(reflection.value(), mode));
 					}
 					else
 					{
-						model->GetMaterial().reflections.push_back(std::tuple(reflection, mode));
+						throw std::runtime_error("Couldn't resolve alternative reflection for model with identifier '" + el2 + "'");
 					}
 				}
 			}
@@ -831,7 +837,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		{
 			if (el.value().is_object())
 			{
-				PointLight* pointlight = new PointLight(scene->GetNewRenderTextureReference());
+				std::shared_ptr<PointLight> pointlight = std::make_shared<PointLight>(scene->GetNewRenderTextureReference());
 
 				pointlight->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 				pointlight->SetIntensity(GetVector(el.value()["intensity"], glm::dvec3(0.0)));
@@ -843,7 +849,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 						pointlight->SetShadowBias(el.value()["shadows"]["acceptance bias"].get<double>());
 					}
 
-					ConfigureCubemap(el.value()["shadows"], perf_data, pointlight, scene);
+					ConfigureCubemap(el.value()["shadows"], perf_data, pointlight.get(), scene);
 				}
 
 				scene->Add(pointlight);
@@ -861,10 +867,10 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		{
 			if (el.value().is_object())
 			{
-				Skybox* skybox = new Skybox(scene->GetNewRenderTextureReference());
+				std::shared_ptr<Skybox> skybox = std::make_shared<Skybox>(scene->GetNewRenderTextureReference());
 				skybox->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 
-				ConfigureCubemap(el.value(), perf_data, skybox, scene);
+				ConfigureCubemap(el.value(), perf_data, skybox.get(), scene);
 
 				scene->Add(skybox);
 
@@ -872,15 +878,15 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 				{
 					if (el2.value().is_string())
 					{
-						Model* model = scene->GetModel(el2.value().get<std::string>());
+						std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
 
-						if (model == nullptr)
+						if (model.has_value())
 						{
-							throw std::runtime_error("Invalid model identifier \"" + el2.value().get<std::string>() + "\"");
+							model.value()->SetSkybox(skybox);
 						}
 						else
 						{
-							model->SetSkybox(skybox);
+							throw std::runtime_error("Invalid model identifier \"" + el2.value().get<std::string>() + "\"");
 						}
 					}
 					else

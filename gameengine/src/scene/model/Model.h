@@ -37,7 +37,7 @@ private:
 	std::vector<glm::vec3> m_wireframe_colours = { glm::vec3(0.0f), glm::vec3(1.0f, 0.75f, 0.0f) };
 
 	//skybox
-	Skybox* m_skybox = nullptr;
+	std::shared_ptr<Skybox> m_skybox = nullptr;
 
 public:
 	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene = nullptr);
@@ -58,6 +58,6 @@ public:
 	void SetCurrentWireframeColour(glm::vec3 colour);
 	glm::vec3 GetCurrentWireframeColour() const;
 
-	void SetSkybox(Skybox* skybox);
-	Skybox* GetSkybox() const;
+	void SetSkybox(std::shared_ptr<Skybox> skybox);
+	std::shared_ptr<Skybox> GetSkybox() const;
 };

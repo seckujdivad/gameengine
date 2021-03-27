@@ -376,10 +376,10 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		this->m_shader_program->SetUniform("light_shadow_draw", shadows_enabled);
 
 		//point lights
-		std::vector<PointLight*> point_lights = this->GetEngine()->GetScene()->GetPointLights();
+		const std::vector<std::shared_ptr<PointLight>> point_lights = this->GetEngine()->GetScene()->GetPointLights();
 		for (int i = 0; i < static_cast<int>(point_lights.size()); i++)
 		{
-			PointLight* point_light = point_lights.at(i);
+			const std::shared_ptr<PointLight>& point_light = point_lights.at(i);
 			std::string root_name = "light_points[" + std::to_string(i) + "].";
 			this->m_shader_program->SetUniform(root_name + "position", point_light->GetPosition());
 			this->m_shader_program->SetUniform(root_name + "intensity", point_light->GetIntensity());
@@ -396,7 +396,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 
 		//scene approximation
-		std::vector<OrientedBoundingBox> scene_approximations = this->GetEngine()->GetScene()->GetOBBApproximations();
+		const std::vector<OrientedBoundingBox>& scene_approximations = this->GetEngine()->GetScene()->GetOBBApproximations();
 		for (int i = 0; i < static_cast<int>(scene_approximations.size()); i++)
 		{
 			OrientedBoundingBox obb = scene_approximations.at(i);
@@ -603,10 +603,10 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 
 		int num_colour_tex = GetNumColourTextures(RenderTargetMode::Normal_PostProcess).value();
 
-		std::vector<std::tuple<Reflection*, ReflectionMode>> reflections = material.reflections;
+		const std::vector<std::tuple<std::shared_ptr<Reflection>, ReflectionMode>>& reflections = material.reflections;
 		for (int i = 0; i < static_cast<int>(reflections.size()); i++)
 		{
-			Reflection* reflection = std::get<0>(reflections.at(i));
+			const std::shared_ptr<Reflection>& reflection = std::get<0>(reflections.at(i));
 			ReflectionMode reflection_mode = std::get<1>(reflections.at(i));
 
 			std::string prefix = "reflections[" + std::to_string(i) + "].";
@@ -640,7 +640,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
 
 		//skybox cubemap
-		Skybox* skybox = model->GetSkybox();
+		std::shared_ptr<Skybox> skybox = model->GetSkybox();
 		GLTexture* skybox_texture;
 		if (skybox == nullptr)
 		{
@@ -741,15 +741,25 @@ std::unordered_set<RenderTextureReference> RenderTarget::GetRenderTextureDepende
 
 	if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 	{
-		for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetEngine()->GetScene()->GetCubemaps())
+		for (const std::shared_ptr<PointLight>& pointlight : this->GetEngine()->GetScene()->GetPointLights())
 		{
-			Cubemap* cubemap = std::get<0>(cubemap_data);
-			CubemapType cubemap_type = std::get<1>(cubemap_data);
-
-			if (!(cubemap_type == CubemapType::Reflection && !this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections))
+			if (this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_shadows)
 			{
-				result.insert(cubemap->GetReference());
+				result.insert(pointlight->GetReference());
 			}
+		}
+
+		for (const std::shared_ptr<Reflection>& reflection : this->GetEngine()->GetScene()->GetReflections())
+		{
+			if (this->m_config.Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
+			{
+				result.insert(reflection->GetReference());
+			}
+		}
+
+		for (const std::shared_ptr<Skybox>& skybox : this->GetEngine()->GetScene()->GetSkyboxes())
+		{
+			result.insert(skybox->GetReference());
 		}
 	}
 

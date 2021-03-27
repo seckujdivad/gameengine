@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <tuple>
+#include <memory>
 
 #include "Reflection.h"
 
@@ -34,7 +35,7 @@ struct Material
 	MaterialSSRConfig ssr;
 
 	bool reflections_enabled = true;
-	std::vector<std::tuple<Reflection*, ReflectionMode>> reflections;
+	std::vector<std::tuple<std::shared_ptr<Reflection>, ReflectionMode>> reflections;
 
 	MaterialDisplacementConfig displacement;
 };

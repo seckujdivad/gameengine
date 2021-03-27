@@ -1,12 +1,16 @@
 #include "ShadowController.h"
 
+#include <stdexcept>
+
 #include "../rendertarget/texture/RenderTexture.h"
-#include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderer/WrapperRenderer.h"
 #include "../TargetType.h"
 #include "../rendertarget/texture/RenderTextureGroup.h"
 #include "../../scene/texture/TextureFiltering.h"
+#include "../../scene/light/PointLight.h"
+#include "../../Engine.h"
+#include "../../scene/Scene.h"
 
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
@@ -46,7 +50,15 @@ RenderControllerType ShadowController::GetType() const
 	return RenderControllerType::Shadow;
 }
 
-CubemapType ShadowController::GetCubemapType() const
+std::shared_ptr<Cubemap> ShadowController::GetTargetCubemap() const
 {
-	return CubemapType::Pointlight;
+	std::optional<std::shared_ptr<PointLight>> pointlight = this->m_engine->GetScene()->GetPointLight(this->GetReference());
+	if (pointlight.has_value())
+	{
+		return pointlight.value();
+	}
+	else
+	{
+		throw std::invalid_argument("Reference does not refer to an existing point light");
+	}
 }

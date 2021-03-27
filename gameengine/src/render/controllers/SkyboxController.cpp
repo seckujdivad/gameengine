@@ -1,11 +1,15 @@
 #include "SkyboxController.h"
 
+#include <stdexcept>
+
 #include "../rendertarget/texture/RenderTexture.h"
-#include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
 #include "../renderer/NormalRenderer.h"
 #include "../TargetType.h"
 #include "../rendertarget/texture/RenderTextureGroup.h"
+#include "../../scene/Scene.h"
+#include "../../Engine.h"
+#include "../../scene/Skybox.h"
 
 std::unique_ptr<Renderer> SkyboxController::GenerateRenderer(int layer)
 {
@@ -43,7 +47,15 @@ RenderControllerType SkyboxController::GetType() const
 	return RenderControllerType::Skybox;
 }
 
-CubemapType SkyboxController::GetCubemapType() const
+std::shared_ptr<Cubemap> SkyboxController::GetTargetCubemap() const
 {
-	return CubemapType::Skybox;
+	std::optional<std::shared_ptr<Skybox>> skybox = this->m_engine->GetScene()->GetSkybox(this->GetReference());
+	if (skybox.has_value())
+	{
+		return skybox.value();
+	}
+	else
+	{
+		throw std::invalid_argument("Reference does not refer to an existing skybox");
+	}
 }

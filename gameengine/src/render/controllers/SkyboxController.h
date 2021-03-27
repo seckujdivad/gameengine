@@ -13,5 +13,5 @@ public:
 
 	RenderControllerType GetType() const override;
 
-	CubemapType GetCubemapType() const override;
+	std::shared_ptr<Cubemap> GetTargetCubemap() const override;
 };

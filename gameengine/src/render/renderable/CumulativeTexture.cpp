@@ -17,7 +17,16 @@ CumulativeTexture::CumulativeTexture(std::vector<Renderer*> renderers) : m_rende
 
 	this->SetFetchModelsFunction([&renderers = this->m_renderers](int layer)
 		{
-			return renderers.at(layer)->GetEngine()->GetScene()->GetModels();
+			const std::vector<std::shared_ptr<Model>>& models = renderers.at(layer)->GetEngine()->GetScene()->GetModels();
+
+			std::vector<Model*> result;
+			result.reserve(models.size());
+			for (const std::shared_ptr<Model>& model : models)
+			{
+				result.push_back(model.get());
+			}
+
+			return result;
 		});
 }
 

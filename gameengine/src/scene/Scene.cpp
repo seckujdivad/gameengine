@@ -1,10 +1,12 @@
 #include "Scene.h"
 
 #include <set>
+#include <unordered_set>
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
 
+#include "Cubemap.h"
 #include "model/Model.h"
 #include "light/PointLight.h"
 #include "model/Reflection.h"
@@ -15,72 +17,26 @@ Scene::Scene() : Nameable()
 {
 }
 
-Scene::~Scene()
-{
-	if (this->m_manage_children)
-	{
-		for (Model* model : this->m_models)
-		{
-			delete model;
-		}
-
-		for (PointLight* pointlight : this->m_pointlights)
-		{
-			delete pointlight;
-		}
-
-		for (Reflection* reflection : this->m_reflections)
-		{
-			delete reflection;
-		}
-
-		for (Skybox* skybox : this->m_skyboxes)
-		{
-			delete skybox;
-		}
-
-		for (VisBox* visbox : this->m_visboxes)
-		{
-			delete visbox;
-		}
-	}
-}
-
-void Scene::ManageChildren(bool manage)
-{
-	this->m_manage_children = manage;
-}
-
-bool Scene::ChildrenAreManaged() const
-{
-	return this->m_manage_children;
-}
-
-void Scene::Add(Model* model)
+void Scene::Add(std::shared_ptr<Model> model)
 {
 	this->m_models.push_back(model);
 }
 
-void Scene::Remove(Model* model)
+void Scene::Remove(std::shared_ptr<Model> model)
 {
-	std::vector<Model*>::iterator it = std::find(this->m_models.begin(), this->m_models.end(), model);
+	std::vector<std::shared_ptr<Model>>::iterator it = std::find(this->m_models.begin(), this->m_models.end(), model);
 	if (it != this->m_models.end())
 	{
 		this->m_models.erase(it);
-
-		if (this->m_manage_children)
-		{
-			delete *it;
-		}
 	}
 
-	for (std::tuple<Cubemap*, CubemapType> cubemap_data : this->GetCubemaps())
+	for (const std::shared_ptr<Cubemap>& cubemaps : this->GetCubemaps())
 	{
-		std::get<0>(cubemap_data)->RemoveStaticModel(model->GetReference());
-		std::get<0>(cubemap_data)->RemoveDynamicModel(model->GetReference());
+		cubemaps->RemoveStaticModel(model->GetReference());
+		cubemaps->RemoveDynamicModel(model->GetReference());
 	}
 
-	for (VisBox* visbox : this->GetVisBoxes())
+	for (const std::shared_ptr<VisBox>& visbox : this->GetVisBoxes())
 	{
 		visbox->RemoveMemberModel(model);
 	}
@@ -88,12 +44,16 @@ void Scene::Remove(Model* model)
 
 void Scene::RemoveModel(ModelReference reference)
 {
-	this->Remove(this->GetModel(reference));
+	std::optional<std::shared_ptr<Model>> model = this->GetModel(reference);
+	if (model.has_value())
+	{
+		this->Remove(model.value());
+	}
 }
 
-Model* Scene::GetModel(ModelReference reference) const
+std::optional<std::shared_ptr<Model>> Scene::GetModel(ModelReference reference) const
 {
-	for (Model* model : this->m_models)
+	for (const std::shared_ptr<Model>& model : this->m_models)
 	{
 		if (model->GetReference() == reference)
 		{
@@ -101,12 +61,12 @@ Model* Scene::GetModel(ModelReference reference) const
 		}
 	}
 
-	return nullptr;
+	return std::optional<std::shared_ptr<Model>>();
 }
 
-Model* Scene::GetModel(std::string identifier) const
+std::optional<std::shared_ptr<Model>> Scene::GetModel(std::string identifier) const
 {
-	for (Model* model : this->m_models)
+	for (const std::shared_ptr<Model>& model : this->m_models)
 	{
 		if (model->GetIdentifier() == identifier)
 		{
@@ -114,27 +74,27 @@ Model* Scene::GetModel(std::string identifier) const
 		}
 	}
 
-	return nullptr;
+	return std::optional<std::shared_ptr<Model>>();
 }
 
-const std::vector<Model*>& Scene::GetModels() const
+const std::vector<std::shared_ptr<Model>>& Scene::GetModels() const
 {
 	return this->m_models;
 }
 
-std::vector<Model*> Scene::GetModels(std::vector<ModelReference> references) const
+std::vector<std::shared_ptr<Model>> Scene::GetModels(std::vector<ModelReference> references) const
 {
-	std::vector<Model*> models;
+	std::vector<std::shared_ptr<Model>> models;
 	for (ModelReference reference : references)
 	{
-		Model* model = this->GetModel(reference);
-		if (model == nullptr)
+		std::optional<std::shared_ptr<Model>> model = this->GetModel(reference);
+		if (model.has_value())
 		{
-			throw std::invalid_argument("Model reference " + std::to_string(reference) + " is invalid");
+			models.push_back(model.value());
 		}
 		else
 		{
-			models.push_back(model);
+			throw std::invalid_argument("Model reference " + std::to_string(reference) + " is invalid");
 		}
 	}
 	return models;
@@ -180,54 +140,49 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 	if ((mode == RenderTargetMode::Normal_DepthOnly) || (mode == RenderTargetMode::Normal_Draw) || (mode == RenderTargetMode::Shadow) || (mode == RenderTargetMode::Textured))
 	{
 		std::set<Model*> visible_models;
-		std::set<VisBox*> enclosed_visboxes;
+		std::unordered_set<VisBox*> enclosed_visboxes;
 
-		for (VisBox* visbox : this->m_visboxes)
+		for (const std::shared_ptr<VisBox> visbox : this->m_visboxes)
 		{
 			if (visbox->PointInBounds(position))
 			{
-				enclosed_visboxes.insert(enclosed_visboxes.begin(), visbox);
+				enclosed_visboxes.insert(enclosed_visboxes.begin(), visbox.get());
 			}
 		}
 
 		if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
 		{
-			for (Model* model : this->m_models)
+			for (const std::shared_ptr<Model>& model : this->m_models)
 			{
-				visible_models.insert(model);
+				visible_models.insert(model.get());
 			}
 		}
 		else
 		{
 			for (VisBox* visbox : enclosed_visboxes)
 			{
-				std::set<Model*> locally_visible_models = visbox->GetPotentiallyVisibleModels();
-				visible_models.insert(locally_visible_models.begin(), locally_visible_models.end());
+				std::set<std::shared_ptr<Model>> locally_visible_models = visbox->GetPotentiallyVisibleModels();
+				for (const std::shared_ptr<Model>& model : locally_visible_models)
+				{
+					visible_models.insert(model.get());
+				}
 			}
 		}
 
 		std::vector<Model*> output;
-		if (model_pool == this->GetModels())
-		{
-			output.assign(visible_models.begin(), visible_models.end());
-		}
-		else
-		{
-			std::set<Model*> output_set;
+		std::unordered_set<Model*> output_set;
 
-			std::set<Model*> model_pool_set;
-			model_pool_set.insert(model_pool.begin(), model_pool.end());
+		std::set<Model*> model_pool_set;
+		model_pool_set.insert(model_pool.begin(), model_pool.end());
 			
-			std::set_intersection(model_pool_set.begin(), model_pool_set.end(), visible_models.begin(), visible_models.end(), std::inserter(output_set, output_set.begin()));
+		std::set_intersection(model_pool_set.begin(), model_pool_set.end(), visible_models.begin(), visible_models.end(), std::inserter(output_set, output_set.begin()));
 
-			output.assign(output_set.begin(), output_set.end());
-		}
-
+		output.assign(output_set.begin(), output_set.end());
 		return output;
 	}
 	else if (mode == RenderTargetMode::Wireframe)
 	{
-		return this->m_models;
+		return model_pool;
 	}
 	else
 	{
@@ -235,38 +190,70 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 	}
 }
 
-void Scene::Add(PointLight* pointlight)
+void Scene::Add(std::shared_ptr<PointLight> pointlight)
 {
 	this->m_pointlights.push_back(pointlight);
 }
 
-void Scene::Remove(PointLight* pointlight)
+std::optional<std::shared_ptr<PointLight>> Scene::GetPointLight(RenderTextureReference reference) const
 {
-	std::vector<PointLight*>::iterator it = std::find(this->m_pointlights.begin(), this->m_pointlights.end(), pointlight);
+	for (const std::shared_ptr<PointLight>& pointlight : this->m_pointlights)
+	{
+		if (pointlight->GetReference() == reference)
+		{
+			return pointlight;
+		}
+	}
+	return std::optional<std::shared_ptr<PointLight>>();
+}
+
+std::optional<std::shared_ptr<PointLight>> Scene::GetPointLight(std::string identifier) const
+{
+	for (const std::shared_ptr<PointLight>& pointlight : this->m_pointlights)
+	{
+		if (pointlight->GetIdentifier() == identifier)
+		{
+			return pointlight;
+		}
+	}
+	return std::optional<std::shared_ptr<PointLight>>();
+}
+
+void Scene::Remove(std::shared_ptr<PointLight> pointlight)
+{
+	std::vector<std::shared_ptr<PointLight>>::iterator it = std::find(this->m_pointlights.begin(), this->m_pointlights.end(), pointlight);
 	if (it != this->m_pointlights.end())
 	{
 		this->m_pointlights.erase(it);
-		
-		if (this->m_manage_children)
-		{
-			delete *it;
-		}
 	}
 }
 
-const std::vector<PointLight*>& Scene::GetPointLights() const
+const std::vector<std::shared_ptr<PointLight>>& Scene::GetPointLights() const
 {
 	return this->m_pointlights;
 }
 
-void Scene::Add(Reflection* reflection)
+void Scene::Add(std::shared_ptr<Reflection> reflection)
 {
 	this->m_reflections.push_back(reflection);
 }
 
-Reflection* Scene::GetReflection(std::string identifier) const
+std::optional<std::shared_ptr<Reflection>> Scene::GetReflection(RenderTextureReference reference) const
 {
-	for (Reflection* reflection : this->m_reflections)
+	for (const std::shared_ptr<Reflection>& reflection : this->m_reflections)
+	{
+		if (reflection->GetReference() == reference)
+		{
+			return reflection;
+		}
+	}
+
+	return std::optional<std::shared_ptr<Reflection>>();
+}
+
+std::optional<std::shared_ptr<Reflection>> Scene::GetReflection(std::string identifier) const
+{
+	for (const std::shared_ptr<Reflection>& reflection : this->m_reflections)
 	{
 		if (reflection->GetIdentifier() == identifier)
 		{
@@ -274,29 +261,24 @@ Reflection* Scene::GetReflection(std::string identifier) const
 		}
 	}
 
-	return nullptr;
+	return std::optional<std::shared_ptr<Reflection>>();
 }
 
-void Scene::Remove(Reflection* reflection)
+void Scene::Remove(std::shared_ptr<Reflection> reflection)
 {
-	std::vector<Reflection*>::iterator it = std::find(this->m_reflections.begin(), this->m_reflections.end(), reflection);
+	std::vector<std::shared_ptr<Reflection>>::iterator it = std::find(this->m_reflections.begin(), this->m_reflections.end(), reflection);
 	if (it != this->m_reflections.end())
 	{
 		this->m_reflections.erase(it);
-		
-		if (this->m_manage_children)
-		{
-			delete *it;
-		}
 	}
 
-	for (Model* model : this->GetModels())
+	for (const std::shared_ptr<Model>& model : this->GetModels())
 	{
 		Material& material = model->GetMaterial();
 
 		for (int i = 0; i < static_cast<int>(material.reflections.size()); i++)
 		{
-			std::tuple<Reflection*, ReflectionMode> reflection_data = material.reflections.at(i);
+			std::tuple<std::shared_ptr<Reflection>, ReflectionMode> reflection_data = material.reflections.at(i);
 
 			if (std::get<0>(reflection_data) == reflection)
 			{
@@ -307,19 +289,32 @@ void Scene::Remove(Reflection* reflection)
 	}
 }
 
-const std::vector<Reflection*>& Scene::GetReflections() const
+const std::vector<std::shared_ptr<Reflection>>& Scene::GetReflections() const
 {
 	return this->m_reflections;
 }
 
-void Scene::Add(Skybox* skybox)
+void Scene::Add(std::shared_ptr<Skybox> skybox)
 {
 	this->m_skyboxes.push_back(skybox);
 }
 
-Skybox* Scene::GetSkybox(std::string identifier) const
+std::optional<std::shared_ptr<Skybox>> Scene::GetSkybox(RenderTextureReference reference) const
 {
-	for (Skybox* skybox : this->m_skyboxes)
+	for (const std::shared_ptr<Skybox>& skybox : this->m_skyboxes)
+	{
+		if (skybox->GetReference() == reference)
+		{
+			return skybox;
+		}
+	}
+
+	return std::optional<std::shared_ptr<Skybox>>();
+}
+
+std::optional<std::shared_ptr<Skybox>> Scene::GetSkybox(std::string identifier) const
+{
+	for (const std::shared_ptr<Skybox>& skybox : this->m_skyboxes)
 	{
 		if (skybox->GetIdentifier() == identifier)
 		{
@@ -327,23 +322,18 @@ Skybox* Scene::GetSkybox(std::string identifier) const
 		}
 	}
 
-	return nullptr;
+	return std::optional<std::shared_ptr<Skybox>>();
 }
 
-void Scene::Remove(Skybox* skybox)
+void Scene::Remove(std::shared_ptr<Skybox> skybox)
 {
-	std::vector<Skybox*>::iterator it = std::find(this->m_skyboxes.begin(), this->m_skyboxes.end(), skybox);
+	std::vector<std::shared_ptr<Skybox>>::iterator it = std::find(this->m_skyboxes.begin(), this->m_skyboxes.end(), skybox);
 	if (it != this->m_skyboxes.end())
 	{
 		this->m_skyboxes.erase(it);
-
-		if (this->m_manage_children)
-		{
-			delete* it;
-		}
 	}
 
-	for (Model* model : this->GetModels())
+	for (const std::shared_ptr<Model>& model : this->GetModels())
 	{
 		if (model->GetSkybox() == skybox)
 		{
@@ -352,19 +342,19 @@ void Scene::Remove(Skybox* skybox)
 	}
 }
 
-const std::vector<Skybox*>& Scene::GetSkyboxes() const
+const std::vector<std::shared_ptr<Skybox>>& Scene::GetSkyboxes() const
 {
 	return this->m_skyboxes;
 }
 
-void Scene::Add(VisBox* visbox)
+void Scene::Add(std::shared_ptr<VisBox> visbox)
 {
 	this->m_visboxes.push_back(visbox);
 }
 
-VisBox* Scene::GetVisBox(std::string identifier) const
+std::optional<std::shared_ptr<VisBox>> Scene::GetVisBox(std::string identifier) const
 {
-	for (VisBox* visbox : this->m_visboxes)
+	for (const std::shared_ptr<VisBox>& visbox : this->m_visboxes)
 	{
 		if (visbox->GetIdentifier() == identifier)
 		{
@@ -372,29 +362,24 @@ VisBox* Scene::GetVisBox(std::string identifier) const
 		}
 	}
 
-	return nullptr;
+	return std::optional<std::shared_ptr<VisBox>>();
 }
 
-void Scene::Remove(VisBox* visbox)
+void Scene::Remove(std::shared_ptr<VisBox> visbox)
 {
-	std::vector<VisBox*>::iterator it = std::find(this->m_visboxes.begin(), this->m_visboxes.end(), visbox);
+	std::vector<std::shared_ptr<VisBox>>::iterator it = std::find(this->m_visboxes.begin(), this->m_visboxes.end(), visbox);
 	if (it != this->m_visboxes.end())
 	{
 		this->m_visboxes.erase(it);
-		
-		if (this->m_manage_children)
-		{
-			delete *it;
-		}
 	}
 
-	for (VisBox* second_visbox : this->GetVisBoxes())
+	for (const std::shared_ptr<VisBox>& second_visbox : this->GetVisBoxes())
 	{
-		second_visbox->RemovePotentiallyVisible(visbox);
+		second_visbox->RemovePotentiallyVisible(visbox.get());
 	}
 }
 
-const std::vector<VisBox*>& Scene::GetVisBoxes() const
+const std::vector<std::shared_ptr<VisBox>>& Scene::GetVisBoxes() const
 {
 	return this->m_visboxes;
 }
@@ -402,8 +387,8 @@ const std::vector<VisBox*>& Scene::GetVisBoxes() const
 void Scene::RemoveCubemap(RenderTextureReference reference)
 {
 	{
-		std::vector<Reflection*>::iterator result = this->m_reflections.end();
-		for (std::vector<Reflection*>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+		std::vector<std::shared_ptr<Reflection>>::iterator result = this->m_reflections.end();
+		for (std::vector<std::shared_ptr<Reflection>>::iterator it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
 		{
 			if ((*it)->GetReference() == reference)
 			{
@@ -418,8 +403,8 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 	}
 
 	{
-		std::vector<PointLight*>::iterator result = this->m_pointlights.end();
-		for (std::vector<PointLight*>::iterator it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
+		std::vector<std::shared_ptr<PointLight>>::iterator result = this->m_pointlights.end();
+		for (std::vector<std::shared_ptr<PointLight>>::iterator it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
 		{
 			if ((*it)->GetReference() == reference)
 			{
@@ -434,8 +419,8 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 	}
 
 	{
-		std::vector<Skybox*>::iterator result = this->m_skyboxes.end();
-		for (std::vector<Skybox*>::iterator it = this->m_skyboxes.begin(); it != this->m_skyboxes.end(); it++)
+		std::vector<std::shared_ptr<Skybox>>::iterator result = this->m_skyboxes.end();
+		for (std::vector<std::shared_ptr<Skybox>>::iterator it = this->m_skyboxes.begin(); it != this->m_skyboxes.end(); it++)
 		{
 			if ((*it)->GetReference() == reference)
 			{
@@ -450,51 +435,51 @@ void Scene::RemoveCubemap(RenderTextureReference reference)
 	}
 }
 
-std::tuple<Cubemap*, CubemapType> Scene::GetCubemap(RenderTextureReference reference) const
+std::optional<std::shared_ptr<Cubemap>> Scene::GetCubemap(RenderTextureReference reference) const
 {
-	for (Reflection* reflection : this->m_reflections)
+	for (const std::shared_ptr<Reflection>& reflection : this->m_reflections)
 	{
 		if (reflection->GetReference() == reference)
 		{
-			return { reflection, CubemapType::Reflection };
+			return reflection;
 		}
 	}
 
-	for (PointLight* point_light : this->m_pointlights)
+	for (const std::shared_ptr<PointLight>& point_light : this->m_pointlights)
 	{
 		if (point_light->GetReference() == reference)
 		{
-			return { point_light, CubemapType::Pointlight };
+			return point_light;
 		}
 	}
 
-	for (Skybox* skybox : this->m_skyboxes)
+	for (const std::shared_ptr<Skybox>& skybox : this->m_skyboxes)
 	{
 		if (skybox->GetReference() == reference)
 		{
-			return { skybox, CubemapType::Skybox };
+			return skybox;
 		}
 	}
 
-	return { nullptr, CubemapType::None };
+	return std::optional<std::shared_ptr<Cubemap>>();
 }
 
-std::vector<std::tuple<Cubemap*, CubemapType>> Scene::GetCubemaps() const
+std::vector<std::shared_ptr<Cubemap>> Scene::GetCubemaps() const
 {
-	std::vector<std::tuple<Cubemap*, CubemapType>> cubemaps;
-	for (auto it = this->m_reflections.begin(); it != this->m_reflections.end(); it++)
+	std::vector<std::shared_ptr<Cubemap>> cubemaps;
+	for (const std::shared_ptr<Reflection>& reflection : this->m_reflections)
 	{
-		cubemaps.push_back({ *it, CubemapType::Reflection });
+		cubemaps.push_back(reflection);
 	}
 
-	for (auto it = this->m_pointlights.begin(); it != this->m_pointlights.end(); it++)
+	for (const std::shared_ptr<PointLight>& pointlight : this->m_pointlights)
 	{
-		cubemaps.push_back({ *it, CubemapType::Pointlight });
+		cubemaps.push_back(pointlight);
 	}
 
-	for (auto it = this->m_skyboxes.begin(); it != this->m_skyboxes.end(); it++)
+	for (const std::shared_ptr<Skybox>& skybox : this->m_skyboxes)
 	{
-		cubemaps.push_back({ *it, CubemapType::Skybox });
+		cubemaps.push_back(skybox);
 	}
 
 	return cubemaps;

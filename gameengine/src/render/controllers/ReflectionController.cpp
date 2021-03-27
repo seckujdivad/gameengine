@@ -2,12 +2,18 @@
 
 #include <stdexcept>
 
-#include "../rendertarget/texture/RenderTexture.h"
+#include "../../Engine.h"
+
 #include "../../scene/model/Reflection.h"
 #include "../../scene/Cubemap.h"
+#include "../../scene/Scene.h"
+
 #include "../renderer/NormalRenderer.h"
+
 #include "../TargetType.h"
+
 #include "../rendertarget/texture/RenderTextureGroup.h"
+#include "../rendertarget/texture/RenderTexture.h"
 
 std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 {
@@ -29,7 +35,7 @@ std::unique_ptr<Renderer> ReflectionController::GenerateRenderer(int layer)
 
 bool ReflectionController::RepeatingConfigureRenderer(Renderer* renderer) const
 {
-	Reflection* reflection = static_cast<Reflection*>(this->m_cubemap);
+	std::shared_ptr<Reflection> reflection = std::static_pointer_cast<Reflection>(this->m_cubemap);
 	NormalRenderer* normal_renderer = dynamic_cast<NormalRenderer*>(renderer);
 
 	bool updated = false;
@@ -65,7 +71,15 @@ RenderControllerType ReflectionController::GetType() const
 	return RenderControllerType::Reflection;
 }
 
-CubemapType ReflectionController::GetCubemapType() const
+std::shared_ptr<Cubemap> ReflectionController::GetTargetCubemap() const
 {
-	return CubemapType::Reflection;
+	std::optional<std::shared_ptr<Reflection>> reflection = this->m_engine->GetScene()->GetReflection(this->GetReference());
+	if (reflection.has_value())
+	{
+		return reflection.value();
+	}
+	else
+	{
+		throw std::invalid_argument("Reference does not refer to an existing reflection");
+	}
 }

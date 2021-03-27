@@ -87,7 +87,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_lb_models->Bind(wxEVT_CHAR, &Main::lb_models_OnChar, this);
 	this->m_sizer->Add(this->m_lb_models, wxGBPosition(0, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
-	for (Model* model : this->m_scene->GetModels())
+	for (const std::shared_ptr<Model> model : this->m_scene->GetModels())
 	{
 		this->m_lb_models->Append(model->GetIdentifier());
 	}
@@ -146,7 +146,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->Layout();
 }
 
-void Main::SetModel(Model* model)
+void Main::SetModel(std::shared_ptr<Model> model)
 {
 	if (this->m_model_selected != nullptr)
 	{
@@ -170,7 +170,7 @@ void Main::SetModel(Model* model)
 	{
 		model->SetCurrentWireframeIndex(1);
 			
-		std::vector<Model*> models = this->m_scene->GetModels();
+		std::vector<std::shared_ptr<Model>> models = this->m_scene->GetModels();
 		for (size_t i = 0; i < models.size(); i++)
 		{
 			if (models.at(i) == model)
@@ -264,7 +264,7 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 	int selection_index = this->m_lb_models->GetSelection();
 	if (selection_index != wxNOT_FOUND)
 	{
-		std::vector<Model*> models = this->m_scene->GetModels();
+		const std::vector<std::shared_ptr<Model>>& models = this->m_scene->GetModels();
 		this->SetModel(models.at(selection_index));
 	}
 }

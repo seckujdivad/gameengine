@@ -121,12 +121,12 @@ glm::vec3 Model::GetCurrentWireframeColour() const
 	return this->m_wireframe_colours.at(this->m_wireframe_colours_index);
 }
 
-void Model::SetSkybox(Skybox* skybox)
+void Model::SetSkybox(std::shared_ptr<Skybox> skybox)
 {
 	this->m_skybox = skybox;
 }
 
-Skybox* Model::GetSkybox() const
+std::shared_ptr<Skybox> Model::GetSkybox() const
 {
 	return this->m_skybox;
 }

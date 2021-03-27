@@ -6,14 +6,6 @@
 #include "Referenceable.h"
 #include "transformations/Positionable.h"
 
-enum class CubemapType
-{
-	None,
-	Reflection,
-	Pointlight,
-	Skybox
-};
-
 class Cubemap : public Positionable, public Referenceable<RenderTextureReference>
 {
 private:

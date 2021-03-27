@@ -31,7 +31,7 @@ private:
 	std::unique_ptr<Scene> m_scene;
 	std::unique_ptr<Camera> m_camera;
 
-	Model* m_model_selected = nullptr;
+	std::shared_ptr<Model> m_model_selected = nullptr;
 
 	nlohmann::json m_settings;
 
@@ -66,7 +66,7 @@ private:
 public:
 	Main();
 
-	void SetModel(Model* model);
+	void SetModel(std::shared_ptr<Model> model);
 
 	void ReloadSettings();
 	nlohmann::json& GetSettings();

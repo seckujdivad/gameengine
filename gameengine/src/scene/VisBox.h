@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <memory>
 
 #include "OrientedBoundingBox.h"
 
@@ -28,15 +29,15 @@ class VisBox : public OrientedBoundingBox
 {
 private:
 	std::set<VisBox*> m_pvs;
-	std::set<Model*> m_members;
+	std::set<std::shared_ptr<Model>> m_members;
 
 public:
 	VisBox();
 
-	std::set<Model*> GetPotentiallyVisibleModels() const;
-	std::set<Model*> GetMemberModels() const;
-	void AddMemberModel(Model* model);
-	void RemoveMemberModel(Model* model);
+	std::set<std::shared_ptr<Model>> GetPotentiallyVisibleModels() const;
+	std::set<std::shared_ptr<Model>> GetMemberModels() const;
+	void AddMemberModel(std::shared_ptr<Model> model);
+	void RemoveMemberModel(std::shared_ptr<Model> model);
 
 	void AddPotentiallyVisible(VisBox* visbox);
 	void RemovePotentiallyVisible(VisBox* visbox);

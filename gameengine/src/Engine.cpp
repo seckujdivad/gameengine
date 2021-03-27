@@ -7,7 +7,10 @@
 #include "LogMessage.h"
 
 #include "scene/Scene.h"
+#include "scene/Skybox.h"
 #include "scene/model/Model.h"
+#include "scene/model/Reflection.h"
+#include "scene/light/PointLight.h"
 #include "scene/texture/TextureFiltering.h"
 
 #include "render/rendertarget/target/RenderTarget.h"
@@ -397,7 +400,7 @@ void Engine::Render(bool continuous_draw)
 
 		//update static textures
 		// load model textures
-		for (Model* model : this->GetScene()->GetModels())
+		for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 		{
 			this->LoadTexture(model->GetColourTexture());
 			this->LoadTexture(model->GetNormalTexture());
@@ -407,130 +410,157 @@ void Engine::Render(bool continuous_draw)
 			this->LoadTexture(model->GetDisplacementTexture());
 		}
 
-		//load required cubemaps and unload unused ones
-		std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_add;
-		std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_remove;
 		{
-			//perform diff for cubemap controllers
-			std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
-			std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
-
-			for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
+			enum class CubemapType
 			{
-				if (render_controller->GetType() == RenderControllerType::Reflection)
-				{
-					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Reflection));
-				}
-				else if (render_controller->GetType() == RenderControllerType::Shadow)
-				{
-					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Pointlight));
-				}
-				else if (render_controller->GetType() == RenderControllerType::Skybox)
-				{
-					existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Skybox));
-				}
-			}
+				Reflection,
+				PointLight,
+				Skybox
+			};
 
-			std::vector<std::tuple<Cubemap*, CubemapType>> required_cubemap_ptrs = this->GetScene()->GetCubemaps();
-			for (const auto& [cubemap, cubemap_type] : required_cubemap_ptrs)
+			//load required cubemaps and unload unused ones
+			std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_add;
+			std::vector<std::tuple<RenderTextureReference, CubemapType>> cubemaps_to_remove;
 			{
-				required_cubemaps.push_back(std::tuple(cubemap->GetReference(), cubemap_type));
-			}
+				//perform diff for cubemap controllers
+				std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
+				std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
 
-			std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
-			std::sort(required_cubemaps.begin(), required_cubemaps.end());
-
-			int i = 0;
-			int j = 0;
-			while ((i < static_cast<int>(existing_cubemaps.size())) || (j < static_cast<int>(required_cubemaps.size())))
-			{
-				enum class State
+				for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 				{
-					Both,
-					Added,
-					Removed
-				};
-
-				State state;
-				if (i == existing_cubemaps.size())
-				{
-					state = State::Added;
-				}
-				else if (j == required_cubemaps.size())
-				{
-					state = State::Removed;
-				}
-				else if (existing_cubemaps.at(i) == required_cubemaps.at(j))
-				{
-					state = State::Both;
-				}
-				else if (existing_cubemaps.at(i) < required_cubemaps.at(j))
-				{
-					state = State::Removed;
-				}
-				else
-				{
-					state = State::Added;
-				}
-
-				if (state == State::Added)
-				{
-					cubemaps_to_add.push_back(required_cubemaps.at(j));
-					j++;
-				}
-				else if (state == State::Removed)
-				{
-					cubemaps_to_remove.push_back(existing_cubemaps.at(i));
-					i++;
-				}
-				else if (state == State::Both)
-				{
-					i++;
-					j++;
-				}
-			}
-		}
-
-		//remove old cubemap controllers
-		{
-			std::vector<int> cubemap_indices;
-			for (const auto& [render_texture_reference, cubemap_type] : cubemaps_to_remove)
-			{
-				for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
-				{
-					if (this->m_render_controllers.at(i)->GetReference() == render_texture_reference)
+					if (render_controller->GetType() == RenderControllerType::Reflection)
 					{
-						cubemap_indices.push_back(i);
+						existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Reflection));
+					}
+					else if (render_controller->GetType() == RenderControllerType::Shadow)
+					{
+						existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::PointLight));
+					}
+					else if (render_controller->GetType() == RenderControllerType::Skybox)
+					{
+						existing_cubemaps.push_back(std::tuple(render_controller->GetReference(), CubemapType::Skybox));
+					}
+				}
+
+				std::vector<std::tuple<std::shared_ptr<Cubemap>, CubemapType>> required_cubemaps_data;
+				
+				{
+					for (const std::shared_ptr<Reflection>& reflection : this->GetScene()->GetReflections())
+					{
+						required_cubemaps_data.push_back(std::tuple(reflection, CubemapType::Reflection));
+					}
+
+					for (const std::shared_ptr<PointLight>& pointlight : this->GetScene()->GetPointLights())
+					{
+						required_cubemaps_data.push_back(std::tuple(pointlight, CubemapType::PointLight));
+					}
+
+					for (const std::shared_ptr<Skybox>& skybox : this->GetScene()->GetSkyboxes())
+					{
+						required_cubemaps_data.push_back(std::tuple(skybox, CubemapType::Skybox));
+					}
+				}
+
+				for (const auto& [cubemap, cubemap_type] : required_cubemaps_data)
+				{
+					required_cubemaps.push_back(std::tuple(cubemap->GetReference(), cubemap_type));
+				}
+
+				std::sort(existing_cubemaps.begin(), existing_cubemaps.end());
+				std::sort(required_cubemaps.begin(), required_cubemaps.end());
+
+				int i = 0;
+				int j = 0;
+				while ((i < static_cast<int>(existing_cubemaps.size())) || (j < static_cast<int>(required_cubemaps.size())))
+				{
+					enum class State
+					{
+						Both,
+						Added,
+						Removed
+					};
+
+					State state;
+					if (i == existing_cubemaps.size())
+					{
+						state = State::Added;
+					}
+					else if (j == required_cubemaps.size())
+					{
+						state = State::Removed;
+					}
+					else if (existing_cubemaps.at(i) == required_cubemaps.at(j))
+					{
+						state = State::Both;
+					}
+					else if (existing_cubemaps.at(i) < required_cubemaps.at(j))
+					{
+						state = State::Removed;
+					}
+					else
+					{
+						state = State::Added;
+					}
+
+					if (state == State::Added)
+					{
+						cubemaps_to_add.push_back(required_cubemaps.at(j));
+						j++;
+					}
+					else if (state == State::Removed)
+					{
+						cubemaps_to_remove.push_back(existing_cubemaps.at(i));
+						i++;
+					}
+					else if (state == State::Both)
+					{
+						i++;
+						j++;
 					}
 				}
 			}
 
-			std::reverse(cubemap_indices.begin(), cubemap_indices.end()); //order high-low
+			//remove old cubemap controllers
+			{
+				std::vector<int> cubemap_indices;
+				for (const auto& [render_texture_reference, cubemap_type] : cubemaps_to_remove)
+				{
+					for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
+					{
+						if (this->m_render_controllers.at(i)->GetReference() == render_texture_reference)
+						{
+							cubemap_indices.push_back(i);
+						}
+					}
+				}
 
-			for (int i = 0; i < static_cast<int>(cubemap_indices.size()); i++)
-			{
-				this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
-			}
-		}
+				std::reverse(cubemap_indices.begin(), cubemap_indices.end()); //order high-low
 
-		//create new cubemap controllers
-		for (const auto& [reference, type] : cubemaps_to_add)
-		{
-			if (type == CubemapType::Reflection)
-			{
-				this->AddRenderController(new ReflectionController(this, reference));
+				for (int i = 0; i < static_cast<int>(cubemap_indices.size()); i++)
+				{
+					this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
+				}
 			}
-			else if (type == CubemapType::Pointlight)
+
+			//create new cubemap controllers
+			for (const auto& [reference, type] : cubemaps_to_add)
 			{
-				this->AddRenderController(new ShadowController(this, reference));
-			}
-			else if (type == CubemapType::Skybox)
-			{
-				this->AddRenderController(new SkyboxController(this, reference));
-			}
-			else
-			{
-				throw std::runtime_error("Invalid CubemapType enum: " + std::to_string(static_cast<int>(type)));
+				if (type == CubemapType::Reflection)
+				{
+					this->AddRenderController(new ReflectionController(this, reference));
+				}
+				else if (type == CubemapType::PointLight)
+				{
+					this->AddRenderController(new ShadowController(this, reference));
+				}
+				else if (type == CubemapType::Skybox)
+				{
+					this->AddRenderController(new SkyboxController(this, reference));
+				}
+				else
+				{
+					throw std::runtime_error("Invalid CubemapType enum: " + std::to_string(static_cast<int>(type)));
+				}
 			}
 		}
 
@@ -539,15 +569,11 @@ void Engine::Render(bool continuous_draw)
 			std::vector<ModelReference> to_remove;
 			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry)
 			{
-				Model* model = this->GetScene()->GetModel(model_reference);
+				std::optional<std::shared_ptr<Model>> model = this->GetScene()->GetModel(model_reference);
 
-				if (model == nullptr)
+				if (model.has_value())
 				{
-					to_remove.push_back(model_reference);
-				}
-				else
-				{
-					std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> geometry_groups = this->GenerateGeometryGroups(model->GetGeometry());
+					std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> geometry_groups = this->GenerateGeometryGroups(model.value()->GetGeometry());
 
 					//check if keys are in both maps
 					std::vector<Geometry::RenderInfo> geometry_to_add;
@@ -601,6 +627,10 @@ void Engine::Render(bool continuous_draw)
 						}
 					}
 				}
+				else
+				{
+					to_remove.push_back(model_reference);
+				}
 			}
 
 			//remove old geometry
@@ -615,7 +645,7 @@ void Engine::Render(bool continuous_draw)
 			}
 
 			//add new geometry
-			for (Model* model : this->GetScene()->GetModels())
+			for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 			{
 				if (this->m_model_geometry.count(model->GetReference()) == 0)
 				{

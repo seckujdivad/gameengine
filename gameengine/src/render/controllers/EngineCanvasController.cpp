@@ -103,11 +103,18 @@ void EngineCanvasController::Render(bool continuous_draw)
 	this->m_texture_final->SetOutputSize(new_output_size);
 
 	//redraw all textures
-	std::vector<Model*> models = this->m_engine->GetScene()->GetModels();
+	const std::vector<std::shared_ptr<Model>>& models = this->m_engine->GetScene()->GetModels();
+	std::vector<Model*> model_ptrs;
+	model_ptrs.reserve(models.size());
+	for (const std::shared_ptr<Model>& model : models)
+	{
+		model_ptrs.push_back(model.get());
+	}
+
 	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
 	{
 		factory->SetCamera(this->m_canvas->GetControlledCamera());
-		factory->Render(models, continuous_draw);
+		factory->Render(model_ptrs, continuous_draw);
 	}
 
 	this->m_texture_final->Render({}, continuous_draw);

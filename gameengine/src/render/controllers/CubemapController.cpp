@@ -12,17 +12,7 @@
 void CubemapController::DerivedClassConstructedEvent()
 {
 	//get cubemap and check type
-	std::tuple<Cubemap*, CubemapType> cubemap_data = this->m_engine->GetScene()->GetCubemap(this->GetReference());
-	if (std::get<0>(cubemap_data) == nullptr)
-	{
-		throw std::runtime_error("Invalid reference given to controller - nullptr returned when retrieving cubemap");
-	}
-	if (std::get<1>(cubemap_data) != this->GetCubemapType())
-	{
-		throw std::runtime_error("Invalid reference given to controller - cubemap returned does not match type " + static_cast<int>(this->GetCubemapType()));
-	}
-
-	this->m_cubemap = std::get<0>(cubemap_data);
+	this->m_cubemap = this->GetTargetCubemap();
 
 	if (this->m_cubemap->GetDynamicRedrawFrames() > 0)
 	{
@@ -60,21 +50,28 @@ void CubemapController::DerivedClassConstructedEvent()
 
 		this->m_cumulative_texture->SetFetchModelsFunction([&, engine = this->m_engine, cubemap = this->m_cubemap](int layer)
 		{
-			std::vector<Model*> model_ptrs;
+			std::vector<std::shared_ptr<Model>> models;
 			if (layer == 0)
 			{
-				model_ptrs = engine->GetScene()->GetModels(cubemap->GetStaticModels());
+				models = engine->GetScene()->GetModels(cubemap->GetStaticModels());
 			}
 			else if (layer == 1)
 			{
-				model_ptrs = engine->GetScene()->GetModels(cubemap->GetDynamicModels());
+				models = engine->GetScene()->GetModels(cubemap->GetDynamicModels());
 			}
 			else
 			{
 				throw std::invalid_argument("Invalid layer: " + std::to_string(layer));
 			}
 
-			return model_ptrs;
+			std::vector<Model*> raw_ptrs;
+			raw_ptrs.reserve(models.size());
+			for (const std::shared_ptr<Model>& model : models)
+			{
+				raw_ptrs.push_back(model.get());
+			}
+
+			return raw_ptrs;
 		});
 	}
 }
