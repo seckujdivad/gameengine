@@ -17,6 +17,7 @@
 
 #include "render/controllers/EngineCanvasController.h"
 #include "render/gltexture/GLTexturePreset.h"
+#include "render/glgeometry/GLGeometry.h"
 
 #include "scene/Referenceable.h"
 #include "scene/SceneChild.h"
@@ -33,17 +34,6 @@ class GLTexture;
 class Engine : public SceneChild
 {
 public:
-	struct LoadedGeometry
-	{
-		std::vector<GLfloat> data;
-
-		GLsizei buffer_len = 0;
-		GLuint vao = NULL;
-		GLuint vbo = NULL;
-
-		void FreeGL() const;
-	};
-
 	struct DebugMessageConfig
 	{
 		GLenum source = GL_DONT_CARE;
@@ -66,14 +56,11 @@ private:
 	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
 	//loaded geometry
-	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash>> m_model_geometry;
-	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> m_geometry_presets;
+	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash>> m_model_geometry;
+	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, GLGeometry>> m_geometry_presets;
 
 	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
-	Engine::LoadedGeometry CreateLoadedGeometry(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
-	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
-
-	void BindVAO(Engine::LoadedGeometry loaded_geometry);
+	std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
@@ -104,7 +91,7 @@ public:
 	std::shared_ptr<GLTexture> GetTexture(GLTexturePreset preset);
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
 
-	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw);
+	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw);
 
 	void MakeContextCurrent(bool force = false) const;
 	bool ContextIsValid() const;
@@ -112,6 +99,3 @@ public:
 	void SetDebugMessageLevel(Engine::DebugMessageConfig config) const;
 	void SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config) const;
 };
-
-bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);
-bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second);

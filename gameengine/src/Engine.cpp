@@ -5,6 +5,7 @@
 #include <wx/image.h>
 
 #include "LogMessage.h"
+#include "PatchSize.h"
 
 #include "scene/Scene.h"
 #include "scene/Skybox.h"
@@ -26,8 +27,6 @@
 #include "render/gltexture/GLTextureType.h"
 
 #include "render/TargetType.h"
-
-const std::size_t GAMEENGINE_PATCH_SIZE = 16;
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
 
@@ -99,92 +98,16 @@ std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderI
 	return result;
 }
 
-std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> Engine::LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
+std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> Engine::LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
 {
-	std::unordered_map<Geometry::RenderInfo, Engine::LoadedGeometry, Geometry::RenderInfo::Hash> result;
+	std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> result;
 
 	for (auto& [render_info, vertices] : this->GenerateGeometryGroups(geometry))
 	{
-		result.insert(std::pair(render_info, this->CreateLoadedGeometry(vertices, render_info.primitive_size, render_info.primitive_type)));
+		result.insert(std::pair(render_info, GLGeometry(vertices, render_info.primitive_size, render_info.primitive_type)));
 	}
 
 	return result;
-}
-
-Engine::LoadedGeometry Engine::CreateLoadedGeometry(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
-{
-	LoadedGeometry loaded_geometry;
-	loaded_geometry.data = vertices;
-
-	std::vector<GLfloat> padded_vertices;
-
-	if (primitive_size > GAMEENGINE_PATCH_SIZE)
-	{
-		throw std::invalid_argument("Primitives must have less than " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices");
-	}
-
-#ifdef _DEBUG
-	if (loaded_geometry.data.size() % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
-	{
-		throw std::runtime_error("Incomplete vertices provided");
-	}
-#endif
-
-	if ((primitive_type == Geometry::PrimitiveType::Patches || primitive_type == Geometry::PrimitiveType::Quads)
-		&& primitive_size != GAMEENGINE_PATCH_SIZE)
-	{
-		std::size_t num_primitives = vertices.size() / (primitive_size * GAMEENGINE_VALUES_PER_VERTEX);
-		padded_vertices.reserve(num_primitives * GAMEENGINE_PATCH_SIZE * GAMEENGINE_VALUES_PER_VERTEX);
-		for (std::size_t i = 0; i < num_primitives; i++)
-		{
-			for (std::size_t j = 0; j < primitive_size * GAMEENGINE_VALUES_PER_VERTEX; j++)
-			{
-				padded_vertices.push_back(vertices.at((i * primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j));
-			}
-
-			for (std::size_t j = 0; j < GAMEENGINE_PATCH_SIZE - primitive_size; j++)
-			{
-				for (std::size_t k = 0; k < std::size_t(GAMEENGINE_VALUES_PER_VERTEX); k++)
-				{
-					padded_vertices.push_back(0.0f);
-				}
-			}
-		}
-	}
-	else
-	{
-		padded_vertices = vertices;
-	}
-
-	loaded_geometry.buffer_len = static_cast<GLsizei>(padded_vertices.size());
-
-#ifdef _DEBUG
-	if (loaded_geometry.buffer_len % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
-	{
-		throw std::runtime_error("Incomplete vertices generated");
-	}
-#endif
-
-	//create vao and vbo
-	glGenVertexArrays(1, &loaded_geometry.vao);
-	glBindVertexArray(loaded_geometry.vao);
-
-	glGenBuffers(1, &loaded_geometry.vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * padded_vertices.size(), padded_vertices.data(), GL_DYNAMIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
-
-	return loaded_geometry;
 }
 
 void Engine::AddRenderController(RenderController* render_controller)
@@ -337,19 +260,6 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 
 Engine::~Engine()
 {
-	for (const auto& [reference, loaded_geometries] : this->m_model_geometry)
-	{
-		for (auto& [render_info, loaded_geometry] : loaded_geometries)
-		{
-			loaded_geometry.FreeGL();
-		}
-	}
-
-	for (const auto& [geometry_type, render_data] : this->m_geometry_presets)
-	{
-		std::get<1>(render_data).FreeGL();
-	}
-
 	delete this->m_glcontext;
 }
 
@@ -600,30 +510,21 @@ void Engine::Render(bool continuous_draw)
 					//remove excess geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_remove)
 					{
-						loaded_geometries.at(render_info).FreeGL();
 						loaded_geometries.erase(render_info);
 					}
 
 					//add new geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_add)
 					{
-						loaded_geometries.insert(std::pair(render_info, this->CreateLoadedGeometry(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type)));
+						loaded_geometries.insert(std::pair(render_info, GLGeometry(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
 
 					//update existing geometry if required
 					for (auto& [render_info, loaded_geometry] : loaded_geometries)
 					{
-						if (loaded_geometry.data != geometry_groups.at(render_info))
+						if (loaded_geometry != geometry_groups.at(render_info))
 						{
-							loaded_geometry.data = geometry_groups.at(render_info);
-
-							glBindVertexArray(loaded_geometry.vao);
-							glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
-
-							glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)* loaded_geometry.data.size(), loaded_geometry.data.data(), GL_DYNAMIC_DRAW);
-
-							glBindVertexArray(NULL);
-							glBindBuffer(GL_ARRAY_BUFFER, NULL);
+							loaded_geometry.SetData(geometry_groups.at(render_info));
 						}
 					}
 				}
@@ -636,11 +537,6 @@ void Engine::Render(bool continuous_draw)
 			//remove old geometry
 			for (ModelReference model_reference : to_remove)
 			{
-				for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model_reference))
-				{
-					loaded_geometry.FreeGL();
-				}
-				
 				this->m_model_geometry.erase(model_reference);
 			}
 
@@ -736,17 +632,17 @@ std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureRefere
 	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
 }
 
-void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const LoadedGeometry& loaded_geometry)> predraw)
+void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw)
 {
 	this->MakeContextCurrent();
 
-	std::vector<std::tuple<Geometry::RenderInfo, Engine::LoadedGeometry>> geometry;
+	std::vector<std::tuple<Geometry::RenderInfo, GLGeometry*>> geometry;
 
 	if (this->IsChildOfSameScene(model))
 	{
 		for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model->GetReference()))
 		{
-			geometry.push_back(std::tuple(render_info, loaded_geometry));
+			geometry.push_back(std::tuple(render_info, &loaded_geometry));
 		}
 	}
 
@@ -759,44 +655,24 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			auto it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
 			if (it == this->m_geometry_presets.end())
 			{
-				std::vector<GLfloat> vertices;
-				std::vector<double> vertices_highp = preset_geom->GetPrimitives();
-				vertices.reserve(vertices_highp.size());
-				for (double value : vertices_highp)
-				{
-					vertices.push_back(static_cast<GLfloat>(value));
-				}
-
-				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), this->CreateLoadedGeometry(vertices, preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
-
-				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
-				geometry.push_back(data);
+				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), GLGeometry(preset_geom->GetPrimitives(), preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
+				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), std::move(data)));
+				it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
 			}
-			else
-			{
-				geometry.push_back(it->second);
-			}
+			auto& [render_info, glgeometry] = it->second;
+			geometry.push_back(std::tuple(render_info, &glgeometry));
 		}
 	}
 
 	for (auto& [render_info, loaded_geometry] : geometry)
 	{
-		GLenum render_mode = predraw(render_info, loaded_geometry);
+		GLenum render_mode = predraw(render_info, *loaded_geometry);
 
-		this->BindVAO(loaded_geometry);
-
-		GLsizei num_elements = static_cast<GLsizei>(loaded_geometry.buffer_len / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
-		glDrawArrays(render_mode, 0, num_elements);
+		loaded_geometry->Draw(render_mode);
 	}
 
 	glBindVertexArray(NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
-}
-
-void Engine::BindVAO(LoadedGeometry loaded_geometry)
-{
-	glBindVertexArray(loaded_geometry.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, loaded_geometry.vbo);
 }
 
 void Engine::PrunePresetGeometry(PresetGeometry::GeometryType type)
@@ -804,7 +680,6 @@ void Engine::PrunePresetGeometry(PresetGeometry::GeometryType type)
 	auto it = this->m_geometry_presets.find(type);
 	if (it != this->m_geometry_presets.end())
 	{
-		std::get<1>(it->second).FreeGL();
 		this->m_geometry_presets.erase(it);
 	}
 }
@@ -859,26 +734,6 @@ void Engine::SetDebugMessageLevel(std::vector<Engine::DebugMessageConfig> config
 	{
 		glDebugMessageControl(config_detail.source, config_detail.type, config_detail.severity, 0, nullptr, config_detail.enabled ? GL_TRUE : GL_FALSE);
 	}
-}
-
-bool operator==(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
-{
-	if (first.data != second.data)
-	{
-		return false;
-	}
-
-	if (first.vbo != second.vbo)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-bool operator!=(const Engine::LoadedGeometry& first, const Engine::LoadedGeometry& second)
-{
-	return !(first == second);
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -955,10 +810,4 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	{
 		throw std::runtime_error(message);
 	}
-}
-
-void Engine::LoadedGeometry::FreeGL() const
-{
-	glDeleteBuffers(1, &this->vbo);
-	glDeleteVertexArrays(1, &this->vao);
 }

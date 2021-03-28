@@ -142,6 +142,12 @@
     <Filter Include="Source Files\render\gltexture\gltextureformat_preprocessor">
       <UniqueIdentifier>{fd3b9ba1-0b14-48f7-8d22-17621cb8d8c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\render\glgeometry">
+      <UniqueIdentifier>{d199e059-7e1b-44d8-a938-11f669d400f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\render\glgeometry">
+      <UniqueIdentifier>{79e7b5c7-e7a3-4744-a771-5c0653935087}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -345,6 +351,12 @@
     <ClInclude Include="src\scene\texture\Filters.h">
       <Filter>Header Files\scene\texture</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\glgeometry\GLGeometry.h">
+      <Filter>Header Files\render\glgeometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PatchSize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -538,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\texture\Filters.cpp">
       <Filter>Source Files\scene\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\glgeometry\GLGeometry.cpp">
+      <Filter>Source Files\render\glgeometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,7 @@
 #include "../../../LogMessage.h"
 
 #include "../../gltexture/GLTextureDataPreset.h"
+#include "../../glgeometry/GLGeometry.h"
 
 #include "../texture/RenderTexture.h"
 #include "../texture/RenderTextureGroup.h"
@@ -171,7 +172,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			}
 		}
 
-		const std::function<GLenum(Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const Engine::LoadedGeometry& loaded_geometry)
+		const std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const GLGeometry& loaded_geometry)
 		{
 			GLenum mode = GL_NONE; //default invalid value, should be overwritten
 

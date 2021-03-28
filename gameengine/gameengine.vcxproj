@@ -194,12 +194,14 @@
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\LogMessage.h" />
+    <ClInclude Include="src\PatchSize.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
     <ClInclude Include="src\render\controllers\ReflectionController.h" />
     <ClInclude Include="src\render\controllers\ShadowController.h" />
     <ClInclude Include="src\render\controllers\SkyboxController.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\glgeometry\GLGeometry.h" />
     <ClInclude Include="src\render\gltexture\GLTexture.h" />
     <ClInclude Include="src\render\gltexture\GLTextureDataPreset.h" />
     <ClInclude Include="src\render\gltexture\GLTextureFormat.h" />
@@ -268,6 +270,7 @@
     <ClCompile Include="src\render\controllers\RenderController.cpp" />
     <ClCompile Include="src\render\controllers\ShadowController.cpp" />
     <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
+    <ClCompile Include="src\render\glgeometry\GLGeometry.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexture.cpp" />
     <ClCompile Include="src\render\gltexture\GLTextureFormat.cpp" />
     <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp" />
