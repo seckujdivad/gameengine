@@ -524,7 +524,7 @@ void Engine::Render(bool continuous_draw)
 					{
 						if (loaded_geometry != geometry_groups.at(render_info))
 						{
-							loaded_geometry.SetData(geometry_groups.at(render_info));
+							loaded_geometry.SetData(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type);
 						}
 					}
 				}

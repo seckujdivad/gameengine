@@ -4,7 +4,7 @@
 
 #include "../../PatchSize.h"
 
-void GLGeometry::LoadVertices(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
+void GLGeometry::SetData(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
 {
 	this->m_data = vertices;
 
@@ -18,7 +18,7 @@ void GLGeometry::LoadVertices(std::vector<GLfloat> vertices, std::size_t primiti
 #ifdef _DEBUG
 	if (this->m_data.size() % static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX) != 0)
 	{
-		throw std::runtime_error("Incomplete vertices provided");
+		throw std::invalid_argument("Incomplete vertices provided");
 	}
 #endif
 
@@ -57,13 +57,22 @@ void GLGeometry::LoadVertices(std::vector<GLfloat> vertices, std::size_t primiti
 	}
 #endif
 
-	//create vao and vbo
+	this->Bind();
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * padded_vertices.size(), padded_vertices.data(), GL_DYNAMIC_DRAW);
+
+#ifdef _DEBUG
+	glBindVertexArray(NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+#endif
+}
+
+void GLGeometry::CreateGLObjects()
+{
 	glGenVertexArrays(1, &this->m_vao);
 	glBindVertexArray(this->m_vao);
 
 	glGenBuffers(1, &this->m_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * padded_vertices.size(), padded_vertices.data(), GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
@@ -72,12 +81,9 @@ void GLGeometry::LoadVertices(std::vector<GLfloat> vertices, std::size_t primiti
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 }
 
-void GLGeometry::BindVAO() const
+void GLGeometry::Bind() const
 {
 	glBindVertexArray(this->m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
@@ -130,21 +136,8 @@ bool GLGeometry::operator!=(const GLGeometry& other) const
 
 void GLGeometry::Draw(GLenum render_mode) const
 {
-	this->BindVAO();
+	this->Bind();
 
 	GLsizei num_elements = static_cast<GLsizei>(this->m_buffer_len/ static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
 	glDrawArrays(render_mode, 0, num_elements);
-}
-
-void GLGeometry::SetData(std::vector<GLfloat> values)
-{
-	this->m_data = values;
-
-	glBindVertexArray(this->m_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * this->m_data.size(), this->m_data.data(), GL_DYNAMIC_DRAW);
-
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 }

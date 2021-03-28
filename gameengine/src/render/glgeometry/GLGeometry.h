@@ -14,26 +14,15 @@ private:
 	GLuint m_vao = GL_NONE;
 	GLuint m_vbo = GL_NONE;
 
-	void LoadVertices(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
-
-	void BindVAO() const;
+	void CreateGLObjects();
+	void Bind() const;
 
 public:
 	template<typename T, typename = std::enable_if_t<std::is_convertible_v<T, GLfloat>>>
 	inline GLGeometry(std::vector<T> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
 	{
-		std::vector<GLfloat> values;
-		values.reserve(vertices.size());
-		for (T value : vertices)
-		{
-			values.push_back(static_cast<GLfloat>(value));
-		}
-		this->LoadVertices(values, primitive_size, primitive_type);
-	};
-
-	inline GLGeometry(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
-	{
-		this->LoadVertices(vertices, primitive_size, primitive_type);
+		this->CreateGLObjects();
+		this->SetData(vertices, primitive_size, primitive_type);
 	};
 
 	GLGeometry(const GLGeometry&) = delete;
@@ -74,7 +63,7 @@ public:
 	}
 	
 	template<typename T, typename = std::enable_if_t<std::is_convertible_v<T, GLfloat>>>
-	inline void SetData(std::vector<T> values)
+	inline void SetData(std::vector<T> values, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
 	{
 		std::vector<GLfloat> values_converted;
 		values_converted.reserve(values.size());
@@ -82,10 +71,9 @@ public:
 		{
 			values_converted.push_back(static_cast<GLfloat>(value));
 		}
-		this->SetData(values_converted);
+		this->SetData(values_converted, primitive_size, primitive_type);
 	}
-
-	void SetData(std::vector<GLfloat> values);
+	void SetData(std::vector<GLfloat> values, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
 
 	void Draw(GLenum render_mode) const;
 };
