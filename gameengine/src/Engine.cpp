@@ -76,10 +76,9 @@ std::set<Geometry::RenderInfo> Engine::GetRenderInfos(std::vector<std::shared_pt
 	return result;
 }
 
-std::vector<GLfloat> Engine::GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info)
+std::vector<double> Engine::GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info)
 {
-	std::vector<GLfloat> result;
-
+	std::vector<double> result;
 	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
 	{
 		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
@@ -91,7 +90,7 @@ std::vector<GLfloat> Engine::GetVerticesForRenderInfo(std::vector<std::shared_pt
 				result.reserve(result.size() + data_highp.size());
 				for (double value : data_highp)
 				{
-					result.push_back(static_cast<GLfloat>(value));
+					result.push_back(value);
 				}
 			}
 		}
@@ -497,7 +496,7 @@ void Engine::Render(bool continuous_draw)
 					//update existing geometry if required
 					for (auto& [render_info, loaded_geometry] : loaded_geometries)
 					{
-						std::vector<GLfloat> vertices = this->GetVerticesForRenderInfo(geometry_ptrs, render_info);
+						std::vector<double> vertices = this->GetVerticesForRenderInfo(geometry_ptrs, render_info);
 						if (*loaded_geometry != vertices)
 						{
 							loaded_geometry->SetData(vertices, render_info.primitive_size, render_info.primitive_type);

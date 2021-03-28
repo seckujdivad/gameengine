@@ -4,7 +4,7 @@
 
 #include "../../PatchSize.h"
 
-void GLGeometry::SetData(std::vector<GLfloat> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
+void GLGeometry::SetData(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
 {
 	this->m_data = vertices;
 
@@ -31,7 +31,7 @@ void GLGeometry::SetData(std::vector<GLfloat> vertices, std::size_t primitive_si
 		{
 			for (std::size_t j = 0; j < primitive_size * GAMEENGINE_VALUES_PER_VERTEX; j++)
 			{
-				padded_vertices.push_back(vertices.at((i * primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j));
+				padded_vertices.push_back(static_cast<GLfloat>(vertices.at((i * primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j)));
 			}
 
 			for (std::size_t j = 0; j < GAMEENGINE_PATCH_SIZE - primitive_size; j++)
@@ -45,7 +45,11 @@ void GLGeometry::SetData(std::vector<GLfloat> vertices, std::size_t primitive_si
 	}
 	else
 	{
-		padded_vertices = vertices;
+		padded_vertices.reserve(vertices.size());
+		for (double value : vertices)
+		{
+			padded_vertices.push_back(static_cast<GLfloat>(value));
+		}
 	}
 
 	this->m_buffer_len = static_cast<GLsizei>(padded_vertices.size());
@@ -87,6 +91,12 @@ void GLGeometry::Bind() const
 {
 	glBindVertexArray(this->m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
+}
+
+GLGeometry::GLGeometry(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
+{
+	this->CreateGLObjects();
+	this->SetData(vertices, primitive_size, primitive_type);
 }
 
 GLGeometry::GLGeometry(GLGeometry&& move_from) noexcept
@@ -132,6 +142,16 @@ bool GLGeometry::operator==(const GLGeometry& other) const //no need to compare 
 bool GLGeometry::operator!=(const GLGeometry& other) const
 {
 	return !(*this == other);
+}
+
+bool GLGeometry::operator==(const std::vector<double>& other) const
+{
+	return this->m_data == other;
+}
+
+bool GLGeometry::operator!=(const std::vector<double>& other) const
+{
+	return this->m_data != other;
 }
 
 void GLGeometry::Draw(GLenum render_mode) const
