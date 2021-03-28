@@ -62,49 +62,39 @@ void Engine::LoadTexture(const Texture& texture)
 	}
 }
 
-std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> Engine::GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry)
+std::set<Geometry::RenderInfo> Engine::GetRenderInfos(std::vector<std::shared_ptr<Geometry>> geometry)
 {
-	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> result;
-
+	std::set<Geometry::RenderInfo> result;
 	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
 	{
 		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
 		{
 			Geometry::RenderInfo render_info = inner_geometry->GetRenderInfo();
-			std::vector<double> data_highp = inner_geometry->GetPrimitives();
-
-			std::vector<GLfloat> vertices;
-			vertices.reserve(data_highp.size());
-			for (double value : data_highp)
-			{
-				vertices.push_back(static_cast<GLfloat>(value));
-			}
-
-			auto it = result.find(render_info);
-			if (it == result.end())
-			{
-				result.insert(std::pair(render_info, vertices));
-			}
-			else
-			{
-				for (GLfloat value : vertices)
-				{
-					it->second.push_back(value);
-				}
-			}
+			result.insert(render_info);
 		}
 	}
-
 	return result;
 }
 
-std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> Engine::LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
+std::vector<GLfloat> Engine::GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info)
 {
-	std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> result;
+	std::vector<GLfloat> result;
 
-	for (auto& [render_info, vertices] : this->GenerateGeometryGroups(geometry))
+	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
 	{
-		result.insert(std::pair(render_info, GLGeometry(vertices, render_info.primitive_size, render_info.primitive_type)));
+		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
+		{
+			if (render_info == inner_geometry->GetRenderInfo())
+			{
+				std::vector<double> data_highp = inner_geometry->GetPrimitives();
+
+				result.reserve(result.size() + data_highp.size());
+				for (double value : data_highp)
+				{
+					result.push_back(static_cast<GLfloat>(value));
+				}
+			}
+		}
 	}
 
 	return result;
@@ -468,7 +458,7 @@ void Engine::Render(bool continuous_draw)
 			}
 		}
 
-		//remove non-existent geometry and update existing (if required)
+		//perform any outstanding changes to loaded geometry
 		{
 			std::vector<ModelReference> to_remove;
 			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry)
@@ -477,29 +467,26 @@ void Engine::Render(bool continuous_draw)
 
 				if (model.has_value())
 				{
-					std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> geometry_groups = this->GenerateGeometryGroups(model.value()->GetGeometry());
+					std::vector<std::shared_ptr<Geometry>> geometry_ptrs = model.value()->GetGeometry();
+					//work out what geometry should be loaded
+					std::set<Geometry::RenderInfo> target_geometry_infos = this->GetRenderInfos(geometry_ptrs);
+
+					//work out what geometry actually is loaded
+					std::set<Geometry::RenderInfo> current_geometry_infos;
+					for (const auto& [render_info, glgeometry] : loaded_geometries)
+					{
+						current_geometry_infos.insert(render_info);
+					}
 
 					//check if keys are in both maps
-					std::vector<Geometry::RenderInfo> geometry_to_add;
-					std::vector<Geometry::RenderInfo> geometry_to_remove;
+					std::set<Geometry::RenderInfo> geometry_to_add;
+					std::set<Geometry::RenderInfo> geometry_to_remove;
 
 					//work out the render info for the geometry that needs to be added
-					for (auto& [render_info, vertices] : geometry_groups)
-					{
-						if (loaded_geometries.count(render_info) == 0)
-						{
-							geometry_to_add.push_back(render_info);
-						}
-					}
+					std::set_difference(target_geometry_infos.begin(), target_geometry_infos.end(), current_geometry_infos.begin(), current_geometry_infos.end(), std::inserter(geometry_to_add, geometry_to_add.begin()));
 
 					//work out the render info for the geometry that needs to be removed
-					for (auto& [render_info, loaded_geometry] : loaded_geometries)
-					{
-						if (geometry_groups.count(render_info) == 0)
-						{
-							geometry_to_remove.push_back(render_info);
-						}
-					}
+					std::set_difference(current_geometry_infos.begin(), current_geometry_infos.end(), target_geometry_infos.begin(), target_geometry_infos.end(), std::inserter(geometry_to_remove, geometry_to_remove.begin()));
 
 					//remove excess geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_remove)
@@ -507,19 +494,20 @@ void Engine::Render(bool continuous_draw)
 						loaded_geometries.erase(render_info);
 					}
 
-					//add new geometry
-					for (const Geometry::RenderInfo& render_info : geometry_to_add)
-					{
-						loaded_geometries.insert(std::pair(render_info, GLGeometry(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type)));
-					}
-
 					//update existing geometry if required
 					for (auto& [render_info, loaded_geometry] : loaded_geometries)
 					{
-						if (loaded_geometry != geometry_groups.at(render_info))
+						std::vector<GLfloat> vertices = this->GetVerticesForRenderInfo(geometry_ptrs, render_info);
+						if (*loaded_geometry != vertices)
 						{
-							loaded_geometry.SetData(geometry_groups.at(render_info), render_info.primitive_size, render_info.primitive_type);
+							loaded_geometry->SetData(vertices, render_info.primitive_size, render_info.primitive_type);
 						}
+					}
+
+					//add new geometry
+					for (const Geometry::RenderInfo& render_info : geometry_to_add)
+					{
+						loaded_geometries.insert(std::pair(render_info, std::make_shared<GLGeometry>(this->GetVerticesForRenderInfo(geometry_ptrs, render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
 				}
 				else
@@ -539,7 +527,14 @@ void Engine::Render(bool continuous_draw)
 			{
 				if (this->m_model_geometry.count(model->GetReference()) == 0)
 				{
-					this->m_model_geometry.insert(std::pair(model->GetReference(), this->LoadGeometry(model->GetGeometry())));
+					std::vector<std::shared_ptr<Geometry>> cpu_geometry = model->GetGeometry();
+					std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash> gpu_geometry;
+					for (const Geometry::RenderInfo render_info : this->GetRenderInfos(cpu_geometry))
+					{
+						gpu_geometry.insert(std::pair(render_info, std::make_shared<GLGeometry>(this->GetVerticesForRenderInfo(cpu_geometry, render_info), render_info.primitive_size, render_info.primitive_type)));
+					}
+
+					this->m_model_geometry.insert(std::pair(model->GetReference(), gpu_geometry));
 				}
 			}
 		}
@@ -630,13 +625,13 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 {
 	this->MakeContextCurrent();
 
-	std::vector<std::tuple<Geometry::RenderInfo, GLGeometry*>> geometry;
+	std::vector<std::tuple<Geometry::RenderInfo, std::shared_ptr<GLGeometry>>> geometry;
 
 	if (this->IsChildOfSameScene(model))
 	{
 		for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model->GetReference()))
 		{
-			geometry.push_back(std::tuple(render_info, &loaded_geometry));
+			geometry.push_back(std::tuple(render_info, loaded_geometry));
 		}
 	}
 
@@ -649,12 +644,15 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			auto it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
 			if (it == this->m_geometry_presets.end())
 			{
-				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), GLGeometry(preset_geom->GetPrimitives(), preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
-				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), std::move(data)));
-				it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
+				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), std::make_shared<GLGeometry>(preset_geom->GetPrimitives(), preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
+				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
+				geometry.push_back(data);
 			}
-			auto& [render_info, glgeometry] = it->second;
-			geometry.push_back(std::tuple(render_info, &glgeometry));
+			else
+			{
+				auto& [render_info, glgeometry] = it->second;
+				geometry.push_back(std::tuple(render_info, glgeometry));
+			}
 		}
 	}
 

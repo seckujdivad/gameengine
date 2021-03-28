@@ -8,10 +8,12 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <memory>
 #include <tuple>
 #include <functional>
+#include <set>
 
 #include "GLComponents.h"
 
@@ -56,11 +58,11 @@ private:
 	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
 	//loaded geometry
-	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash>> m_model_geometry;
-	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, GLGeometry>> m_geometry_presets;
+	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash>> m_model_geometry;
+	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, std::shared_ptr<GLGeometry>>> m_geometry_presets;
 
-	std::unordered_map<Geometry::RenderInfo, std::vector<GLfloat>, Geometry::RenderInfo::Hash> GenerateGeometryGroups(std::vector<std::shared_ptr<Geometry>> geometry);
-	std::unordered_map<Geometry::RenderInfo, GLGeometry, Geometry::RenderInfo::Hash> LoadGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
+	static std::set<Geometry::RenderInfo> GetRenderInfos(std::vector<std::shared_ptr<Geometry>> geometry);
+	static std::vector<GLfloat> GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info);
 
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
