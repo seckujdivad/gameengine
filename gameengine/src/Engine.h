@@ -43,7 +43,7 @@ public:
 	};
 
 private:
-	wxGLContext* m_glcontext;
+	std::unique_ptr<wxGLContext> m_glcontext;
 	wxWindow* m_parent;
 	wxGLAttributes m_canvas_args;
 	wxGLCanvas* m_glcontext_canvas;
@@ -73,11 +73,6 @@ private:
 
 public:
 	Engine(wxWindow* parent, Scene* scene, bool single_context_mode = false);
-	Engine(const Engine&) = delete;
-	Engine& operator=(const Engine&) = delete;
-	Engine(Engine&&) = delete;
-	Engine& operator=(Engine&&) = delete;
-	~Engine();
 
 	EngineCanvasController* GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);
 	EngineCanvasController* GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id = wxID_ANY, wxWindow* parent = nullptr);

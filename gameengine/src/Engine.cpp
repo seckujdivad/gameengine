@@ -188,14 +188,13 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 #ifdef _DEBUG
 		//test an impossible context to make sure wxGLContext::IsOK is working (this is done in the pyramid sample)
 		ctx_attrs.PlatformDefaults().CoreProfile().MajorVersion(99).MinorVersion(2).EndList();
-		this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
+		this->m_glcontext = std::make_unique<wxGLContext>(this->m_glcontext_canvas, nullptr, &ctx_attrs);
 
 		if (this->m_glcontext->IsOK())
 		{
 			throw std::runtime_error("Successfully created an impossible context - this should have failed");
 		}
 
-		delete this->m_glcontext;
 		ctx_attrs.Reset();
 #endif
 		//create the proper context
@@ -207,7 +206,7 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 
 		ctx_attrs.EndList();
 
-		this->m_glcontext = new wxGLContext(this->m_glcontext_canvas, NULL, &ctx_attrs);
+		this->m_glcontext = std::make_unique<wxGLContext>(this->m_glcontext_canvas, nullptr, &ctx_attrs);
 
 		if (!this->m_glcontext->IsOK())
 		{
@@ -258,17 +257,12 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
-Engine::~Engine()
-{
-	delete this->m_glcontext;
-}
-
 EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
 {
 	this->MakeContextCurrent();
 
 	RenderTargetConfig empty_config; //configuration of the EngineCanvas is done by the EngineCanvasController
-	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext, this, empty_config);
+	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext.get(), this, empty_config);
 	canvas->MakeOpenGLFocus();
 
 	EngineCanvasController* controller = new EngineCanvasController(this, this->GetScene()->GetNewRenderTextureReference(), canvas, composite_layers);
