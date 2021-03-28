@@ -34,6 +34,10 @@ public:
 
 		bool operator==(const RenderInfo& second) const;
 		bool operator!=(const RenderInfo& second) const;
+		bool operator<(const RenderInfo& second) const;
+		bool operator<=(const RenderInfo& second) const;
+		bool operator>(const RenderInfo& second) const;
+		bool operator>=(const RenderInfo& second) const;
 
 		struct Hash
 		{

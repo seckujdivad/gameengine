@@ -209,6 +209,30 @@ bool Geometry::RenderInfo::operator!=(const RenderInfo& second) const
 	return !(*this == second);
 }
 
+bool Geometry::RenderInfo::operator<(const RenderInfo& second) const
+{
+	Hash hasher = Hash();
+	return hasher(*this) < hasher(second);
+}
+
+bool Geometry::RenderInfo::operator<=(const RenderInfo& second) const
+{
+	Hash hasher = Hash();
+	return hasher(*this) <= hasher(second);
+}
+
+bool Geometry::RenderInfo::operator>(const RenderInfo& second) const
+{
+	Hash hasher = Hash();
+	return hasher(*this) > hasher(second);
+}
+
+bool Geometry::RenderInfo::operator>=(const RenderInfo& second) const
+{
+	Hash hasher = Hash();
+	return hasher(*this) >= hasher(second);
+}
+
 std::size_t Geometry::RenderInfo::Hash::operator()(const RenderInfo& target) const
 {
 	/*
@@ -217,7 +241,8 @@ std::size_t Geometry::RenderInfo::Hash::operator()(const RenderInfo& target) con
 	* 0			tesselation_enabled
 	* 1			interpolation_mode
 	* 2, 3		primitive_type
-	* 4+		primitive_size
+	* [4, 7]	primitive_dimensions.x
+	* [8, 13]	primitive_dimensions.y
 	*/
 
 	int interpolation_mode = static_cast<int>(target.interpolation_mode);
@@ -234,11 +259,22 @@ std::size_t Geometry::RenderInfo::Hash::operator()(const RenderInfo& target) con
 		throw std::runtime_error("Unknown interpolation mode " + std::to_string(interpolation_mode) + ": Geometry::RenderInfo::Hash::operator() needs to be updated");
 	}
 
+	if (target.primitive_dimensions.x > 15)
+	{
+		throw std::invalid_argument("Cannot hash when primitive_dimensions.x > 15"); //if this happens, increase the bits allocated
+	}
+
+	if (target.primitive_dimensions.y > 15)
+	{
+		throw std::invalid_argument("Cannot hash when primitive_dimensions.y > 15"); //if this happens, increase the bits allocated
+	}
+
 	//calculate hash
 	std::size_t result = std::size_t(target.tesselation_enabled);
 	result += std::size_t(interpolation_mode) << 1;
 	result += std::size_t(primitive_type) << 2;
-	result += std::size_t(target.primitive_size) << 4;
+	result += std::size_t(target.primitive_dimensions.x) << 4;
+	result += std::size_t(target.primitive_dimensions.y) << 8;
 
 	return result;
 }
