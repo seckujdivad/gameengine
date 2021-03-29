@@ -357,6 +357,9 @@
     <ClInclude Include="src\PatchSize.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\GLObjectLabelable.h">
+      <Filter>Header Files\render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -553,6 +556,9 @@
     </ClCompile>
     <ClCompile Include="src\render\glgeometry\GLGeometry.cpp">
       <Filter>Source Files\render\glgeometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\GLObjectLabelable.cpp">
+      <Filter>Source Files\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
