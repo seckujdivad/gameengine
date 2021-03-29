@@ -5,6 +5,8 @@
 
 GLTexturePreset::GLTexturePreset()
 {
+	this->target = TargetType::Texture_2D;
+	this->preset = GLTextureDataPreset::Black;
 }
 
 GLTexturePreset::GLTexturePreset(TargetType target, GLTextureDataPreset preset) : target(target), preset(preset)
