@@ -556,7 +556,7 @@ void main()
 			reflections, but should be reflecting an object, are (often,
 			eventually) found.
 			*/
-			bool is_test_px = ivec2(gl_FragCoord.xy) % 32 == 0;
+			bool is_test_px = ivec2(gl_FragCoord.xy) % 32 == ivec2(0);
 			float mixer = is_test_px ? 1.0f : ssr_hit_perc;
 			int initial_search_level = int(mix(float(mat_ssr_refinements_max), float(mat_ssr_refinements_min), mixer)); //number of levels of precision that can be dropped through before any hits become final
 
