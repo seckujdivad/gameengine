@@ -246,6 +246,8 @@ Engine::Engine(wxWindow* parent, Scene* scene, bool single_context_mode) : Scene
 	this->MakeContextCurrent(true);
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	glActiveTexture(GL_TEXTURE1);
 }
 
 EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasController::CompositeLayer> composite_layers, wxWindowID id, wxWindow* parent)
