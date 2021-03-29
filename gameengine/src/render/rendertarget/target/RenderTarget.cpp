@@ -431,10 +431,10 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		{
 			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::Black, this->GetTargetType()).get());
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_2D).get());
 			}
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroShadow, this->GetTargetType()).get());
+			this->m_shader_program->SetTexture(-1, "render_output_depth", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroShadow, TargetType::Texture_2D).get());
 		}
 
 		//ssr quality
