@@ -385,6 +385,12 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 
 		this->SetPixels(GLTextureFormat_Depth(), pixel_arrays);
 	}
+	else if (preset == GLTextureDataPreset::ZeroShadow)
+	{
+		this->SetPixels(GLTextureDataPreset::ZeroDepth);
+		this->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		this->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	}
 	else
 	{
 		throw std::invalid_argument("Unknown texture preset " + std::to_string(static_cast<int>(preset)));

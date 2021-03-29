@@ -3,5 +3,6 @@
 enum class GLTextureDataPreset
 {
 	Black,
-	ZeroDepth
+	ZeroDepth,
+	ZeroShadow
 };
