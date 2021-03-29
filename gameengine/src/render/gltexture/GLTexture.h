@@ -9,6 +9,8 @@
 #include "GLTexturePreset.h"
 #include "GLTextureFormat.h"
 
+#include "../GLObjectLabelable.h"
+
 enum class GLTextureType;
 enum class TargetType;
 enum class GLTextureDataPreset;
@@ -17,7 +19,7 @@ enum class TextureFiltering;
 
 enum class RenderTargetMode;
 
-class GLTexture
+class GLTexture : public GLObjectLabelable
 {
 public:
 	enum class Preset

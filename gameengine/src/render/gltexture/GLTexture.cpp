@@ -61,6 +61,7 @@ void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pix
 	if (create)
 	{
 		glGenTextures(1, &this->m_texture);
+		this->SetName(this->m_texture);
 	}
 	glBindTexture(target, this->m_texture);
 
@@ -161,13 +162,13 @@ void GLTexture::SetPreset(Preset preset, std::optional<int> num_channels, bool c
 	}
 }
 
-GLTexture::GLTexture(Preset preset, TargetType target, std::optional<int> num_channels, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type))
+GLTexture::GLTexture(Preset preset, TargetType target, std::optional<int> num_channels, std::tuple<int, int> dimensions, bool generate_mipmaps) : m_dimensions(dimensions), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type)), GLObjectLabelable(GL_TEXTURE)
 {
 	this->SetPreset(preset, num_channels, false);
 	this->ConfigureTexture(true);
 }
 
-GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type))
+GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type)), GLObjectLabelable(GL_TEXTURE)
 {
 	this->SetPixels(preset);
 }
@@ -176,7 +177,7 @@ GLTexture::GLTexture(GLTexturePreset preset, bool generate_mipmaps) : GLTexture(
 {
 }
 
-GLTexture::GLTexture(const GLTexture& copy_from) : m_format(copy_from.m_format)
+GLTexture::GLTexture(const GLTexture& copy_from) : m_format(copy_from.m_format), GLObjectLabelable(GL_TEXTURE)
 {
 	*this = copy_from;
 }
@@ -188,7 +189,7 @@ GLTexture& GLTexture::operator=(const GLTexture& copy_from)
 	return *this;
 }
 
-GLTexture::GLTexture(GLTexture&& move_from) noexcept : m_format(std::move(move_from.m_format))
+GLTexture::GLTexture(GLTexture&& move_from) noexcept : m_format(std::move(move_from.m_format)), GLObjectLabelable(GL_TEXTURE)
 {
 	*this = std::move(move_from);
 }

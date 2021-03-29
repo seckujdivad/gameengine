@@ -50,6 +50,8 @@ void Engine::LoadTexture(const Texture& texture)
 		loaded_texture->SetMinFiltering(texture.GetMinFilter());
 		loaded_texture->SetMagFiltering(texture.GetMagFilter());
 
+		loaded_texture->SetLabel("Static colour texture (reference " + std::to_string(texture.GetReference()) + ")");
+
 		this->m_textures_static.insert(std::pair(texture.GetReference(), std::tuple(loaded_texture, texture)));
 
 		reload_texture_data = true;
@@ -528,7 +530,7 @@ void Engine::Render(bool continuous_draw)
 				{
 					std::vector<std::shared_ptr<Geometry>> cpu_geometry = model->GetGeometry();
 					std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash> gpu_geometry;
-					for (const Geometry::RenderInfo render_info : this->GetRenderInfos(cpu_geometry))
+					for (const Geometry::RenderInfo& render_info : this->GetRenderInfos(cpu_geometry))
 					{
 						gpu_geometry.insert(std::pair(render_info, std::make_shared<GLGeometry>(this->GetVerticesForRenderInfo(cpu_geometry, render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
@@ -601,6 +603,7 @@ std::shared_ptr<GLTexture> Engine::GetTexture(GLTexturePreset preset)
 	{
 		std::shared_ptr<GLTexture> texture = std::make_shared<GLTexture>(preset);
 		texture->SetPixels(preset.preset);
+		texture->SetLabel("Texture preset (preset " + std::to_string(static_cast<int>(preset.preset)) + ")");
 		this->m_textures_static_presets.insert(std::pair(preset, texture));
 	}
 

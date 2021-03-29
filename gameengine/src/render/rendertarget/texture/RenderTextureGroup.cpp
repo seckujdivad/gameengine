@@ -101,12 +101,22 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 	else if (mode == RenderTargetMode::Normal_SSRQuality)
 	{
 		GLTexture texture = GLTexture(GLTexture::Preset::Data_LowP, target, GetNumAttachedColourTextures(RenderTargetMode::Normal_SSRQuality));
-		//texture.SetFiltering(TextureFiltering::Linear);
 		this->colour.push_back(texture);
 	}
 	else
 	{
 		throw std::invalid_argument("Can't generate RenderTextureGroup for mode " + std::to_string(static_cast<int>(mode)));
+	}
+
+	//name textures
+	for (std::size_t i = 0; i < this->colour.size(); i++)
+	{
+		this->colour.at(i).SetLabel("Colour render texture " + std::to_string(i) + ", mode " + std::to_string(static_cast<int>(mode)));
+	}
+
+	if (this->depth.has_value())
+	{
+		this->depth->SetLabel("Depth render texture, mode " + std::to_string(static_cast<int>(mode)));
 	}
 }
 
