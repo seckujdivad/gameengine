@@ -67,7 +67,7 @@ public:
 	ShaderProgram& operator=(ShaderProgram&& move_from) noexcept;
 	~ShaderProgram();
 
-	void Recompile(bool force = false);
+	bool Recompile(bool force = false);
 	bool RecompileIsRequired() const;
 
 	void SetShaderSources(std::vector<ShaderSource> sources, bool defer_recompilation = true);

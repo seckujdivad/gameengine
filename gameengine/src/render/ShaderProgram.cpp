@@ -44,7 +44,7 @@ ShaderProgram::~ShaderProgram()
 	}
 }
 
-void ShaderProgram::Recompile(bool force)
+bool ShaderProgram::Recompile(bool force)
 {
 	if (force || this->m_recompile_required)
 	{
@@ -104,6 +104,12 @@ void ShaderProgram::Recompile(bool force)
 		this->Select();
 
 		this->m_recompile_required = false;
+
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
