@@ -803,6 +803,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 		|| type == GL_OUT_OF_MEMORY
 		|| type == GL_INVALID_FRAMEBUFFER_OPERATION
 		|| type == GL_CONTEXT_LOST
+		|| type == GL_DEBUG_TYPE_ERROR
 		|| type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
 	{
 		throw std::runtime_error(message);
