@@ -377,7 +377,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		this->m_shader_program->SetUniform("light_shadow_draw", shadows_enabled);
 
 		//point lights
-		const std::vector<std::shared_ptr<PointLight>> point_lights = this->GetEngine()->GetScene()->GetPointLights();
+		const std::vector<std::shared_ptr<PointLight>>& point_lights = this->GetEngine()->GetScene()->GetPointLights();
 		for (int i = 0; i < static_cast<int>(point_lights.size()); i++)
 		{
 			const std::shared_ptr<PointLight>& point_light = point_lights.at(i);
