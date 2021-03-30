@@ -6,6 +6,8 @@
 #include "gltexture/GLTexture.h"
 #include "TargetType.h"
 
+const int SHADERPROGRAM_RESERVED_TEXTURE_UNITS = 2;
+
 ShaderProgram::ShaderProgram()
 {
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &this->m_max_texture_units); //get number of texture units allowed at once
@@ -238,16 +240,16 @@ void ShaderProgram::Select(int texture_group_id)
 			}
 		}
 
-		if ((static_cast<int>(textures.size()) + 2) > this->m_max_texture_units)
+		if ((static_cast<int>(textures.size()) + SHADERPROGRAM_RESERVED_TEXTURE_UNITS) > this->m_max_texture_units)
 		{
 			throw std::runtime_error("Too many bound textures - maximum is " + std::to_string(this->m_max_texture_units));
 		}
 
 		for (int i = 0; i < static_cast<int>(textures.size()); i++)
 		{
-			glActiveTexture(GL_TEXTURE2 + i);
+			glActiveTexture(GL_TEXTURE0 + SHADERPROGRAM_RESERVED_TEXTURE_UNITS + i);
 			textures.at(i).Bind();
-			glUniform1i(this->GetUniform(textures.at(i).uniform_name), i + 2);
+			glUniform1i(this->GetUniform(textures.at(i).uniform_name), SHADERPROGRAM_RESERVED_TEXTURE_UNITS + i);
 
 #ifdef _DEBUG
 			if ((textures.at(i).id != GL_NONE) && !glIsTexture(textures.at(i).id))
