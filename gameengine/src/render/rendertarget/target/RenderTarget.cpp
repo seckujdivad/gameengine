@@ -429,7 +429,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		}
 		else
 		{
-			for (int i = 0; i < GetNumColourTextures(this->GetRenderMode()).value(); i++)
+			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
 				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_2D).get());
 			}
