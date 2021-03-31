@@ -788,7 +788,7 @@ void main()
 								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
 								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_NORMAL_TEXTURES], sample_vector).rgb;
-								//sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
+								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], vec4(sample_vector, 1.0f)) == 1.0f));
 							}
 
 							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;
