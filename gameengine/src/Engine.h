@@ -61,9 +61,6 @@ private:
 	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash>> m_model_geometry;
 	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, std::shared_ptr<GLGeometry>>> m_geometry_presets;
 
-	static std::set<Geometry::RenderInfo> GetRenderInfos(std::vector<std::shared_ptr<Geometry>> geometry);
-	static std::vector<double> GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info);
-
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
 	void AddRenderController(RenderController* render_controller);

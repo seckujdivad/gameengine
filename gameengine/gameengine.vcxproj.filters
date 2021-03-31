@@ -360,6 +360,9 @@
     <ClInclude Include="src\render\GLObjectLabelable.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\render\glgeometry\GeometryVertexView.h">
+      <Filter>Header Files\render\glgeometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -559,6 +562,9 @@
     </ClCompile>
     <ClCompile Include="src\render\GLObjectLabelable.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\glgeometry\GeometryVertexView.cpp">
+      <Filter>Source Files\render\glgeometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

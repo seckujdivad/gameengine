@@ -154,6 +154,11 @@ bool GLGeometry::operator!=(const std::vector<double>& other) const
 	return this->m_data != other;
 }
 
+const std::vector<double>& GLGeometry::GetValues() const
+{
+	return this->m_data;
+}
+
 void GLGeometry::Draw(GLenum render_mode) const
 {
 	this->Bind();

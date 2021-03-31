@@ -12,7 +12,7 @@ Geometry::~Geometry()
 {
 }
 
-std::vector<double> Geometry::GetPrimitives()
+const std::vector<double>& Geometry::GetPrimitives()
 {
 	if (this->m_primitives_cache_is_valid)
 	{

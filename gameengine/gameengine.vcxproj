@@ -201,6 +201,7 @@
     <ClInclude Include="src\render\controllers\ShadowController.h" />
     <ClInclude Include="src\render\controllers\SkyboxController.h" />
     <ClInclude Include="src\render\controllers\RenderController.h" />
+    <ClInclude Include="src\render\glgeometry\GeometryVertexView.h" />
     <ClInclude Include="src\render\glgeometry\GLGeometry.h" />
     <ClInclude Include="src\render\GLObjectLabelable.h" />
     <ClInclude Include="src\render\gltexture\GLTexture.h" />
@@ -271,6 +272,7 @@
     <ClCompile Include="src\render\controllers\RenderController.cpp" />
     <ClCompile Include="src\render\controllers\ShadowController.cpp" />
     <ClCompile Include="src\render\controllers\SkyboxController.cpp" />
+    <ClCompile Include="src\render\glgeometry\GeometryVertexView.cpp" />
     <ClCompile Include="src\render\glgeometry\GLGeometry.cpp" />
     <ClCompile Include="src\render\GLObjectLabelable.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexture.cpp" />

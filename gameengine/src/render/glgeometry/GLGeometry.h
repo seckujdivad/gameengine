@@ -36,4 +36,6 @@ public:
 	void SetData(std::vector<double> values, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
 
 	void Draw(GLenum render_mode) const;
+
+	const std::vector<double>& GetValues() const;
 };

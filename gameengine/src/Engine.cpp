@@ -26,6 +26,8 @@
 #include "render/gltexture/GLTextureFormat.h"
 #include "render/gltexture/GLTextureType.h"
 
+#include "render/glgeometry/GeometryVertexView.h"
+
 #include "render/TargetType.h"
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
@@ -62,43 +64,6 @@ void Engine::LoadTexture(const Texture& texture)
 		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetDimensions(texture.GetDimensions());
 		std::get<0>(this->m_textures_static.at(texture.GetReference()))->SetPixels(GLTextureFormat_Colour(3, GLTextureType::UnsignedByte), std::vector<const void*>({ texture.GetData() }));
 	}
-}
-
-std::set<Geometry::RenderInfo> Engine::GetRenderInfos(std::vector<std::shared_ptr<Geometry>> geometry)
-{
-	std::set<Geometry::RenderInfo> result;
-	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
-	{
-		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
-		{
-			Geometry::RenderInfo render_info = inner_geometry->GetRenderInfo();
-			result.insert(render_info);
-		}
-	}
-	return result;
-}
-
-std::vector<double> Engine::GetVerticesForRenderInfo(std::vector<std::shared_ptr<Geometry>> geometry, Geometry::RenderInfo render_info)
-{
-	std::vector<double> result;
-	for (const std::shared_ptr<Geometry>& inner_geometry : geometry)
-	{
-		if (std::dynamic_pointer_cast<PresetGeometry>(inner_geometry).get() == nullptr)
-		{
-			if (render_info == inner_geometry->GetRenderInfo())
-			{
-				std::vector<double> data_highp = inner_geometry->GetPrimitives();
-
-				result.reserve(result.size() + data_highp.size());
-				for (double value : data_highp)
-				{
-					result.push_back(value);
-				}
-			}
-		}
-	}
-
-	return result;
 }
 
 void Engine::AddRenderController(RenderController* render_controller)
@@ -470,9 +435,9 @@ void Engine::Render(bool continuous_draw)
 
 				if (model.has_value())
 				{
-					std::vector<std::shared_ptr<Geometry>> geometry_ptrs = model.value()->GetGeometry();
+					GeometryVertexView geometry_view = model.value()->GetGeometry();
 					//work out what geometry should be loaded
-					std::set<Geometry::RenderInfo> target_geometry_infos = this->GetRenderInfos(geometry_ptrs);
+					std::set<Geometry::RenderInfo> target_geometry_infos = geometry_view.GetRenderInfos();
 
 					//work out what geometry actually is loaded
 					std::set<Geometry::RenderInfo> current_geometry_infos;
@@ -500,17 +465,16 @@ void Engine::Render(bool continuous_draw)
 					//update existing geometry if required
 					for (auto& [render_info, loaded_geometry] : loaded_geometries)
 					{
-						std::vector<double> vertices = this->GetVerticesForRenderInfo(geometry_ptrs, render_info);
-						if (*loaded_geometry != vertices)
+						if (!geometry_view.IsEqual(loaded_geometry->GetValues(), render_info))
 						{
-							loaded_geometry->SetData(vertices, render_info.primitive_size, render_info.primitive_type);
+							loaded_geometry->SetData(geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type);
 						}
 					}
 
 					//add new geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_add)
 					{
-						loaded_geometries.insert(std::pair(render_info, std::make_shared<GLGeometry>(this->GetVerticesForRenderInfo(geometry_ptrs, render_info), render_info.primitive_size, render_info.primitive_type)));
+						loaded_geometries.insert(std::pair(render_info, std::make_shared<GLGeometry>(geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
 				}
 				else
@@ -519,22 +483,22 @@ void Engine::Render(bool continuous_draw)
 				}
 			}
 
-			//remove old geometry
+			//remove old models
 			for (ModelReference model_reference : to_remove)
 			{
 				this->m_model_geometry.erase(model_reference);
 			}
 
-			//add new geometry
+			//add new models
 			for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 			{
 				if (this->m_model_geometry.count(model->GetReference()) == 0)
 				{
-					std::vector<std::shared_ptr<Geometry>> cpu_geometry = model->GetGeometry();
+					GeometryVertexView cpu_geometry_view = model->GetGeometry();
 					std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash> gpu_geometry;
-					for (const Geometry::RenderInfo& render_info : this->GetRenderInfos(cpu_geometry))
+					for (const Geometry::RenderInfo& render_info : cpu_geometry_view.GetRenderInfos())
 					{
-						gpu_geometry.insert(std::pair(render_info, std::make_shared<GLGeometry>(this->GetVerticesForRenderInfo(cpu_geometry, render_info), render_info.primitive_size, render_info.primitive_type)));
+						gpu_geometry.insert(std::pair(render_info, std::make_shared<GLGeometry>(cpu_geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type)));
 					}
 
 					this->m_model_geometry.insert(std::pair(model->GetReference(), gpu_geometry));

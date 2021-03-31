@@ -57,7 +57,7 @@ protected:
 public:
 	virtual ~Geometry();
 
-	std::vector<double> GetPrimitives();
+	const std::vector<double>& GetPrimitives();
 	virtual std::size_t GetPrimitivesNumVertices() const = 0;
 	
 	virtual Geometry::PrimitiveType GetPrimitiveType() const = 0;
