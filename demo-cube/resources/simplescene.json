@@ -111,6 +111,10 @@
         "screen space": {
           "appear in ssr": true,
           "enabled": false
+        },
+        "alternative": {
+          "reflection": "level section 3",
+          "mode": "iterative sampling"
         }
       },
       "textures": {
