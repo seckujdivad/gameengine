@@ -679,24 +679,9 @@ void main()
 				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
 				{
 					vec3 sample_vector = reflect(-fragtocam, normal);
-					vec3 offset = geomSceneSpacePos - reflections[reflection_index].position;
 
-					/*for (int i = 0; i < reflections[reflection_index].iterations; i++)
-					{
-						float depth_sample = texture(reflection_depth_cubemaps[reflection_index], sample_vector).r;
-						if (depth_sample == 1.0f)
-						{
-							i = reflections[reflection_index].iterations; //exit loop
-						}
-						else
-						{
-							depth_sample = GetDistanceFromReflection(reflection_index, depth_sample);
-							sample_vector = (normalize(sample_vector) * depth_sample) + offset;
-						}
-					}
-
-					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;*/
-					reflection_colour = vec3(1.0f);
+					bool is_skybox = texture(reflection_depth_cubemaps[reflection_index], vec4(sample_vector, 1.0f)).r == 1.0f;
+					reflection_colour = is_skybox ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;
 				}
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
