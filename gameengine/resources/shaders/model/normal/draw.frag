@@ -130,7 +130,7 @@ uniform struct Reflection
 uniform bool reflections_enabled;
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_NORMAL_TEXTURES];
-uniform samplerCube reflection_depth_cubemaps[REFLECTION_NUM];
+uniform samplerCubeShadow reflection_depth_cubemaps[REFLECTION_NUM];
 uniform int reflection_count;
 
 //scene approximation
@@ -681,7 +681,7 @@ void main()
 					vec3 sample_vector = reflect(-fragtocam, normal);
 					vec3 offset = geomSceneSpacePos - reflections[reflection_index].position;
 
-					for (int i = 0; i < reflections[reflection_index].iterations; i++)
+					/*for (int i = 0; i < reflections[reflection_index].iterations; i++)
 					{
 						float depth_sample = texture(reflection_depth_cubemaps[reflection_index], sample_vector).r;
 						if (depth_sample == 1.0f)
@@ -695,7 +695,8 @@ void main()
 						}
 					}
 
-					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;
+					reflection_colour = (texture(reflection_depth_cubemaps[reflection_index], sample_vector).r == 1.0f) ? texture(skyboxTexture, sample_vector).rgb : texture(reflection_cubemaps[reflection_index * NUM_NORMAL_TEXTURES], sample_vector).rgb;*/
+					reflection_colour = vec3(1.0f);
 				}
 				else if (reflections[reflection_index].mode == ReflectionModeOBB) //oriented bounding box
 				{
@@ -787,7 +788,7 @@ void main()
 								bool valid_sample = i == reflection_index;
 								vec3 sample_vector = line_end - reflections[i].position;
 								reflection_sample += float(valid_sample) * texture(reflection_cubemaps[i * NUM_NORMAL_TEXTURES], sample_vector).rgb;
-								sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
+								//sample_is_skybox = sample_is_skybox || (valid_sample && (texture(reflection_depth_cubemaps[i], sample_vector).r == 1.0f));
 							}
 
 							reflection_colour = sample_is_skybox ? texture(skyboxTexture,  refl_dir).rgb : reflection_sample;

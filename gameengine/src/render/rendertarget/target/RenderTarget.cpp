@@ -635,7 +635,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 				std::string uniform_name = "reflection_cubemaps[" + std::to_string((i * num_colour_tex) + j) + "]";
 				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_Cubemap).get());
 			}
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroDepth, TargetType::Texture_Cubemap).get());
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", this->GetEngine()->GetTexture(GLTextureDataPreset::ZeroShadow, TargetType::Texture_Cubemap).get());
 		}
 
 		this->m_shader_program->SetUniform("reflection_count", static_cast<int>(reflections.size()));
