@@ -616,7 +616,6 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			this->m_shader_program->SetUniform(prefix + "clip_near", std::get<0>(reflection->GetClips()));
 			this->m_shader_program->SetUniform(prefix + "clip_far", std::get<1>(reflection->GetClips()));
 			this->m_shader_program->SetUniform(prefix + "mode", static_cast<int>(reflection_mode));
-			this->m_shader_program->SetUniform(prefix + "iterations", reflection->GetIterations());
 
 			std::shared_ptr<RenderTextureGroup> reflection_output = this->GetEngine()->GetRenderTexture(reflection->GetReference());
 			for (int j = 0; j < num_colour_tex; j++)

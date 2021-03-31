@@ -123,8 +123,6 @@ uniform struct Reflection
 	float clip_far;
 
 	int mode; //ReflectionMode
-
-	int iterations;
 };
 
 uniform bool reflections_enabled;
@@ -157,7 +155,7 @@ uniform ivec2 render_ssr_region_dimensions;
 
 //enums
 //ReflectionMode - scene/model/Reflection.h
-const int ReflectionModeIterative = 0;
+const int ReflectionModeSimple = 0;
 const int ReflectionModeOBB = 1;
 
 vec2 SCREEN_POS = vec2(gl_FragCoord.xy / vec2(render_output_dimensions));
@@ -676,7 +674,7 @@ void main()
 					refl_distance = mix(refl_distance, current_distance, is_closer);
 				}
 			
-				if (reflections[reflection_index].mode == ReflectionModeIterative) //iteratively apply perspective correction
+				if (reflections[reflection_index].mode == ReflectionModeSimple) //no perspective correction
 				{
 					vec3 sample_vector = reflect(-fragtocam, normal);
 

@@ -726,17 +726,6 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 			reflection->SetIdentifier(el.value()["identifier"].get<std::string>());
 		}
 
-		if (el.value()["corrections"].is_object())
-		{
-			if (el.value()["corrections"]["iterative sampling"].is_object())
-			{
-				if (el.value()["corrections"]["iterative sampling"]["iterations"].is_number_integer())
-				{
-					reflection->SetIterations(el.value()["corrections"]["iterative sampling"]["iterations"].get<int>());
-				}
-			}
-		}
-
 		if (el.value()["draw shadows"].is_boolean())
 		{
 			reflection->SetDrawShadows(el.value()["draw shadows"].get<bool>()); 
@@ -768,9 +757,9 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 				if (el["reflections"]["alternative"]["mode"].is_string())
 				{
 					std::string mode_name = el["reflections"]["alternative"]["mode"].get<std::string>();
-					if (mode_name == "iterative sampling")
+					if (mode_name == "simple")
 					{
-						mode = ReflectionMode::Iterative;
+						mode = ReflectionMode::Simple;
 					}
 					else if (mode_name == "oriented bounding box")
 					{
