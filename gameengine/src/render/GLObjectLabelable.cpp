@@ -4,7 +4,7 @@ void GLObjectLabelable::PushLabel() const
 {
 	if (this->m_label.has_value() && this->m_name.has_value())
 	{
-		glObjectLabel(this->m_identifier, this->m_name.value(), this->m_label->size(), this->m_label->c_str());
+		glObjectLabel(this->m_identifier, this->m_name.value(), static_cast<GLsizei>(this->m_label->size()), this->m_label->c_str());
 	}
 }
 
