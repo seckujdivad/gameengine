@@ -6,6 +6,7 @@
 #include <optional>
 #include <variant>
 #include <type_traits>
+#include <memory>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -46,7 +47,7 @@ private:
 	std::vector<ShaderSource> m_sources;
 
 	std::unordered_map<std::string, GLuint> m_uniforms;
-	std::unordered_map<int, std::unordered_map<std::string, GLTexture*>> m_textures;
+	std::unordered_map<int, std::unordered_map<std::string, std::shared_ptr<GLTexture>>> m_textures;
 	std::unordered_map<std::string, DefineType> m_defines;
 
 	bool m_recompile_required = true;
@@ -116,7 +117,7 @@ public:
 		this->SetUniform(prefix, values.begin(), values.end(), index_start, index_step);
 	};
 
-	void SetTexture(int texture_group_id, std::string uniform_name, GLTexture* texture);
+	void SetTexture(int texture_group_id, std::string uniform_name, std::shared_ptr<GLTexture> texture);
 
 	//returns whether or not the shader requires recompilation (this can be deferred to the caller)
 	bool SetDefine(std::string key, DefineType value, bool defer_recompilation = true);

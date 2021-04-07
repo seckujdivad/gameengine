@@ -490,14 +490,14 @@ void ShaderProgram::SetUniform(std::string name, glm::dmat3 mat, bool demote)
 	}
 }
 
-void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, GLTexture* texture)
+void ShaderProgram::SetTexture(int texture_group_id, std::string uniform_name, std::shared_ptr<GLTexture> texture)
 {
 	this->AddUniformName(uniform_name);
 
 	bool add_new = false;
 	if (this->m_textures.count(texture_group_id) == 0)
 	{
-		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, GLTexture*>()));
+		this->m_textures.insert(std::pair(texture_group_id, std::unordered_map<std::string, std::shared_ptr<GLTexture>>()));
 		add_new = true;
 	}
 	else

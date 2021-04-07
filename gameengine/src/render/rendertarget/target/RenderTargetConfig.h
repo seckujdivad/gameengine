@@ -112,7 +112,7 @@ struct RenderTargetConfig
 
 		struct Layer
 		{
-			GLTexture* texture = nullptr;
+			std::shared_ptr<GLTexture> texture = nullptr;
 			glm::vec4 colour_translate = glm::vec4(0.0f);
 			glm::vec4 colour_scale = glm::vec4(1.0f);
 		};

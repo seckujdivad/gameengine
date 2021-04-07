@@ -69,14 +69,16 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 
 
 			RenderTargetConfig::PostProcess::Layer layer;
+			std::shared_ptr<RenderTextureGroup> layer_group;
 			if (i == 0)
 			{
-				layer.texture = &this->m_rt_ssrquality->GetOutputTextures()->colour.at(0);
+				layer_group = this->m_rt_ssrquality->GetOutputTextures();
 			}
 			else if (i == 1)
 			{
-				layer.texture = &this->GetSSRBoxBlurTarget(0)->GetOutputTextures()->colour.at(0);
+				layer_group = this->GetSSRBoxBlurTarget(0)->GetOutputTextures();
 			}
+			layer.texture = std::shared_ptr<GLTexture>(layer_group, &layer_group->colour.at(0));
 
 			config.Data<RenderTargetConfig::PostProcess>().layers.push_back(layer);
 
