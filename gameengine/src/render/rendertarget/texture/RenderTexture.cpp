@@ -33,7 +33,8 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 
 		if (simultaneous_read_write)
 		{
-			this->m_texture_read = std::make_shared<RenderTextureGroup>(*this->m_texture_write.get());
+			this->m_texture_read = std::make_shared<RenderTextureGroup>();
+			this->m_texture_write->CopyTo(**this->m_texture_read, true);
 		}
 
 		GLuint fbo;
@@ -59,19 +60,12 @@ std::tuple<int, int> RenderTexture::GetOutputSize() const
 
 bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 {
-	if (dimensions == this->m_texture_write.get()->GetDimensions())
+	bool changed_dimensions = this->m_texture_write.get()->SetDimensions(dimensions);
+	if (this->m_texture_read.has_value())
 	{
-		return false;
+		changed_dimensions = this->m_texture_read->get()->SetDimensions(dimensions) || changed_dimensions;
 	}
-	else
-	{
-		this->m_texture_write.get()->SetDimensions(dimensions);
-		if (this->m_texture_read.has_value())
-		{
-			this->m_texture_read->get()->SetDimensions(dimensions);
-		}
-		return true;
-	}
+	return changed_dimensions;
 }
 
 void RenderTexture::SetWriteTarget(RenderTexture* target)

@@ -31,20 +31,23 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
-		textures->depth->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-		textures->depth->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LESS);
-		textures->depth->SetFiltering(TextureFiltering::Nearest);
+		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		textures->depth.value()->SetFiltering(TextureFiltering::Nearest);
 
 		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
 	{
+		std::shared_ptr<RenderTextureGroup> depth_only_textures = this->GetDepthOnlyTarget()->GetOutputTextures();
+
 		RenderTargetConfig config;
 		config.SetMode(RenderTargetMode::Normal_Draw);
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
-		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = this->GetDepthOnlyTarget()->GetOutputTextures();
+		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = depth_only_textures;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
+		textures->depth = depth_only_textures->depth.value();
 
 		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
@@ -67,7 +70,6 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().is_first_pass = i == 0;
 			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().radius = glm::ivec2(1);
 
-
 			RenderTargetConfig::PostProcess::Layer layer;
 			std::shared_ptr<RenderTextureGroup> layer_group;
 			if (i == 0)
@@ -78,7 +80,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 			{
 				layer_group = this->GetSSRBoxBlurTarget(0)->GetOutputTextures();
 			}
-			layer.texture = std::shared_ptr<GLTexture>(layer_group, &layer_group->colour.at(0));
+			layer.texture = layer_group->colour.at(0);
 
 			config.Data<RenderTargetConfig::PostProcess>().layers.push_back(layer);
 
@@ -206,7 +208,6 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_draw->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
-	this->m_rt_depth_only->GetWriteTextures()->depth.value().CopyTo(this->m_rt_draw->GetWriteTextures()->depth.value());
 
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);

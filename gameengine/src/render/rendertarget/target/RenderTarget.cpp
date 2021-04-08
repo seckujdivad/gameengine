@@ -393,7 +393,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			this->m_shader_program->AddUniformName(cubemap_name);
 			std::shared_ptr<RenderTextureGroup> texture = this->GetEngine()->GetRenderTexture(point_light->GetReference());
 
-			this->m_shader_program->SetTexture(-1, cubemap_name, std::shared_ptr<GLTexture>(texture, &texture->depth.value()));
+			this->m_shader_program->SetTexture(-1, cubemap_name, texture->depth.value());
 		}
 
 		//scene approximation
@@ -424,12 +424,12 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 			for (int i = 0; i < GetNumColourTextures(RenderTargetMode::Normal_DepthOnly).value(); i++)
 			{
-				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", std::shared_ptr<GLTexture>(depth_frame, &depth_frame->colour.at(i)));
+				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", depth_frame->colour.at(i));
 			}
 
 			
 
-			this->m_shader_program->SetTexture(-1, "render_output_depth", std::shared_ptr<GLTexture>(depth_frame, &depth_frame->depth.value()));
+			this->m_shader_program->SetTexture(-1, "render_output_depth", depth_frame->depth.value());
 		}
 		else
 		{
@@ -443,7 +443,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 
 		//ssr quality
 		std::shared_ptr<RenderTextureGroup> ssr_quality_frame = this->m_config.Data<RenderTargetConfig::Normal_Draw>().ssr_quality_frame;
-		this->m_shader_program->SetTexture(-1, "render_ssr_quality", std::shared_ptr<GLTexture>(ssr_quality_frame, &ssr_quality_frame->colour.at(0)));
+		this->m_shader_program->SetTexture(-1, "render_ssr_quality", ssr_quality_frame->colour.at(0));
 	}
 
 	if (this->GetRenderMode() == RenderTargetMode::Wireframe)
@@ -531,20 +531,20 @@ void RenderTarget::Render_Setup_FSQuad()
 		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_PostProcess>().draw_frame;
 		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
 		{
-			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", std::shared_ptr<GLTexture>(draw_frame, &draw_frame->colour.at(i)));
+			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", draw_frame->colour.at(i));
 		}
 
-		this->m_shader_program->SetTexture(-1, "draw_frame_depth", std::shared_ptr<GLTexture>(draw_frame, &draw_frame->depth.value()));
+		this->m_shader_program->SetTexture(-1, "draw_frame_depth", draw_frame->depth.value());
 	}
 	else if (this->GetRenderMode() == RenderTargetMode::Normal_SSRQuality)
 	{
 		std::shared_ptr<RenderTextureGroup>& draw_frame = this->m_config.Data<RenderTargetConfig::Normal_SSRQuality>().draw_frame;
 		for (int i = 0; i < static_cast<int>(draw_frame->colour.size()); i++)
 		{
-			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", std::shared_ptr<GLTexture>(draw_frame, &draw_frame->colour.at(i)));
+			this->m_shader_program->SetTexture(-1, "draw_frame[" + std::to_string(i) + "]", draw_frame->colour.at(i));
 		}
 
-		this->m_shader_program->SetTexture(-1, "draw_frame_depth", std::shared_ptr<GLTexture>(draw_frame, &draw_frame->depth.value()));
+		this->m_shader_program->SetTexture(-1, "draw_frame_depth", draw_frame->depth.value());
 
 		const auto& [draw_size_x, draw_size_y] = draw_frame->GetDimensions();
 		this->m_shader_program->SetUniform("render_draw_output_dimensions", glm::ivec2(draw_size_x, draw_size_y));
@@ -626,9 +626,9 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 			for (int j = 0; j < num_colour_tex; j++)
 			{
 				std::string uniform_name = "reflection_cubemaps[" + std::to_string((i * num_colour_tex) + j) + "]";
-				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, std::shared_ptr<GLTexture>(reflection_output, &reflection_output->colour.at(j)));
+				this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), uniform_name, reflection_output->colour.at(j));
 			}
-			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", std::shared_ptr<GLTexture>(reflection_output, &reflection_output->depth.value()));
+			this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "reflection_depth_cubemaps[" + std::to_string(i) + "]", reflection_output->depth.value());
 		}
 
 		int required_reflections = this->m_shader_program->GetDefine<int>("REFLECTION_NUM");
@@ -655,7 +655,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		else
 		{
 			std::shared_ptr<RenderTextureGroup> render_texture = this->GetEngine()->GetRenderTexture(skybox->GetReference());
-			skybox_texture = std::shared_ptr<GLTexture>(render_texture, &render_texture->colour.at(0));
+			skybox_texture = render_texture->colour.at(0);
 		}
 		this->m_shader_program->SetTexture(static_cast<int>(model->GetReference()), "skyboxTexture", skybox_texture);
 	}

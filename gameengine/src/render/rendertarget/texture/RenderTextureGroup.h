@@ -26,18 +26,18 @@ public:
 	RenderTextureGroup();
 	RenderTextureGroup(RenderTargetMode mode, TargetType target);
 
-	std::vector<GLTexture> colour;
-	std::optional<GLTexture> depth;
+	std::vector<std::shared_ptr<GLTexture>> colour;
+	std::optional<std::shared_ptr<GLTexture>> depth;
 
 	std::tuple<int, int> GetDimensions() const;
-	void SetDimensions(std::tuple<int, int> dimensions);
+	bool SetDimensions(std::tuple<int, int> dimensions);
 
 	TargetType GetTargetType() const;
 
-	void CopyFrom(const RenderTextureGroup& src);
-	void CopyTo(RenderTextureGroup& dest) const;
+	void CopyFrom(const RenderTextureGroup& src, bool deep_copy_textures = false);
+	void CopyTo(RenderTextureGroup& dest, bool deep_copy_textures = false) const;
 
-	void ForEachTexture(std::function<void(GLTexture& texture)> foreach);
+	void ForEachTexture(std::function<void(std::shared_ptr<GLTexture>& texture)> foreach);
 
 	Identifiers GetIdentifiers() const;
 

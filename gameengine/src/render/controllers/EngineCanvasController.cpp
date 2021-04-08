@@ -66,7 +66,7 @@ RenderTargetConfig EngineCanvasController::RemakeTextures(std::vector<EngineCanv
 
 		RenderTargetConfig::PostProcess::Layer layer;
 		std::shared_ptr<RenderTextureGroup> render_texture_output = render_texture->GetOutputTextures();
-		layer.texture = std::shared_ptr<GLTexture>(render_texture_output, &render_texture_output->colour.at(0));
+		layer.texture = render_texture_output->colour.at(0);
 		std::get<RenderTargetConfig::PostProcess>(postprocess_config.mode_data).layers.push_back(layer);
 
 		this->m_renderers.push_back(std::move(renderer));
@@ -88,7 +88,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 
 	RenderTargetConfig::PostProcess::Layer passthrough_layer;
 	std::shared_ptr<RenderTextureGroup> final_texture_output = this->m_texture_final->GetOutputTextures();
-	passthrough_layer.texture = std::shared_ptr<GLTexture>(final_texture_output, &final_texture_output->colour.at(0));
+	passthrough_layer.texture = final_texture_output->colour.at(0);
 	std::get<RenderTargetConfig::PostProcess>(canvas_config.mode_data).layers.push_back(passthrough_layer);
 
 	this->m_canvas->SetConfig(canvas_config);

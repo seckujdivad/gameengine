@@ -220,12 +220,17 @@ GLTexture::~GLTexture()
 	}
 }
 
-void GLTexture::SetDimensions(std::tuple<int, int> dimensions)
+bool GLTexture::SetDimensions(std::tuple<int, int> dimensions)
 {
-	if (dimensions != this->m_dimensions)
+	if (dimensions == this->m_dimensions)
+	{
+		return false;
+	}
+	else
 	{
 		this->m_dimensions = dimensions;
 		this->ConfigureTexture(false);
+		return true;
 	}
 }
 

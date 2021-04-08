@@ -59,7 +59,7 @@ public:
 	GLTexture& operator=(GLTexture&& move_from) noexcept;
 	~GLTexture();
 
-	void SetDimensions(std::tuple<int, int> dimensions);
+	bool SetDimensions(std::tuple<int, int> dimensions);
 	std::tuple<int, int> GetDimensions() const;
 
 	void SetTextureType(GLTextureType type);
