@@ -8,12 +8,12 @@
 
 const int SHADERPROGRAM_RESERVED_TEXTURE_UNITS = 2;
 
-ShaderProgram::ShaderProgram()
+ShaderProgram::ShaderProgram() : GLObjectLabelable(GL_PROGRAM)
 {
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &this->m_max_texture_units); //get number of texture units allowed at once
 }
 
-ShaderProgram::ShaderProgram(ShaderProgram&& move_from) noexcept
+ShaderProgram::ShaderProgram(ShaderProgram&& move_from) noexcept : GLObjectLabelable(GL_PROGRAM)
 {
 	*this = std::move(move_from);
 }
@@ -106,6 +106,8 @@ bool ShaderProgram::Recompile(bool force)
 		this->Select();
 
 		this->m_recompile_required = false;
+
+		this->SetName(this->m_program_id);
 
 		return true;
 	}

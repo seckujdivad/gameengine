@@ -13,11 +13,13 @@
 
 #include "../GLComponents.h"
 
+#include "GLObjectLabelable.h"
+
 class GLTexture;
 
 const int GAMEENGINE_BOUND_TEXTURE_LIMIT = 16;
 
-class ShaderProgram
+class ShaderProgram : public GLObjectLabelable
 {
 public:
 	struct ShaderSource
