@@ -4,8 +4,9 @@
 
 #include "../../GLComponents.h"
 #include "../../scene/model/geometry/Geometry.h"
+#include "../GLObjectLabelable.h"
 
-class GLGeometry
+class GLGeometry : public GLObjectLabelable
 {
 private:
 	std::vector<double> m_data;

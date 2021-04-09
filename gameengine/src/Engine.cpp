@@ -474,7 +474,10 @@ void Engine::Render(bool continuous_draw)
 					//add new geometry
 					for (const Geometry::RenderInfo& render_info : geometry_to_add)
 					{
-						loaded_geometries.insert(std::pair(render_info, std::make_shared<GLGeometry>(geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type)));
+						std::shared_ptr<GLGeometry> geometry = std::make_shared<GLGeometry>(geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type);
+						geometry->SetLabel(model.value()->GetIdentifier() + ": " + GetPrimitiveTypeName(render_info.primitive_type));
+
+						loaded_geometries.insert(std::pair(render_info, std::move(geometry)));
 					}
 				}
 				else
@@ -498,7 +501,10 @@ void Engine::Render(bool continuous_draw)
 					std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash> gpu_geometry;
 					for (const Geometry::RenderInfo& render_info : cpu_geometry_view.GetRenderInfos())
 					{
-						gpu_geometry.insert(std::pair(render_info, std::make_shared<GLGeometry>(cpu_geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type)));
+						std::shared_ptr<GLGeometry> geometry = std::make_shared<GLGeometry>(cpu_geometry_view.GetVerticesFromRenderInfo(render_info), render_info.primitive_size, render_info.primitive_type);
+						geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(render_info.primitive_type));
+
+						gpu_geometry.insert(std::pair(render_info, std::move(geometry)));
 					}
 
 					this->m_model_geometry.insert(std::pair(model->GetReference(), gpu_geometry));
@@ -613,6 +619,8 @@ void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo i
 			if (it == this->m_geometry_presets.end())
 			{
 				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), std::make_shared<GLGeometry>(preset_geom->GetPrimitives(), preset_geom->GetPrimitiveSize(), preset_geom->GetPrimitiveType()));
+				std::get<1>(data)->SetLabel("Preset geometry: " + GetPresetGeometryType(preset_geom->GetGeometryType()));
+
 				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
 				geometry.push_back(data);
 			}

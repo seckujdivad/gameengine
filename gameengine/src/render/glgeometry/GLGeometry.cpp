@@ -78,6 +78,8 @@ void GLGeometry::CreateGLObjects()
 	glGenBuffers(1, &this->m_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
 
+	this->SetName(this->m_vao);
+
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, GAMEENGINE_VALUES_PER_VERTEX * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
@@ -93,13 +95,13 @@ void GLGeometry::Bind() const
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
 }
 
-GLGeometry::GLGeometry(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
+GLGeometry::GLGeometry(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type) : GLObjectLabelable(GL_VERTEX_ARRAY)
 {
 	this->CreateGLObjects();
 	this->SetData(vertices, primitive_size, primitive_type);
 }
 
-GLGeometry::GLGeometry(GLGeometry&& move_from) noexcept
+GLGeometry::GLGeometry(GLGeometry&& move_from) noexcept : GLObjectLabelable(GL_VERTEX_ARRAY)
 {
 	*this = std::move(move_from);
 }
@@ -114,6 +116,8 @@ GLGeometry& GLGeometry::operator=(GLGeometry&& move_from) noexcept
 	this->m_buffer_len = move_from.m_buffer_len;
 
 	this->m_data = move_from.m_data;
+
+	this->SetName(this->m_vao);
 
 	return *this;
 }
