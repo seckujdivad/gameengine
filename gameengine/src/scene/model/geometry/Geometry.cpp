@@ -174,6 +174,17 @@ std::size_t GetNumQuadsFromPolygon(std::size_t vertices)
 	return std::size_t(-1);
 }
 
+std::string GetPrimitiveTypeName(Geometry::PrimitiveType primitive_type)
+{
+	switch (primitive_type)
+	{
+	case Geometry::PrimitiveType::Patches: return "Patches";
+	case Geometry::PrimitiveType::Quads: return "Quads";
+	case Geometry::PrimitiveType::Triangles: return "Triangles";
+	default: throw std::invalid_argument("Unknown primitive type: " + std::to_string(static_cast<int>(primitive_type)));
+	}
+}
+
 bool Geometry::RenderInfo::operator==(const RenderInfo& second) const
 {
 	if (this->tesselation_enabled != second.tesselation_enabled)

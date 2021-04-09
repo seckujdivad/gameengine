@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <array>
+#include <string>
 
 #include <glm/glm.hpp>
 
@@ -75,3 +76,5 @@ std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::size_t vertices);
 std::vector<std::array<int, 4>> GetQuadsFromPolygon(std::vector<int> indices);
 
 std::size_t GetNumQuadsFromPolygon(std::size_t vertices);
+
+std::string GetPrimitiveTypeName(Geometry::PrimitiveType primitive_type);
