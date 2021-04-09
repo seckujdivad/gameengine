@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum class RenderTargetMode
 {
 	Default,
@@ -20,3 +22,5 @@ enum class RenderTargetModeType
 };
 
 RenderTargetModeType GetRenderTargetModeType(RenderTargetMode mode);
+
+std::string GetRenderTargetModeName(RenderTargetMode mode);
