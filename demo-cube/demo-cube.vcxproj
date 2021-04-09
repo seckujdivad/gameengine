@@ -196,7 +196,7 @@
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>py $(SolutionDir)\packaged-releases/package-releases.py</Command>
+      <Command>py "$(SolutionDir)\packaged-releases/package-releases.py"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Packaging release in zip archive</Message>
