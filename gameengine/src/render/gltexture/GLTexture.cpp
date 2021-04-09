@@ -427,6 +427,8 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	}
 
 	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
+
+	dest.SetName(dest.m_texture);
 }
 
 void GLTexture::CopyFrom(const GLTexture& src)

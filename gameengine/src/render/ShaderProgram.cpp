@@ -35,6 +35,8 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& move_from) noexcept
 	this->m_textures = move_from.m_textures;
 	this->m_defines = move_from.m_defines;
 
+	this->SetName(this->m_program_id);
+
 	return *this;
 }
 
