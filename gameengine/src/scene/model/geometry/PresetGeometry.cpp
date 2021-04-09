@@ -89,3 +89,13 @@ bool PresetGeometry::GetTesselationEnabled() const
 {
 	return this->m_geometry->GetTesselationEnabled();
 }
+
+std::string GetPresetGeometryType(PresetGeometry::GeometryType preset_geometry_type)
+{
+	switch (preset_geometry_type)
+	{
+	case PresetGeometry::GeometryType::Icosphere: return "Icosphere";
+	case PresetGeometry::GeometryType::Plane: return "Plane";
+	default: throw std::invalid_argument("Unknown preset geometry type: " + std::to_string(static_cast<int>(preset_geometry_type)));
+	}
+}

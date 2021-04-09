@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 
 class PresetGeometry : public Geometry
 {
@@ -37,3 +38,5 @@ public:
 
 	bool GetTesselationEnabled() const override;
 };
+
+std::string GetPresetGeometryType(PresetGeometry::GeometryType preset_geometry_type);
