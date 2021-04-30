@@ -47,7 +47,6 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = depth_only_textures;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
-		textures->depth = depth_only_textures->depth.value();
 
 		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
@@ -208,6 +207,7 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_draw->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
+	this->m_rt_depth_only->GetWriteTextures()->depth.value()->CopyTo(*this->m_rt_draw->GetWriteTextures()->depth.value());
 
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
