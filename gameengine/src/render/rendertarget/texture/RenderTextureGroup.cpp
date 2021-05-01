@@ -171,7 +171,14 @@ void RenderTextureGroup::CopyTo(RenderTextureGroup& dest, bool deep_copy_texture
 
 	if (this->depth.has_value() != dest.depth.has_value())
 	{
-		throw std::runtime_error("One texture group has a depth buffer, but the other doesn't");
+		if (dest.depth.has_value())
+		{
+			throw std::invalid_argument("The destination expects a depth texture, but the source doesn't have one");
+		}
+		else
+		{
+			throw std::invalid_argument("The source has a depth texture, but the destination doesn't expect one");
+		}
 	}
 
 	if (deep_copy_textures)
