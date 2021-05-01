@@ -105,18 +105,18 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 	}
 	else
 	{
-		throw std::invalid_argument("Can't generate RenderTextureGroup for mode " + std::to_string(static_cast<int>(mode)));
+		throw std::invalid_argument("Can't generate RenderTextureGroup for mode " + GetRenderTargetModeName(mode));
 	}
 
 	//name textures
 	for (std::size_t i = 0; i < this->colour.size(); i++)
 	{
-		this->colour.at(i)->SetLabel("Colour render texture " + std::to_string(i) + ", mode " + std::to_string(static_cast<int>(mode)));
+		this->colour.at(i)->SetLabel("Colour render texture " + std::to_string(i) + ", mode " + GetRenderTargetModeName(mode));
 	}
 
 	if (this->depth.has_value())
 	{
-		this->depth.value()->SetLabel("Depth render texture, mode " + std::to_string(static_cast<int>(mode)));
+		this->depth.value()->SetLabel("Depth render texture, mode " + GetRenderTargetModeName(mode));
 	}
 }
 
