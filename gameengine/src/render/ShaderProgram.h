@@ -56,9 +56,6 @@ private:
 
 	GLuint LoadShader(ShaderSource source);
 
-	std::string GetInfoLog() const;
-	bool IsValid() const;
-
 	template<typename T>
 	static T ConvertDefine_Inner(DefineType value);
 
@@ -134,5 +131,8 @@ public:
 	template<typename T>
 	static T ConvertDefine(DefineType value);
 
-	std::optional<std::string> CheckProgramValidity() const;
+	//program and shader state checks
+	static std::optional<std::string> GetShaderInfoLog(GLuint shader_id);
+	std::optional<std::string> GetProgramInfoLog() const;
+	bool IsValid() const;
 };

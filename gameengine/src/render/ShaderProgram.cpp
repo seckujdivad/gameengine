@@ -88,9 +88,17 @@ bool ShaderProgram::Recompile(bool force)
 		glGetProgramiv(this->m_program_id, GL_LINK_STATUS, &link_was_successful);
 		if (link_was_successful != GL_TRUE) //get error message from GPU
 		{
-			std::string errmsg = this->GetInfoLog();
-			LogMessage("Shader link exception: " + errmsg);
-			throw std::runtime_error("Shader link exception: " + errmsg);
+			std::optional<std::string> errmsg = this->GetProgramInfoLog();
+			if (errmsg.has_value())
+			{
+				LogMessage("Shader link exception: " + errmsg.value());
+				throw std::runtime_error("Shader link exception: " + errmsg.value());
+			}
+			else
+			{
+				LogMessage("Shader link exception");
+				throw std::runtime_error("Shader link exception");
+			}
 		}
 
 		//re-register uniform names
@@ -165,39 +173,50 @@ GLuint ShaderProgram::LoadShader(ShaderSource source)
 	glShaderSource(shader_id, 1, &shader_src, 0);
 	glCompileShader(shader_id);
 
-	//get log
-	{
-		GLint buffer_len = 0;
-		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &buffer_len);
-		if (buffer_len > 1)
-		{
-			std::unique_ptr<GLchar[]> log_string = std::make_unique<GLchar[]>(std::size_t(buffer_len) + 1);
-			glGetShaderInfoLog(shader_id, buffer_len, 0, log_string.get());
-
-			LogMessage("Shader log: " + std::string(log_string.get()));
-		}
-	}
+	//get log (if there is one)
+	std::optional<std::string> log_msg = this->GetShaderInfoLog(shader_id);
 
 	//check for errors
-	GLint compile_was_successful; //should be glboolean in my opinion but that's what the function takes
+	GLint compile_was_successful = GL_FALSE; //should be glboolean in my opinion but that's what the function takes
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compile_was_successful);
-	if (compile_was_successful != GL_TRUE) //get error message from GPU
+	if (compile_was_successful == GL_TRUE) //get error message from GPU
 	{
-		const int error_length = 512;
-		char err_info[error_length];
-		int err_len;
-		glGetShaderInfoLog(shader_id, error_length, &err_len, err_info);
-		std::string errmsg = std::string(err_info);
-		errmsg = errmsg.substr(0, err_len);
+		if (log_msg.has_value()) //output warnings
+		{
+			LogMessage("Shader log:\n" + log_msg.value());
+		}
+	}
+	else
+	{
+		std::string message = "Shader compile exception";
+		if (log_msg.has_value())
+		{
+			message = "Shader compile exception:\n" + log_msg.value();
+		}
 
-		std::string final_message = "Shader compile exception: " + errmsg;
-
-		LogMessage(final_message);
-		throw std::runtime_error(final_message);
+		LogMessage(message);
+		throw std::runtime_error(message);
 	}
 
 	//return id
 	return shader_id;
+}
+
+std::optional<std::string> ShaderProgram::GetShaderInfoLog(GLuint shader_id)
+{
+	GLint buffer_len = 0;
+	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &buffer_len);
+	if (buffer_len > 0)
+	{
+		std::unique_ptr<GLchar[]> log_string = std::make_unique<GLchar[]>(static_cast<std::size_t>(buffer_len));
+		glGetShaderInfoLog(shader_id, buffer_len, nullptr, log_string.get());
+
+		return std::string(log_string.get());
+	}
+	else
+	{
+		return std::optional<std::string>();
+	}
 }
 
 void ShaderProgram::Select(int texture_group_id)
@@ -639,27 +658,21 @@ bool ShaderProgram::RemoveDefine(std::string key, bool defer_recompilation)
 	return recompile_required && defer_recompilation;
 }
 
-std::optional<std::string> ShaderProgram::CheckProgramValidity() const
+std::optional<std::string> ShaderProgram::GetProgramInfoLog() const
 {
-	if (this->IsValid())
+	GLint log_len = 0;
+	glGetProgramiv(this->m_program_id, GL_INFO_LOG_LENGTH, &log_len);
+
+	if (log_len > 0)
 	{
-		return std::optional<std::string>();
+		std::unique_ptr<GLchar[]> log_cstr = std::make_unique<GLchar[]>(static_cast<std::size_t>(log_len));
+		glGetProgramInfoLog(this->m_program_id, log_len, nullptr, log_cstr.get());
+		return std::string(log_cstr.get());
 	}
 	else
 	{
-		return this->GetInfoLog();
+		return std::optional<std::string>();
 	}
-}
-
-std::string ShaderProgram::GetInfoLog() const
-{
-	const int max_err_len = 512;
-	int err_len = 0;
-	char err_info[max_err_len];
-	glGetProgramInfoLog(this->m_program_id, max_err_len, &err_len, err_info);
-	std::string errmsg = std::string(err_info);
-	errmsg = errmsg.substr(0, err_len);
-	return errmsg;
 }
 
 bool ShaderProgram::IsValid() const

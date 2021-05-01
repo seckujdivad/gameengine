@@ -230,9 +230,9 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 			}
 
 #ifdef _DEBUG
-			std::optional<std::string> validity_message = this->m_shader_program->CheckProgramValidity();
-			if (validity_message.has_value())
+			if (!this->m_shader_program->IsValid())
 			{
+				std::optional<std::string> validity_message = this->m_shader_program->GetProgramInfoLog();
 				LogMessage("Shader not valid - info log: " + validity_message.value());
 				throw std::runtime_error("Shader not valid - info log: " + validity_message.value());
 			}
@@ -925,6 +925,12 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 		this->m_shader_program->Recompile();
 
 		this->m_shader_program->SetLabel("Shader program mode: " + GetRenderTargetModeName(this->GetRenderMode()));
+
+		std::optional<std::string> program_info_log = this->m_shader_program->GetProgramInfoLog();
+		if (program_info_log.has_value())
+		{
+			LogMessage("Shader program info log (" + GetRenderTargetModeName(this->GetRenderMode()) + "):\n" + program_info_log.value());
+		}
 
 		this->m_shader_program->AddUniformNames({
 			//geometry
