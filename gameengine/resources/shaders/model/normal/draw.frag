@@ -593,7 +593,7 @@ void main()
 			float hit_pos = 0.0f; //fraction of the length of the ray covered
 			int increments_at_this_level = 0; //tracks the number of increments that have taken place since the search level was last changed
 
-			vec2 tex_pos; //current ray position in screen space (the vector needed for sampling from the screen textures)
+			vec2 tex_pos = vec2(0.0f); //current ray position in screen space (the vector needed for sampling from the screen textures)
 			while (!ssr_reflection_applied && hit_pos < 1.0f) //repeat until either the ray reaches the edge of the screen or a reflection hit is found
 			{
 				//convert screen space position to use texture UV space coordinates
