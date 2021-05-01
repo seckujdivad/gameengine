@@ -404,6 +404,11 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 
 void GLTexture::CopyTo(GLTexture& dest) const
 {
+	if ((&dest == this) || (this->GetTexture() == dest.GetTexture()))
+	{
+		throw std::invalid_argument("Can't copy a texture onto itself");
+	}
+
 	dest.m_dimensions = this->m_dimensions;
 	dest.m_type = this->m_type;
 	dest.m_format = this->m_format;
