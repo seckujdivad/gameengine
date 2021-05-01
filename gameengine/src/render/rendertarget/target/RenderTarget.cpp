@@ -44,6 +44,30 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
 
+#ifdef _DEBUG
+		{
+			GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (fbo_status != GL_FRAMEBUFFER_COMPLETE)
+			{
+				std::string fbo_status_info = "";
+				switch (fbo_status) //https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glCheckFramebufferStatus.xhtml
+				{
+				case GL_FRAMEBUFFER_UNDEFINED: fbo_status_info = "GL_FRAMEBUFFER_UNDEFINED"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"; break;
+				case GL_FRAMEBUFFER_UNSUPPORTED: fbo_status_info = "GL_FRAMEBUFFER_UNSUPPORTED"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"; break;
+				case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: fbo_status_info = "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"; break;
+				default: fbo_status_info = "unknown";
+				}
+
+				throw std::runtime_error("Invalid framebuffer status: " + fbo_status_info);
+			}
+		}
+#endif
+
 		if (this->RenderModeIsModelRendering())
 		{
 			models = this->Render_GetModels_Model(models);
