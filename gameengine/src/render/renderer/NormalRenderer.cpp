@@ -18,6 +18,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Provided target must have mode Normal_PostProcess");
 	}
 
+	//where the final output of NormalRenderer ends up
 	RenderTexture* target_texture = dynamic_cast<RenderTexture*>(target);
 
 	if (target_texture == nullptr)
@@ -25,6 +26,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Target must inherit from RenderTexture");
 	}
 
+	//create depth only render texture
 	{
 		RenderTargetConfig config;
 		config.SetMode(RenderTargetMode::Normal_DepthOnly);
@@ -38,6 +40,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
+	//create draw render texture
 	{
 		std::shared_ptr<RenderTextureGroup> depth_only_textures = this->GetDepthOnlyTarget()->GetOutputTextures();
 
@@ -51,6 +54,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
+	//create ssr quality render texture
 	{
 		RenderTargetConfig config;
 		config.SetMode(RenderTargetMode::Normal_SSRQuality);
@@ -61,48 +65,49 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		this->m_rt_ssrquality = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
 
+	//create render textures for applying post processing filters to the ssr quality texture
+	for (int i = 0; i < 2; i++)
 	{
-		for (int i = 0; i < 2; i++)
+		RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::PostProcess);
+		config.Data<RenderTargetConfig::PostProcess>().data = RenderTargetConfig::PostProcess::MaxBox();
+		config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().is_first_pass = i == 0;
+		config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().radius = glm::ivec2(1);
+
+		RenderTargetConfig::PostProcess::Layer layer;
+		std::shared_ptr<RenderTextureGroup> layer_group;
+		if (i == 0)
 		{
-			RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::PostProcess);
-			config.Data<RenderTargetConfig::PostProcess>().data = RenderTargetConfig::PostProcess::MaxBox();
-			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().is_first_pass = i == 0;
-			config.Data<RenderTargetConfig::PostProcess>().Data<RenderTargetConfig::PostProcess::MaxBox>().radius = glm::ivec2(1);
-
-			RenderTargetConfig::PostProcess::Layer layer;
-			std::shared_ptr<RenderTextureGroup> layer_group;
-			if (i == 0)
-			{
-				layer_group = this->m_rt_ssrquality->GetOutputTextures();
-			}
-			else if (i == 1)
-			{
-				layer_group = this->GetSSRBoxBlurTarget(0)->GetOutputTextures();
-			}
-			layer.texture = layer_group->colour.at(0);
-
-			config.Data<RenderTargetConfig::PostProcess>().layers.push_back(layer);
-
-			std::shared_ptr<RenderTextureGroup> target_textures = nullptr;
-			if (i != -1)
-			{
-				target_textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
-			}
-			else if (i == 1)
-			{
-				target_textures = this->m_rt_ssrquality->GetOutputTextures();
-			}
-
-			this->m_rt_ssrquality_boxblur.at(i) = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, target_textures);
+			layer_group = this->m_rt_ssrquality->GetOutputTextures();
 		}
+		else if (i == 1)
+		{
+			layer_group = this->GetSSRBoxBlurTarget(0)->GetOutputTextures();
+		}
+		layer.texture = layer_group->colour.at(0);
+
+		config.Data<RenderTargetConfig::PostProcess>().layers.push_back(layer);
+
+		std::shared_ptr<RenderTextureGroup> target_textures = nullptr;
+		if (i != -1)
+		{
+			target_textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_SSRQuality, target->GetTargetType());
+		}
+		else if (i == 1)
+		{
+			target_textures = this->m_rt_ssrquality->GetOutputTextures();
+		}
+
+		this->m_rt_ssrquality_boxblur.at(i) = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, target_textures);
 	}
 
+	//set the draw frame (the result of the draw render texture) for the final render target (that contains the output of NormalRenderer)
 	{
 		RenderTargetConfig config = this->GetTarget()->GetConfig();
 		std::get<RenderTargetConfig::Normal_PostProcess>(config.mode_data).draw_frame = this->GetDrawTarget()->GetOutputTextures();
 		this->GetTarget()->SetConfig(config);
 	}
 
+	//set the ssr quality texture for the draw render texture to the result of the ssr quality post processing filters
 	{
 		RenderTargetConfig config = this->GetDrawTarget()->GetConfig();
 		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).ssr_quality_frame = this->GetSSRBoxBlurTarget(1)->GetOutputTextures();
@@ -158,20 +163,17 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 {
 	std::unordered_set<RenderTextureReference> references = this->GetDepthOnlyTarget()->GetRenderTextureDependencies();
 
-	{
-		std::unordered_set<RenderTextureReference> references_to_add = this->GetDrawTarget()->GetRenderTextureDependencies();
-		references.insert(references_to_add.begin(), references_to_add.end());
-	}
+	std::unordered_set<RenderTextureReference> references_to_add;
 
-	{
-		std::unordered_set<RenderTextureReference> references_to_add = this->GetTarget()->GetRenderTextureDependencies();
-		references.insert(references_to_add.begin(), references_to_add.end());
-	}
+	references_to_add = this->GetDrawTarget()->GetRenderTextureDependencies();
+	references.insert(references_to_add.begin(), references_to_add.end());
 
-	{
-		std::unordered_set<RenderTextureReference> references_to_add = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
-		references.insert(references_to_add.begin(), references_to_add.end());
-	}
+	references_to_add = this->GetTarget()->GetRenderTextureDependencies();
+	references.insert(references_to_add.begin(), references_to_add.end());
+		
+	references_to_add = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
+	references.insert(references_to_add.begin(), references_to_add.end());
+
 
 	for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
 	{
