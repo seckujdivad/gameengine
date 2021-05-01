@@ -154,7 +154,7 @@ void RenderTextureGroup::CopyTo(RenderTextureGroup& dest, bool deep_copy_texture
 {
 	if (this->colour.size() != dest.colour.size())
 	{
-		throw std::runtime_error("The texture groups don't have the same number of colour textures");
+		throw std::invalid_argument("The texture groups don't have the same number of colour textures");
 	}
 
 	if (deep_copy_textures)
