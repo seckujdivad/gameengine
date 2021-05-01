@@ -924,7 +924,7 @@ void RenderTarget::SetConfig(RenderTargetConfig config)
 
 		this->m_shader_program->Recompile();
 
-		this->m_shader_program->SetLabel("Shader mode: " + GetRenderTargetModeName(this->GetRenderMode()));
+		this->m_shader_program->SetLabel("Shader program mode: " + GetRenderTargetModeName(this->GetRenderMode()));
 
 		this->m_shader_program->AddUniformNames({
 			//geometry
