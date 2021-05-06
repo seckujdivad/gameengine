@@ -66,6 +66,8 @@ protected:
 	void Render_ForEachModel_Model(Model* model);
 	void Render_ForEachModel_FSQuad(Model* model);
 
+	void DoClear() const;
+
 public:
 	RenderTarget(Engine* engine, RenderTargetConfig config);
 	virtual ~RenderTarget();

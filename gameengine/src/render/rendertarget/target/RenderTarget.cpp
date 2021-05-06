@@ -151,51 +151,6 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		//prepare viewport
 		glViewport(0, 0, output_size.x, output_size.y);
 
-		glm::vec4 clear_colour = this->m_engine->GetScene()->GetClearColour();
-		glClearColor(
-			clear_colour.r,
-			clear_colour.g,
-			clear_colour.b,
-			clear_colour.a
-		);
-
-		glClearDepth(1.0);
-
-		if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-			|| (this->RenderModeIsFSQuadRendering() && this->GetRenderMode() != RenderTargetMode::Normal_PostProcess))
-		{
-			glDepthMask(GL_FALSE);
-		}
-		else
-		{
-			glDepthMask(GL_TRUE);
-		}
-
-		if (this->GetRenderMode() == RenderTargetMode::Shadow)
-		{
-			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		}
-		else
-		{
-			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		}
-
-		if (this->m_config.clear_fbo && !this->RenderModeIsFSQuadRendering())
-		{
-			if ((this->GetRenderMode() == RenderTargetMode::Shadow) || (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly))
-			{
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-			else if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
-			{
-				glClear(GL_COLOR_BUFFER_BIT);
-			}
-			else
-			{
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			}
-		}
-
 		const std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const GLGeometry& loaded_geometry)
 		{
 			GLenum mode = GL_NONE; //default invalid value, should be overwritten
@@ -244,6 +199,8 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		this->CheckParentContext();
 
 		//draw scene geometry
+		bool has_cleared = false;
+		
 		for (Model* model : models)
 		{
 			if (this->RenderModeIsModelRendering())
@@ -255,9 +212,21 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				this->Render_ForEachModel_FSQuad(model);
 			}
 
+			if (!has_cleared)
+			{
+				this->DoClear();
+				has_cleared = true;
+			}
+
 			this->GetEngine()->DrawModel(model, predraw);
 
 			this->CheckParentContext();
+		}
+
+		if (!has_cleared)
+		{
+			this->DoClear();
+			has_cleared = true;
 		}
 
 		this->m_fbo_contains_render = true;
@@ -378,6 +347,7 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 		this->m_shader_program->SetUniform("cubemap_transform[4]", glm::mat4(1.0f));
 		this->m_shader_program->SetUniform("cubemap_transform[5]", glm::mat4(1.0f));
 	}
+
 	// camera
 	this->m_shader_program->SetUniform("cam_translate", glm::vec4(0.0 - this->GetCamera()->GetPosition(), 0.0f));
 	this->m_shader_program->SetUniform("cam_rotate", this->GetCamera()->GetRotationMatrixInverse());
@@ -450,8 +420,6 @@ void RenderTarget::Render_Setup_Model(std::vector<Model*> models)
 			{
 				this->m_shader_program->SetTexture(-1, "render_output_colour[" + std::to_string(i) + "]", depth_frame->colour.at(i));
 			}
-
-			
 
 			this->m_shader_program->SetTexture(-1, "render_output_depth", depth_frame->depth.value());
 		}
@@ -673,8 +641,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 		std::shared_ptr<GLTexture> skybox_texture;
 		if (skybox == nullptr)
 		{
-			std::shared_ptr<GLTexture> texture = this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_Cubemap);
-			skybox_texture = texture;
+			skybox_texture = this->GetEngine()->GetTexture(GLTextureDataPreset::Black, TargetType::Texture_Cubemap);
 		}
 		else
 		{
@@ -695,6 +662,54 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 void RenderTarget::Render_ForEachModel_FSQuad(Model* model)
 {
 	this->m_shader_program->Select(-1); //select shader (and texture group)
+}
+
+void RenderTarget::DoClear() const
+{
+	glm::vec4 clear_colour = this->m_engine->GetScene()->GetClearColour();
+	glClearColor(
+		clear_colour.r,
+		clear_colour.g,
+		clear_colour.b,
+		clear_colour.a
+	);
+
+	glClearDepth(1.0);
+
+	if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+		|| (this->RenderModeIsFSQuadRendering() && this->GetRenderMode() != RenderTargetMode::Normal_PostProcess))
+	{
+		glDepthMask(GL_FALSE);
+	}
+	else
+	{
+		glDepthMask(GL_TRUE);
+	}
+
+	if (this->GetRenderMode() == RenderTargetMode::Shadow)
+	{
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	}
+	else
+	{
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	}
+
+	if (this->m_config.clear_fbo && !this->RenderModeIsFSQuadRendering())
+	{
+		if ((this->GetRenderMode() == RenderTargetMode::Shadow) || (this->GetRenderMode() == RenderTargetMode::Normal_DepthOnly))
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
+		else if (this->GetRenderMode() == RenderTargetMode::Normal_Draw)
+		{
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+		else
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
+	}
 }
 
 RenderTarget::RenderTarget(Engine* engine, RenderTargetConfig config) : m_engine(engine)
