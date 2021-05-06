@@ -733,5 +733,10 @@ void ShaderProgram::GLTextureUnmanaged::Bind() const
 	}
 #endif
 
+	if (this->id == GL_NONE)
+	{
+		throw std::invalid_argument("ID can't be GL_NONE");
+	}
+
 	glBindTexture(this->target, this->id);
 }
