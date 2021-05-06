@@ -12,9 +12,9 @@
 
 void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format, std::vector<const void*> pixels)
 {
-	if (this->m_texture == GL_NONE)
+	if (this->m_texture == GL_NONE && !create)
 	{
-		create = true;
+		throw std::invalid_argument("This texture must be created first");
 	}
 
 	//pad pixel data with nullptr
@@ -178,8 +178,9 @@ GLTexture::GLTexture(Preset preset, TargetType target, std::optional<int> num_ch
 	this->ConfigureTexture(true);
 }
 
-GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type)), GLObjectLabelable(GL_TEXTURE)
+GLTexture::GLTexture(GLTextureDataPreset preset, TargetType target, std::optional<int> num_channels, bool generate_mipmaps) : m_dimensions(std::tuple(1, 1)), m_target(target), m_generate_mipmaps(generate_mipmaps), m_type(GLTextureType::UnsignedByte), m_format(GLTextureFormat_Colour(4, m_type)), m_filtering_mag(TextureFiltering::Nearest), m_filtering_min(TextureFiltering::Nearest), GLObjectLabelable(GL_TEXTURE)
 {
+	this->ConfigureTexture(true);
 	this->SetPixels(preset);
 }
 
