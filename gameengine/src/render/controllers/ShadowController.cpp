@@ -15,10 +15,7 @@
 std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 {
 	RenderTargetConfig config = RenderTargetConfig(RenderTargetMode::Shadow);
-	if (layer != 0)
-	{
-		config.clear_fbo = false;
-	}
+	config.clear_fbo = layer == 0;
 	
 	std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
 
