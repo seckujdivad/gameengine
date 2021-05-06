@@ -288,6 +288,7 @@
     <ClCompile Include="src\render\glgeometry\GLGeometry.cpp" />
     <ClCompile Include="src\render\GLObjectLabelable.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexture.cpp" />
+    <ClCompile Include="src\render\gltexture\GLTextureDataPreset.cpp" />
     <ClCompile Include="src\render\gltexture\GLTextureFormat.cpp" />
     <ClCompile Include="src\render\gltexture\gltextureformat_preprocessor\TextureFormats.cpp" />
     <ClCompile Include="src\render\gltexture\GLTexturePreset.cpp" />

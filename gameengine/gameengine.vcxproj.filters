@@ -566,6 +566,9 @@
     <ClCompile Include="src\render\glgeometry\GeometryVertexView.cpp">
       <Filter>Source Files\render\glgeometry</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\gltexture\GLTextureDataPreset.cpp">
+      <Filter>Source Files\render\gltexture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
