@@ -275,7 +275,7 @@ void ShaderProgram::Select(int texture_group_id)
 			glUniform1i(this->GetUniform(textures.at(i).uniform_name), SHADERPROGRAM_RESERVED_TEXTURE_UNITS + i);
 
 #ifdef _DEBUG
-			if ((textures.at(i).id != GL_NONE) && !glIsTexture(textures.at(i).id))
+			if (!glIsTexture(textures.at(i).id))
 			{
 				throw std::runtime_error("Texture does not exist (uniform \"" + textures.at(i).uniform_name + "\")");
 			}
