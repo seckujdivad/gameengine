@@ -455,26 +455,33 @@ void GLTexture::SetTexParameter(GLenum pname, std::vector<GLint> params)
 
 std::vector<GLint> GLTexture::GetTexParameteriv(GLenum pname, std::size_t num_params) const
 {
+	std::unique_ptr<GLint[]> output = std::make_unique<GLint[]>(num_params);
+
+	this->BindTexture();
+	glGetTexParameteriv(GetTargetEnum(this->GetTargetType()), pname, output.get());
+
 	std::vector<GLint> result;
 	result.reserve(num_params);
 	for (std::size_t i = 0; i < num_params; i++)
 	{
-		result.push_back(GL_NONE);
+		result.push_back(output[i]);
 	}
-
-	this->BindTexture();
-	glGetTexParameteriv(GetTargetEnum(this->GetTargetType()), pname, result.data());
 
 	return result;
 }
 
 std::vector<GLfloat> GLTexture::GetTexParameterfv(GLenum pname, std::size_t num_params) const
 {
+	std::unique_ptr<GLfloat[]> output = std::make_unique<GLfloat[]>(num_params);
+
+	this->BindTexture();
+	glGetTexParameterfv(GetTargetEnum(this->GetTargetType()), pname, output.get());
+
 	std::vector<GLfloat> result;
 	result.reserve(num_params);
 	for (std::size_t i = 0; i < num_params; i++)
 	{
-		result.push_back(GL_NONE);
+		result.push_back(output[i]);
 	}
 
 	return result;
