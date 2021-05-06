@@ -127,7 +127,7 @@ void RenderTexture::CopyFrom(const RenderTarget* src)
 		}
 		else
 		{
-			src_tex->GetOutputTextures()->CopyTo(*this->GetWriteTextures().get());
+			src_tex->GetOutputTextures()->CopyTo(*this->GetWriteTextures().get(), true);
 			this->SwapBuffers();
 		}
 	}
