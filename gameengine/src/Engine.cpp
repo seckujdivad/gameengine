@@ -575,7 +575,7 @@ std::shared_ptr<GLTexture> Engine::GetTexture(GLTexturePreset preset)
 	{
 		std::shared_ptr<GLTexture> texture = std::make_shared<GLTexture>(preset);
 		texture->SetPixels(preset.preset);
-		texture->SetLabel("Texture preset (preset " + std::to_string(static_cast<int>(preset.preset)) + ")");
+		texture->SetLabel("Texture preset (" + preset.ToString() + ")");
 		this->m_textures_static_presets.insert(std::pair(preset, texture));
 	}
 
