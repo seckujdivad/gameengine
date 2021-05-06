@@ -13,6 +13,11 @@ GLTexturePreset::GLTexturePreset(TargetType target, GLTextureDataPreset preset) 
 {
 }
 
+std::string GLTexturePreset::ToString() const
+{
+	return TargetTypeToString(this->target) + ": " + GLTextureDataPresetToString(this->preset);
+}
+
 bool GLTexturePreset::operator==(const GLTexturePreset& other) const
 {
 	if (this->preset != other.preset)
