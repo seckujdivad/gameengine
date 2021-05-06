@@ -67,6 +67,11 @@ void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pix
 	{
 		glGenTextures(1, &this->m_texture);
 		this->SetName(this->m_texture);
+
+		if (this->m_texture == GL_NONE)
+		{
+			throw std::runtime_error("glGenTextures returned GL_NONE");
+		}
 	}
 	glBindTexture(target, this->m_texture);
 
