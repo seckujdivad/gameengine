@@ -26,6 +26,14 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		throw std::invalid_argument("Target must inherit from RenderTexture");
 	}
 
+	//set sampling filters for target depth texture
+	{
+		std::shared_ptr<RenderTextureGroup> textures = target_texture->GetOutputTextures();
+		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		textures->depth.value()->SetFiltering(TextureFiltering::Nearest);
+	}
+
 	//create depth only render texture
 	{
 		RenderTargetConfig config;
