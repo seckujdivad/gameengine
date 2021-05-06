@@ -32,3 +32,13 @@ int GetNumTextures(TargetType target)
 	default: throw std::invalid_argument("Unknown target");
 	}
 }
+
+std::string TargetTypeToString(TargetType target)
+{
+	switch (target)
+	{
+	case TargetType::Texture_2D: return "2D";
+	case TargetType::Texture_Cubemap: return "cubemap";
+	default: throw std::invalid_argument("Unknown TargetType: " + std::to_string(static_cast<int>(target)));
+	}
+}
