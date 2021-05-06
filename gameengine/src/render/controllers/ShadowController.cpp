@@ -26,6 +26,8 @@ std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 	textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	textures->depth.value()->SetFiltering(TextureFiltering::Linear);
 
+	textures->depth.value()->SetLabel(textures->depth.value()->GetLabel().value() + " " + std::to_string(layer));
+
 	std::shared_ptr<RenderTexture> render_texture = std::make_shared<RenderTexture>(this->GetReference(), this->m_engine, config, textures, false);
 	this->m_textures.push_back(render_texture);
 	render_texture->SetOutputSize(this->m_cubemap->GetTextureDimensions());
