@@ -64,7 +64,7 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 			throw std::invalid_argument("Can't generate RenderTextureGroup - mode should link to other textures");
 		}
 
-		if (mode != RenderTargetMode::PostProcess)
+		if (mode != RenderTargetMode::PostProcess && mode != RenderTargetMode::Normal_DepthOnly)
 		{
 			this->depth = std::make_shared<GLTexture>(GLTexture::Preset::Depth, target);
 		}
@@ -96,8 +96,6 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 
 			this->colour.push_back(std::make_shared<GLTexture>(preset, target, num_channels));
 		}
-
-		this->depth = std::make_shared<GLTexture>(GLTexture::Preset::Depth, target);
 	}
 	else if (mode == RenderTargetMode::Normal_SSRQuality)
 	{

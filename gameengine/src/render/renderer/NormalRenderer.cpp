@@ -41,9 +41,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		config.clear_fbo = this->GetTarget()->GetConfig().clear_fbo;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_DepthOnly, target->GetTargetType());
-		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-		textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LESS);
-		textures->depth.value()->SetFiltering(TextureFiltering::Nearest);
+		textures->depth = target_texture->GetOutputTextures()->depth.value();
 
 		this->m_rt_depth_only = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
@@ -58,6 +56,7 @@ NormalRenderer::NormalRenderer(Engine* engine, RenderTarget* target) : Renderer(
 		std::get<RenderTargetConfig::Normal_Draw>(config.mode_data).depth_frame = depth_only_textures;
 
 		std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Normal_Draw, target->GetTargetType());
+		textures->depth = depth_only_textures->depth.value();
 
 		this->m_rt_draw = std::make_unique<RenderTexture>(-1, this->GetEngine(), config, textures);
 	}
@@ -182,7 +181,6 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 	references_to_add = this->GetSSRQualityTarget()->GetRenderTextureDependencies();
 	references.insert(references_to_add.begin(), references_to_add.end());
 
-
 	for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
 	{
 		std::unordered_set<RenderTextureReference> references_to_add = render_texture->GetRenderTextureDependencies();
@@ -217,7 +215,6 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_draw->SetOutputSize(this->GetTarget()->GetOutputSize());
 
 	this->m_rt_depth_only->Render(models, continuous_draw);
-	this->m_rt_depth_only->GetWriteTextures()->depth.value()->CopyTo(*this->m_rt_draw->GetWriteTextures()->depth.value());
 
 	this->m_rt_draw->Render(models, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
