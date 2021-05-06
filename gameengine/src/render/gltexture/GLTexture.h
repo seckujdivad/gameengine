@@ -96,6 +96,8 @@ public:
 	void SetTexParameter(GLenum pname, std::vector<GLfloat> params);
 	std::vector<GLint> GetTexParameteriv(GLenum pname, std::size_t num_params) const;
 	std::vector<GLfloat> GetTexParameterfv(GLenum pname, std::size_t num_params) const;
+	GLint GetTexParameteri(GLenum pname) const;
+	GLfloat GetTexParameterf(GLenum pname) const;
 };
 
 std::optional<int> GetNumColourTextures(RenderTargetMode mode); //returning no value means this mode links into textures from another mode

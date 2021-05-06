@@ -477,9 +477,20 @@ std::vector<GLfloat> GLTexture::GetTexParameterfv(GLenum pname, std::size_t num_
 		result.push_back(GL_NONE);
 	}
 
-	this->BindTexture();
-	glGetTexParameterfv(GetTargetEnum(this->GetTargetType()), pname, result.data());
+	return result;
+}
 
+GLint GLTexture::GetTexParameteri(GLenum pname) const
+{
+	GLint result = GL_NONE;
+	glGetTexParameteriv(GetTargetEnum(this->GetTargetType()), pname, &result);
+	return result;
+}
+
+GLfloat GLTexture::GetTexParameterf(GLenum pname) const
+{
+	GLfloat result = 0.0f;
+	glGetTexParameterfv(GetTargetEnum(this->GetTargetType()), pname, &result);
 	return result;
 }
 
