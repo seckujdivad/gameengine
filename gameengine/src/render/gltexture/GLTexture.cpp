@@ -434,6 +434,9 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
 
 	dest.SetName(dest.m_texture);
+
+	dest.SetTexParameter(GL_TEXTURE_COMPARE_MODE, this->GetTexParameteri(GL_TEXTURE_COMPARE_MODE));
+	dest.SetTexParameter(GL_TEXTURE_COMPARE_FUNC, this->GetTexParameteri(GL_TEXTURE_COMPARE_FUNC));
 }
 
 void GLTexture::CopyFrom(const GLTexture& src)
