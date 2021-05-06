@@ -37,8 +37,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 
 	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
-		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false }),
-		Engine::DebugMessageConfig({ GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, GL_DEBUG_SEVERITY_MEDIUM, false }) //silences weird NVIDIA shadow sampler undefined behaviour warning
+		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
 		}));
 
 	this->m_camera = std::make_unique<Camera>();
