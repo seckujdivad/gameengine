@@ -111,12 +111,12 @@ RenderTextureGroup::RenderTextureGroup(RenderTargetMode mode, TargetType target)
 	//name textures
 	for (std::size_t i = 0; i < this->colour.size(); i++)
 	{
-		this->colour.at(i)->SetLabel("Colour render texture " + std::to_string(i) + ", mode " + GetRenderTargetModeName(mode));
+		this->colour.at(i)->SetLabel(GetRenderTargetModeName(mode) + ": colour render texture");
 	}
 
 	if (this->depth.has_value())
 	{
-		this->depth.value()->SetLabel("Depth render texture, mode " + GetRenderTargetModeName(mode));
+		this->depth.value()->SetLabel(GetRenderTargetModeName(mode) + ": depth render texture");
 	}
 }
 
