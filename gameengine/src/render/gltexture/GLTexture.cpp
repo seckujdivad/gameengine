@@ -12,6 +12,11 @@
 
 void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format, std::vector<const void*> pixels)
 {
+	if (this->m_texture == GL_NONE)
+	{
+		create = true;
+	}
+
 	//pad pixel data with nullptr
 	std::size_t req_num_pixel_arrays = 0;
 	switch (this->GetTargetType())
