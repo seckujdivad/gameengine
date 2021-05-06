@@ -14,7 +14,7 @@ struct SceneLoaderConfig
 	
 	struct Performance
 	{
-		int index;
+		int index = 0;
 	} performance;
 };
 
