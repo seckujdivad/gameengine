@@ -395,6 +395,7 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 		this->SetPixels(GLTextureDataPreset::ZeroDepth);
 		this->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		this->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		this->SetFiltering(TextureFiltering::Nearest);
 	}
 	else
 	{
@@ -428,7 +429,7 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	{
 	case TargetType::Texture_2D: copy_layers = 1; break;
 	case TargetType::Texture_Cubemap: copy_layers = 6; break;
-	default: throw std::runtime_error("Unknown TargetType " + std::to_string(static_cast<int>(this->GetTargetType())));
+	default: throw std::runtime_error("Unknown TargetType " + TargetTypeToString(this->GetTargetType()));
 	}
 
 	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
