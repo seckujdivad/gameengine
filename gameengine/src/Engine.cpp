@@ -93,7 +93,7 @@ std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(Ren
 		{
 			is_drawn.at(inner_ref) = true;
 
-			for (RenderTextureReference inner_inner_ref : this->CollateRenderTextureDependencies(inner_ref, direct_dependencies, is_drawn))
+			for (RenderTextureReference inner_inner_ref : Engine::CollateRenderTextureDependencies(inner_ref, direct_dependencies, is_drawn))
 			{
 				result.push_back(inner_inner_ref);
 			}

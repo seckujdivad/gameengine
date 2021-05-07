@@ -66,7 +66,7 @@ private:
 	void AddRenderController(RenderController* render_controller);
 	RenderController* GetRenderController(RenderTextureReference reference) const;
 
-	std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
+	static std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 
 	void LoadTexture(const Texture& texture);
 
