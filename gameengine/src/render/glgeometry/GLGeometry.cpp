@@ -165,6 +165,11 @@ const std::vector<double>& GLGeometry::GetValues() const
 	return this->m_data;
 }
 
+const Geometry::RenderInfo& GLGeometry::GetRenderInfo() const
+{
+	return this->m_render_info;
+}
+
 void GLGeometry::Draw() const
 {
 	this->Bind();

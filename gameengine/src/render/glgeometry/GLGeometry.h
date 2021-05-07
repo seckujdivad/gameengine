@@ -41,6 +41,7 @@ public:
 	void Draw() const;
 
 	const std::vector<double>& GetValues() const;
+	const Geometry::RenderInfo& GetRenderInfo() const;
 };
 
 GLenum GetPrimitiveTypeRenderMode(Geometry::PrimitiveType primitive_type);

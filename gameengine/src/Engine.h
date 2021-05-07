@@ -58,8 +58,8 @@ private:
 	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
 	//loaded geometry
-	std::unordered_map<ModelReference, std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash>> m_model_geometry;
-	std::unordered_map<PresetGeometry::GeometryType, std::tuple<Geometry::RenderInfo, std::shared_ptr<GLGeometry>>> m_geometry_presets;
+	std::unordered_map<std::shared_ptr<Geometry>, std::shared_ptr<GLGeometry>> m_geometry;
+	std::unordered_map<PresetGeometry::GeometryType, std::shared_ptr<GLGeometry>> m_geometry_presets;
 
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
@@ -84,6 +84,9 @@ public:
 	std::shared_ptr<GLTexture> GetTexture(GLTextureDataPreset preset, TargetType target);
 	std::shared_ptr<GLTexture> GetTexture(GLTexturePreset preset);
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture(RenderTextureReference reference) const;
+
+	std::shared_ptr<GLGeometry> GetGeometry(const std::shared_ptr<Geometry>& geometry);
+	std::shared_ptr<GLGeometry> GetGeometry(const std::shared_ptr<PresetGeometry>& geometry);
 
 	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw);
 

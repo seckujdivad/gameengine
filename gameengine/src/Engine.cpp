@@ -26,8 +26,6 @@
 #include "render/gltexture/GLTextureFormat.h"
 #include "render/gltexture/GLTextureType.h"
 
-#include "render/glgeometry/GeometryVertexView.h"
-
 #include "render/TargetType.h"
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam); //forward declaration to keep it out of the header
@@ -426,88 +424,28 @@ void Engine::Render(bool continuous_draw)
 			}
 		}
 
-		//perform any outstanding changes to loaded geometry
+		//update loaded geometry
+		for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 		{
-			std::vector<ModelReference> to_remove;
-			for (auto& [model_reference, loaded_geometries] : this->m_model_geometry)
+			std::vector<std::shared_ptr<Geometry>> geometries = model->GetGeometry();
+
+			for (const std::shared_ptr<Geometry>& geometry : geometries)
 			{
-				std::optional<std::shared_ptr<Model>> model = this->GetScene()->GetModel(model_reference);
-
-				if (model.has_value())
+				if (this->m_geometry.count(geometry) == 0)
 				{
-					GeometryVertexView geometry_view = model.value()->GetGeometry();
-					//work out what geometry should be loaded
-					std::set<Geometry::RenderInfo> target_geometry_infos = geometry_view.GetRenderInfos();
+					std::shared_ptr<GLGeometry> loaded_geometry = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
+					loaded_geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(loaded_geometry->GetRenderInfo().primitive_type));
 
-					//work out what geometry actually is loaded
-					std::set<Geometry::RenderInfo> current_geometry_infos;
-					for (const auto& [render_info, glgeometry] : loaded_geometries)
-					{
-						current_geometry_infos.insert(render_info);
-					}
-
-					//check if keys are in both maps
-					std::set<Geometry::RenderInfo> geometry_to_add;
-					std::set<Geometry::RenderInfo> geometry_to_remove;
-
-					//work out the render info for the geometry that needs to be added
-					std::set_difference(target_geometry_infos.begin(), target_geometry_infos.end(), current_geometry_infos.begin(), current_geometry_infos.end(), std::inserter(geometry_to_add, geometry_to_add.begin()));
-
-					//work out the render info for the geometry that needs to be removed
-					std::set_difference(current_geometry_infos.begin(), current_geometry_infos.end(), target_geometry_infos.begin(), target_geometry_infos.end(), std::inserter(geometry_to_remove, geometry_to_remove.begin()));
-
-					//remove excess geometry
-					for (const Geometry::RenderInfo& render_info : geometry_to_remove)
-					{
-						loaded_geometries.erase(render_info);
-					}
-
-					//update existing geometry if required
-					for (auto& [render_info, loaded_geometry] : loaded_geometries)
-					{
-						if (!geometry_view.IsEqual(loaded_geometry->GetValues(), render_info))
-						{
-							loaded_geometry->SetData(geometry_view.GetVerticesFromRenderInfo(render_info), render_info);
-						}
-					}
-
-					//add new geometry
-					for (const Geometry::RenderInfo& render_info : geometry_to_add)
-					{
-						std::shared_ptr<GLGeometry> geometry = std::make_shared<GLGeometry>(geometry_view.GetVerticesFromRenderInfo(render_info), render_info);
-						geometry->SetLabel(model.value()->GetIdentifier() + ": " + GetPrimitiveTypeName(render_info.primitive_type));
-
-						loaded_geometries.insert(std::pair(render_info, std::move(geometry)));
-					}
+					this->m_geometry.insert(std::pair(geometry, loaded_geometry));
 				}
 				else
 				{
-					to_remove.push_back(model_reference);
-				}
-			}
-
-			//remove old models
-			for (ModelReference model_reference : to_remove)
-			{
-				this->m_model_geometry.erase(model_reference);
-			}
-
-			//add new models
-			for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
-			{
-				if (this->m_model_geometry.count(model->GetReference()) == 0)
-				{
-					GeometryVertexView cpu_geometry_view = model->GetGeometry();
-					std::unordered_map<Geometry::RenderInfo, std::shared_ptr<GLGeometry>, Geometry::RenderInfo::Hash> gpu_geometry;
-					for (const Geometry::RenderInfo& render_info : cpu_geometry_view.GetRenderInfos())
+					const std::shared_ptr<GLGeometry>& loaded_geometry = this->m_geometry.at(geometry);
+					const Geometry::RenderInfo& render_info = loaded_geometry->GetRenderInfo();
+					if (loaded_geometry->GetValues() != geometry->GetPrimitives())
 					{
-						std::shared_ptr<GLGeometry> geometry = std::make_shared<GLGeometry>(cpu_geometry_view.GetVerticesFromRenderInfo(render_info), render_info);
-						geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(render_info.primitive_type));
-
-						gpu_geometry.insert(std::pair(render_info, std::move(geometry)));
+						loaded_geometry->SetData(loaded_geometry->GetValues(), render_info);
 					}
-
-					this->m_model_geometry.insert(std::pair(model->GetReference(), gpu_geometry));
 				}
 			}
 		}
@@ -529,7 +467,7 @@ void Engine::Render(bool continuous_draw)
 					essential_draws.push_back(render_controller.get());
 				}
 			}
-			
+
 			std::vector<RenderController*> to_draw;
 			for (RenderController* render_controller : essential_draws)
 			{
@@ -595,46 +533,52 @@ std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureRefere
 	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
 }
 
+std::shared_ptr<GLGeometry> Engine::GetGeometry(const std::shared_ptr<Geometry>& geometry)
+{
+	std::shared_ptr<PresetGeometry> preset_geometry = std::dynamic_pointer_cast<PresetGeometry>(geometry);
+
+	if (preset_geometry.get() == nullptr)
+	{
+		if (this->m_geometry.count(geometry) == 0)
+		{
+			throw std::invalid_argument("Unknown Geometry. All Geometry that is fetched using this function must be attached to a Model in the Scene that this Engine instance is a child of");
+		}
+		else
+		{
+			return this->m_geometry.at(geometry);
+		}
+	}
+	else
+	{
+		return this->GetGeometry(preset_geometry);
+	}
+}
+
+std::shared_ptr<GLGeometry> Engine::GetGeometry(const std::shared_ptr<PresetGeometry>& geometry)
+{
+	auto it = this->m_geometry_presets.find(geometry->GetGeometryType());
+	if (it == this->m_geometry_presets.end())
+	{
+		std::shared_ptr<GLGeometry> result = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
+		result->SetLabel("Preset geometry: " + GetPresetGeometryType(geometry->GetGeometryType()));
+
+		this->m_geometry_presets.insert(std::pair(geometry->GetGeometryType(), result));
+		return result;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
 void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw)
 {
 	this->MakeContextCurrent();
 
-	std::vector<std::tuple<Geometry::RenderInfo, std::shared_ptr<GLGeometry>>> geometry;
-
-	if (this->IsChildOfSameScene(model))
+	for (const std::shared_ptr<Geometry>& geometry : model->GetGeometry())
 	{
-		for (auto& [render_info, loaded_geometry] : this->m_model_geometry.at(model->GetReference()))
-		{
-			geometry.push_back(std::tuple(render_info, loaded_geometry));
-		}
-	}
-
-	for (std::shared_ptr<Geometry>& geom : model->GetGeometry())
-	{
-		std::shared_ptr<PresetGeometry> preset_geom = std::dynamic_pointer_cast<PresetGeometry>(geom);
-
-		if (preset_geom.get() != nullptr)
-		{
-			auto it = this->m_geometry_presets.find(preset_geom->GetGeometryType());
-			if (it == this->m_geometry_presets.end())
-			{
-				std::tuple data = std::tuple(preset_geom->GetRenderInfo(), std::make_shared<GLGeometry>(preset_geom->GetPrimitives(), preset_geom->GetRenderInfo()));
-				std::get<1>(data)->SetLabel("Preset geometry: " + GetPresetGeometryType(preset_geom->GetGeometryType()));
-
-				this->m_geometry_presets.insert(std::pair(preset_geom->GetGeometryType(), data));
-				geometry.push_back(data);
-			}
-			else
-			{
-				auto& [render_info, glgeometry] = it->second;
-				geometry.push_back(std::tuple(render_info, glgeometry));
-			}
-		}
-	}
-
-	for (auto& [render_info, loaded_geometry] : geometry)
-	{
-		GLenum render_mode = predraw(render_info, *loaded_geometry);
+		std::shared_ptr<GLGeometry> loaded_geometry = this->GetGeometry(geometry);
+		GLenum render_mode = predraw(loaded_geometry->GetRenderInfo(), *loaded_geometry);
 
 		loaded_geometry->Draw();
 	}
