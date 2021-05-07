@@ -83,7 +83,7 @@ RenderController* Engine::GetRenderController(RenderTextureReference reference) 
 	return nullptr;
 }
 
-std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(RenderTextureReference reference, std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn)
+std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn)
 {
 	std::vector<RenderTextureReference> result;
 
