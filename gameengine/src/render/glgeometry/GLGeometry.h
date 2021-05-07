@@ -15,11 +15,13 @@ private:
 	GLuint m_vao = GL_NONE;
 	GLuint m_vbo = GL_NONE;
 
+	Geometry::RenderInfo m_render_info;
+
 	void CreateGLObjects();
 	void Bind() const;
 
 public:
-	GLGeometry(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
+	GLGeometry(std::vector<double> vertices, Geometry::RenderInfo render_info);
 	GLGeometry(const GLGeometry&) = delete;
 	GLGeometry& operator=(const GLGeometry&) = delete;
 	GLGeometry(GLGeometry&& move_from) noexcept;
@@ -34,9 +36,11 @@ public:
 	bool operator==(const std::vector<double>& other) const;
 	bool operator!=(const std::vector<double>& other) const;
 
-	void SetData(std::vector<double> values, std::size_t primitive_size, Geometry::PrimitiveType primitive_type);
+	void SetData(std::vector<double> values, Geometry::RenderInfo render_info);
 
-	void Draw(GLenum render_mode) const;
+	void Draw() const;
 
 	const std::vector<double>& GetValues() const;
 };
+
+GLenum GetPrimitiveTypeRenderMode(Geometry::PrimitiveType primitive_type);

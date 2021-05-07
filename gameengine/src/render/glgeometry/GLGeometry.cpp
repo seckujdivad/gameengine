@@ -4,13 +4,14 @@
 
 #include "../../PatchSize.h"
 
-void GLGeometry::SetData(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type)
+void GLGeometry::SetData(std::vector<double> vertices, Geometry::RenderInfo render_info)
 {
 	this->m_data = vertices;
+	this->m_render_info = render_info;
 
 	std::vector<GLfloat> padded_vertices;
 
-	if (primitive_size > GAMEENGINE_PATCH_SIZE)
+	if (this->m_render_info.primitive_size > GAMEENGINE_PATCH_SIZE)
 	{
 		throw std::invalid_argument("Primitives must have less than " + std::to_string(GAMEENGINE_PATCH_SIZE) + " vertices");
 	}
@@ -22,19 +23,19 @@ void GLGeometry::SetData(std::vector<double> vertices, std::size_t primitive_siz
 	}
 #endif
 
-	if ((primitive_type == Geometry::PrimitiveType::Patches || primitive_type == Geometry::PrimitiveType::Quads)
-		&& primitive_size != GAMEENGINE_PATCH_SIZE)
+	if ((this->m_render_info.primitive_type == Geometry::PrimitiveType::Patches || this->m_render_info.primitive_type == Geometry::PrimitiveType::Quads)
+		&& this->m_render_info.primitive_size != GAMEENGINE_PATCH_SIZE)
 	{
-		std::size_t num_primitives = vertices.size() / (primitive_size * GAMEENGINE_VALUES_PER_VERTEX);
+		std::size_t num_primitives = vertices.size() / (this->m_render_info.primitive_size * GAMEENGINE_VALUES_PER_VERTEX);
 		padded_vertices.reserve(num_primitives * GAMEENGINE_PATCH_SIZE * GAMEENGINE_VALUES_PER_VERTEX);
 		for (std::size_t i = 0; i < num_primitives; i++)
 		{
-			for (std::size_t j = 0; j < primitive_size * GAMEENGINE_VALUES_PER_VERTEX; j++)
+			for (std::size_t j = 0; j < this->m_render_info.primitive_size * GAMEENGINE_VALUES_PER_VERTEX; j++)
 			{
-				padded_vertices.push_back(static_cast<GLfloat>(vertices.at((i * primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j)));
+				padded_vertices.push_back(static_cast<GLfloat>(vertices.at((i * this->m_render_info.primitive_size * GAMEENGINE_VALUES_PER_VERTEX) + j)));
 			}
 
-			for (std::size_t j = 0; j < GAMEENGINE_PATCH_SIZE - primitive_size; j++)
+			for (std::size_t j = 0; j < GAMEENGINE_PATCH_SIZE - this->m_render_info.primitive_size; j++)
 			{
 				for (std::size_t k = 0; k < std::size_t(GAMEENGINE_VALUES_PER_VERTEX); k++)
 				{
@@ -95,10 +96,10 @@ void GLGeometry::Bind() const
 	glBindBuffer(GL_ARRAY_BUFFER, this->m_vbo);
 }
 
-GLGeometry::GLGeometry(std::vector<double> vertices, std::size_t primitive_size, Geometry::PrimitiveType primitive_type) : GLObjectLabelable(GL_VERTEX_ARRAY)
+GLGeometry::GLGeometry(std::vector<double> vertices, Geometry::RenderInfo render_info) : GLObjectLabelable(GL_VERTEX_ARRAY)
 {
 	this->CreateGLObjects();
-	this->SetData(vertices, primitive_size, primitive_type);
+	this->SetData(vertices, render_info);
 }
 
 GLGeometry::GLGeometry(GLGeometry&& move_from) noexcept : GLObjectLabelable(GL_VERTEX_ARRAY)
@@ -116,6 +117,7 @@ GLGeometry& GLGeometry::operator=(GLGeometry&& move_from) noexcept
 	this->m_buffer_len = move_from.m_buffer_len;
 
 	this->m_data = move_from.m_data;
+	this->m_render_info = move_from.m_render_info;
 
 	this->SetName(this->m_vao);
 
@@ -163,10 +165,26 @@ const std::vector<double>& GLGeometry::GetValues() const
 	return this->m_data;
 }
 
-void GLGeometry::Draw(GLenum render_mode) const
+void GLGeometry::Draw() const
 {
 	this->Bind();
 
-	GLsizei num_elements = static_cast<GLsizei>(this->m_buffer_len/ static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
-	glDrawArrays(render_mode, 0, num_elements);
+	GLsizei num_elements = static_cast<GLsizei>(this->m_buffer_len / static_cast<std::size_t>(GAMEENGINE_VALUES_PER_VERTEX));
+	glDrawArrays(GetPrimitiveTypeRenderMode(this->m_render_info.primitive_type), 0, num_elements);
+
+	glBindVertexArray(GL_NONE);
+	glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+}
+
+GLenum GetPrimitiveTypeRenderMode(Geometry::PrimitiveType primitive_type)
+{
+	switch (primitive_type)
+	{
+	case Geometry::PrimitiveType::Patches:
+	case Geometry::PrimitiveType::Quads:
+		return GL_PATCHES;
+	case Geometry::PrimitiveType::Triangles:
+		return GL_TRIANGLES;
+	default: throw std::invalid_argument("Unknown primitive type " + std::to_string(static_cast<int>(primitive_type)));
+	}
 }
