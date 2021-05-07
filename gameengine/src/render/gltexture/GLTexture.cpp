@@ -210,6 +210,7 @@ GLTexture& GLTexture::operator=(GLTexture&& move_from) noexcept
 	this->m_filtering_mag = move_from.m_filtering_mag;
 	this->m_target = move_from.m_target;
 	this->m_generate_mipmaps = move_from.m_generate_mipmaps;
+	this->m_shadow_compare_func = move_from.m_shadow_compare_func;
 
 	this->m_texture = move_from.m_texture;
 	move_from.m_texture = GL_NONE;
@@ -397,14 +398,41 @@ void GLTexture::SetPixels(GLTextureDataPreset preset)
 	else if (preset == GLTextureDataPreset::ZeroShadow)
 	{
 		this->SetPixels(GLTextureDataPreset::ZeroDepth);
-		this->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-		this->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		this->SetShadowCompareFunc(GL_LEQUAL);
 		this->SetFiltering(TextureFiltering::Nearest);
 	}
 	else
 	{
 		throw std::invalid_argument("Unknown texture preset " + std::to_string(static_cast<int>(preset)));
 	}
+}
+
+void GLTexture::SetShadowCompareFunc(GLint func)
+{
+	if (func != this->m_shadow_compare_func)
+	{
+		this->m_shadow_compare_func = func;
+		this->ConfigureTexture(false);
+	}
+}
+
+void GLTexture::DisableShadowComparisons()
+{
+	if (this->m_shadow_compare_func.has_value())
+	{
+		this->m_shadow_compare_func = std::optional<GLint>();
+		this->ConfigureTexture(false);
+	}
+}
+
+bool GLTexture::ShadowComparisonsAreEnabled() const
+{
+	return this->m_shadow_compare_func.has_value();
+}
+
+std::optional<GLint> GLTexture::GetShadowCompareFunc() const
+{
+	return this->m_shadow_compare_func;
 }
 
 void GLTexture::CopyTo(GLTexture& dest) const
@@ -421,6 +449,7 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	dest.m_filtering_mag = this->m_filtering_mag;
 	dest.m_target = this->m_target;
 	dest.m_generate_mipmaps = this->m_generate_mipmaps;
+	dest.m_shadow_compare_func = this->m_shadow_compare_func;
 
 	dest.ConfigureTexture(dest.m_texture == GL_NONE);
 
@@ -437,9 +466,6 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	glCopyImageSubData(this->GetTexture(), GetTargetEnum(this->GetTargetType()), 0, 0, 0, 0, dest.GetTexture(), GetTargetEnum(dest.GetTargetType()), 0, 0, 0, 0, width, height, copy_layers);
 
 	dest.SetName(dest.m_texture);
-
-	dest.SetTexParameter(GL_TEXTURE_COMPARE_MODE, this->GetTexParameteri(GL_TEXTURE_COMPARE_MODE));
-	dest.SetTexParameter(GL_TEXTURE_COMPARE_FUNC, this->GetTexParameteri(GL_TEXTURE_COMPARE_FUNC));
 }
 
 void GLTexture::CopyFrom(const GLTexture& src)

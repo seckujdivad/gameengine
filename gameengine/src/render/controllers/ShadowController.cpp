@@ -19,8 +19,7 @@ std::unique_ptr<Renderer> ShadowController::GenerateRenderer(int layer)
 	
 	std::shared_ptr<RenderTextureGroup> textures = std::make_shared<RenderTextureGroup>(RenderTargetMode::Shadow, TargetType::Texture_Cubemap);
 
-	textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-	textures->depth.value()->SetTexParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	textures->depth.value()->SetShadowCompareFunc(GL_LEQUAL);
 	textures->depth.value()->SetFiltering(TextureFiltering::Linear);
 
 	textures->depth.value()->SetLabel(textures->depth.value()->GetLabel().value() + " " + std::to_string(layer));

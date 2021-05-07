@@ -42,6 +42,8 @@ private:
 
 	GLuint m_texture = GL_NONE;
 
+	std::optional<GLint> m_shadow_compare_func = std::optional<GLint>();
+
 private:
 	void ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format = std::optional<GLTextureFormat>(), std::vector<const void*> pixels = {});
 
@@ -85,9 +87,15 @@ public:
 	void SetPixels(GLTextureFormat pixel_format, std::vector<const void*> pixels);
 	void SetPixels(GLTextureDataPreset preset);
 
+	void SetShadowCompareFunc(GLint func);
+	void DisableShadowComparisons();
+	bool ShadowComparisonsAreEnabled() const;
+	std::optional<GLint> GetShadowCompareFunc() const;
+
 	void CopyTo(GLTexture& dest) const;
 	void CopyFrom(const GLTexture& src);
 
+	//only to be used by features that aren't exposed through other methods
 	void SetTexParameter(GLenum pname, GLint param);
 	void SetTexParameter(GLenum pname, std::vector<GLint> params);
 	void SetTexParameter(GLenum pname, GLfloat param);
