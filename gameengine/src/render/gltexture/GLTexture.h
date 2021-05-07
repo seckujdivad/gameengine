@@ -41,11 +41,9 @@ private:
 	bool m_generate_mipmaps;
 
 	GLuint m_texture = GL_NONE;
-	GLint m_preferred_format = GL_NONE;
 
 private:
 	void ConfigureTexture(bool create, std::optional<GLTextureFormat> pixel_format = std::optional<GLTextureFormat>(), std::vector<const void*> pixels = {});
-	GLint GetPreferredFormat(bool force = false);
 
 	void SetPreset(Preset preset, std::optional<int> num_channels = std::optional<int>(), bool configure = true);
 

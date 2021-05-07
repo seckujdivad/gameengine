@@ -60,7 +60,7 @@ void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pix
 	}
 	else
 	{
-		preferred_format = this->GetPreferredFormat();
+		preferred_format = GetSimpleTextureFormatEnum(this->GetFormat());
 	}
 
 	if (create)
@@ -110,20 +110,16 @@ void GLTexture::ConfigureTexture(bool create, std::optional<GLTextureFormat> pix
 			glGenerateMipmap(target);
 		}
 	}
-}
 
-GLint GLTexture::GetPreferredFormat(bool force)
-{
-	if (force || (this->m_preferred_format == GL_NONE))
+	if (this->m_shadow_compare_func.has_value())
 	{
-		glGetInternalformativ(GetTargetEnum(this->GetTargetType()), GetTextureFormatEnum(this->GetFormat()), GL_TEXTURE_IMAGE_FORMAT, 1, &this->m_preferred_format);
-
-		if (this->m_preferred_format == GL_NONE)
-		{
-			this->m_preferred_format = GetSimpleTextureFormatEnum(this->GetFormat());
-		}
+		glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		glTexParameteri(target, GL_TEXTURE_COMPARE_FUNC, this->m_shadow_compare_func.value());
 	}
-	return this->m_preferred_format;
+	else
+	{
+		glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	}
 }
 
 void GLTexture::SetPreset(Preset preset, std::optional<int> num_channels, bool configure)
@@ -215,8 +211,6 @@ GLTexture& GLTexture::operator=(GLTexture&& move_from) noexcept
 	this->m_target = move_from.m_target;
 	this->m_generate_mipmaps = move_from.m_generate_mipmaps;
 
-	this->m_preferred_format = move_from.m_preferred_format;
-
 	this->m_texture = move_from.m_texture;
 	move_from.m_texture = GL_NONE;
 
@@ -269,7 +263,6 @@ void GLTexture::SetFormat(GLTextureFormat format)
 	if (format != this->m_format)
 	{
 		this->m_format = format;
-		this->GetPreferredFormat(true);
 		this->ConfigureTexture(false);
 	}
 }
@@ -428,8 +421,6 @@ void GLTexture::CopyTo(GLTexture& dest) const
 	dest.m_filtering_mag = this->m_filtering_mag;
 	dest.m_target = this->m_target;
 	dest.m_generate_mipmaps = this->m_generate_mipmaps;
-
-	dest.m_preferred_format = this->m_preferred_format;
 
 	dest.ConfigureTexture(dest.m_texture == GL_NONE);
 
