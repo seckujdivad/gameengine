@@ -425,28 +425,47 @@ void Engine::Render(bool continuous_draw)
 		}
 
 		//update loaded geometry
-		for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 		{
-			std::vector<std::shared_ptr<Geometry>> geometries = model->GetGeometry();
-
-			for (const std::shared_ptr<Geometry>& geometry : geometries)
+			std::set<std::shared_ptr<Geometry>> geometries_in_scene;
+			
+			for (const std::shared_ptr<Model>& model : this->GetScene()->GetModels())
 			{
-				if (this->m_geometry.count(geometry) == 0)
-				{
-					std::shared_ptr<GLGeometry> loaded_geometry = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
-					loaded_geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(loaded_geometry->GetRenderInfo().primitive_type));
+				std::vector<std::shared_ptr<Geometry>> geometries = model->GetGeometry();
 
-					this->m_geometry.insert(std::pair(geometry, loaded_geometry));
-				}
-				else
+				for (const std::shared_ptr<Geometry>& geometry : geometries)
 				{
-					const std::shared_ptr<GLGeometry>& loaded_geometry = this->m_geometry.at(geometry);
-					const Geometry::RenderInfo& render_info = loaded_geometry->GetRenderInfo();
-					if (loaded_geometry->GetValues() != geometry->GetPrimitives())
+					if (this->m_geometry.count(geometry) == 0)
 					{
-						loaded_geometry->SetData(loaded_geometry->GetValues(), render_info);
+						std::shared_ptr<GLGeometry> loaded_geometry = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
+						loaded_geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(loaded_geometry->GetRenderInfo().primitive_type));
+
+						this->m_geometry.insert(std::pair(geometry, loaded_geometry));
 					}
+					else
+					{
+						const std::shared_ptr<GLGeometry>& loaded_geometry = this->m_geometry.at(geometry);
+						const Geometry::RenderInfo& render_info = loaded_geometry->GetRenderInfo();
+						if (loaded_geometry->GetValues() != geometry->GetPrimitives())
+						{
+							loaded_geometry->SetData(loaded_geometry->GetValues(), render_info);
+						}
+					}
+
+					geometries_in_scene.insert(geometry);
 				}
+			}
+
+			std::set<std::shared_ptr<Geometry>> geometries_loaded;
+			for (const auto& [geometry, loaded_geometry] : this->m_geometry)
+			{
+				geometries_loaded.insert(geometry);
+			}
+
+			std::set<std::shared_ptr<Geometry>> geometries_to_remove;
+			std::set_difference(geometries_loaded.begin(), geometries_loaded.end(), geometries_in_scene.begin(), geometries_in_scene.end(), std::inserter(geometries_to_remove, geometries_to_remove.begin()));
+			for (const std::shared_ptr<Geometry>& geometry : geometries_to_remove)
+			{
+				this->m_geometry.erase(geometry);
 			}
 		}
 
