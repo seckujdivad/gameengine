@@ -218,13 +218,18 @@ void RenderTarget::CheckParentContext() const
 #endif
 }
 
-void RenderTarget::SetFramebuffer(GLFramebuffer framebuffer)
+void RenderTarget::SetFramebuffer(GLFramebuffer&& framebuffer)
 {
 	this->m_fbo = std::move(framebuffer);
 	this->m_fbo_contains_render = false;
 }
 
 const GLFramebuffer& RenderTarget::GetFramebuffer() const
+{
+	return this->m_fbo;
+}
+
+GLFramebuffer& RenderTarget::GetFramebuffer()
 {
 	return this->m_fbo;
 }

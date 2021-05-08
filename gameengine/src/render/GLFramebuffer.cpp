@@ -2,17 +2,20 @@
 
 GLFramebuffer::GLFramebuffer(GLuint fbo, bool is_owning) : GLObjectLabelable(GL_FRAMEBUFFER), m_fbo(fbo), m_is_owning(is_owning)
 {
+	this->SetName(fbo);
 }
 
-GLFramebuffer::GLFramebuffer(GLFramebuffer&& move_from) : GLObjectLabelable(GL_FRAMEBUFFER)
+GLFramebuffer::GLFramebuffer(GLFramebuffer&& move_from) noexcept : GLObjectLabelable(GL_FRAMEBUFFER)
 {
 	*this = std::move(move_from);
 }
 
-GLFramebuffer& GLFramebuffer::operator=(GLFramebuffer&& move_from)
+GLFramebuffer& GLFramebuffer::operator=(GLFramebuffer&& move_from) noexcept
 {
 	this->m_fbo = move_from.m_fbo;
 	this->m_is_owning = move_from.m_is_owning;
+
+	this->SetName(this->m_fbo);
 
 	move_from.m_is_owning = false;
 

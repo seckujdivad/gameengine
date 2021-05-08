@@ -14,8 +14,8 @@ public:
 	GLFramebuffer(GLuint fbo, bool is_owning);
 	GLFramebuffer(const GLFramebuffer&) = delete;
 	GLFramebuffer& operator=(const GLFramebuffer&) = delete;
-	GLFramebuffer(GLFramebuffer&& move_from);
-	GLFramebuffer& operator=(GLFramebuffer&& move_from);
+	GLFramebuffer(GLFramebuffer&& move_from) noexcept;
+	GLFramebuffer& operator=(GLFramebuffer&& move_from) noexcept;
 	~GLFramebuffer();
 
 	GLuint GetFBO() const;

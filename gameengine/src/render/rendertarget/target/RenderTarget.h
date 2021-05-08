@@ -48,8 +48,9 @@ protected:
 	//scene rendering
 	RenderTargetConfig m_config;
 
-	void SetFramebuffer(GLFramebuffer framebuffer);
+	void SetFramebuffer(GLFramebuffer&& framebuffer);
 	const GLFramebuffer& GetFramebuffer() const;
+	GLFramebuffer& GetFramebuffer();
 	void SetTargetType(TargetType target_type);
 
 	virtual void PreRenderEvent(); //happens just before rendering

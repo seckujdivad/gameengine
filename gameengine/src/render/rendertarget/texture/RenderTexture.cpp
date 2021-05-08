@@ -40,6 +40,7 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 		glGenFramebuffers(1, &fbo);
 		this->SetFramebuffer(GLFramebuffer(fbo, true));
 		this->GetWriteTextures()->AttachToFBO(fbo);
+		this->GetFramebuffer().SetLabel("Render texture framebuffer: " + GetRenderTargetModeName(config.GetMode()));
 	}
 }
 
