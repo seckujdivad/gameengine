@@ -66,20 +66,12 @@ void Engine::LoadTexture(const Texture& texture)
 
 void Engine::AddRenderController(std::unique_ptr<RenderController>&& render_controller)
 {
-	this->m_render_controllers.push_back(std::move(render_controller));
+	this->m_render_controllers.insert(std::pair(render_controller->GetReference(), std::move(render_controller)));
 }
 
 const std::unique_ptr<RenderController>& Engine::GetRenderController(RenderTextureReference reference) const
 {
-	for (const std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
-	{
-		if (render_controller->GetReference() == reference)
-		{
-			return render_controller;
-		}
-	}
-	
-	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
+	return this->m_render_controllers.at(reference);
 }
 
 std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn)
@@ -288,7 +280,7 @@ void Engine::Render(bool continuous_draw)
 				std::vector<std::tuple<RenderTextureReference, CubemapType>> existing_cubemaps;
 				std::vector<std::tuple<RenderTextureReference, CubemapType>> required_cubemaps;
 
-				for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
+				for (const auto& [reference, render_controller] : this->m_render_controllers)
 				{
 					if (render_controller->GetType() == RenderControllerType::Reflection)
 					{
@@ -383,25 +375,9 @@ void Engine::Render(bool continuous_draw)
 			}
 
 			//remove old cubemap controllers
+			for (const auto& [render_texture_reference, cubemap_type] : cubemaps_to_remove)
 			{
-				std::vector<int> cubemap_indices;
-				for (const auto& [render_texture_reference, cubemap_type] : cubemaps_to_remove)
-				{
-					for (int i = 0; i < static_cast<int>(this->m_render_controllers.size()); i++)
-					{
-						if (this->m_render_controllers.at(i)->GetReference() == render_texture_reference)
-						{
-							cubemap_indices.push_back(i);
-						}
-					}
-				}
-
-				std::reverse(cubemap_indices.begin(), cubemap_indices.end()); //order high-low
-
-				for (int i = 0; i < static_cast<int>(cubemap_indices.size()); i++)
-				{
-					this->m_render_controllers.erase(this->m_render_controllers.begin() + i);
-				}
+				this->m_render_controllers.erase(render_texture_reference);
 			}
 
 			//create new cubemap controllers
@@ -477,11 +453,11 @@ void Engine::Render(bool continuous_draw)
 			std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>> reference_direct_dependencies;
 			std::vector<RenderController*> essential_draws;
 
-			for (std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
+			for (const auto& [reference, render_controller] : this->m_render_controllers)
 			{
 				bool is_essential_draw = render_controller->IsEssentialDraw();
-				draw_required.insert(std::pair(render_controller->GetReference(), is_essential_draw));
-				reference_direct_dependencies.insert(std::pair(render_controller->GetReference(), render_controller->GetRenderTextureDependencies()));
+				draw_required.insert(std::pair(reference, is_essential_draw));
+				reference_direct_dependencies.insert(std::pair(reference, render_controller->GetRenderTextureDependencies()));
 
 				if (is_essential_draw)
 				{
@@ -605,7 +581,7 @@ void Engine::MakeContextCurrent(bool force) const
 		if (this->m_glcontext_canvas == nullptr)
 		{
 			bool context_set = false;
-			for (const std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
+			for (const auto& [reference, render_controller] : this->m_render_controllers)
 			{
 				if (!context_set)
 				{

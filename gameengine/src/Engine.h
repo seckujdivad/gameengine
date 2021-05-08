@@ -51,10 +51,12 @@ private:
 
 	bool m_single_context_mode = false;
 
+	//render controllers
+	std::unordered_map<RenderTextureReference, std::unique_ptr<RenderController>> m_render_controllers;
+
+	//textures
 	std::unordered_map<TextureReference, std::tuple<std::shared_ptr<GLTexture>, Texture>> m_textures_static;
 	std::unordered_map<GLTexturePreset, std::shared_ptr<GLTexture>, GLTexturePreset::Hash> m_textures_static_presets;
-
-	std::vector<std::unique_ptr<RenderController>> m_render_controllers;
 
 	//loaded geometry
 	std::unordered_map<std::shared_ptr<Geometry>, std::shared_ptr<GLGeometry>> m_geometry;
