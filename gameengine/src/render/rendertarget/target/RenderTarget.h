@@ -14,6 +14,7 @@
 #include "../../renderable/Renderable.h"
 #include "../../../scene/Referenceable.h"
 #include "../../TargetType.h"
+#include "../../GLFramebuffer.h"
 
 class Engine;
 class Model;
@@ -26,7 +27,7 @@ public:
 	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
 
 private:
-	GLuint m_fbo = 0;
+	GLFramebuffer m_fbo = GLFramebuffer(0, false);
 	bool m_fbo_contains_render = false;
 	TargetType m_fbo_target = TargetType::Texture_2D;
 	
@@ -47,8 +48,8 @@ protected:
 	//scene rendering
 	RenderTargetConfig m_config;
 
-	void SetFramebuffer(GLuint fbo);
-	GLuint GetFramebuffer() const;
+	void SetFramebuffer(GLFramebuffer framebuffer);
+	const GLFramebuffer& GetFramebuffer() const;
 	void SetTargetType(TargetType target_type);
 
 	virtual void PreRenderEvent(); //happens just before rendering

@@ -23,10 +23,9 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 	:
 	RenderTarget(engine, config),
 	Referenceable<RenderTextureReference>(reference),
-	m_auto_swap_buffers(auto_swap_buffers),
-	m_owns_fbo(write_textures.has_value())
+	m_auto_swap_buffers(auto_swap_buffers)
 {
-	if (this->m_owns_fbo)
+	if (write_textures.has_value())
 	{
 		this->m_texture_write = write_textures.value();
 		this->SetTargetType(this->m_texture_write.get()->GetTargetType());
@@ -39,17 +38,8 @@ RenderTexture::RenderTexture(RenderTextureReference reference, Engine* engine, R
 
 		GLuint fbo;
 		glGenFramebuffers(1, &fbo);
-		this->SetFramebuffer(fbo);
+		this->SetFramebuffer(GLFramebuffer(fbo, true));
 		this->GetWriteTextures()->AttachToFBO(fbo);
-	}
-}
-
-RenderTexture::~RenderTexture()
-{
-	if (this->m_owns_fbo)
-	{
-		GLuint fbo = this->GetFramebuffer();
-		glDeleteFramebuffers(1, &fbo);
 	}
 }
 
@@ -70,14 +60,7 @@ bool RenderTexture::SetOutputSize(std::tuple<int, int> dimensions)
 
 void RenderTexture::SetWriteTarget(RenderTexture* target)
 {
-	if (this->m_owns_fbo)
-	{
-		GLuint fbo = this->GetFramebuffer();
-		glDeleteFramebuffers(1, &fbo);
-	}
-	this->m_owns_fbo = false;
-
-	this->SetFramebuffer(target->GetFramebuffer());
+	this->SetFramebuffer(GLFramebuffer(target->GetFramebuffer().GetFBO(), false));
 	this->SetTargetType(target->GetTargetType());
 
 	this->m_texture_write = target->m_texture_write;

@@ -16,7 +16,7 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 	RenderTarget(engine, config),
 	m_glcontext(context)
 {
-	this->SetFramebuffer(0);
+	this->SetFramebuffer(GLFramebuffer(0, false));
 
 	this->m_blank_cursor = wxCursor(wxCURSOR_BLANK);
 	

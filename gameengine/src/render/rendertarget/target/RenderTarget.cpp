@@ -36,13 +36,13 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 	if (this->m_engine->GetScene() != nullptr)
 	{
 #ifdef _DEBUG
-		if ((this->m_fbo != 0) && !glIsFramebuffer(this->m_fbo))
+		if (!this->m_fbo.IsValidFBO())
 		{
 			throw std::runtime_error("FBO provided is not an FBO");
 		}
 #endif
 
-		glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
+		this->m_fbo.Bind();
 
 #ifdef _DEBUG
 		{
@@ -218,13 +218,13 @@ void RenderTarget::CheckParentContext() const
 #endif
 }
 
-void RenderTarget::SetFramebuffer(GLuint fbo)
+void RenderTarget::SetFramebuffer(GLFramebuffer framebuffer)
 {
-	this->m_fbo = fbo;
+	this->m_fbo = std::move(framebuffer);
 	this->m_fbo_contains_render = false;
 }
 
-GLuint RenderTarget::GetFramebuffer() const
+const GLFramebuffer& RenderTarget::GetFramebuffer() const
 {
 	return this->m_fbo;
 }
@@ -804,8 +804,8 @@ void RenderTarget::CopyFrom(const RenderTarget* src)
 
 		GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, src->GetFramebuffer());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->GetFramebuffer());
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, src->GetFramebuffer().GetFBO());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->GetFramebuffer().GetFBO());
 
 		glBlitFramebuffer(
 			0, 0, static_cast<GLint>(src_x), static_cast<GLint>(src_y),
