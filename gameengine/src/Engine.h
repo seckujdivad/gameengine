@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <memory>
 #include <tuple>
-#include <functional>
 #include <set>
 
 #include "GLComponents.h"
@@ -87,8 +86,7 @@ public:
 
 	std::shared_ptr<GLGeometry> GetGeometry(const std::shared_ptr<Geometry>& geometry);
 	std::shared_ptr<GLGeometry> GetGeometry(const std::shared_ptr<PresetGeometry>& geometry);
-
-	void DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw);
+	std::shared_ptr<GLGeometry> GetGeometry(PresetGeometry preset);
 
 	void MakeContextCurrent(bool force = false) const;
 	bool ContextIsValid() const;

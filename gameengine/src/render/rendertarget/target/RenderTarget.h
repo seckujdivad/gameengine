@@ -39,8 +39,6 @@ private:
 
 	ControllerFunction m_render_function;
 
-	std::unique_ptr<Model> m_postprocess_model = nullptr;
-
 	std::array<glm::mat4, 6> m_cubemap_rotations;
 
 	void CheckParentContext() const;
@@ -64,9 +62,11 @@ protected:
 	void Render_Setup_Model(std::vector<Model*> models);
 	void Render_Setup_FSQuad();
 	void Render_ForEachModel_Model(Model* model);
-	void Render_ForEachModel_FSQuad(Model* model);
+	void Render_ForEachModel_FSQuad();
 
 	void DoClear() const;
+
+	void CheckShaderValidity() const;
 
 public:
 	RenderTarget(Engine* engine, RenderTargetConfig config);

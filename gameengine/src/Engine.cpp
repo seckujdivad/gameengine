@@ -575,35 +575,24 @@ std::shared_ptr<GLGeometry> Engine::GetGeometry(const std::shared_ptr<Geometry>&
 
 std::shared_ptr<GLGeometry> Engine::GetGeometry(const std::shared_ptr<PresetGeometry>& geometry)
 {
-	auto it = this->m_geometry_presets.find(geometry->GetGeometryType());
+	return this->GetGeometry(*geometry);
+}
+
+std::shared_ptr<GLGeometry> Engine::GetGeometry(PresetGeometry preset)
+{
+	auto it = this->m_geometry_presets.find(preset.GetGeometryType());
 	if (it == this->m_geometry_presets.end())
 	{
-		std::shared_ptr<GLGeometry> result = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
-		result->SetLabel("Preset geometry: " + GetPresetGeometryType(geometry->GetGeometryType()));
+		std::shared_ptr<GLGeometry> result = std::make_shared<GLGeometry>(preset.GetPrimitives(), preset.GetRenderInfo());
+		result->SetLabel("Preset geometry: " + GetPresetGeometryType(preset.GetGeometryType()));
 
-		this->m_geometry_presets.insert(std::pair(geometry->GetGeometryType(), result));
+		this->m_geometry_presets.insert(std::pair(preset.GetGeometryType(), result));
 		return result;
 	}
 	else
 	{
 		return it->second;
 	}
-}
-
-void Engine::DrawModel(Model* model, std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw)
-{
-	this->MakeContextCurrent();
-
-	for (const std::shared_ptr<Geometry>& geometry : model->GetGeometry())
-	{
-		std::shared_ptr<GLGeometry> loaded_geometry = this->GetGeometry(geometry);
-		GLenum render_mode = predraw(loaded_geometry->GetRenderInfo(), *loaded_geometry);
-
-		loaded_geometry->Draw();
-	}
-
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 }
 
 void Engine::PrunePresetGeometry(PresetGeometry::GeometryType type)

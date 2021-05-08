@@ -72,18 +72,6 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		{
 			models = this->Render_GetModels_Model(models);
 		}
-		else
-		{
-			models.clear();
-			if (this->m_postprocess_model == nullptr)
-			{
-				throw std::runtime_error("Post process full screen quad model has not been initialised");
-			}
-			else
-			{
-				models.push_back(this->m_postprocess_model.get());
-			}
-		}
 
 		this->m_shader_program->Select();
 
@@ -151,65 +139,47 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 		//prepare viewport
 		glViewport(0, 0, output_size.x, output_size.y);
 
-		const std::function<GLenum(Geometry::RenderInfo info, const GLGeometry& loaded_geometry)> predraw = [this](Geometry::RenderInfo info, const GLGeometry& loaded_geometry)
-		{
-			GLenum mode = GL_NONE; //default invalid value, should be overwritten
-
-			if (this->RenderModeIsModelRendering())
-			{
-				if ((info.primitive_type == Geometry::PrimitiveType::Patches) || (info.primitive_type == Geometry::PrimitiveType::Quads))
-				{
-					mode = GL_PATCHES;
-
-					this->m_shader_program->SetUniform("tess_enable", info.tesselation_enabled);
-					this->m_shader_program->SetUniform("tess_interp_mode", static_cast<int>(info.interpolation_mode));
-
-					this->m_shader_program->SetUniform("patch_size_u", info.primitive_dimensions.x);
-					this->m_shader_program->SetUniform("patch_size_v", info.primitive_dimensions.y);
-				}
-				else
-				{
-					throw std::runtime_error("Primitive type " + std::to_string(static_cast<int>(info.primitive_type)) + " is not supported by model-oriented rendering modes");
-				}
-			}
-			else
-			{
-				if (info.primitive_type == Geometry::PrimitiveType::Triangles)
-				{
-					mode = GL_TRIANGLES;
-				}
-				else
-				{
-					throw std::runtime_error("The only primitive type supported by postprocess rendering is triangles");
-				}
-			}
-
-#ifdef _DEBUG
-			if (!this->m_shader_program->IsValid())
-			{
-				std::optional<std::string> validity_message = this->m_shader_program->GetProgramInfoLog();
-				LogMessage("Shader not valid - info log: " + validity_message.value());
-				throw std::runtime_error("Shader not valid - info log: " + validity_message.value());
-			}
-#endif
-
-			return mode;
-		};
-
 		this->CheckParentContext();
 
 		//draw scene geometry
-		bool has_cleared = false;
-		
-		for (Model* model : models)
+		if (this->RenderModeIsModelRendering())
 		{
-			if (this->RenderModeIsModelRendering())
+			bool has_cleared = false;
+
+			for (Model* model : models)
 			{
 				this->Render_ForEachModel_Model(model);
-			}
-			else
-			{
-				this->Render_ForEachModel_FSQuad(model);
+
+				if (!has_cleared)
+				{
+					this->DoClear();
+					has_cleared = true;
+				}
+
+				for (const std::shared_ptr<Geometry>& geometry : model->GetGeometry())
+				{
+					Geometry::RenderInfo render_info = geometry->GetRenderInfo();
+					if ((render_info.primitive_type == Geometry::PrimitiveType::Patches) || (render_info.primitive_type == Geometry::PrimitiveType::Quads))
+					{
+						this->m_shader_program->SetUniform("tess_enable", render_info.tesselation_enabled);
+						this->m_shader_program->SetUniform("tess_interp_mode", static_cast<int>(render_info.interpolation_mode));
+
+						this->m_shader_program->SetUniform("patch_size_u", render_info.primitive_dimensions.x);
+						this->m_shader_program->SetUniform("patch_size_v", render_info.primitive_dimensions.y);
+					}
+					else
+					{
+						throw std::runtime_error("Primitive type " + GetPrimitiveTypeName(render_info.primitive_type) + " is not supported by model-oriented rendering modes");
+					}
+
+#ifdef _DEBUG
+					this->CheckShaderValidity();
+#endif
+
+					this->GetEngine()->GetGeometry(geometry)->Draw();
+				}
+
+				this->CheckParentContext();
 			}
 
 			if (!has_cleared)
@@ -217,19 +187,24 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 				this->DoClear();
 				has_cleared = true;
 			}
+		}
+		else
+		{
+			this->DoClear();
+			this->Render_ForEachModel_FSQuad();
 
-			this->GetEngine()->DrawModel(model, predraw);
+#ifdef _DEBUG
+			this->CheckShaderValidity();
+#endif
 
+			this->GetEngine()->GetGeometry(PresetGeometry(PresetGeometry::GeometryType::Plane))->Draw();
 			this->CheckParentContext();
 		}
 
-		if (!has_cleared)
-		{
-			this->DoClear();
-			has_cleared = true;
-		}
-
 		this->m_fbo_contains_render = true;
+
+		glBindVertexArray(NULL);
+		glBindBuffer(GL_ARRAY_BUFFER, NULL);
 	}
 }
 
@@ -659,7 +634,7 @@ void RenderTarget::Render_ForEachModel_Model(Model* model)
 	this->m_shader_program->Select(static_cast<int>(model->GetReference())); //select shader (and texture group)
 }
 
-void RenderTarget::Render_ForEachModel_FSQuad(Model* model)
+void RenderTarget::Render_ForEachModel_FSQuad()
 {
 	this->m_shader_program->Select(-1); //select shader (and texture group)
 }
@@ -709,6 +684,16 @@ void RenderTarget::DoClear() const
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
+	}
+}
+
+void RenderTarget::CheckShaderValidity() const
+{
+	if (!this->m_shader_program->IsValid())
+	{
+		std::optional<std::string> validity_message = this->m_shader_program->GetProgramInfoLog();
+		LogMessage("Shader not valid - info log: " + validity_message.value());
+		throw std::runtime_error("Shader not valid - info log: " + validity_message.value());
 	}
 }
 
@@ -842,22 +827,6 @@ RenderTargetMode RenderTarget::GetRenderMode() const
 
 void RenderTarget::SetConfig(RenderTargetConfig config)
 {
-	if (config.GetMode() == RenderTargetMode::Default)
-	{
-		this->m_postprocess_model.reset();
-	}
-	else if (this->m_config.GetMode() != config.GetMode())
-	{
-		if (GetRenderTargetModeType(config.GetMode()) == RenderTargetModeType::FSQuad)
-		{
-			this->m_postprocess_model = std::make_unique<Model>(-1, std::vector<std::shared_ptr<Geometry>>({ std::make_shared<PresetGeometry>(PresetGeometry::GeometryType::Plane) }));
-		}
-		else
-		{
-			this->m_postprocess_model.reset();
-		}
-	}
-
 	this->m_config = config;
 	this->m_fbo_contains_render = false;
 
