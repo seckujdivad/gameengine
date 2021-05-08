@@ -62,8 +62,8 @@ private:
 
 	void PrunePresetGeometry(PresetGeometry::GeometryType type);
 
-	void AddRenderController(RenderController* render_controller);
-	RenderController* GetRenderController(RenderTextureReference reference) const;
+	void AddRenderController(std::unique_ptr<RenderController>&& render_controller);
+	const std::unique_ptr<RenderController>& GetRenderController(RenderTextureReference reference) const;
 
 	static std::vector<RenderTextureReference> CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn);
 

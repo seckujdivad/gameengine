@@ -64,21 +64,22 @@ void Engine::LoadTexture(const Texture& texture)
 	}
 }
 
-void Engine::AddRenderController(RenderController* render_controller)
+void Engine::AddRenderController(std::unique_ptr<RenderController>&& render_controller)
 {
-	this->m_render_controllers.push_back(std::unique_ptr<RenderController>(render_controller));
+	this->m_render_controllers.push_back(std::move(render_controller));
 }
 
-RenderController* Engine::GetRenderController(RenderTextureReference reference) const
+const std::unique_ptr<RenderController>& Engine::GetRenderController(RenderTextureReference reference) const
 {
 	for (const std::unique_ptr<RenderController>& render_controller : this->m_render_controllers)
 	{
 		if (render_controller->GetReference() == reference)
 		{
-			return render_controller.get();
+			return render_controller;
 		}
 	}
-	return nullptr;
+	
+	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
 }
 
 std::vector<RenderTextureReference> Engine::CollateRenderTextureDependencies(RenderTextureReference reference, const std::unordered_map<RenderTextureReference, std::unordered_set<RenderTextureReference>>& direct_dependencies, std::unordered_map<RenderTextureReference, bool>& is_drawn)
@@ -221,8 +222,9 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 	EngineCanvas* canvas = new EngineCanvas(parent == nullptr ? this->m_parent : parent, id, this->m_canvas_args, this->m_glcontext.get(), this, empty_config);
 	canvas->MakeOpenGLFocus();
 
-	EngineCanvasController* controller = new EngineCanvasController(this, this->GetScene()->GetNewRenderTextureReference(), canvas, composite_layers);
-	this->AddRenderController(controller);
+	std::unique_ptr<EngineCanvasController> controller = std::make_unique<EngineCanvasController>(this, this->GetScene()->GetNewRenderTextureReference(), canvas, composite_layers);
+	EngineCanvasController* non_owning_controller_ptr = controller.get();
+	this->AddRenderController(std::move(controller));
 
 	if (this->m_glcontext_canvas != nullptr)
 	{
@@ -230,7 +232,7 @@ EngineCanvasController* Engine::GenerateNewCanvas(std::vector<EngineCanvasContro
 		this->m_glcontext_canvas = nullptr;
 	}
 
-	return controller;
+	return non_owning_controller_ptr;
 }
 
 EngineCanvasController* Engine::GenerateNewCanvas(std::vector<RenderMode> modes, wxWindowID id, wxWindow* parent)
@@ -407,15 +409,15 @@ void Engine::Render(bool continuous_draw)
 			{
 				if (type == CubemapType::Reflection)
 				{
-					this->AddRenderController(new ReflectionController(this, reference));
+					this->AddRenderController(std::make_unique<ReflectionController>(this, reference));
 				}
 				else if (type == CubemapType::PointLight)
 				{
-					this->AddRenderController(new ShadowController(this, reference));
+					this->AddRenderController(std::make_unique<ShadowController>(this, reference));
 				}
 				else if (type == CubemapType::Skybox)
 				{
-					this->AddRenderController(new SkyboxController(this, reference));
+					this->AddRenderController(std::make_unique<SkyboxController>(this, reference));
 				}
 				else
 				{
@@ -492,7 +494,7 @@ void Engine::Render(bool continuous_draw)
 			{
 				for (RenderTextureReference ref : this->CollateRenderTextureDependencies(render_controller->GetReference(), reference_direct_dependencies, draw_required))
 				{
-					to_draw.push_back(this->GetRenderController(ref));
+					to_draw.push_back(this->GetRenderController(ref).get());
 				}
 				to_draw.push_back(render_controller);
 			}
@@ -541,15 +543,7 @@ std::shared_ptr<GLTexture> Engine::GetTexture(GLTexturePreset preset)
 
 std::shared_ptr<RenderTextureGroup> Engine::GetRenderTexture(RenderTextureReference reference) const
 {
-	for (const std::unique_ptr<RenderController>& controller : this->m_render_controllers)
-	{
-		if (controller->GetReference() == reference)
-		{
-			return controller->GetRenderTexture();
-		}
-	}
-
-	throw std::invalid_argument("Couldn't resolve render texture reference " + std::to_string(reference));
+	return this->GetRenderController(reference)->GetRenderTexture();
 }
 
 std::shared_ptr<GLGeometry> Engine::GetGeometry(const std::shared_ptr<Geometry>& geometry)
