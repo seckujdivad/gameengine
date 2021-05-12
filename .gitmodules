@@ -1,0 +1,4 @@
+[submodule "gameengine-server"]
+	path = gameengine-server
+	url = https://www.github.com/seckujdivad/gameengine-server.git
+	branch = main
