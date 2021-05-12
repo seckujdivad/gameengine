@@ -4,26 +4,20 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 079c57ce3014c74383af23b492b5e0a91446d0169e21a5ea37c869ee774a4490
+-- hash: 0d2ea002ba2fd1c83d63957f11154deddee71e62fdc4197cd22c19849f28733b
 
 name:           gameengine-server
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/gameengine-server#readme>
-homepage:       https://github.com/githubuser/gameengine-server#readme
-bug-reports:    https://github.com/githubuser/gameengine-server/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2021 Author name here
-license:        BSD3
-license-file:   LICENSE
+description:    Server for gameengine
+homepage:       https://github.com/seckujdivad/gameengine/tree/master/gameengine-server#readme
+bug-reports:    https://github.com/seckujdivad/gameengine/tree/master/gameengine-server/issues
+author:         David Juckes
+maintainer:     David Juckes
 build-type:     Simple
-extra-source-files:
-    README.md
-    ChangeLog.md
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/gameengine-server
+  location: https://github.com/seckujdivad/gameengine/tree/master/gameengine-server
 
 library
   exposed-modules:

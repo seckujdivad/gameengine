@@ -351,3 +351,4 @@ demo-cube/resources/settings.json
 gameengine-server/.stack-work/
 gameengine-server/*~
 gameengine-server/build/
+gameengine-server/.vscode/phoityne.log
