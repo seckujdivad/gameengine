@@ -107,6 +107,9 @@
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
+    <PostBuildEvent>
+      <Command>py "scripts/post_build_debug.py"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -134,6 +137,9 @@
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
+    <PostBuildEvent>
+      <Command>py "scripts/post_build_debug.py"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -159,10 +165,11 @@
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>py "$(SolutionDir)\packaged-releases/package-releases.py"</Command>
+      <Command>py "scripts/post_build_release.py"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Packaging release in zip archive</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
@@ -196,10 +203,11 @@
       <AdditionalOptions>comctl32.lib rpcrt4.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>py "$(SolutionDir)\packaged-releases/package-releases.py"</Command>
+      <Command>py "scripts/post_build_release.py"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Packaging release in zip archive</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
@@ -232,6 +240,9 @@
     <None Include="resources\simplescene.json">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="scripts\post_build.py" />
+    <None Include="scripts\post_build_debug.py" />
+    <None Include="scripts\post_build_release.py" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />

@@ -22,6 +22,9 @@
     <Filter Include="Resource Files\perfprofiles">
       <UniqueIdentifier>{c6f12367-3b9d-4670-847b-6c79c7d22210}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\scripts">
+      <UniqueIdentifier>{e4153eb6-a62c-4dbc-ac71-567d5840d1e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\simplescene.json">
@@ -59,6 +62,15 @@
     </None>
     <None Include="resources\settings.default.json">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="scripts\post_build.py">
+      <Filter>Resource Files\scripts</Filter>
+    </None>
+    <None Include="scripts\post_build_debug.py">
+      <Filter>Resource Files\scripts</Filter>
+    </None>
+    <None Include="scripts\post_build_release.py">
+      <Filter>Resource Files\scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
