@@ -344,6 +344,7 @@ packaged-releases/packages/*
 packaged-releases/package sources/*
 
 demo-cube/resources/settings.json
+demo-cube/resources/server/*
 
 *.cxl
 

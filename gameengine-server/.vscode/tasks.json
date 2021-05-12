@@ -4,19 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Run compiled (quick)",
             "type": "shell",
-            "command": "stack build --copy-bins --local-bin-path build",
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "Run compiled",
-            "type": "shell",
-            "command": "stack run gameengine-server",
+            "command": "stack run gameengine-server --copy-bins --local-bin-path build --fast",
             "problemMatcher": []
         },
         {
@@ -24,6 +14,21 @@
             "type": "shell",
             "command": "stack ghci app/Main.hs",
             "problemMatcher": []
+        },
+        {
+            "label": "Copy to demo-cube",
+            "type": "shell",
+            "command": "py \"copy-to-demo-cube.py\""
+        },
+        {
+            "label": "Build (release)",
+            "type": "shell",
+            "command": "stack build --copy-bins --local-bin-path build",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
