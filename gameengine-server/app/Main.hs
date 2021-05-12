@@ -1,6 +1,13 @@
 module Main where
 
-import Lib
+import System.IO (withFile, IOMode(ReadMode), hClose, hGetContents)
+import Control.Exception (bracket)
+
+import Lib (someFunc)
 
 main :: IO ()
-main = someFunc
+main = do
+    someFunc
+    withFile "resources/file.txt" ReadMode (\handle -> do
+        contents <- hGetContents handle
+        putStrLn contents)

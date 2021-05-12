@@ -12,6 +12,9 @@ author:              "David Juckes"
 # common to point users to the README.md file.
 description: Server for gameengine
 
+data-files:
+- resources/*
+
 dependencies:
 - base >= 4.7 && < 5
 
