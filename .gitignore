@@ -346,3 +346,8 @@ packaged-releases/package sources/*
 demo-cube/resources/settings.json
 
 *.cxl
+
+# stack
+gameengine-server/.stack-work/
+gameengine-server/*~
+gameengine-server/build/
