@@ -7,18 +7,22 @@ on:
     - 'NVIDIA Nsight/**'
     - 'demo-cube/**'
     - 'packaged-releases/**'
+    - 'gameengine-server/**'
     - '.gitattributes'
     - '.gitignore'
     - 'README.md'
+    - 'SOURCES.md'
   pull_request:
     branches: [ master ]
     paths-ignore:
     - 'NVIDIA Nsight/**'
     - 'demo-cube/**'
     - 'packaged-releases/**'
+    - 'gameengine-server/**'
     - '.gitattributes'
     - '.gitignore'
     - 'README.md'
+    - 'SOURCES.md'
 
 jobs:
   build:
