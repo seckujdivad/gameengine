@@ -6,7 +6,7 @@
         {
             "label": "Run compiled (quick)",
             "type": "shell",
-            "command": "stack run gameengine-server --copy-bins --local-bin-path build --fast",
+            "command": "stack build --copy-bins --local-bin-path build --fast && stack run gameengine-server ",
             "problemMatcher": []
         },
         {
