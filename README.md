@@ -43,6 +43,7 @@ Build dependencies are handled by [vcpkg](https://github.com/microsoft/vcpkg). Y
 * glew
 * opengl
 * gtest
+* ASIO
 
 You can also use the response file at `/vcpkg_install.txt`.
 

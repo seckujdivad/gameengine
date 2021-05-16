@@ -16,7 +16,7 @@
 #include "scene/Camera.h"
 #include "render/RenderMode.h"
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.1", 4321)
 {
 	//load settings file
 	this->ReloadSettings();

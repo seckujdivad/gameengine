@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "loaders/SceneLoader.h"
+#include "network/Connection.h"
 
 #include "VectorCtrl.h"
 
@@ -32,6 +33,8 @@ private:
 	std::unique_ptr<Camera> m_camera;
 
 	std::shared_ptr<Model> m_model_selected = nullptr;
+
+	Connection m_connection;
 
 	nlohmann::json m_settings;
 

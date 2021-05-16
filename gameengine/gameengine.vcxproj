@@ -206,6 +206,7 @@
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\LogMessage.h" />
+    <ClInclude Include="src\network\Connection.h" />
     <ClInclude Include="src\PatchSize.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
@@ -279,6 +280,7 @@
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\loaders\SceneLoader.cpp" />
     <ClCompile Include="src\LogMessage.cpp" />
+    <ClCompile Include="src\network\Connection.cpp" />
     <ClCompile Include="src\render\controllers\CubemapController.cpp" />
     <ClCompile Include="src\render\controllers\EngineCanvasController.cpp" />
     <ClCompile Include="src\render\controllers\ReflectionController.cpp" />

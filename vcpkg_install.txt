@@ -4,5 +4,6 @@ glm
 opengl
 nlohmann-json
 glew
+asio
 --triplet
 x86-windows

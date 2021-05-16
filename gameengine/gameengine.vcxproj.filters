@@ -148,6 +148,12 @@
     <Filter Include="Source Files\render\glgeometry">
       <UniqueIdentifier>{79e7b5c7-e7a3-4744-a771-5c0653935087}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\network">
+      <UniqueIdentifier>{ff269033-2c0b-4925-a093-b8b6082712b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\network">
+      <UniqueIdentifier>{f3b86262-51c8-4da2-9d5f-a71914cd7124}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -366,6 +372,9 @@
     <ClInclude Include="src\render\GLFramebuffer.h">
       <Filter>Header Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\network\Connection.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -574,6 +583,9 @@
     </ClCompile>
     <ClCompile Include="src\render\GLFramebuffer.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\Connection.cpp">
+      <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
