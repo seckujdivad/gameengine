@@ -1,4 +1,4 @@
-module TCPServer (runTCPServer) where
+module TCPServer (runTCPServer, ConnInfo (Client)) where
 
 import Network.Socket (ServiceName, SocketType(Stream), AddrInfo(addrFlags, addrSocketType),
     HostName, defaultHints, getAddrInfo, AddrInfoFlag(AI_PASSIVE), Socket, SockAddr, Socket, HostName, ServiceName, withSocketsDo,
@@ -11,16 +11,27 @@ import Control.Concurrent (forkFinally)
 import Control.Monad (forever)
 
 
+-- |Store information about a connection
+data ConnInfo = Client Integer SockAddr
+
+instance Eq ConnInfo where
+    (==) (Client uid1 _) (Client uid2 _) = uid1 == uid2
+
+instance Show ConnInfo where
+    show (Client uid address) = show uid ++ " - " ++ show address
+
 -- |Starts a TCP listen server on the given address and port. 'connHandler' is started in a new thread for each new connection
-runTCPServer :: Maybe HostName -> ServiceName -> (Socket -> SockAddr -> IO ()) -> IO ()
+runTCPServer :: Maybe HostName -> ServiceName -> (Socket -> ConnInfo -> IO ()) -> IO ()
 runTCPServer host port connHandler = withSocketsDo $ do
     address <- resolveAddress host (Just port)
-    bracket (startListen address) close (connAccepter connHandler) --listen to the given address and close the connection when the listen function exits
+    bracket (startListen address) close (connAccepter connHandler 0) --listen to the given address and close the connection when the listen function exits
 
-connAccepter :: (Socket -> SockAddr -> IO ()) -> Socket -> IO ()
-connAccepter handlerFunc sock = forever $ do
+connAccepter :: (Socket -> ConnInfo -> IO ()) -> Integer -> Socket -> IO ()
+connAccepter handlerFunc uid sock = do
     (connection, address) <- accept sock --accept all incoming connections
-    forkFinally (handlerFunc connection address) (\_ -> gracefulClose connection 5000)
+    let connInfo = Client uid address
+    forkFinally (handlerFunc connection connInfo) (\_ -> gracefulClose connection 5000)
+    connAccepter handlerFunc (uid + 1) sock
 
 startListen :: AddrInfo -> IO Socket
 startListen address = do --create a socket that is listening on the given address

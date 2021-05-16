@@ -11,9 +11,12 @@ import Control.Concurrent.STM.TChan (TChan, newTChan, dupTChan, tryReadTChan, wr
 import qualified Data.ByteString (null)
 import Data.ByteString.Char8 (pack, unpack)
 
-import TCPServer (runTCPServer)
+import TCPServer (runTCPServer, ConnInfo (Client))
 
-type ServerInterface = (TChan String, TChan String) --mainloop input, mainloop output
+
+data ServerMessage = Message String | Close Integer;
+
+type ServerInterface = (TChan ServerMessage, TChan ServerMessage) --mainloop input, mainloop output
 
 main :: IO ()
 main = do
@@ -23,28 +26,38 @@ main = do
     forkIO (serverMainloop interface)
     runTCPServer Nothing "4321" (connHandler interface)
 
-connHandler :: ServerInterface -> Socket -> SockAddr -> IO ()
-connHandler (mainloopIn, mainloopOut) connection address = do
-    putStrLn ("New connection: " ++ show address)
-    mainloopOutDuplicated <- atomically $ dupTChan mainloopOut
-    forkIO (connSender connection address mainloopOutDuplicated)
-    handleMessageFromClient (mainloopIn, mainloopOut) connection
+connHandler :: ServerInterface -> Socket -> ConnInfo -> IO ()
+connHandler interfaceBlock connection connInfo = do
+    putStrLn ("New connection: " ++ show connInfo)
+    connReceiver interfaceBlock connection connInfo
 
-handleMessageFromClient :: ServerInterface -> Socket -> IO ()
-handleMessageFromClient (mainloopIn, mainloopOut) connection = do
+connReceiver :: ServerInterface -> Socket -> ConnInfo -> IO ()
+connReceiver (mainloopIn, mainloopOut) connection connInfo = do
     message <- recv connection 1024
     let socketClosed = Data.ByteString.null message
-    when socketClosed (putStrLn "Connection closed")
-    unless socketClosed (do
+    if socketClosed then do
+        putStrLn ("Client receiver closed - " ++ show connInfo)
+        atomically $ writeTChan mainloopIn (Close uid)
+    else do
         let strMessage = unpack message
-        atomically $ writeTChan mainloopIn strMessage
-        handleMessageFromClient (mainloopIn, mainloopOut) connection)
+        putStrLn ("Message received - " ++ strMessage)
+        atomically $ writeTChan mainloopIn (Message strMessage)
+        connReceiver (mainloopIn, mainloopOut) connection connInfo
+    where
+        (Client uid address) = connInfo
 
-connSender :: Socket -> SockAddr -> TChan String -> IO ()
-connSender connection address mainloopOut = forever $ do
-    toSend <- atomically $ readTChan mainloopOut
-    putStrLn toSend
-    sendAll connection (pack (toSend ++ "\n"))
+connSender :: Socket -> ConnInfo -> TChan ServerMessage -> IO ()
+connSender connection connInfo mainloopOut = do
+    nextMessage <- atomically $ readTChan mainloopOut
+    case nextMessage of
+        Message strMessage -> do
+            putStrLn ("Rebroadcasting to " ++ show connInfo ++ " - " ++ strMessage)
+            sendAll connection (pack (strMessage ++ "\n"))
+            connSender connection connInfo mainloopOut
+        Close uidToClose -> do
+            unless (uid == uidToClose) (connSender connection connInfo mainloopOut)
+    where
+        (Client uid address) = connInfo
 
 serverMainloop :: ServerInterface -> IO ()
 serverMainloop (mainloopIn, mainloopOut) = forever $ do
