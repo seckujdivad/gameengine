@@ -44,7 +44,7 @@ connSender :: Socket -> SockAddr -> TChan String -> IO ()
 connSender connection address mainloopOut = forever $ do
     toSend <- atomically $ readTChan mainloopOut
     putStrLn toSend
-    sendAll connection (pack toSend)
+    sendAll connection (pack (toSend ++ "\n"))
 
 serverMainloop :: ServerInterface -> IO ()
 serverMainloop (mainloopIn, mainloopOut) = forever $ do
