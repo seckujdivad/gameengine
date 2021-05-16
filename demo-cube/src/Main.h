@@ -29,7 +29,7 @@ class Main : public wxFrame
 private:
 	//gameengine
 	std::unique_ptr<Engine> m_engine;
-	std::unique_ptr<Scene> m_scene;
+	Scene m_scene;
 	std::unique_ptr<Camera> m_camera;
 
 	std::shared_ptr<Model> m_model_selected = nullptr;

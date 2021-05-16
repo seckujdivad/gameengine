@@ -18,4 +18,4 @@ struct SceneLoaderConfig
 	} performance;
 };
 
-Scene* SceneFromJSON(SceneLoaderConfig config);
+Scene SceneFromJSON(SceneLoaderConfig config);
