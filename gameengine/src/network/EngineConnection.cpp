@@ -1,7 +1,7 @@
 #include "EngineConnection.h"
 
 #include <stdexcept>
-#include <stdint.h>
+
 
 enum class PacketType
 {
@@ -21,9 +21,9 @@ void EngineConnection::BytesReceived(std::vector<unsigned char> bytes) //CALLED 
 		
 		if (msg_type == PacketType::ConnEstablished)
 		{
-			if (bytes.size() == 10)
+			if (bytes.size() == 6)
 			{
-				int64_t uid = *reinterpret_cast<int64_t*>(bytes.data() + sizeof(unsigned char));
+				this->m_uid.store(*reinterpret_cast<int32_t*>(bytes.data() + sizeof(unsigned char)));
 			}
 			else
 			{
