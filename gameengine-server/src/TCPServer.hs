@@ -1,4 +1,4 @@
-module TCPServer (runTCPServer, ConnInfo (Client)) where
+module TCPServer (runTCPServer, ConnInfo (ConnInfo)) where
 
 import Network.Socket (ServiceName, SocketType(Stream), AddrInfo(addrFlags, addrSocketType),
     HostName, defaultHints, getAddrInfo, AddrInfoFlag(AI_PASSIVE), Socket, SockAddr, Socket, HostName, ServiceName, withSocketsDo,
@@ -12,13 +12,13 @@ import Control.Monad (forever)
 
 
 -- |Store information about a connection
-data ConnInfo = Client Integer SockAddr
+data ConnInfo = ConnInfo Integer SockAddr
 
 instance Eq ConnInfo where
-    (==) (Client uid1 _) (Client uid2 _) = uid1 == uid2
+    (==) (ConnInfo uid1 _) (ConnInfo uid2 _) = uid1 == uid2
 
 instance Show ConnInfo where
-    show (Client uid address) = show uid ++ " - " ++ show address
+    show (ConnInfo uid address) = show uid ++ " - " ++ show address
 
 -- |Starts a TCP listen server on the given address and port. 'connHandler' is started in a new thread for each new connection
 runTCPServer :: Maybe HostName -> ServiceName -> (Socket -> ConnInfo -> IO ()) -> IO ()
@@ -29,7 +29,7 @@ runTCPServer host port connHandler = withSocketsDo $ do
 connAccepter :: (Socket -> ConnInfo -> IO ()) -> Integer -> Socket -> IO ()
 connAccepter handlerFunc uid sock = do
     (connection, address) <- accept sock --accept all incoming connections
-    let connInfo = Client uid address
+    let connInfo = ConnInfo uid address
     forkFinally (handlerFunc connection connInfo) (\_ -> gracefulClose connection 5000)
     connAccepter handlerFunc (uid + 1) sock
 
