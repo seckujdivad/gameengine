@@ -21,14 +21,22 @@ void Connection::Listener()
 		{
 			throw std::runtime_error("Socket error: " + error_code.message());
 		}
-
-		std::string s = asio::buffer_cast<const char*>(buffer.data());
+		else
+		{
+			const unsigned char* bytes_raw = asio::buffer_cast<const unsigned char*>(buffer.data());
+			this->BytesReceived(std::vector<unsigned char>(bytes_raw, bytes_raw + bytes_read));
+		}
 	}
 }
 
-void Connection::WriteString(std::string to_send)
+void Connection::SendBytes(std::vector<unsigned char> bytes)
 {
-	this->m_asio_socket.write_some(asio::buffer(to_send));
+	this->m_asio_socket.write_some(asio::buffer(bytes));
+}
+
+void Connection::SendBytes(const unsigned char* bytes, std::size_t num_bytes)
+{
+	this->SendBytes(std::vector<unsigned char>(bytes, bytes + num_bytes));
 }
 
 Connection::Connection(std::string address, unsigned short port) : m_asio_socket(this->m_asio_service), m_continue_running(true)
@@ -36,8 +44,6 @@ Connection::Connection(std::string address, unsigned short port) : m_asio_socket
 	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(address), port));
 
 	this->m_listener = std::thread(&Connection::Listener, this);
-	
-	this->WriteString("hello world");
 }
 
 Connection::~Connection()

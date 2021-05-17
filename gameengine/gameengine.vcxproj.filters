@@ -375,6 +375,9 @@
     <ClInclude Include="src\network\Connection.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
+    <ClInclude Include="src\network\EngineConnection.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -585,6 +588,9 @@
       <Filter>Source Files\render</Filter>
     </ClCompile>
     <ClCompile Include="src\network\Connection.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\EngineConnection.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>

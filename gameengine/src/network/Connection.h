@@ -14,6 +14,8 @@
 #include <asio.hpp>
 #endif
 
+class Scene;
+
 class Connection
 {
 private:
@@ -24,7 +26,11 @@ private:
 	std::thread m_listener;
 	void Listener();
 
-	void WriteString(std::string to_send);
+protected:
+	void SendBytes(std::vector<unsigned char> bytes);
+	void SendBytes(const unsigned char* bytes, std::size_t num_bytes);
+
+	virtual void BytesReceived(std::vector<unsigned char> bytes) = 0;
 
 public:
 	Connection(std::string address, unsigned short port);
