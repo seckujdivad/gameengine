@@ -14,10 +14,11 @@ import Data.ByteString.Char8 (pack, unpack)
 import TCPServer (runTCPServer, ConnInfo (ConnInfo))
 import Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise)
 
+import qualified RecvToMain as RToM
+import qualified MainToSend as MToS
 
-data ServerMessage = Message String | Close Integer;
 
-type ServerInterface = (TChan ServerMessage, TChan ServerMessage) --mainloop input, mainloop output
+type ServerInterface = (TChan RToM.RecvToMain, TChan MToS.MainToSend) --mainloop input, mainloop output
 
 main :: IO ()
 main = do
@@ -41,32 +42,46 @@ connReceiver (mainloopIn, mainloopOut) connection connInfo = do
     let socketClosed = Data.ByteString.null message
     if socketClosed then do
         putStrLn ("Client receiver closed - " ++ show connInfo)
-        atomically $ writeTChan mainloopIn (Close uid)
+        writeToInput (RToM.RecvToMain uid RToM.Close)
     else do
         let strMessage = unpack message
         putStrLn ("Message received - " ++ strMessage)
-        atomically $ writeTChan mainloopIn (Message strMessage)
+        writeToInput (RToM.RecvToMain uid (RToM.Message strMessage))
         connReceiver (mainloopIn, mainloopOut) connection connInfo
     where
         (ConnInfo uid address) = connInfo
+        writeToInput = sendToTChan mainloopIn
 
-connSender :: Socket -> ConnInfo -> TChan ServerMessage -> IO ()
+connSender :: Socket -> ConnInfo -> TChan MToS.MainToSend -> IO ()
 connSender connection connInfo mainloopOut = do
     nextMessage <- atomically $ readTChan mainloopOut
     case nextMessage of
-        Message strMessage -> do
+        MToS.Message strMessage -> do
             putStrLn ("Rebroadcasting to " ++ show connInfo ++ " - " ++ strMessage)
             sendPacket connection (ChatMessage strMessage)
             connSender connection connInfo mainloopOut
-        Close uidToClose -> do
+        MToS.Close uidToClose -> do
             unless (uid == uidToClose) (connSender connection connInfo mainloopOut)
     where
         (ConnInfo uid address) = connInfo
 
 serverMainloop :: ServerInterface -> IO ()
 serverMainloop (mainloopIn, mainloopOut) = forever $ do
-    message <- atomically $ readTChan mainloopIn
-    atomically $ writeTChan mainloopOut message
+    (RToM.RecvToMain uid message) <- readFromInput
+    
+    case message of
+        RToM.Message strMessage -> writeToOutput (MToS.Message strMessage)
+        RToM.Close -> writeToOutput (MToS.Close uid)
+    
+    where
+        writeToOutput = sendToTChan mainloopOut
+        readFromInput = readFromTChan mainloopIn
 
 sendPacket :: Socket -> Packet -> IO ()
 sendPacket socket = sendAll socket . serialise 
+
+sendToTChan :: TChan a -> a -> IO ()
+sendToTChan channel = atomically . writeTChan channel
+
+readFromTChan :: TChan a -> IO a
+readFromTChan = atomically . readTChan

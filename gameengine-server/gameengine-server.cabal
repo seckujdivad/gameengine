@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a9538b9a3f04d37e29e1fc95d2ed787607e4268c32d1b8323af08ccdc2eaee7c
+-- hash: 5f4f49783a15f833bc4b009ee6f7a9f2760f1ec2ded435eb66f0638baf810c4f
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -38,7 +38,9 @@ library
 executable gameengine-server
   main-is: Main.hs
   other-modules:
+      MainToSend
       Packet
+      RecvToMain
       Paths_gameengine_server
   hs-source-dirs:
       app
