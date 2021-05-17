@@ -194,7 +194,7 @@ Texture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, 
 	return texture;
 }
 
-void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, const Scene& scene)
+void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, Scene* scene)
 {
 	if (data.contains("clips") && data["clips"].is_array())
 	{
@@ -234,7 +234,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				std::optional<std::shared_ptr<Model>> model = scene.GetModel(el2.value().get<std::string>());
+				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
 				if (model.has_value())
 				{
 					cubemap->AddStaticModel(model.value()->GetReference());
@@ -257,7 +257,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				std::optional<std::shared_ptr<Model>> model = scene.GetModel(el2.value().get<std::string>());
+				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
 				if (model.has_value())
 				{
 					cubemap->AddDynamicModel(model.value()->GetReference());
@@ -288,7 +288,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 }
 
 
-Scene SceneFromJSON(SceneLoaderConfig config)
+Scene* SceneFromJSON(SceneLoaderConfig config)
 {
 	//load scene json
 	nlohmann::json scene_data = nlohmann::json::parse(LoadFile(config.path.root / config.path.file));
@@ -382,17 +382,17 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 	}
 
 	//initialise scene object
-	Scene scene;
+	Scene* scene = new Scene();
 
 	if (scene_data["metadata"].is_object())
 	{
 		if (scene_data["metadata"]["identifier"].is_string())
 		{
-			scene.SetIdentifier(scene_data["metadata"]["identifier"].get<std::string>());
+			scene->SetIdentifier(scene_data["metadata"]["identifier"].get<std::string>());
 		}
 	}
 
-	scene.SetAmbientLight(GetVector(scene_data["lighting"]["ambient"], glm::dvec3(0.0)));
+	scene->SetAmbientLight(GetVector(scene_data["lighting"]["ambient"], glm::dvec3(0.0)));
 
 	//load scene approximation (OBBs)
 	if (scene_data["obb approximation"].is_array())
@@ -410,7 +410,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 			obb.SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
 			obb.SetScale(GetVector(el.value()["dimensions"], glm::dvec3(2.0)) * 0.5);
 
-			scene.Add(obb);
+			scene->Add(obb);
 		}
 	}
 
@@ -427,13 +427,13 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 			visbox->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
 			visbox->SetScale(GetVector(el.value()["dimensions"], glm::dvec3(2.0)) * 0.5);
 
-			scene.Add(visbox);
+			scene->Add(visbox);
 		}
 
 		//second pass - load visboxes into other visboxes
 		for (auto& el : scene_data["visboxes"].items())
 		{
-			std::optional<std::shared_ptr<VisBox>> visbox = scene.GetVisBox(el.key());
+			std::optional<std::shared_ptr<VisBox>> visbox = scene->GetVisBox(el.key());
 
 			if (visbox.has_value())
 			{
@@ -463,7 +463,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 
 				for (auto& el2 : pvs)
 				{
-					std::optional<std::shared_ptr<VisBox>> inner_visbox = scene.GetVisBox(el2);
+					std::optional<std::shared_ptr<VisBox>> inner_visbox = scene->GetVisBox(el2);
 					if (inner_visbox.has_value())
 					{
 						visbox.value()->AddPotentiallyVisible(inner_visbox.value().get());
@@ -593,7 +593,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 					}
 				}
 
-				std::shared_ptr<Model> model = std::make_shared<Model>(scene.GetNewModelReference(), geometries, scene);
+				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), geometries, scene);
 
 				if (el.value()["identifier"].is_string())
 				{
@@ -636,12 +636,12 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 				}
 
 				//load textures
-				model->GetColourTexture() = GetTexture(el.value()["textures"]["colour"], config.path.root, scene.GetNewTextureReference(), glm::vec3(1.0f), TextureFiltering::Linear, TextureFiltering::Linear);
-				model->GetNormalTexture() = GetTexture(el.value()["textures"]["normal"], config.path.root, scene.GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f), TextureFiltering::Linear, TextureFiltering::Linear);
-				model->GetReflectionTexture() = GetTexture(el.value()["textures"]["reflection intensity"], config.path.root, scene.GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
-				model->GetSpecularTexture() = GetTexture(el.value()["textures"]["specular"], config.path.root, scene.GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
-				model->GetSkyboxMaskTexture() = GetTexture(el.value()["textures"]["skybox mask"], config.path.root, scene.GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Nearest, TextureFiltering::Nearest);
-				model->GetDisplacementTexture() = GetTexture(el.value()["textures"]["displacement"], config.path.root, scene.GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
+				model->GetColourTexture() = GetTexture(el.value()["textures"]["colour"], config.path.root, scene->GetNewTextureReference(), glm::vec3(1.0f), TextureFiltering::Linear, TextureFiltering::Linear);
+				model->GetNormalTexture() = GetTexture(el.value()["textures"]["normal"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.5f, 0.5f, 1.0f), TextureFiltering::Linear, TextureFiltering::Linear);
+				model->GetReflectionTexture() = GetTexture(el.value()["textures"]["reflection intensity"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
+				model->GetSpecularTexture() = GetTexture(el.value()["textures"]["specular"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
+				model->GetSkyboxMaskTexture() = GetTexture(el.value()["textures"]["skybox mask"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Nearest, TextureFiltering::Nearest);
+				model->GetDisplacementTexture() = GetTexture(el.value()["textures"]["displacement"], config.path.root, scene->GetNewTextureReference(), glm::vec3(0.0f), TextureFiltering::Linear, TextureFiltering::Linear);
 
 				//load phong material
 				model->GetMaterial().diffuse = GetVector(el.value()["material"]["diffuse"], glm::dvec3(0.0));
@@ -696,7 +696,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 
 				for (auto& el2 : pvs_membership)
 				{
-					std::optional<std::shared_ptr<VisBox>> visbox = scene.GetVisBox(el2);
+					std::optional<std::shared_ptr<VisBox>> visbox = scene->GetVisBox(el2);
 
 					if (visbox.has_value())
 					{
@@ -708,7 +708,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 					}
 				}
 
-				scene.Add(model);
+				scene->Add(model);
 				models.push_back(model);
 			}
 		}
@@ -717,7 +717,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 	//load all reflections with model ptrs
 	for (auto& el : scene_data["reflections"].items())
 	{
-		std::shared_ptr<Reflection> reflection = std::make_shared<Reflection>(scene.GetNewRenderTextureReference());
+		std::shared_ptr<Reflection> reflection = std::make_shared<Reflection>(scene->GetNewRenderTextureReference());
 
 		reflection->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 
@@ -738,7 +738,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 
 		ConfigureCubemap(el.value(), perf_data, reflection.get(), scene);
 
-		scene.Add(reflection);
+		scene->Add(reflection);
 	}
 
 	//load reflection ptrs into all models that require them for reflections
@@ -801,7 +801,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 
 				for (auto& el2 : refl_names)
 				{
-					std::optional<std::shared_ptr<Reflection>> reflection = scene.GetReflection(el2);
+					std::optional<std::shared_ptr<Reflection>> reflection = scene->GetReflection(el2);
 					if (reflection.has_value())
 					{
 						model->GetMaterial().reflections.push_back(std::tuple(reflection.value(), mode));
@@ -826,7 +826,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 		{
 			if (el.value().is_object())
 			{
-				std::shared_ptr<PointLight> pointlight = std::make_shared<PointLight>(scene.GetNewRenderTextureReference());
+				std::shared_ptr<PointLight> pointlight = std::make_shared<PointLight>(scene->GetNewRenderTextureReference());
 
 				pointlight->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 				pointlight->SetIntensity(GetVector(el.value()["intensity"], glm::dvec3(0.0)));
@@ -841,7 +841,7 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 					ConfigureCubemap(el.value()["shadows"], perf_data, pointlight.get(), scene);
 				}
 
-				scene.Add(pointlight);
+				scene->Add(pointlight);
 			}
 			else
 			{
@@ -856,18 +856,18 @@ Scene SceneFromJSON(SceneLoaderConfig config)
 		{
 			if (el.value().is_object())
 			{
-				std::shared_ptr<Skybox> skybox = std::make_shared<Skybox>(scene.GetNewRenderTextureReference());
+				std::shared_ptr<Skybox> skybox = std::make_shared<Skybox>(scene->GetNewRenderTextureReference());
 				skybox->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 
 				ConfigureCubemap(el.value(), perf_data, skybox.get(), scene);
 
-				scene.Add(skybox);
+				scene->Add(skybox);
 
 				for (auto& el2 : el.value()["drawn on"].items())
 				{
 					if (el2.value().is_string())
 					{
-						std::optional<std::shared_ptr<Model>> model = scene.GetModel(el2.value().get<std::string>());
+						std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
 
 						if (model.has_value())
 						{

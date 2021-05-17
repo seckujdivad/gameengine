@@ -33,9 +33,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//create glcanvas
-	this->m_scene = SceneFromJSON(this->GetSceneLoaderConfig());
+	this->m_scene = std::unique_ptr<Scene>(SceneFromJSON(this->GetSceneLoaderConfig()));
 
-	this->m_engine = std::make_unique<Engine>(this, &this->m_scene, true);
+	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
 		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
 		}));
@@ -87,7 +87,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.
 	this->m_lb_models->Bind(wxEVT_CHAR, &Main::lb_models_OnChar, this);
 	this->m_sizer->Add(this->m_lb_models, wxGBPosition(0, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
-	for (const std::shared_ptr<Model> model : this->m_scene.GetModels())
+	for (const std::shared_ptr<Model> model : this->m_scene->GetModels())
 	{
 		this->m_lb_models->Append(model->GetIdentifier());
 	}
@@ -133,7 +133,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.
 	this->m_sizer->Add(this->m_rdobx_render_mode, wxGBPosition(4, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
 	//set window title
-	this->SetTitle("Render Test: viewing " + this->m_scene.GetIdentifier());
+	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier());
 
 	this->SetModel(nullptr);
 
@@ -170,7 +170,7 @@ void Main::SetModel(std::shared_ptr<Model> model)
 	{
 		model->SetCurrentWireframeIndex(1);
 			
-		std::vector<std::shared_ptr<Model>> models = this->m_scene.GetModels();
+		std::vector<std::shared_ptr<Model>> models = this->m_scene->GetModels();
 		for (size_t i = 0; i < models.size(); i++)
 		{
 			if (models.at(i) == model)
@@ -264,7 +264,7 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 	int selection_index = this->m_lb_models->GetSelection();
 	if (selection_index != wxNOT_FOUND)
 	{
-		const std::vector<std::shared_ptr<Model>>& models = this->m_scene.GetModels();
+		const std::vector<std::shared_ptr<Model>>& models = this->m_scene->GetModels();
 		this->SetModel(models.at(selection_index));
 	}
 }
