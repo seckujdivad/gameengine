@@ -66,6 +66,8 @@ private:
 	void vct_rotation_OnChange(VectorCtrlEvent& evt);
 	void vct_scale_OnChange(VectorCtrlEvent& evt);
 
+	void Mainloop(wxIdleEvent& evt);
+
 public:
 	Main();
 

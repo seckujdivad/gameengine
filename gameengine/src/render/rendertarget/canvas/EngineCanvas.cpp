@@ -27,7 +27,6 @@ EngineCanvas::EngineCanvas(wxWindow* parent, wxWindowID id, wxGLAttributes& args
 
 	this->Bind(wxEVT_PAINT, &EngineCanvas::OnPaint, this);
 	this->Bind(wxEVT_SIZE, &EngineCanvas::OnSize, this);
-	this->Bind(wxEVT_IDLE, &EngineCanvas::RenderMainloop, this);
 	this->Bind(wxEVT_KEY_DOWN, &EngineCanvas::KeyDown, this);
 	this->Bind(wxEVT_LEFT_DOWN, &EngineCanvas::Clicked, this);
 }
@@ -129,16 +128,6 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 	evt.Skip();
 }
 
-void EngineCanvas::RenderMainloop(wxIdleEvent& evt)
-{
-	if (this->m_loop_render)
-	{
-		this->Draw(true);
-		evt.RequestMore();
-		evt.Skip();
-	}
-}
-
 void EngineCanvas::KeyDown(wxKeyEvent& evt)
 {
 	if ((evt.GetKeyCode() == WXK_ESCAPE) && this->m_mouselook_active)
@@ -207,15 +196,6 @@ void EngineCanvas::SetKeyboardMove(bool enable)
 void EngineCanvas::SetKeyboardMoveActive(bool enable)
 {
 	this->m_keyboard_move_active = enable;
-}
-
-void EngineCanvas::SetRenderLoop(bool enable)
-{
-	this->m_loop_render = enable;
-
-	this->MakeOpenGLFocus();
-	glFlush();
-	this->SwapBuffers();
 }
 
 void EngineCanvas::SetVerticalSync(bool enabled)

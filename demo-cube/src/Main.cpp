@@ -77,7 +77,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.
 	this->m_glcanvas->SetControlledCamera(this->m_camera.get());
 	this->m_glcanvas->SetMouselook(true);
 	this->m_glcanvas->SetKeyboardMove(true);
-	this->m_glcanvas->SetRenderLoop(true);
 
 	this->m_sizer->Add(this->m_glcanvas, wxGBPosition(0, 0), wxGBSpan(5, 1), wxEXPAND | wxALL);
 
@@ -136,6 +135,9 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.
 	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier());
 
 	this->SetModel(nullptr);
+
+	//start the render loop
+	this->Bind(wxEVT_IDLE, &Main::Mainloop, this);
 
 	//final layout configuration
 	this->m_sizer->AddGrowableRow(0);
@@ -329,5 +331,13 @@ void Main::vct_scale_OnChange(VectorCtrlEvent& evt)
 	{
 		this->m_model_selected->SetScale(GetGLMVector<3>(this->m_vct_scale->GetValues()));
 	}
+	evt.Skip();
+}
+
+void Main::Mainloop(wxIdleEvent& evt)
+{
+	this->m_engine->Render(true);
+
+	evt.RequestMore();
 	evt.Skip();
 }

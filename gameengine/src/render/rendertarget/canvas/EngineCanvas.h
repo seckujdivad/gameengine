@@ -34,10 +34,6 @@ private:
 	void SetKeyboardMoveActive(bool enable);
 	void CameraControlMainloop(wxTimerEvent& evt);
 
-	//render loop
-	bool m_loop_render = false;
-	void RenderMainloop(wxIdleEvent& evt);
-
 	//key press handling
 	void KeyDown(wxKeyEvent& evt);
 	void Clicked(wxMouseEvent& evt);
@@ -55,7 +51,6 @@ public:
 
 	void SetMouselook(bool enable);
 	void SetKeyboardMove(bool enable);
-	void SetRenderLoop(bool enable);
 
 	void SetVerticalSync(bool enabled);
 
