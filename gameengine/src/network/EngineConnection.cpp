@@ -2,45 +2,59 @@
 
 #include <stdexcept>
 
-
-enum class PacketType
-{
-	ConnEstablished,
-	ChatMessage
-};
-
 void EngineConnection::BytesReceived(std::vector<unsigned char> bytes) //CALLED FROM A SEPARATE THREAD
 {
-	if (bytes.size() == 0)
-	{
-		throw std::runtime_error("Empty message decoded");
-	}
-	else
-	{
-		PacketType msg_type = static_cast<PacketType>(bytes.at(0));
-		
-		if (msg_type == PacketType::ConnEstablished)
-		{
-			if (bytes.size() == 6)
-			{
-				this->m_uid.store(*reinterpret_cast<int32_t*>(bytes.data() + sizeof(unsigned char)));
-			}
-			else
-			{
-				throw std::runtime_error("Unexpected ConnEstablished packet size");
-			}
-		}
-		else if (msg_type == PacketType::ChatMessage)
-		{
+	this->m_packets_received_lock.lock();
 
-		}
-		else
-		{
-			throw std::runtime_error("Unknown packet header received from server");
-		}
-	}
+	this->m_packets_received.emplace(bytes);
+
+	this->m_packets_received_lock.unlock();
 }
 
 EngineConnection::EngineConnection(std::string address, unsigned short port) : Connection(address, port)
 {
+}
+
+void EngineConnection::SendPacket(Packet packet)
+{
+	this->SendBytes(packet.Serialise());
+}
+
+std::optional<Packet> EngineConnection::GetLatestPacket()
+{
+	std::optional<Packet> result;
+
+	this->m_packets_received_lock.lock();
+
+	if (!this->m_packets_received.empty())
+	{
+		result = this->m_packets_received.front();
+		this->m_packets_received.pop();
+	}
+
+	this->m_packets_received_lock.unlock();
+
+	return result;
+}
+
+bool EngineConnection::HasUnprocessedPackets()
+{
+	this->m_packets_received_lock.lock();
+
+	bool is_empty = this->m_packets_received.empty();
+
+	this->m_packets_received_lock.unlock();
+
+	return !is_empty;
+}
+
+std::size_t EngineConnection::GetNumUnprocessedPackets()
+{
+	this->m_packets_received_lock.lock();
+
+	std::size_t num_packets = this->m_packets_received.size();
+
+	this->m_packets_received_lock.unlock();
+
+	return num_packets;
 }
