@@ -338,6 +338,28 @@ void Main::Mainloop(wxIdleEvent& evt)
 {
 	this->m_engine->Render(true);
 
+	std::optional<Packet> latest_packet = this->m_connection.GetLatestPacket();
+	while (latest_packet.has_value())
+	{
+		//handle this packet
+		Packet& packet = latest_packet.value();
+		if (packet.GetType() == Packet::Type::ConnEstablished)
+		{
+			this->m_connection.SendPacket(Packet(Packet::ChatMessage("Hello world!")));
+		}
+		else if (packet.GetType() == Packet::Type::ChatMessage)
+		{
+
+		}
+		else
+		{
+			throw std::runtime_error("Unknown packet type: " + std::to_string(static_cast<int>(packet.GetType())));
+		}
+
+		//get the next packet
+		latest_packet = this->m_connection.GetLatestPacket();
+	}
+
 	evt.RequestMore();
 	evt.Skip();
 }
