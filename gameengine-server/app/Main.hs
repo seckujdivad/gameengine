@@ -18,8 +18,10 @@ import qualified RecvToMain as RToM
 import qualified MainToSend as MToS
 
 
-type ServerInterface = (TChan RToM.RecvToMain, TChan MToS.MainToSend) --mainloop input, mainloop output
+-- |(mainloop input, mainloop output)
+type ServerInterface = (TChan RToM.RecvToMain, TChan MToS.MainToSend) --
 
+-- |Entry point
 main :: IO ()
 main = do
     mainloopIn <- atomically newTChan
@@ -28,6 +30,7 @@ main = do
     forkIO (serverMainloop interface)
     runTCPServer Nothing "4321" (connHandler interface)
 
+-- |Called when a new connection to a client is established
 connHandler :: ServerInterface -> Socket -> ConnInfo -> IO ()
 connHandler interfaceBlock connection connInfo = do
     putStrLn ("New connection: " ++ show connInfo)
@@ -36,6 +39,7 @@ connHandler interfaceBlock connection connInfo = do
     where
         (ConnInfo uid address) = connInfo
 
+-- |Listens to a client
 connReceiver :: ServerInterface -> Socket -> ConnInfo -> IO ()
 connReceiver (mainloopIn, mainloopOut) connection connInfo = do
     message <- recv connection 1024
@@ -56,6 +60,7 @@ connReceiver (mainloopIn, mainloopOut) connection connInfo = do
         (ConnInfo uid address) = connInfo
         writeToInput = sendToTChan mainloopIn
 
+-- |Sends messages to a client
 connSender :: Socket -> ConnInfo -> TChan MToS.MainToSend -> IO ()
 connSender connection connInfo mainloopOut = do
     nextMessage <- atomically $ readTChan mainloopOut
@@ -68,23 +73,25 @@ connSender connection connInfo mainloopOut = do
     where
         (ConnInfo uid address) = connInfo
 
+-- |Handles inter-client communication and the server state
 serverMainloop :: ServerInterface -> IO ()
 serverMainloop (mainloopIn, mainloopOut) = forever $ do
     (RToM.RecvToMain uid message) <- readFromInput
-    
     case message of
         RToM.Message strMessage -> writeToOutput (MToS.Message strMessage)
         RToM.Close -> writeToOutput (MToS.Close uid)
-    
     where
         writeToOutput = sendToTChan mainloopOut
         readFromInput = readFromTChan mainloopIn
 
+-- |Sends a 'Packet' to a 'Socket'
 sendPacket :: Socket -> Packet -> IO ()
 sendPacket socket = sendAll socket . serialise 
 
+-- |Transactionally write some data to a 'TChan'
 sendToTChan :: TChan a -> a -> IO ()
 sendToTChan channel = atomically . writeTChan channel
 
+-- |Transactionally read some data from a 'TChan'
 readFromTChan :: TChan a -> IO a
 readFromTChan = atomically . readTChan
