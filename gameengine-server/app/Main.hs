@@ -44,10 +44,16 @@ connReceiver (mainloopIn, mainloopOut) connection connInfo = do
         putStrLn ("Client receiver closed - " ++ show connInfo)
         writeToInput (RToM.RecvToMain uid RToM.Close)
     else do
-        let strMessage = unpack message
-        putStrLn ("Message received - " ++ strMessage)
-        writeToInput (RToM.RecvToMain uid (RToM.Message strMessage))
+        case deserialise message of
+            Nothing -> putStrLn "Couldn't decode packet"
+            Just packet -> case packet of
+                ConnEstablished uid -> putStrLn (show connInfo ++ " - client shouldn't send ConnEstablished")
+                ChatMessage strMessage -> do
+                    putStrLn ("Chat message - " ++ show connInfo ++ " - " ++ strMessage)
+                    writeToInput (RToM.RecvToMain uid (RToM.Message strMessage))
+        
         connReceiver (mainloopIn, mainloopOut) connection connInfo
+
     where
         (ConnInfo uid address) = connInfo
         writeToInput = sendToTChan mainloopIn
