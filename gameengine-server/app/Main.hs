@@ -51,9 +51,7 @@ connReceiver (mainloopIn, mainloopOut) connection connInfo = do
                 ChatMessage strMessage -> do
                     putStrLn ("Chat message - " ++ show connInfo ++ " - " ++ strMessage)
                     writeToInput (RToM.RecvToMain uid (RToM.Message strMessage))
-        
         connReceiver (mainloopIn, mainloopOut) connection connInfo
-
     where
         (ConnInfo uid address) = connInfo
         writeToInput = sendToTChan mainloopIn
@@ -66,8 +64,7 @@ connSender connection connInfo mainloopOut = do
             putStrLn ("Rebroadcasting to " ++ show connInfo ++ " - " ++ strMessage)
             sendPacket connection (ChatMessage strMessage)
             connSender connection connInfo mainloopOut
-        MToS.Close uidToClose -> do
-            unless (uid == uidToClose) (connSender connection connInfo mainloopOut)
+        MToS.Close uidToClose -> unless (uid == uidToClose) (connSender connection connInfo mainloopOut)
     where
         (ConnInfo uid address) = connInfo
 
