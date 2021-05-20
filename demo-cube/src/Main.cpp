@@ -6,6 +6,7 @@
 #include <wx/listbox.h>
 #include <wx/stattext.h>
 #include <wx/radiobox.h>
+#include <wx/menu.h>
 
 #include "Engine.h"
 #include "generic/std_glm.h"
@@ -15,11 +16,26 @@
 #include "scene/model/Model.h"
 #include "scene/Camera.h"
 #include "render/RenderMode.h"
+#include "network/EngineConnection.h"
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_connection("127.0.0.1", 4321)
+#include "Chat.h"
+
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
+	//set up menu bar
+	this->m_mb = new wxMenuBar();
+
+	wxMenu* menu_server = new wxMenu();
+	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Chat, this, menu_server->Append(wxID_ANY, "Chat", "Open a new chat window")->GetId());
+	this->m_mb->Append(menu_server, "Server");
+
+	this->SetMenuBar(this->m_mb);
+
 	//load settings file
 	this->ReloadSettings();
+
+	//connect to the server
+	this->m_connection = std::make_shared<EngineConnection>("127.0.0.1", 4321);
 
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));
@@ -261,6 +277,14 @@ SceneLoaderConfig Main::GetSceneLoaderConfig() const
 	return config;
 }
 
+void Main::mb_Server_Chat(wxCommandEvent& evt)
+{
+	Chat* chat_window = new Chat(this, this->m_connection);
+	chat_window->Show();
+
+	evt.Skip();
+}
+
 void Main::lb_models_OnSelection(wxCommandEvent& evt)
 {
 	int selection_index = this->m_lb_models->GetSelection();
@@ -338,14 +362,14 @@ void Main::Mainloop(wxIdleEvent& evt)
 {
 	this->m_engine->Render(true);
 
-	std::optional<Packet> latest_packet = this->m_connection.GetLatestPacket();
+	std::optional<Packet> latest_packet = this->m_connection->GetLatestPacket();
 	while (latest_packet.has_value())
 	{
 		//handle this packet
 		Packet& packet = latest_packet.value();
 		if (packet.GetType() == Packet::Type::ConnEstablished)
 		{
-			this->m_connection.SendPacket(Packet(Packet::ChatMessage("Hello world!")));
+			this->m_connection->SendPacket(Packet(Packet::ChatMessage("Hello world!")));
 		}
 		else if (packet.GetType() == Packet::Type::ChatMessage)
 		{
@@ -357,7 +381,7 @@ void Main::Mainloop(wxIdleEvent& evt)
 		}
 
 		//get the next packet
-		latest_packet = this->m_connection.GetLatestPacket();
+		latest_packet = this->m_connection->GetLatestPacket();
 	}
 
 	evt.RequestMore();

@@ -7,15 +7,14 @@
 #include <nlohmann/json.hpp>
 
 #include "loaders/SceneLoader.h"
-#include "network/EngineConnection.h"
 
 #include "VectorCtrl.h"
 
 class wxGridBagSizer;
-class wxButton;
 class wxListBox;
 class wxStaticText;
 class wxRadioBox;
+class wxMenuBar;
 
 class Engine;
 class EngineCanvas;
@@ -23,6 +22,8 @@ class EngineCanvasController;
 class Scene;
 class Camera;
 class Model;
+
+class EngineConnection;
 
 class Main : public wxFrame
 {
@@ -34,7 +35,7 @@ private:
 
 	std::shared_ptr<Model> m_model_selected = nullptr;
 
-	EngineConnection m_connection;
+	std::shared_ptr<EngineConnection> m_connection;
 
 	nlohmann::json m_settings;
 
@@ -42,6 +43,10 @@ private:
 
 	//wxwidgets
 	wxGridBagSizer* m_sizer;
+
+	wxMenuBar* m_mb;
+
+	void mb_Server_Chat(wxCommandEvent& evt);
 	
 	EngineCanvas* m_glcanvas;
 	EngineCanvasController* m_glcanvas_controller;
