@@ -4,8 +4,18 @@
 
 #include <asio/error.hpp>
 
+//only required for naming the thread, a debugging convenience
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 void Connection::Listener()
 {
+#ifdef _WIN32
+	//https://docs.microsoft.com/en-us/visualstudio/debugger/how-to-set-a-thread-name-in-native-code?view=vs-2019
+	SetThreadDescription(GetCurrentThread(), L"Socket listener");
+#endif
+
 	while (this->m_continue_running.load())
 	{
 		asio::streambuf buffer;
