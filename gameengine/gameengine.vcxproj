@@ -209,6 +209,8 @@
     <ClInclude Include="src\network\Connection.h" />
     <ClInclude Include="src\network\EngineConnection.h" />
     <ClInclude Include="src\network\Packet.h" />
+    <ClInclude Include="src\network\PacketProcessor.h" />
+    <ClInclude Include="src\network\wx\PacketEvent.h" />
     <ClInclude Include="src\PatchSize.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
@@ -285,6 +287,8 @@
     <ClCompile Include="src\network\Connection.cpp" />
     <ClCompile Include="src\network\EngineConnection.cpp" />
     <ClCompile Include="src\network\Packet.cpp" />
+    <ClCompile Include="src\network\PacketProcessor.cpp" />
+    <ClCompile Include="src\network\wx\PacketEvent.cpp" />
     <ClCompile Include="src\render\controllers\CubemapController.cpp" />
     <ClCompile Include="src\render\controllers\EngineCanvasController.cpp" />
     <ClCompile Include="src\render\controllers\ReflectionController.cpp" />

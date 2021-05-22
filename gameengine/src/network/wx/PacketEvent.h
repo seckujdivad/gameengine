@@ -2,7 +2,7 @@
 
 #include <wx/event.h>
 
-#include "network/Packet.h"
+#include "../Packet.h"
 
 class PacketEvent : public wxEvent
 {

@@ -154,6 +154,12 @@
     <Filter Include="Source Files\network">
       <UniqueIdentifier>{f3b86262-51c8-4da2-9d5f-a71914cd7124}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\network\wx">
+      <UniqueIdentifier>{fd02d293-ac1d-4192-9b47-d6efd9f02623}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\network\wx">
+      <UniqueIdentifier>{fb7a6ca4-e949-48ce-940d-3ec64eba2d6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -381,6 +387,12 @@
     <ClInclude Include="src\network\Packet.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
+    <ClInclude Include="src\network\wx\PacketEvent.h">
+      <Filter>Header Files\network\wx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\PacketProcessor.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -597,6 +609,12 @@
       <Filter>Source Files\network</Filter>
     </ClCompile>
     <ClCompile Include="src\network\Packet.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\wx\PacketEvent.cpp">
+      <Filter>Source Files\network\wx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\PacketProcessor.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>

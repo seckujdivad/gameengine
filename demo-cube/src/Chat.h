@@ -4,7 +4,7 @@
 
 #include <wx/frame.h>
 
-#include "PacketEvent.h"
+#include "network/wx/PacketEvent.h"
 
 class wxGridBagSizer;
 class wxButton;
