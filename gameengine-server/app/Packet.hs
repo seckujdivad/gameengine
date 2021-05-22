@@ -2,7 +2,7 @@ module Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise) wh
 
 import qualified Data.ByteString
 import Data.ByteString.Char8 (pack, unpack, readInteger)
-import Data.ByteString.Builder (toLazyByteString, Builder, string8, word8, int32LE, char7)
+import Data.ByteString.Builder (toLazyByteString, Builder, string8, word8, int32LE, char8)
 import qualified Data.ByteString.Lazy
 import Data.Word (Word8)
 import Data.Int (Int32)
@@ -20,7 +20,7 @@ packetDelimiter = '\n'
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
-serialise packet = (Data.ByteString.Lazy.toStrict . toLazyByteString . mconcat) (serialiseInner packet ++ [char7 packetDelimiter])
+serialise packet = (Data.ByteString.Lazy.toStrict . toLazyByteString . mconcat) (serialiseInner packet ++ [char8 packetDelimiter])
 
 serialiseInner :: Packet -> [Builder]
 serialiseInner (ConnEstablished uid) = [word8 (0 :: Word8), int32LE (fromIntegral uid :: Int32)]

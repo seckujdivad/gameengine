@@ -14,75 +14,65 @@ import Data.ByteString.Char8 (pack, unpack)
 import TCPServer (runTCPServer, ConnInfo (ConnInfo))
 import Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise)
 
-import qualified RecvToMain as RToM
-import qualified MainToSend as MToS
-
-
--- |(mainloop input, mainloop output)
-type ServerInterface = (TChan RToM.RecvToMain, TChan MToS.MainToSend) --
+data ClientPacket = ClientPacket Integer (Maybe Packet) | NewClient ConnInfo Socket
 
 -- |Entry point
 main :: IO ()
 main = do
     mainloopIn <- atomically newTChan
-    mainloopOut <- atomically newBroadcastTChan
-    let interface = (mainloopIn, mainloopOut)
-    forkIO (serverMainloop interface)
-    runTCPServer Nothing "4321" (connHandler interface)
+    forkIO (serverMainloop mainloopIn)
+    runTCPServer Nothing "4321" (connHandler mainloopIn)
 
 -- |Called when a new connection to a client is established
-connHandler :: ServerInterface -> Socket -> ConnInfo -> IO ()
-connHandler interfaceBlock connection connInfo = do
+connHandler :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
+connHandler mainloopIn connection connInfo = do
     putStrLn ("New connection: " ++ show connInfo)
-    sendPacket connection (ConnEstablished uid)
-    connReceiver interfaceBlock connection connInfo
+    sendToTChan mainloopIn (NewClient connInfo connection)
+    connReceiver mainloopIn connection connInfo
     where
         (ConnInfo uid address) = connInfo
 
 -- |Listens to a client
-connReceiver :: ServerInterface -> Socket -> ConnInfo -> IO ()
-connReceiver (mainloopIn, mainloopOut) connection connInfo = do
+connReceiver :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
+connReceiver mainloopIn connection connInfo = do
     message <- recv connection 1024
     let socketClosed = Data.ByteString.null message
     if socketClosed then do
         putStrLn ("Client receiver closed - " ++ show connInfo)
-        writeToInput (RToM.RecvToMain uid RToM.Close)
+        writeToInput $ ClientPacket uid Nothing
     else do
         case deserialise message of
             Nothing -> putStrLn "Couldn't decode packet"
-            Just packet -> case packet of
-                ConnEstablished uid -> putStrLn (show connInfo ++ " - client shouldn't send ConnEstablished")
-                ChatMessage strMessage -> do
-                    putStrLn ("Chat message - " ++ show connInfo ++ " - " ++ strMessage)
-                    writeToInput (RToM.RecvToMain uid (RToM.Message strMessage))
-        connReceiver (mainloopIn, mainloopOut) connection connInfo
+            Just packet -> writeToInput $ ClientPacket uid (Just packet)
+        connReceiver mainloopIn connection connInfo
     where
         (ConnInfo uid address) = connInfo
         writeToInput = sendToTChan mainloopIn
 
--- |Sends messages to a client
-connSender :: Socket -> ConnInfo -> TChan MToS.MainToSend -> IO ()
-connSender connection connInfo mainloopOut = do
-    nextMessage <- atomically $ readTChan mainloopOut
-    case nextMessage of
-        MToS.Message strMessage -> do
-            putStrLn ("Rebroadcasting to " ++ show connInfo ++ " - " ++ strMessage)
-            sendPacket connection (ChatMessage strMessage)
-            connSender connection connInfo mainloopOut
-        MToS.Close uidToClose -> unless (uid == uidToClose) (connSender connection connInfo mainloopOut)
-    where
-        (ConnInfo uid address) = connInfo
-
 -- |Handles inter-client communication and the server state
-serverMainloop :: ServerInterface -> IO ()
-serverMainloop (mainloopIn, mainloopOut) = forever $ do
-    (RToM.RecvToMain uid message) <- readFromInput
-    case message of
-        RToM.Message strMessage -> writeToOutput (MToS.Message strMessage)
-        RToM.Close -> writeToOutput (MToS.Close uid)
+serverMainloop :: TChan ClientPacket -> IO ()
+serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn []
+
+serverMainloopInner :: TChan ClientPacket -> [(ConnInfo, Socket)] -> IO ()
+serverMainloopInner mainloopIn clients = do
+    clientComm <- readFromInput
+    case clientComm of
+        (ClientPacket uid packetMaybe) -> case packetMaybe of
+            Just packet -> case packet of
+                ConnEstablished uid -> putStrLn $ show uid ++ " - client shouldn't send ConnEstablished"
+                ChatMessage strMessage -> do
+                    putStrLn $ "Chat message - " ++ show uid ++ " - " ++ strMessage
+                    foldl (>>) (return ()) [sendPacket connection packet | (connInfo, connection) <- clients]
+                    nextLoop clients
+            Nothing -> do
+                putStrLn $ show uid ++ " - cleaning client"
+                nextLoop $ filter (\(ConnInfo uid2 _, _) -> uid /= uid2) clients
+        (NewClient (ConnInfo uid address) connection) -> do
+            sendPacket connection (ConnEstablished uid)
+            nextLoop $ clients ++ [(ConnInfo uid address, connection)]
     where
-        writeToOutput = sendToTChan mainloopOut
         readFromInput = readFromTChan mainloopIn
+        nextLoop = serverMainloopInner mainloopIn
 
 -- |Sends a 'Packet' to a 'Socket'
 sendPacket :: Socket -> Packet -> IO ()
