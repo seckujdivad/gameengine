@@ -4,6 +4,8 @@
 
 #include <wx/frame.h>
 
+#include "PacketEvent.h"
+
 class wxGridBagSizer;
 class wxButton;
 class wxListBox;
@@ -19,6 +21,8 @@ private:
 	wxListBox* m_lb_messages;
 
 	void txt_message_KeyPressed(wxKeyEvent& evt);
+
+	void OnPacketReceived(PacketEvent& evt);
 
 	std::shared_ptr<EngineConnection> m_connection;
 

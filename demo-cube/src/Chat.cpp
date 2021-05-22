@@ -21,6 +21,15 @@ void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 	}
 }
 
+void Chat::OnPacketReceived(PacketEvent& evt)
+{
+	const Packet& packet = evt.GetPacket();
+	if (packet.GetType() == Packet::Type::ChatMessage)
+	{
+		this->m_lb_messages->AppendString(packet.GetData<Packet::ChatMessage>().message);
+	}
+}
+
 Chat::Chat(wxWindow* parent, std::shared_ptr<EngineConnection> connection) : wxFrame(parent, wxID_ANY, "Chat"), m_connection(connection)
 {
 	this->m_sizer = new wxGridBagSizer(0, 0);
@@ -40,4 +49,6 @@ Chat::Chat(wxWindow* parent, std::shared_ptr<EngineConnection> connection) : wxF
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
 	this->Layout();
+
+	parent->Bind(EVT_PACKET, &Chat::OnPacketReceived, this);
 }
