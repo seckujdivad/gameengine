@@ -19,6 +19,7 @@
 #include "network/EngineConnection.h"
 
 #include "Chat.h"
+#include "PacketEvent.h"
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
@@ -369,16 +370,17 @@ void Main::Mainloop(wxIdleEvent& evt)
 		Packet& packet = latest_packet.value();
 		if (packet.GetType() == Packet::Type::ConnEstablished)
 		{
-			this->m_connection->SendPacket(Packet(Packet::ChatMessage("Hello world!")));
 		}
 		else if (packet.GetType() == Packet::Type::ChatMessage)
 		{
-
 		}
 		else
 		{
 			throw std::runtime_error("Unknown packet type: " + std::to_string(static_cast<int>(packet.GetType())));
 		}
+
+		PacketEvent event = PacketEvent(latest_packet.value(), this);
+		this->ProcessWindowEvent(event);
 
 		//get the next packet
 		latest_packet = this->m_connection->GetLatestPacket();
