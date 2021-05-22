@@ -19,7 +19,6 @@
 #include "network/EngineConnection.h"
 
 #include "Chat.h"
-#include "network/PacketProcessor.h"
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
@@ -363,7 +362,7 @@ void Main::Mainloop(wxIdleEvent& evt)
 {
 	this->m_engine->Render(true);
 
-	ProcessOutstandingPackets(*this->m_connection, this);
+	this->m_connection->ProcessOutstandingPackets(this);
 
 	evt.RequestMore();
 	evt.Skip();

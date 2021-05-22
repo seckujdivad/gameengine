@@ -7,6 +7,8 @@
 #include "Connection.h"
 #include "Packet.h"
 
+class wxWindow;
+
 class EngineConnection : public Connection
 {
 private:
@@ -23,4 +25,6 @@ public:
 	std::optional<Packet> GetLatestPacket();
 	bool HasUnprocessedPackets();
 	std::size_t GetNumUnprocessedPackets();
+
+	void ProcessOutstandingPackets(wxWindow* emit_events_from = nullptr);
 };

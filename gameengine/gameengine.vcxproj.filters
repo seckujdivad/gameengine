@@ -390,9 +390,6 @@
     <ClInclude Include="src\network\wx\PacketEvent.h">
       <Filter>Header Files\network\wx</Filter>
     </ClInclude>
-    <ClInclude Include="src\network\PacketProcessor.h">
-      <Filter>Header Files\network</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -613,9 +610,6 @@
     </ClCompile>
     <ClCompile Include="src\network\wx\PacketEvent.cpp">
       <Filter>Source Files\network\wx</Filter>
-    </ClCompile>
-    <ClCompile Include="src\network\PacketProcessor.cpp">
-      <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
