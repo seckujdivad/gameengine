@@ -31,6 +31,10 @@ void Connection::Listener()
 		{
 			throw std::runtime_error("Socket error: " + error_code.message());
 		}
+		else if (bytes_read == 0)
+		{
+			throw std::runtime_error("Socket error: " + error_code.message());
+		}
 		else
 		{
 			const unsigned char* bytes_raw = asio::buffer_cast<const unsigned char*>(buffer.data());
