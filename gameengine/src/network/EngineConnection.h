@@ -16,7 +16,7 @@ private:
 	std::queue<Packet> m_packets_received;
 
 protected:
-	void BytesReceived(std::vector<unsigned char> bytes) override;
+	void BytesReceived(std::vector<char> bytes) override;
 
 public:
 	EngineConnection(std::string address, unsigned short port);

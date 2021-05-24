@@ -6,7 +6,7 @@
 
 #include "wx/PacketEvent.h"
 
-void EngineConnection::BytesReceived(std::vector<unsigned char> bytes) //CALLED FROM A SEPARATE THREAD
+void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
 	this->m_packets_received_lock.lock();
 

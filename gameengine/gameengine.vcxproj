@@ -209,6 +209,10 @@
     <ClInclude Include="src\network\Connection.h" />
     <ClInclude Include="src\network\EngineConnection.h" />
     <ClInclude Include="src\network\Packet.h" />
+    <ClInclude Include="src\network\serialiser\Deserialise.h" />
+    <ClInclude Include="src\network\serialiser\Field.h" />
+    <ClInclude Include="src\network\serialiser\Serialise.h" />
+    <ClInclude Include="src\network\serialiser\Type.h" />
     <ClInclude Include="src\network\wx\PacketEvent.h" />
     <ClInclude Include="src\PatchSize.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />

@@ -160,6 +160,12 @@
     <Filter Include="Source Files\network\wx">
       <UniqueIdentifier>{fb7a6ca4-e949-48ce-940d-3ec64eba2d6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\network\serialiser">
+      <UniqueIdentifier>{3d9bf0aa-e1db-4fe6-a275-33057093e274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\network\serialiser">
+      <UniqueIdentifier>{1d35c587-6542-47cd-a73a-80c65cb25a29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -389,6 +395,18 @@
     </ClInclude>
     <ClInclude Include="src\network\wx\PacketEvent.h">
       <Filter>Header Files\network\wx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\serialiser\Type.h">
+      <Filter>Header Files\network\serialiser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\serialiser\Field.h">
+      <Filter>Header Files\network\serialiser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\serialiser\Serialise.h">
+      <Filter>Header Files\network\serialiser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\serialiser\Deserialise.h">
+      <Filter>Header Files\network\serialiser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -37,20 +37,20 @@ void Connection::Listener()
 		}
 		else
 		{
-			const unsigned char* bytes_raw = asio::buffer_cast<const unsigned char*>(buffer.data());
-			this->BytesReceived(std::vector<unsigned char>(bytes_raw, bytes_raw + bytes_read));
+			const char* bytes_raw = asio::buffer_cast<const char*>(buffer.data());
+			this->BytesReceived(std::vector<char>(bytes_raw, bytes_raw + bytes_read));
 		}
 	}
 }
 
-void Connection::SendBytes(std::vector<unsigned char> bytes)
+void Connection::SendBytes(std::vector<char> bytes)
 {
 	this->m_asio_socket.write_some(asio::buffer(bytes));
 }
 
-void Connection::SendBytes(const unsigned char* bytes, std::size_t num_bytes)
+void Connection::SendBytes(const char* bytes, std::size_t num_bytes)
 {
-	this->SendBytes(std::vector<unsigned char>(bytes, bytes + num_bytes));
+	this->SendBytes(std::vector<char>(bytes, bytes + num_bytes));
 }
 
 Connection::Connection(std::string address, unsigned short port) : m_asio_socket(this->m_asio_service), m_continue_running(true)

@@ -3,7 +3,35 @@
 #include <stdexcept>
 #include <string.h>
 
-Packet::Packet(std::vector<unsigned char> bytes)
+#include "serialiser/Serialise.h"
+#include "serialiser/Deserialise.h"
+
+std::vector<Serialiser::Field> Packet::GetFields(Type type)
+{
+	if (type == Type::ConnEstablished)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::Int32, offsetof(ConnEstablished, uid))
+			});
+	}
+	else if (type == Type::ChatMessage)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(ChatMessage, message))
+			});
+	}
+	else
+	{
+		throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(type)));
+	}
+}
+
+std::vector<Serialiser::Field> Packet::GetFields() const
+{
+	return this->GetFields(this->GetType());
+}
+
+Packet::Packet(std::vector<char> bytes)
 {
 	this->Deserialise(bytes);
 }
@@ -29,32 +57,32 @@ Packet::Type Packet::GetType() const
 	return static_cast<Packet::Type>(this->m_data.index());
 }
 
-std::vector<unsigned char> Packet::Serialise() const
+std::vector<char> Packet::Serialise() const
 {
-	std::vector<unsigned char> result;
-	result.push_back(static_cast<unsigned char>(this->GetType()));
+	std::vector<char> result;
+	result.push_back(static_cast<char>(this->GetType()));
 
+	std::vector<char> body_bytes;
+	std::vector<Serialiser::Field> fields = this->GetFields();
 	if (this->GetType() == Type::ConnEstablished)
 	{
-		unsigned char uid_bytes[4];
-		std::memcpy(uid_bytes, reinterpret_cast<const unsigned char*>(&this->GetData<ConnEstablished>().uid), sizeof(unsigned char) * 4);
+		body_bytes = Serialiser::Serialise(this->GetData<ConnEstablished>(), fields);
 	}
 	else if (this->GetType() == Type::ChatMessage)
 	{
-		for (unsigned char c : this->GetData<ChatMessage>().message)
-		{
-			result.push_back(c);
-		}
+		body_bytes = Serialiser::Serialise(this->GetData<ChatMessage>(), fields);
 	}
 	else
 	{
 		throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(this->GetType())));
 	}
 
+	result.insert(result.end(), body_bytes.begin(), body_bytes.end());
+
 	return result;
 }
 
-void Packet::Deserialise(std::vector<unsigned char> bytes)
+void Packet::Deserialise(std::vector<char> bytes)
 {
 	if (bytes.size() == 0)
 	{
@@ -64,31 +92,14 @@ void Packet::Deserialise(std::vector<unsigned char> bytes)
 	{
 		this->SetType(static_cast<Type>(bytes.at(0)));
 
+		std::vector<Serialiser::Field> fields = this->GetFields();
 		if (this->GetType() == Type::ConnEstablished)
 		{
-			if (bytes.size() == 6)
-			{
-				this->GetData<ConnEstablished>().uid = *reinterpret_cast<int32_t*>(bytes.data() + sizeof(unsigned char));
-			}
-			else
-			{
-				throw std::invalid_argument("Unexpected ConnEstablished packet size");
-			}
+			this->m_data = Serialiser::Deserialise<ConnEstablished>(bytes, fields, 1);
 		}
 		else if (this->GetType() == Type::ChatMessage)
 		{
-			if (bytes.size() == 2)
-			{
-				this->GetData<ChatMessage>().message = "";
-			}
-			else if (bytes.size() > 2)
-			{
-				this->GetData<ChatMessage>().message = std::string(bytes.data() + sizeof(unsigned char), bytes.data() + (bytes.size() * sizeof(unsigned char)));
-			}
-			else
-			{
-				throw std::invalid_argument("Packet invalid");
-			}
+			this->m_data = Serialiser::Deserialise<ChatMessage>(bytes, fields, 1);
 		}
 		else
 		{

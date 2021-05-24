@@ -27,10 +27,10 @@ private:
 	void Listener();
 
 protected:
-	void SendBytes(std::vector<unsigned char> bytes);
-	void SendBytes(const unsigned char* bytes, std::size_t num_bytes);
+	void SendBytes(std::vector<char> bytes);
+	void SendBytes(const char* bytes, std::size_t num_bytes);
 
-	virtual void BytesReceived(std::vector<unsigned char> bytes) = 0;
+	virtual void BytesReceived(std::vector<char> bytes) = 0;
 
 public:
 	Connection(std::string address, unsigned short port);

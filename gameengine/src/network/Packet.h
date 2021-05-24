@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+#include "serialiser/Field.h"
+
 class Packet
 {
 public: //type definitions
@@ -34,10 +36,13 @@ public: //type definitions
 private:
 	std::variant<ConnEstablished, ChatMessage> m_data;
 
+	static std::vector<Serialiser::Field> GetFields(Type type);
+	std::vector<Serialiser::Field> GetFields() const;
+
 public:
 	template<typename T, typename = std::enable_if_t<std::is_base_of_v<PacketInner, T>>>
 	inline Packet(T data) : m_data(data) {};
-	Packet(std::vector<unsigned char> bytes);
+	Packet(std::vector<char> bytes);
 
 	void SetType(Type type);
 	Type GetType() const;
@@ -54,6 +59,6 @@ public:
 		return std::get<T>(this->m_data);
 	}
 
-	std::vector<unsigned char> Serialise() const;
-	void Deserialise(std::vector<unsigned char> bytes);
+	std::vector<char> Serialise() const;
+	void Deserialise(std::vector<char> bytes);
 };
