@@ -20,32 +20,58 @@ void Connection::Listener()
 
 	while (this->m_continue_running.load())
 	{
-		asio::streambuf buffer;
-		
-		asio::error_code error_code;
-		std::size_t bytes_read = asio::read_until(this->m_asio_socket, buffer, PACKET_DELIMITER, error_code);
-
-		if (error_code.value() == asio::error::eof)
+		std::optional<std::vector<char>> header = this->ReadBytes(1);
+		if (!header.has_value())
 		{
 			this->m_continue_running.store(false);
 		}
-		else if (error_code.value() != 0)
+		else if (header.value().size() == 1)
 		{
-			throw std::runtime_error("Socket error: " + error_code.message());
-		}
-		else if (bytes_read == 0)
-		{
-			throw std::runtime_error("Socket error: " + error_code.message());
-		}
-		else if (bytes_read == 1)
-		{
-			this->BytesReceived(std::vector<char>());
+			std::optional<std::vector<char>> body = this->ReadBytes(static_cast<std::size_t>(header.value().at(0)));
+			if (body.has_value())
+			{
+				this->BytesReceived(body.value());
+			}
+			else
+			{
+				this->m_continue_running.store(false);
+			}
 		}
 		else
 		{
-			const char* bytes_raw = asio::buffer_cast<const char*>(buffer.data());
-			this->BytesReceived(std::vector<char>(bytes_raw, bytes_raw + bytes_read - 1));
+			throw std::runtime_error("Header must be one byte");
 		}
+	}
+}
+
+std::optional<std::vector<char>> Connection::ReadBytes(std::size_t bytes)
+{
+	if (bytes == 0)
+	{
+		throw std::invalid_argument("Can't read 0 bytes");
+	}
+
+	asio::streambuf buffer;
+
+	asio::error_code error_code;
+	std::size_t bytes_read = asio::read(this->m_asio_socket, buffer, asio::transfer_exactly(bytes), error_code);
+
+	if (error_code.value() == asio::error::eof)
+	{
+		return std::optional<std::vector<char>>();
+	}
+	else if (error_code.value() != 0)
+	{
+		throw std::runtime_error("Socket error: " + error_code.message());
+	}
+	else if (bytes_read != bytes)
+	{
+		throw std::runtime_error("Less bytes were read than requested");
+	}
+	else
+	{
+		const char* bytes_raw = asio::buffer_cast<const char*>(buffer.data());
+		return std::vector<char>(bytes_raw, bytes_raw + bytes_read);
 	}
 }
 

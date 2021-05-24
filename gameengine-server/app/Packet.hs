@@ -15,12 +15,13 @@ data Packet =
     -- |Sent by either the client or the server containing global chat messages
     | ChatMessage String
 
-packetDelimiter :: Char
-packetDelimiter = '\n'
-
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
-serialise packet = (Data.ByteString.Lazy.toStrict . toLazyByteString . mconcat) (serialiseInner packet ++ [char8 packetDelimiter])
+serialise packet = (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
+    where
+        body = (toLazyByteString . mconcat) (serialiseInner packet)
+        body_length = Data.ByteString.Lazy.length body
+        header = (toLazyByteString . word8) (fromIntegral body_length :: Word8)
 
 serialiseInner :: Packet -> [Builder]
 serialiseInner (ConnEstablished uid) = [word8 (0 :: Word8), int32LE (fromIntegral uid :: Int32)]

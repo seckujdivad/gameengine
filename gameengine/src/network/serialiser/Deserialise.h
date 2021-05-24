@@ -78,6 +78,11 @@ namespace Serialiser
 			}
 		}
 
+		if (bytes_read < bytes.size())
+		{
+			throw std::invalid_argument("The layout doesn't match the provided bytes - not all bytes were used");
+		}
+
 		return result;
 	}
 }

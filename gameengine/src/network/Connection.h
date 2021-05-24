@@ -25,6 +25,7 @@ private:
 	std::atomic<bool> m_continue_running;
 	std::thread m_listener;
 	void Listener();
+	std::optional<std::vector<char>> ReadBytes(std::size_t bytes);
 
 protected:
 	void SendBytes(std::vector<char> bytes);
