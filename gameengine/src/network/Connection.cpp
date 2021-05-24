@@ -9,6 +9,8 @@
 #include <windows.h>
 #endif
 
+constexpr char PACKET_DELIMITER = '\n';
+
 void Connection::Listener()
 {
 #ifdef _WIN32
@@ -21,7 +23,7 @@ void Connection::Listener()
 		asio::streambuf buffer;
 		
 		asio::error_code error_code;
-		std::size_t bytes_read = asio::read_until(this->m_asio_socket, buffer, '\n', error_code);
+		std::size_t bytes_read = asio::read_until(this->m_asio_socket, buffer, PACKET_DELIMITER, error_code);
 
 		if (error_code.value() == asio::error::eof)
 		{
@@ -35,10 +37,14 @@ void Connection::Listener()
 		{
 			throw std::runtime_error("Socket error: " + error_code.message());
 		}
+		else if (bytes_read == 1)
+		{
+			this->BytesReceived(std::vector<char>());
+		}
 		else
 		{
 			const char* bytes_raw = asio::buffer_cast<const char*>(buffer.data());
-			this->BytesReceived(std::vector<char>(bytes_raw, bytes_raw + bytes_read));
+			this->BytesReceived(std::vector<char>(bytes_raw, bytes_raw + bytes_read - 1));
 		}
 	}
 }
