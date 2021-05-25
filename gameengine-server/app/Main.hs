@@ -16,6 +16,9 @@ import Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise)
 
 data ClientPacket = ClientPacket Integer (Maybe Packet) | NewClient ConnInfo Socket
 
+instance Show ClientPacket where
+    show (ClientPacket uid packetMaybe) = show uid ++ ": " ++ maybe "no packet" show packetMaybe
+
 -- |Entry point
 main :: IO ()
 main = do
