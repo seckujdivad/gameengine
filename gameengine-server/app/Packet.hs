@@ -17,7 +17,7 @@ data Packet =
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
-serialise packet = (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
+serialise packet = if body_length > (2 ^ 8) then error "Body must contain less than 256 bytes" else (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
     where
         body = (toLazyByteString . mconcat) (serialiseInner packet)
         body_length = Data.ByteString.Lazy.length body
