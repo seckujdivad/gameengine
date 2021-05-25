@@ -15,6 +15,10 @@ data Packet =
     -- |Sent by either the client or the server containing global chat messages
     | ChatMessage String
 
+instance Show Packet where
+    show (ConnEstablished uid) = "ConnEstablished {uid: " ++ show uid ++ "}"
+    show (ChatMessage message) = "ChatMessage {message: \"" ++ show message ++ "\"}"
+
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
 serialise packet = if body_length > (2 ^ 8) then error "Body must contain less than 256 bytes" else (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
