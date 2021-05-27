@@ -6,12 +6,14 @@ import Network.Socket.ByteString (recv, sendAll)
 import Control.Monad (forever, unless, when)
 import Control.Monad.STM (atomically)
 import Control.Concurrent (forkIO)
-import Control.Concurrent.STM.TChan (TChan, newTChan, dupTChan, tryReadTChan, writeTChan, newBroadcastTChan, readTChan)
+import Control.Concurrent.STM.TChan (TChan, newTChan)
 
 import qualified Data.ByteString (null)
 import Data.ByteString.Char8 (pack, unpack)
 
 import TCPServer (runTCPServer, ConnInfo (ConnInfo))
+import AtomicTChan (sendToTChan, readFromTChan)
+
 import Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise)
 
 data ClientPacket = ClientPacket Integer (Maybe Packet) | NewClient ConnInfo Socket
@@ -80,11 +82,3 @@ serverMainloopInner mainloopIn clients = do
 -- |Sends a 'Packet' to a 'Socket'
 sendPacket :: Socket -> Packet -> IO ()
 sendPacket socket = sendAll socket . serialise 
-
--- |Transactionally write some data to a 'TChan'
-sendToTChan :: TChan a -> a -> IO ()
-sendToTChan channel = atomically . writeTChan channel
-
--- |Transactionally read some data from a 'TChan'
-readFromTChan :: TChan a -> IO a
-readFromTChan = atomically . readTChan

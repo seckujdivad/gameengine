@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a9538b9a3f04d37e29e1fc95d2ed787607e4268c32d1b8323af08ccdc2eaee7c
+-- hash: 359d117e9576b765e11967adee337eca1eb746b00983d0e3c0930ffe6f2e1ea3
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -23,6 +23,7 @@ source-repository head
 
 library
   exposed-modules:
+      AtomicTChan
       TCPServer
   other-modules:
       Paths_gameengine_server
