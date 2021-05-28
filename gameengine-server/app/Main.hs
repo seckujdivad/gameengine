@@ -58,7 +58,7 @@ connReceiver mainloopIn connection connInfo = do
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan ClientPacket -> IO ()
-serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty
+serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty >> putStrLn "Mainloop stopped"
 
 serverMainloopInner :: TChan ClientPacket -> Map Integer (ConnInfo, Socket) -> IO ()
 serverMainloopInner mainloopIn clients = do
