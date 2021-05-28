@@ -10,6 +10,8 @@ import Control.Concurrent.STM.TChan (TChan, newTChan)
 
 import qualified Data.ByteString (null)
 import Data.ByteString.Char8 (pack, unpack)
+import Data.Map (Map)
+import Data.Map.Strict (insert, update, lookup, empty, delete, keys)
 
 import TCPServer (runTCPServer, ConnInfo (ConnInfo))
 import AtomicTChan (sendToTChan, readFromTChan)
@@ -56,9 +58,9 @@ connReceiver mainloopIn connection connInfo = do
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan ClientPacket -> IO ()
-serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn []
+serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty
 
-serverMainloopInner :: TChan ClientPacket -> [(ConnInfo, Socket)] -> IO ()
+serverMainloopInner :: TChan ClientPacket -> Map Integer (ConnInfo, Socket) -> IO ()
 serverMainloopInner mainloopIn clients = do
     clientComm <- readFromInput
     case clientComm of
@@ -67,18 +69,25 @@ serverMainloopInner mainloopIn clients = do
                 ConnEstablished uid -> putStrLn $ show uid ++ " - client shouldn't send ConnEstablished"
                 ChatMessage strMessage -> do
                     putStrLn $ "Chat message - " ++ show uid ++ " - " ++ strMessage
-                    foldl (>>) (return ()) [sendPacket connection packet | (connInfo, connection) <- clients]
+                    foldl (>>) (return ()) (map
+                        (\k -> case Data.Map.Strict.lookup k clients of
+                            Just (_, connection) -> sendPacket connection packet
+                            Nothing -> return ())
+                        (keys clients))
                     nextLoop clients
+
             Nothing -> do
                 putStrLn $ show uid ++ " - cleaning client"
-                nextLoop $ filter (\(ConnInfo uid2 _, _) -> uid /= uid2) clients
+                nextLoop $ delete uid clients
+
         (NewClient (ConnInfo uid address) connection) -> do
             sendPacket connection (ConnEstablished uid)
-            nextLoop $ clients ++ [(ConnInfo uid address, connection)]
+            nextLoop $ insert uid (ConnInfo uid address, connection) clients
+
     where
         readFromInput = readFromTChan mainloopIn
         nextLoop = serverMainloopInner mainloopIn
 
 -- |Sends a 'Packet' to a 'Socket'
 sendPacket :: Socket -> Packet -> IO ()
-sendPacket socket = sendAll socket . serialise 
+sendPacket socket = sendAll socket . serialise
