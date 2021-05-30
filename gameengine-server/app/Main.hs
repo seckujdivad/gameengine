@@ -37,7 +37,7 @@ connHandler mainloopIn connection connInfo = do
     sendToTChan mainloopIn (NewClient connInfo connection)
     connReceiver mainloopIn connection connInfo
     where
-        (ConnInfo uid address) = connInfo
+        (ConnInfo uid _) = connInfo
 
 -- |Listens to a client
 connReceiver :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
@@ -48,9 +48,7 @@ connReceiver mainloopIn connection connInfo = do
         putStrLn ("Client receiver closed - " ++ show connInfo)
         writeToInput $ ClientPacket uid Nothing
     else do
-        case deserialise message of
-            Nothing -> putStrLn "Couldn't decode packet"
-            Just packet -> writeToInput $ ClientPacket uid (Just packet)
+        writeToInput $ ClientPacket uid $ Just $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
         connReceiver mainloopIn connection connInfo
     where
         (ConnInfo uid address) = connInfo

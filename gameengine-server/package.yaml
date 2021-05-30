@@ -1,6 +1,6 @@
 name:                gameengine-server
 version:             0.1.0.0
-github:              "seckujdivad/gameengine/tree/master/gameengine-server"
+github:              "seckujdivad/gameengine"
 author:              "David Juckes"
 
 # Metadata used when publishing your package
@@ -21,6 +21,7 @@ dependencies:
 - bytestring
 - stm >= 2.5
 - containers >= 0.6 && < 0.7
+- binary >= 0.8 && < 0.9
 
 library:
   source-dirs: src
