@@ -23,6 +23,8 @@ data ClientPacket = ClientPacket Integer (Maybe Packet) | NewClient ConnInfo Soc
 instance Show ClientPacket where
     show (ClientPacket uid packetMaybe) = show uid ++ ": " ++ maybe "no packet" show packetMaybe
 
+data Client = Client ConnInfo Socket
+
 -- |Entry point
 main :: IO ()
 main = do
@@ -58,7 +60,7 @@ connReceiver mainloopIn connection connInfo = do
 serverMainloop :: TChan ClientPacket -> IO ()
 serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty >> putStrLn "Mainloop stopped"
 
-serverMainloopInner :: TChan ClientPacket -> Map Integer (ConnInfo, Socket) -> IO ()
+serverMainloopInner :: TChan ClientPacket -> Map Integer Client -> IO ()
 serverMainloopInner mainloopIn clients = do
     clientComm <- readFromInput
     case clientComm of
@@ -69,7 +71,7 @@ serverMainloopInner mainloopIn clients = do
                     putStrLn $ "Chat message - " ++ show uid ++ " - " ++ strMessage
                     foldl (>>) (return ()) (map
                         (\k -> case Data.Map.Strict.lookup k clients of
-                            Just (_, connection) -> sendPacket connection packet
+                            Just (Client _ connection) -> sendPacket connection packet
                             Nothing -> return ())
                         (keys clients))
                     nextLoop clients
@@ -80,7 +82,7 @@ serverMainloopInner mainloopIn clients = do
 
         (NewClient (ConnInfo uid address) connection) -> do
             sendPacket connection (ConnEstablished uid)
-            nextLoop $ insert uid (ConnInfo uid address, connection) clients
+            nextLoop $ insert uid (Client (ConnInfo uid address) connection) clients
 
     where
         readFromInput = readFromTChan mainloopIn

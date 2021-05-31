@@ -27,11 +27,11 @@ serialise packet = if body_length > (2 ^ 8) then error "Body must contain less t
     where
         body = (toLazyByteString . serialiseInner) packet
         body_length = Data.ByteString.Lazy.length body
-        header = (toLazyByteString . word8) (fromIntegral body_length :: Word8)
+        header = (toLazyByteString . word8) (fromIntegral body_length)
 
 serialiseInner :: Packet -> Builder
-serialiseInner (ConnEstablished uid) = mconcat [word8 (0 :: Word8), int32LE (fromIntegral uid :: Int32)]
-serialiseInner (ChatMessage message) = mconcat [word8 (1 :: Word8), string8 message]
+serialiseInner (ConnEstablished uid) = mconcat [word8 0, int32LE (fromIntegral uid)]
+serialiseInner (ChatMessage message) = mconcat [word8 1, string8 message]
 
 -- |Turn a 'ByteString' into a 'Packet' if it conforms to the correct layout
 deserialise :: Data.ByteString.ByteString -> Packet
