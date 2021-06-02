@@ -59,7 +59,9 @@ private:
 
 public:
 	template<typename T, typename = std::enable_if_t<std::is_base_of_v<PacketInner, T>>>
-	inline Packet(T data) : m_data(data) {};
+	inline Packet(const T& data) : m_data(data) {};
+	template<typename T, typename = std::enable_if_t<std::is_base_of_v<PacketInner, T>>>
+	inline Packet(T&& data) : m_data(data) {};
 	Packet(std::vector<char> bytes);
 
 	void SetType(Type type);
