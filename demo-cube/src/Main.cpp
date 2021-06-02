@@ -35,6 +35,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->ReloadSettings();
 
 	//connect to the server
+	this->Bind(EVT_PACKET, &Main::HandlePacket, this);
 	this->m_connection = std::make_shared<EngineConnection>("127.0.0.1", 4321);
 
 	//configure window
@@ -366,4 +367,16 @@ void Main::Mainloop(wxIdleEvent& evt)
 
 	evt.RequestMore();
 	evt.Skip();
+}
+
+void Main::HandlePacket(PacketEvent& evt)
+{
+	const Packet& packet = evt.GetPacket();
+	if (packet.GetType() == Packet::Type::ConnEstablished)
+	{
+		if (this->GetSettings().contains("network") && this->GetSettings()["network"].is_object() && this->GetSettings()["network"].contains("username") && this->GetSettings()["network"]["username"].is_string())
+		{
+			this->m_connection->SendPacket(Packet(Packet::SetClientName(this->GetSettings()["network"]["username"].get<std::string>())));
+		}
+	}
 }

@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "loaders/SceneLoader.h"
+#include "network/wx/PacketEvent.h"
 
 #include "VectorCtrl.h"
 
@@ -72,6 +73,8 @@ private:
 	void vct_scale_OnChange(VectorCtrlEvent& evt);
 
 	void Mainloop(wxIdleEvent& evt);
+
+	void HandlePacket(PacketEvent& evt);
 
 public:
 	Main();
