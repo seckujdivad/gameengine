@@ -3,6 +3,7 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <stdint.h>
 
@@ -14,7 +15,9 @@ public: //type definitions
 	enum class Type
 	{
 		ConnEstablished,
-		ChatMessage
+		ClientChatMessage,
+		ServerChatMessage,
+		SetClientName
 	};
 
 	struct PacketInner {};
@@ -26,15 +29,30 @@ public: //type definitions
 		std::int32_t uid;
 	};
 
-	struct ChatMessage : public PacketInner
+	struct ClientChatMessage : public PacketInner
 	{
-		inline ChatMessage(std::string message = "") : message(message) {};
+		inline ClientChatMessage(std::string message = "") : message(message) {};
 
 		std::string message;
 	};
 
+	struct ServerChatMessage : public PacketInner
+	{
+		inline ServerChatMessage(std::string name = "", std::string message = "") : name(name), message(message) {};
+
+		std::string name;
+		std::string message;
+	};
+
+	struct SetClientName : public PacketInner
+	{
+		inline SetClientName(std::string name = "") : name(name) {};
+
+		std::string name;
+	};
+
 private:
-	std::variant<ConnEstablished, ChatMessage> m_data;
+	std::variant<ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName> m_data;
 
 	static std::vector<Serialiser::Field> GetFields(Type type);
 	std::vector<Serialiser::Field> GetFields() const;
@@ -61,4 +79,14 @@ public:
 
 	std::vector<char> Serialise() const;
 	void Deserialise(std::vector<char> bytes);
+};
+
+constexpr std::array<Packet::Type, 2> RECEIVABLE_PACKET_TYPES = {
+	Packet::Type::ConnEstablished,
+	Packet::Type::ServerChatMessage
+};
+
+constexpr std::array<Packet::Type, 2> SENDABLE_PACKET_TYPES = {
+	Packet::Type::ClientChatMessage,
+	Packet::Type::SetClientName
 };

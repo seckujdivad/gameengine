@@ -21,6 +21,15 @@ EngineConnection::EngineConnection(std::string address, unsigned short port) : C
 
 void EngineConnection::SendPacket(Packet packet)
 {
+	bool packet_type_sendable = false;
+	for (Packet::Type sendable_type : SENDABLE_PACKET_TYPES)
+	{
+		if (sendable_type == packet.GetType())
+		{
+			packet_type_sendable = true;
+		}
+	}
+
 	this->SendBytes(packet.Serialise());
 }
 
@@ -70,15 +79,19 @@ void EngineConnection::ProcessOutstandingPackets(wxWindow* emit_events_from)
 	{
 		//handle this packet
 		Packet& packet = latest_packet.value();
-		if (packet.GetType() == Packet::Type::ConnEstablished)
+
+		bool packet_type_receivable = false;
+		for (Packet::Type receivable_type : RECEIVABLE_PACKET_TYPES)
 		{
+			if (receivable_type == packet.GetType())
+			{
+				packet_type_receivable = true;
+			}
 		}
-		else if (packet.GetType() == Packet::Type::ChatMessage)
+
+		if (!packet_type_receivable)
 		{
-		}
-		else
-		{
-			throw std::runtime_error("Unknown packet type: " + std::to_string(static_cast<int>(packet.GetType())));
+			throw std::runtime_error("Packet type " + std::to_string(static_cast<int>(packet.GetType())) + " not found in list of receivable packets");
 		}
 
 		if (emit_events_from != nullptr)

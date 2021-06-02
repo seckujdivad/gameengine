@@ -1,4 +1,4 @@
-module Packet (Packet (ConnEstablished, ChatMessage), serialise, deserialise) where
+module Packet (Packet (ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName), serialise, deserialise) where
 
 import qualified Data.ByteString
 import qualified Data.ByteString.Lazy
@@ -14,24 +14,32 @@ import Data.Binary.Get (Get, runGet, getWord8, getInt32le, getRemainingLazyByteS
 data Packet =
     -- |Sent from server to client containing the unique ID of that client when the client connects
     ConnEstablished Integer
-    -- |Sent by either the client or the server containing global chat messages
-    | ChatMessage String
+    -- |Sent by either the client containing global chat messages
+    | ClientChatMessage String
+    -- |Sent by the server containing chat messages and the user who sent them
+    | ServerChatMessage String String
+    -- |Sent by a client containing its new name
+    | SetClientName String
 
 instance Show Packet where
     show (ConnEstablished uid) = "ConnEstablished {uid: " ++ show uid ++ "}"
-    show (ChatMessage message) = "ChatMessage {message: \"" ++ show message ++ "\"}"
+    show (ClientChatMessage message) = "ClientChatMessage {message: \"" ++ show message ++ "\"}"
+    show (ServerChatMessage name message) = "ChatMessage {name: \"" ++ name ++ "\", " ++ "message: \"" ++ show message ++ "\"}"
+    show (SetClientName message) = "ChatMessage {message: \"" ++ show message ++ "\"}"
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
 serialise packet = if body_length > (2 ^ 8) then error "Body must contain less than 256 bytes" else (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
     where
-        body = (toLazyByteString . serialiseInner) packet
+        body = toLazyByteString (mappend ((word8 . packetToNum) packet) (serialiseInner packet))
         body_length = Data.ByteString.Lazy.length body
         header = (toLazyByteString . word8) (fromIntegral body_length)
 
 serialiseInner :: Packet -> Builder
-serialiseInner (ConnEstablished uid) = mconcat [word8 0, int32LE (fromIntegral uid)]
-serialiseInner (ChatMessage message) = mconcat [word8 1, string8 message]
+serialiseInner (ConnEstablished uid) = mconcat [int32LE (fromIntegral uid)]
+serialiseInner (ClientChatMessage _) = error "Server can't ClientChatMessage"
+serialiseInner (ServerChatMessage name message) = mconcat [string8 name, char8 '\0', string8 message]
+serialiseInner (SetClientName _) = error "Server can't send SetClientName"
 
 -- |Turn a 'ByteString' into a 'Packet' if it conforms to the correct layout
 deserialise :: Data.ByteString.ByteString -> Packet
@@ -41,13 +49,19 @@ deserialise bytes = runGet getPacket (Data.ByteString.Lazy.fromStrict bytes)
 getPacket :: Get Packet
 getPacket = do
     packetType <- getWord8
-    if packetType == 0 then do
-        uid <- getInt32le
-        return (ConnEstablished (fromIntegral uid))
+    if packetType == packetTypeToNum TypeConnEstablished then do
+        error "Client can't send ConnEstablished"
     
-    else if packetType == 1 then do
+    else if packetType == packetTypeToNum TypeClientChatMessage then do
         message <- getRemainingString
-        return (ChatMessage message)
+        return (ClientChatMessage message)
+    
+    else if packetType == packetTypeToNum TypeServerChatMessage then do
+        error "Client can't send ServerChatMessage"
+    
+    else if packetType == packetTypeToNum TypeSetClientName then do
+        message <- getRemainingString
+        return (SetClientName message)
     
     else
         error ("Unknown header - " ++ show packetType)
@@ -55,3 +69,22 @@ getPacket = do
 -- |Get the remaining 'Char's and pack into a 'String' from a lazy 'ByteString' using 'runGet'
 getRemainingString :: Get String
 getRemainingString = fmap (unpack . Data.ByteString.Lazy.toStrict) getRemainingLazyByteString
+
+-- |Enumerators representing constructors for 'Packet'
+data PacketType = TypeConnEstablished | TypeClientChatMessage | TypeServerChatMessage | TypeSetClientName deriving (Show, Eq, Enum)
+
+-- |Convert a 'Packet' to a 'PacketType' enumerator
+packetToPacketType :: Packet -> PacketType
+packetToPacketType (ConnEstablished _) = TypeConnEstablished
+packetToPacketType (ClientChatMessage _) = TypeClientChatMessage
+packetToPacketType (ServerChatMessage _ _) = TypeServerChatMessage
+packetToPacketType (SetClientName _) = TypeSetClientName
+
+-- |Convert a 'PacketType' to some 'Num' that can be used when serialising and deserialising
+packetTypeToNum :: Num a => PacketType -> a
+packetTypeToNum TypeConnEstablished = 0
+packetTypeToNum packetType = packetTypeToNum (pred packetType) + 1
+
+-- |Convert a 'Packet' to some 'Num' that can be used when serialising and deserialising
+packetToNum :: Num a => Packet -> a
+packetToNum = packetTypeToNum . packetToPacketType

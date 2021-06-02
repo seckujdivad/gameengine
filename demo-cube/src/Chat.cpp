@@ -12,7 +12,7 @@ void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 	if (evt.GetKeyCode() == WXK_RETURN)
 	{
 		std::string to_send = this->m_txt_message->GetValue();
-		this->m_connection->SendPacket(Packet(Packet::ChatMessage(to_send)));
+		this->m_connection->SendPacket(Packet(Packet::ClientChatMessage(to_send)));
 		this->m_txt_message->SetValue("");
 	}
 	else
@@ -24,9 +24,9 @@ void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 void Chat::OnPacketReceived(PacketEvent& evt)
 {
 	const Packet& packet = evt.GetPacket();
-	if (packet.GetType() == Packet::Type::ChatMessage)
+	if (packet.GetType() == Packet::Type::ServerChatMessage)
 	{
-		this->m_lb_messages->AppendString(packet.GetData<Packet::ChatMessage>().message);
+		this->m_lb_messages->AppendString(packet.GetData<Packet::ServerChatMessage>().name + ": " + packet.GetData<Packet::ServerChatMessage>().message);
 	}
 }
 

@@ -14,10 +14,23 @@ std::vector<Serialiser::Field> Packet::GetFields(Type type)
 			Serialiser::Field(Serialiser::Type::Int32, offsetof(ConnEstablished, uid))
 			});
 	}
-	else if (type == Type::ChatMessage)
+	else if (type == Type::ClientChatMessage)
 	{
 		return std::vector<Serialiser::Field>({
-			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(ChatMessage, message))
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(ClientChatMessage, message))
+			});
+	}
+	else if (type == Type::ServerChatMessage)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::NullTerminatedString, offsetof(ServerChatMessage, name)),
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(ServerChatMessage, message))
+			});
+	}
+	else if (type == Type::SetClientName)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(SetClientName, name))
 			});
 	}
 	else
@@ -42,9 +55,17 @@ void Packet::SetType(Type type)
 	{
 		this->m_data = ConnEstablished();
 	}
-	else if (type == Type::ChatMessage)
+	else if (type == Type::ClientChatMessage)
 	{
-		this->m_data = ChatMessage();
+		this->m_data = ClientChatMessage();
+	}
+	else if (type == Type::ServerChatMessage)
+	{
+		this->m_data = ServerChatMessage();
+	}
+	else if (type == Type::SetClientName)
+	{
+		this->m_data = SetClientName();
 	}
 	else
 	{
@@ -68,9 +89,17 @@ std::vector<char> Packet::Serialise() const
 	{
 		body_bytes = Serialiser::Serialise(this->GetData<ConnEstablished>(), fields);
 	}
-	else if (this->GetType() == Type::ChatMessage)
+	else if (this->GetType() == Type::ClientChatMessage)
 	{
-		body_bytes = Serialiser::Serialise(this->GetData<ChatMessage>(), fields);
+		body_bytes = Serialiser::Serialise(this->GetData<ClientChatMessage>(), fields);
+	}
+	else if (this->GetType() == Type::ServerChatMessage)
+	{
+		body_bytes = Serialiser::Serialise(this->GetData<ServerChatMessage>(), fields);
+	}
+	else if (this->GetType() == Type::SetClientName)
+	{
+		body_bytes = Serialiser::Serialise(this->GetData<SetClientName>(), fields);
 	}
 	else
 	{
@@ -97,9 +126,17 @@ void Packet::Deserialise(std::vector<char> bytes)
 		{
 			this->m_data = Serialiser::Deserialise<ConnEstablished>(bytes, fields, 1);
 		}
-		else if (this->GetType() == Type::ChatMessage)
+		else if (this->GetType() == Type::ClientChatMessage)
 		{
-			this->m_data = Serialiser::Deserialise<ChatMessage>(bytes, fields, 1);
+			this->m_data = Serialiser::Deserialise<ClientChatMessage>(bytes, fields, 1);
+		}
+		else if (this->GetType() == Type::ServerChatMessage)
+		{
+			this->m_data = Serialiser::Deserialise<ServerChatMessage>(bytes, fields, 1);
+		}
+		else if (this->GetType() == Type::SetClientName)
+		{
+			this->m_data = Serialiser::Deserialise<SetClientName>(bytes, fields, 1);
 		}
 		else
 		{
