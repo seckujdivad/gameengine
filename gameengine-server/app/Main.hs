@@ -122,8 +122,8 @@ serverMainloopInner mainloopIn clients = do
                             nextLoop clients
                         
                         SetClientName newName -> do
-                            putStrLn $ showClientMessage client "client shouldn't send ConnEstablished"
-                            nextLoop clients
+                            putStrLn $ showClientMessage client ("name set to " ++ newName)
+                            nextLoop (update (\(Client connection connInfo _) -> Just (Client connection connInfo (Just newName))) uid clients)
 
                     Nothing -> do
                         putStrLn $ showClientMessage client "cleaning client"
