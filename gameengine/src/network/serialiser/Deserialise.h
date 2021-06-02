@@ -52,11 +52,21 @@ namespace Serialiser
 				while (continue_searching)
 				{
 					char c = bytes.at(bytes_read);
-					string_target += c;
 
-					if ((field.type == Type::NullTerminatedString) && (c == '\0'))
+					if (c == '\0')
 					{
-						continue_searching = false;
+						if (field.type == Type::NullTerminatedString)
+						{
+							continue_searching = false;
+						}
+						else
+						{
+							throw std::runtime_error("Unexpected null");
+						}
+					}
+					else
+					{
+						string_target += c;
 					}
 
 					bytes_read++;
