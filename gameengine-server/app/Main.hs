@@ -43,7 +43,7 @@ connHandler mainloopIn connection connInfo = do
     sendToTChan mainloopIn (NewClient connInfo connection)
     connReceiver mainloopIn connection connInfo
     where
-        (ConnInfo uid _) = connInfo
+        ConnInfo uid _ = connInfo
 
 -- |Listens to a client
 connReceiver :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
@@ -57,7 +57,7 @@ connReceiver mainloopIn connection connInfo = do
         writeToInput $ ClientPacket uid $ Just $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
         connReceiver mainloopIn connection connInfo
     where
-        (ConnInfo uid address) = connInfo
+        ConnInfo uid address = connInfo
         writeToInput = sendToTChan mainloopIn
 
 -- |Handles inter-client communication and the server state
@@ -68,9 +68,9 @@ serverMainloopInner :: TChan ClientPacket -> Map Integer Client -> IO ()
 serverMainloopInner mainloopIn clients = do
     clientComm <- readFromInput
     case clientComm of
-        (ClientPacket uid packetMaybe) -> case Data.Map.Strict.lookup uid clients of
+        ClientPacket uid packetMaybe -> case Data.Map.Strict.lookup uid clients of
             Just client -> do
-                let (Client _ connInfo clientNameMaybe) = client
+                let Client _ connInfo clientNameMaybe = client
                 case packetMaybe of
                     Just packet -> case packet of
                         ConnEstablished _ -> do
@@ -131,7 +131,7 @@ serverMainloopInner mainloopIn clients = do
             
             Nothing -> putStrLn $ "Client UID " ++ show uid ++ " does not exist"
 
-        (NewClient (ConnInfo uid address) connection) -> do
+        NewClient (ConnInfo uid address) connection -> do
             sendPacket connection (ConnEstablished uid)
             nextLoop $ insert uid (Client connection (ConnInfo uid address) Nothing) clients
 
