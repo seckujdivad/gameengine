@@ -276,9 +276,10 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 
 	if (data.contains("dynamic draw refresh frames") && data["dynamic draw refresh frames"].is_number())
 	{
-		if (data["dynamic draw refresh frames"].is_number_integer())
+		int dynamic_redraw_frames = data["dynamic draw refresh frames"].get<int>();
+		if (dynamic_redraw_frames > 0)
 		{
-			cubemap->SetDynamicRedrawFrames(data["dynamic draw refresh frames"].get<int>());
+			cubemap->SetDynamicRedrawFrames(dynamic_redraw_frames);
 		}
 		else
 		{
