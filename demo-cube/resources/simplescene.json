@@ -1,4 +1,5 @@
 {
+  "$schema": "../../gameengine/json-schemas/scenefile-schema.json",
   "metadata": {
     "identifier": "Simple Scene",
     "performance profiles": [

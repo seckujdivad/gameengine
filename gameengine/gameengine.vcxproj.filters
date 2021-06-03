@@ -166,6 +166,9 @@
     <Filter Include="Source Files\network\serialiser">
       <UniqueIdentifier>{1d35c587-6542-47cd-a73a-80c65cb25a29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JSON Schemas">
+      <UniqueIdentifier>{d8a53362-9fa2-4983-8a21-4235ad59aaa6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -698,6 +701,9 @@
     </None>
     <None Include="resources\shaders\postprocess\generic.frag">
       <Filter>Resource Files\shaders\postprocess</Filter>
+    </None>
+    <None Include="json-schemas\scenefile-schema.json">
+      <Filter>JSON Schemas</Filter>
     </None>
   </ItemGroup>
 </Project>

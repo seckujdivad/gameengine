@@ -1,0 +1,705 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "3d-vector": {
+      "anyOf": [
+        {
+          "type": "array",
+          "maxItems": 3,
+          "minItems": 3,
+          "items": {
+            "type": "number",
+            "description": "Value for the nth axis of the vector"
+          }
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "2d-vector": {
+      "anyOf": [
+        {
+          "type": "array",
+          "maxItems": 2,
+          "minItems": 2
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "array-index": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": false
+    },
+    "ssr": {
+      "type": "object",
+      "description": "Screen space reflections configuration",
+      "properties": {
+        "acceptable depth distance": {
+          "$ref": "#/definitions/array-index",
+          "description": "The maximum distance difference between the trace and the sampled depth at which a hit is counted. Indexed to an array in the chosen performance profile"
+        },
+        "appear in ssr": {
+          "type": "boolean",
+          "description": "Whether or not this object appears in screen space reflections"
+        },
+        "distance limit": {
+          "$ref": "#/definitions/array-index",
+          "description": "The maximum length to trace a ray for. Indexed to an array in the chosen performance profile"
+        },
+        "max camera distance": {
+          "$ref": "#/definitions/array-index",
+          "description": "The maximum distance away a pixel can be for a ray cast attempt. Indexed to an array in the chosen performance profile"
+        },
+        "max refinements": {
+          "$ref": "#/definitions/array-index",
+          "description": "The maximum number of times the resolution and hit acceptance can be halved before a final hit is found. A value between the minimum and maximum is chosen based on whether or not traces in that area were successful last frame. Indexed to an array in the chosen performance profile"
+        },
+        "min refinements": {
+          "$ref": "#/definitions/array-index",
+          "description": "The minimum number of times the resolution and hit acceptance can be halved before a final hit is found. A value between the minimum and maximum is chosen based on whether or not traces in that area were successful last frame. Indexed to an array in the chosen performance profile"
+        },
+        "resolution": {
+          "$ref": "#/definitions/array-index",
+          "description": "The minimum initial number of pixels to trace across in both the X and Y axis. Indexed to an array in the chosen performance profile"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether or not screen space reflections will display on the surface of this object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "2d-texture": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "Path to texture"
+        },
+        {
+          "type": "object",
+          "description": "Texture and filtering",
+          "properties": {
+            "texture": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "Path to texture"
+                },
+                {
+                  "type": "object",
+                  "description": "XOR texture gemerator",
+                  "properties": {
+                    "preset": {
+                      "type": "string",
+                      "description": "Preset type",
+                      "enum": ["xor"]
+                    },
+                    "mode": {
+                      "type": "string",
+                      "description": "XOR generator mode",
+                      "enum": ["greyscale", "hsv"]
+                    },
+                    "dimensions": {
+                      "description": "Texture dimensions to generate",
+                      "$ref": "#/definitions/2d-vector"
+                    }
+                  },
+                  "required": ["preset", "mode"],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "magnify filter": {
+              "type": "string",
+              "description": "Type of filtering to use when sampling and the texture needs to be magnified",
+              "enum": ["nearest", "linear"]
+            },
+            "shrink filter": {
+              "type": "string",
+              "description": "Type of filtering to use when sampling and the texture needs to be shrunk",
+              "enum": ["nearest", "linear"]
+            }
+          },
+          "required": ["texture"],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/definitions/3d-vector"
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema for the document"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Information about the scene",
+      "properties": {
+        "performance profiles": {
+          "type": "array",
+          "description": "Paths to performance profiles",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "A file containing settings to adjust the visual quality and resources required to render the scene for different systems"
+          }
+        },
+        "identifier": {
+          "type": "string",
+          "description": "The name of the scene"
+        }
+      },
+      "required": ["performance profiles"],
+      "additionalProperties": false
+    },
+    "models": {
+      "type": "object",
+      "description": "Loading information for and paths to model files",
+      "properties": {
+        "ply": {
+          "description": "Model files stored in the .PLY format (http://paulbourke.net/dataformats/ply/)",
+          "type": "object",
+          "patternProperties": {
+            "^.+": {
+              "type": "object",
+              "description": "Model to load",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the .PLY file"
+                },
+                "invert normals": {
+                  "type": "boolean",
+                  "description": "Inverts all normals stored in the model file"
+                },
+                "merge geometry": {
+                  "type": "object",
+                  "description": "Can be used to merge nearby vertices into one. Helps to remove gaps in models caused by floating point imprecision",
+                  "properties": {
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Specifies whether or not to merge the vertices"
+                    },
+                    "distance": {
+                      "type": "number",
+                      "description": "The distance between vertices which causes them to be merged",
+                      "minimum": 0,
+                      "exclusiveMinimum": true
+                    }
+                  },
+                  "required": ["enable", "distance"],
+                  "additionalProperties": false
+                },
+                "grid": {
+                  "description": "All loaded vertices will be clamped to a grid with the given increments along each axis. Serves the same purpose as \"merge geometry\". Must be non-zero in all axes",
+                  "$ref": "#/definitions/3d-vector"
+                }
+              },
+              "required": ["path"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "bpt": {
+          "type": "object",
+          "description": "Model files stored in the .BPT format (http://www.holmes3d.net/graphics/roffview/tools/patchoff/)",
+          "patternProperties": {
+            "^.+": {
+              "type": "object",
+              "description": "Model to load",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Path to the .BPT file"
+                }
+              },
+              "required": ["path"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "layout": {
+      "type": "array",
+      "description": "The layout of the objects in the scene",
+      "items": {
+        "type": "object",
+        "description": "An object in the scene",
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Model to load"
+              },
+              {
+                "type": "array",
+                "description": "Models to load",
+                "items": {
+                  "type": "string",
+                  "description": "Model to load"
+                }
+              }
+            ]
+          },
+          "models": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Model to load"
+              },
+              {
+                "type": "array",
+                "description": "Models to load",
+                "items": {
+                  "type": "string",
+                  "description": "Model to load"
+                }
+              }
+            ]
+          },
+          "identifier": {
+            "type": "string",
+            "description": "Descriptive name of the model"
+          },
+          "position": {
+            "description": "Position of the object",
+            "$ref": "#/definitions/3d-vector"
+          },
+          "rotation": {
+            "description": "Rotation of the object",
+            "$ref": "#/definitions/3d-vector"
+          },
+          "scale": {
+            "description": "Scale of the object",
+            "$ref": "#/definitions/3d-vector"
+          },
+          "reflections": {
+            "description": "The reflections that appear on the surface of the object",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "screen space": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/definitions/ssr"
+                      },
+                      {
+                        "type": "boolean",
+                        "description": "Simply enables or disables SSR"
+                      }
+                    ]
+                  },
+                  "alternative": {
+                    "type": "object",
+                    "description": "Fallback cubemapped reflections to be used if SSR fails",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "description": "Sampling and correction mode to use the cubemapped reflection in",
+                        "enum": [
+                          "oriented bounding box", "simple"
+                        ]
+                      },
+                      "reflection": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "description": "Name of the reflection to use when in fallback mode"
+                          },
+                          {
+                            "type": "array",
+                            "description": "Names of the reflections to use when in fallback mode",
+                            "items": {
+                              "type": "string",
+                              "description": "Name of a reflection to use when in fallback mode"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["mode", "reflection"],
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "boolean",
+                "enum": [false]
+              }
+            ]
+          },
+          "textures": {
+            "type": "object",
+            "description": "Textures associated with the object",
+            "properties": {
+              "colour": {
+                "$ref": "#/definitions/2d-texture"
+              },
+              "normal": {
+                "$ref": "#/definitions/2d-texture"
+              },
+              "reflection intensity": {
+                "$ref": "#/definitions/2d-texture"
+              },
+              "specular": {
+                "$ref": "#/definitions/2d-texture"
+              },
+              "skybox mask": {
+                "$ref": "#/definitions/2d-texture"
+              },
+              "displacement": {
+                "$ref": "#/definitions/2d-texture"
+              }
+            },
+            "additionalProperties": false
+          },
+          "material": {
+            "type": "object",
+            "properties": {
+              "diffuse": {
+                "description": "Diffuse lighting component multiplier",
+                "$ref": "#/definitions/3d-vector"
+              },
+              "specular": {
+                "description": "Specular lighting component multiplier",
+                "$ref": "#/definitions/3d-vector"
+              },
+              "specular highlight": {
+                "type": "number",
+                "description": "Blinn-Phong specular highlight exponent",
+                "minimum": 0,
+                "exclusiveMinimum": true
+              },
+              "displacement": {
+                "type": "object",
+                "description": "Configures the effect produced by a displacement texture (heightmap)",
+                "properties": {
+                  "multiplier": {
+                    "type": "number",
+                    "description": "Scales the displacement texture's effect"
+                  },
+                  "discard out of range": {
+                    "type": "boolean",
+                    "description": "Whether or not out of range fragments will be discarded, showing the objects behind. Comes with a small performance penalty to all rendered objects when enabled for at least one"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "visboxes": {
+            "description": "Specifies the visboxs that this object will be a member of. When the camera is inside a visbox, all objects that are a member of either that visbox or a visbox that is visible from that visbox are rendered",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "A visbox that this object will be a member of"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ssr defaults": {
+      "$ref": "#/definitions/ssr"
+    },
+    "lighting": {
+      "type": "object",
+      "description": "Lighting properties and lights in the scene",
+      "properties": {
+        "ambient": {
+          "$ref": "#/definitions/3d-vector",
+          "description": "Ambient light level for the entire scene"
+        },
+        "point lights": {
+          "type": "array",
+          "description": "All point lights in the scene",
+          "items": {
+            "type": "object",
+            "description": "A point light",
+            "properties": {
+              "position": {
+                "description": "Position of the point light",
+                "$ref": "#/definitions/3d-vector"
+              },
+              "intensity": {
+                "description": "Intensity of the point light",
+                "$ref": "#/definitions/3d-vector"
+              },
+              "shadows": {
+                "type": "object",
+                "description": "Options for shadow rendering",
+                "properties": {
+                  "acceptance bias": {
+                    "type": "number",
+                    "description": "Offset applied to sampled shadow values to reduce shadow acne"
+                  },
+                  "clips": {
+                    "type": "array",
+                    "description": "Far and near clips for rendering the cubemap",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "type": "number",
+                      "description": "Camera clip"
+                    }
+                  },
+                  "texture": {
+                    "$ref": "#/definitions/array-index",
+                    "description": "Cubemap dimensions. Indexed to an array in the chosen performance profile"
+                  },
+                  "static draw": {
+                    "type": "array",
+                    "description": "Identifiers of objects to be drawn once into the cubemap on the first frame and preserved",
+                    "items": {
+                      "type": "string",
+                      "description": "Model identifier"
+                    }
+                  },
+                  "dynamic draw": {
+                    "type": "array",
+                    "description": "Identifiers of objects to be redrawn every n frames",
+                    "items": {
+                      "type": "string",
+                      "description": "Model identifier"
+                    }
+                  },
+                  "dynamic draw refresh frames": {
+                    "type": "number",
+                    "description": "Number of frames to wait before redrawing objects in the dynamic draw list. A value of 1 means redraw every frame",
+                    "minimum": 1,
+                    "exclusiveMinimum": false
+                  }
+                },
+                "required": ["texture"],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "reflections": {
+      "type": "array",
+      "description": "Reflection cubemaps",
+      "items": {
+        "type": "object",
+        "description": "Reflection cubemap",
+        "properties": {
+          "clips": {
+            "type": "array",
+            "description": "Far and near clips for rendering the cubemap",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "description": "Camera clip"
+            }
+          },
+          "texture": {
+            "$ref": "#/definitions/array-index",
+            "description": "Cubemap dimensions. Indexed to an array in the chosen performance profile"
+          },
+          "static draw": {
+            "type": "array",
+            "description": "Identifiers of objects to be drawn once into the cubemap on the first frame and preserved",
+            "items": {
+              "type": "string",
+              "description": "Model identifier"
+            }
+          },
+          "dynamic draw": {
+            "type": "array",
+            "description": "Identifiers of objects to be redrawn every n frames",
+            "items": {
+              "type": "string",
+              "description": "Model identifier"
+            }
+          },
+          "dynamic draw refresh frames": {
+            "type": "number",
+            "description": "Number of frames to wait before redrawing objects in the dynamic draw list. A value of 1 means redraw every frame",
+            "minimum": 1,
+            "exclusiveMinimum": false
+          },
+          "position": {
+            "description": "Position that the reflection is rendered from",
+            "$ref": "#/definitions/3d-vector"
+          },
+          "draw shadows": {
+            "type": "boolean",
+            "description": "Whether or not shadows should appear in the reflection"
+          },
+          "draw reflections": {
+            "type": "boolean",
+            "description": "Whether or not other reflections should appear in the reflection"
+          },
+          "identifier": {
+            "type": "string",
+            "description": "Name of the reflection"
+          }
+        },
+        "required": ["texture"],
+        "additionalProperties": false
+      }
+    },
+    "skyboxes": {
+      "type": "array",
+      "description": "Skyboxes in the scene",
+      "items": {
+        "type": "object",
+        "description": "A skybox",
+        "properties": {
+          "position": {
+            "$ref": "#/definitions/3d-vector",
+            "description": "Position that the skybox is rendered from"
+          },
+          "clips": {
+            "type": "array",
+            "description": "Far and near clips for rendering the cubemap",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "description": "Camera clip"
+            }
+          },
+          "texture": {
+            "$ref": "#/definitions/array-index",
+            "description": "Cubemap dimensions. Indexed to an array in the chosen performance profile"
+          },
+          "static draw": {
+            "type": "array",
+            "description": "Identifiers of objects to be drawn once into the cubemap on the first frame and preserved",
+            "items": {
+              "type": "string",
+              "description": "Model identifier"
+            }
+          },
+          "dynamic draw": {
+            "type": "array",
+            "description": "Identifiers of objects to be redrawn every n frames",
+            "items": {
+              "type": "string",
+              "description": "Model identifier"
+            }
+          },
+          "dynamic draw refresh frames": {
+            "type": "number",
+            "description": "Number of frames to wait before redrawing objects in the dynamic draw list. A value of 1 means redraw every frame",
+            "minimum": 1,
+            "exclusiveMinimum": false
+          },
+          "drawn on": {
+            "type": "array",
+            "description": "Objects to attach this skybox to",
+            "items": {
+              "type": "string",
+              "description": "Object identifier"
+            }
+          }
+        },
+        "required": ["texture"],
+        "additionalProperties": false
+      }
+    },
+    "obb approximation": {
+      "type": "array",
+      "description": "Oriented bounding box approximation of the scene. Used for perspective correct cubemaps",
+      "items": {
+        "type": "object",
+        "description": "Oriented bounding box",
+        "properties":
+        {
+          "identifier": {
+            "type": "string",
+            "description": "OBB identifier"
+          },
+          "position": {
+            "$ref": "#/definitions/3d-vector",
+            "description": "OBB position"
+          },
+          "rotation": {
+            "$ref": "#/definitions/3d-vector",
+            "description": "OBB rotation"
+          },
+          "dimensions": {
+            "$ref": "#/definitions/3d-vector",
+            "description": "Dimensions of the OBB in local space"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "visboxes": {
+      "type": "object",
+      "description": "Oriented bounding boxes that help with optimising a scene",
+      "patternProperties": {
+        "^.+": {
+          "type": "object",
+          "description": "Oriented bounding box",
+          "properties":
+          {
+            "position": {
+              "$ref": "#/definitions/3d-vector",
+              "description": "OBB position"
+            },
+            "rotation": {
+              "$ref": "#/definitions/3d-vector",
+              "description": "OBB rotation"
+            },
+            "dimensions": {
+              "$ref": "#/definitions/3d-vector",
+              "description": "Dimensions of the OBB in local space"
+            },
+            "pvs": {
+              "description": "Visboxes visible from inside this visbox",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "The visbox visible from inside this visbox"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "A visbox visible from inside this visbox"
+                  }
+                }
+              ]
+            }
+          },
+          "required": ["pvs"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["metadata"],
+  "additionalProperties": false
+}

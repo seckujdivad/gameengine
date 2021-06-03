@@ -356,6 +356,7 @@
     <ResourceCompile Include="shaders.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="json-schemas\scenefile-schema.json" />
     <None Include="resources\models\icosphere.ply" />
     <None Include="resources\shaders\default.frag" />
     <None Include="resources\shaders\default.vert" />
