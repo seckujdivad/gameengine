@@ -464,14 +464,8 @@
                     "description": "Offset applied to sampled shadow values to reduce shadow acne"
                   },
                   "clips": {
-                    "type": "array",
-                    "description": "Far and near clips for rendering the cubemap",
-                    "minItems": 2,
-                    "maxItems": 2,
-                    "items": {
-                      "type": "number",
-                      "description": "Camera clip"
-                    }
+                    "$ref": "#/definitions/2d-vector",
+                    "description": "Far and near clips for rendering the cubemap"
                   },
                   "texture": {
                     "$ref": "#/definitions/array-index",
@@ -518,14 +512,8 @@
         "description": "Reflection cubemap",
         "properties": {
           "clips": {
-            "type": "array",
-            "description": "Far and near clips for rendering the cubemap",
-            "minItems": 2,
-            "maxItems": 2,
-            "items": {
-              "type": "number",
-              "description": "Camera clip"
-            }
+            "$ref": "#/definitions/2d-vector",
+            "description": "Far and near clips for rendering the cubemap"
           },
           "texture": {
             "$ref": "#/definitions/array-index",
@@ -586,14 +574,8 @@
             "description": "Position that the skybox is rendered from"
           },
           "clips": {
-            "type": "array",
-            "description": "Far and near clips for rendering the cubemap",
-            "minItems": 2,
-            "maxItems": 2,
-            "items": {
-              "type": "number",
-              "description": "Camera clip"
-            }
+            "$ref": "#/definitions/2d-vector",
+            "description": "Far and near clips for rendering the cubemap"
           },
           "texture": {
             "$ref": "#/definitions/array-index",

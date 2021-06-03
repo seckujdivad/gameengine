@@ -59,7 +59,6 @@
               }
             }
           },
-          "required": ["texture"],
           "additionalProperties": false
         },
         "model": {

@@ -196,32 +196,13 @@ Texture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, 
 
 void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, Scene* scene)
 {
-	if (data.contains("clips") && data["clips"].is_array())
-	{
-		if (data["clips"].size() == 2)
-		{
-			cubemap->SetClips({ data["clips"][0].get<double>(), data["clips"][1].get<double>() });
-		}
-		else
-		{
-			throw std::runtime_error("Clips for cubemaps must contain exactly 2 values");
-		}
-	}
+	glm::dvec2 clips = GetVector(data["clips"], glm::dvec2(std::get<0>(cubemap->GetClips()), std::get<1>(cubemap->GetClips())));
+	cubemap->SetClips({ clips.x, clips.y });
 
 	if (data.contains("texture") && data["texture"].is_number_integer())
 	{
-		const nlohmann::json& texture_dimensions = perf_data["scene"]["cubemap"]["texture"][data["texture"].get<int>()];
-		if (texture_dimensions.is_array())
-		{
-			if (texture_dimensions.size() == 2)
-			{
-				cubemap->SetTextureDimensions({ texture_dimensions[0].get<int>(), texture_dimensions[1].get<int>() });
-			}
-			else
-			{
-				throw std::runtime_error("Texture dimensions for cubemaps must contain exactly 2 values");
-			}
-		}
+		glm::ivec2 tex_dimensions = GetVector(perf_data["scene"]["cubemap"]["texture"][data["texture"].get<int>()], glm::ivec2(1));
+		cubemap->SetTextureDimensions({ tex_dimensions.x, tex_dimensions.y });
 	}
 	else
 	{
