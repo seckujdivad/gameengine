@@ -1,5 +1,7 @@
 {
-  "scene": "simplescene.json",
-  "performance level": 0,
-  "render mode": "normal"
+  "scene": {
+    "root": "resources",
+    "file": "simplescene.json"
+  },
+  "performance level": 0
 }

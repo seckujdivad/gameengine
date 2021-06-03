@@ -270,8 +270,8 @@ SceneLoaderConfig Main::GetSceneLoaderConfig() const
 {
 	SceneLoaderConfig config;
 
-	config.path.root = "resources";
-	config.path.file = "simplescene.json";
+	config.path.root = this->GetSettings()["scene"]["root"].get<std::string>();
+	config.path.file = this->GetSettings()["scene"]["file"].get<std::string>();
 
 	config.performance.index = this->GetSettings()["performance level"].get<int>();
 
@@ -374,7 +374,10 @@ void Main::HandlePacket(PacketEvent& evt)
 	const Packet& packet = evt.GetPacket();
 	if (packet.GetType() == Packet::Type::ConnEstablished)
 	{
-		if (this->GetSettings().contains("network") && this->GetSettings()["network"].is_object() && this->GetSettings()["network"].contains("username") && this->GetSettings()["network"]["username"].is_string())
+		if (this->GetSettings().contains("network")
+			&& this->GetSettings()["network"].is_object()
+			&& this->GetSettings()["network"].contains("username")
+			&& this->GetSettings()["network"]["username"].is_string())
 		{
 			this->m_connection->SendPacket(Packet(Packet::SetClientName(this->GetSettings()["network"]["username"].get<std::string>())));
 		}
