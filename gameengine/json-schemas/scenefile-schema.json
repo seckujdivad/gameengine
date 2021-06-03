@@ -13,7 +13,8 @@
           }
         },
         {
-          "type": "number"
+          "type": "number",
+          "description": "Value for the nth axis of the vector"
         }
       ]
     },
@@ -22,10 +23,15 @@
         {
           "type": "array",
           "maxItems": 2,
-          "minItems": 2
+          "minItems": 2,
+          "items": {
+            "type": "number",
+            "description": "Value for the nth axis of the vector"
+          }
         },
         {
-          "type": "number"
+          "type": "number",
+          "description": "Value for the nth axis of the vector"
         }
       ]
     },
@@ -134,6 +140,7 @@
     }
   },
   "type": "object",
+  "description": "A file describing a scene and its assets",
   "properties": {
     "$schema": {
       "type": "string",
