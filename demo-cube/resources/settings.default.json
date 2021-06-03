@@ -1,4 +1,5 @@
 {
+  "$schema": "../json-schemas/settings-schema.json",
   "scene": {
     "root": "resources",
     "file": "simplescene.json"

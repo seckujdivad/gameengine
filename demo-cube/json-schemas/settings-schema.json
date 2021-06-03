@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "properties": {
+    "scene": {
+      "type": "object",
+      "properties": {
+        "root": {
+          "type": "string",
+          "description": "Root directory containing the scene file and its resources"
+        },
+        "file": {
+          "type": "string",
+          "description": "Path to the scene file itself relative to the root"
+        }
+      },
+      "required": [ "root", "file" ],
+      "description": "Path to scene to load"
+    },
+    "performance level": {
+      "type": "integer",
+      "description": "Index to select the appropriate set of predefined scene settings (e.g. cubemap resolution) for the system",
+      "default": 0
+    },
+    "render mode": {
+      "type": "string",
+      "enum": [ "normal", "wireframe", "textured" ],
+      "default": "normal"
+    },
+    "network": {
+      "type": "object",
+      "description": "Settings specific to networking and servers",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Username to be displayed when connected to a server"
+        }
+      }
+    }
+  },
+  "required": [ "scene", "performance level" ]
+}

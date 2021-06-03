@@ -25,6 +25,9 @@
     <Filter Include="Resource Files\scripts">
       <UniqueIdentifier>{e4153eb6-a62c-4dbc-ac71-567d5840d1e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JSON Schemas">
+      <UniqueIdentifier>{b560ec34-f52b-448b-b850-10d4b4b5e501}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\simplescene.json">
@@ -71,6 +74,9 @@
     </None>
     <None Include="scripts\post_build_release.py">
       <Filter>Resource Files\scripts</Filter>
+    </None>
+    <None Include="json-schemas\settings-schema.json">
+      <Filter>JSON Schemas</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

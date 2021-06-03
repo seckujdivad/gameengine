@@ -218,6 +218,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="json-schemas\settings-schema.json" />
     <None Include="resources\models\cube.ply">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -293,4 +294,9 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties json-schemas_4settings-schema_1json__JsonSchema="https://json-schema.org/draft-04/schema" resources_4settings_1json__JsonSchema="..\json-schemas\settings-schema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
