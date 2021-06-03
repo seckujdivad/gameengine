@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "3d-vector": {
+      "anyOf": [
+        {
+          "type": "array",
+          "maxItems": 3,
+          "minItems": 3,
+          "items": {
+            "type": "number",
+            "description": "Value for the nth axis of the vector"
+          }
+        },
+        {
+          "type": "number",
+          "description": "Value for the nth axis of the vector"
+        }
+      ]
+    },
+    "2d-vector": {
+      "anyOf": [
+        {
+          "type": "array",
+          "maxItems": 2,
+          "minItems": 2,
+          "items": {
+            "type": "number",
+            "description": "Value for the nth axis of the vector"
+          }
+        },
+        {
+          "type": "number",
+          "description": "Value for the nth axis of the vector"
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "description": "Performance profile to tune the performance of a scene for many different systems",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema for the document"
+    },
+    "scene": {
+      "type": "object",
+      "description": "Performance options specific to the scene",
+      "properties": {
+        "cubemap": {
+          "type": "object",
+          "description": "Performance options specific to cubemaps",
+          "properties": {
+            "texture": {
+              "type": "array",
+              "description": "Texture dimensions",
+              "items": {
+                "$ref": "#/definitions/2d-vector"
+              }
+            }
+          },
+          "required": ["texture"],
+          "additionalProperties": false
+        },
+        "model": {
+          "type": "object",
+          "description": "Performance options specific to models",
+          "properties": {
+            "material": {
+              "type": "object",
+              "description": "Performance options specific to materials",
+              "properties": {
+                "ssr": {
+                  "type": "object",
+                  "description": "Performance options specific to screen space reflections",
+                  "properties": {
+                    "acceptable depth distance": {
+                      "type": "array",
+                      "description": "The maximum distance difference between the trace and the sampled depth at which a hit is counted",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": false
+                      }
+                    },
+                    "distance limit": {
+                      "type": "array",
+                      "description": "The maximum length to trace a ray for",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": false
+                      }
+                    },
+                    "max camera distance": {
+                      "type": "array",
+                      "description": "The maximum distance away a pixel can be for a ray cast attempt",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": false
+                      }
+                    },
+                    "min refinements": {
+                      "type": "array",
+                      "description": "The minimum number of times the resolution and hit acceptance can be halved before a final hit is found. A value between the minimum and maximum is chosen based on whether or not traces in that area were successful last frame",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": false
+                      }
+                    },
+                    "max refinements": {
+                      "type": "array",
+                      "description": "The maximum number of times the resolution and hit acceptance can be halved before a final hit is found. A value between the minimum and maximum is chosen based on whether or not traces in that area were successful last frame",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "exclusiveMinimum": false
+                      }
+                    },
+                    "resolution": {
+                      "type": "array",
+                      "description": "The minimum initial number of pixels to trace across in both the X and Y axis",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "exclusiveMinimum": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "acceptable depth distance",
+                    "distance limit",
+                    "max camera distance",
+                    "min refinements",
+                    "max refinements",
+                    "resolution"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["ssr"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["material"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["cubemap", "model"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["scene"],
+  "additionalProperties": false
+}

@@ -705,5 +705,8 @@
     <None Include="json-schemas\scenefile-schema.json">
       <Filter>JSON Schemas</Filter>
     </None>
+    <None Include="json-schemas\perffile-schema.json">
+      <Filter>JSON Schemas</Filter>
+    </None>
   </ItemGroup>
 </Project>

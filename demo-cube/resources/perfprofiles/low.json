@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../gameengine/json-schemas/perffile-schema.json",
   "scene": {
     "cubemap": {
       "texture": [
