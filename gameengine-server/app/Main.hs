@@ -112,7 +112,7 @@ serverMainloopInner mainloopIn clients = do
 
                             let
                                 clientFilterer :: Map Integer Client -> [(Integer, String)] -> Map Integer Client
-                                clientFilterer clients ((uid, error):otherErrors) = delete uid clients
+                                clientFilterer clients ((uid, error):otherErrors) = clientFilterer (delete uid clients) otherErrors
                                 clientFilterer clients [] = clients
 
                             nextLoop (clientFilterer clients errors)
