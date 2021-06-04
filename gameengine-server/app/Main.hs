@@ -110,12 +110,7 @@ serverMainloopInner mainloopIn clients = do
                                         Nothing -> return ())
                                 errors)
 
-                            let
-                                clientFilterer :: Map Integer Client -> [(Integer, String)] -> Map Integer Client
-                                clientFilterer clients ((uid, error):otherErrors) = clientFilterer (delete uid clients) otherErrors
-                                clientFilterer clients [] = clients
-
-                            nextLoop (clientFilterer clients errors)
+                            nextLoop (foldl (\clients (uid, _) -> delete uid clients) clients errors)
                         
                         ServerChatMessage _ _ -> do
                             putStrLn $ showClientMessage client "client shouldn't send ServerChatMessage"
