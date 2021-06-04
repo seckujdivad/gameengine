@@ -66,7 +66,7 @@ serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloop
 
 serverMainloopInner :: TChan ClientPacket -> Map Integer Client -> IO ()
 serverMainloopInner mainloopIn clients = do
-    clientComm <- readFromInput
+    clientComm <- readFromTChan mainloopIn
     case clientComm of
         ClientPacket uid packetMaybe -> case Data.Map.Strict.lookup uid clients of
             Just client -> do
@@ -97,16 +97,19 @@ serverMainloopInner mainloopIn clients = do
                                 clientErrors = foldl mappend (return []) (map (\operation -> operation >>= (\errorDescriptionMaybe -> return [errorDescriptionMaybe])) sendResults)
                             
                             errorMaybes <- clientErrors
-                            let errors = [case errorMaybe of Just error -> error | errorMaybe <- errorMaybes, maybe False (const True) errorMaybe]
 
-                            mconcat (map (\(uid, errorText) -> case Data.Map.Strict.lookup uid clients of
+                            let
+                                errors = [case errorMaybe of Just error -> error | errorMaybe <- errorMaybes, maybe False (const True) errorMaybe]
+
+                                connectionDropper :: (Integer, String) -> IO ()
+                                connectionDropper (uid, errorText) = case Data.Map.Strict.lookup uid clients of
                                     Just client -> do
                                         let Client connection _ _ = client
                                         putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorText)
                                         catch (shutdown connection ShutdownBoth) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
-                                    Nothing -> return ())
-                                errors)
+                                    Nothing -> return ()
 
+                            mconcat (map connectionDropper errors)
                             nextLoop (foldl (\clients (uid, _) -> delete uid clients) clients errors)
                         
                         ServerChatMessage _ _ -> do
@@ -128,7 +131,6 @@ serverMainloopInner mainloopIn clients = do
             nextLoop $ insert uid (Client connection (ConnInfo uid address) Nothing) clients
 
     where
-        readFromInput = readFromTChan mainloopIn
         nextLoop = serverMainloopInner mainloopIn
 
 -- |Sends a 'Packet' to a 'Socket'. Returns 'True' if the 'Packet' was sent without error, 'False' otherwise
@@ -141,11 +143,12 @@ sendPacket socket packet = catch (do
 sendPacketInner :: Socket -> Packet -> IO ()
 sendPacketInner socket = sendAll socket . serialise
 
--- |Get a 
+-- |Get a human-readable identifier for a 'Client'. The first 'Bool' controls whether or not the UID is always included
 getClientIdentifier :: Bool -> Client -> String
 getClientIdentifier alwaysIncludeUID (Client _ (ConnInfo uid _) nameMaybe) = case nameMaybe of
     Just name -> name ++ if alwaysIncludeUID then " (" ++ show uid ++ ")" else ""
     Nothing -> show uid
 
+-- |Show a 'String' in the console that is caused by a 'Client'
 showClientMessage :: Client -> String -> String
 showClientMessage client message = (getClientIdentifier True client) ++ " - " ++ message
