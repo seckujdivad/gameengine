@@ -97,17 +97,14 @@ serverMainloopInner mainloopIn clients = do
                                 clientErrors = foldl mappend (return []) (map (\operation -> operation >>= (\errorDescriptionMaybe -> return [errorDescriptionMaybe])) sendResults)
                             
                             errorMaybes <- clientErrors
-                            let filteredErrorMaybes = filter (maybe False (const True)) errorMaybes
-                            let errors = map (\(Just error) -> error) filteredErrorMaybes
+                            let errors = [case errorMaybe of Just error -> error | errorMaybe <- errorMaybes, maybe False (const True) errorMaybe]
 
-                            mconcat (map (\(uid, errorText) -> do
-                                    let clientMaybe = Data.Map.Strict.lookup uid clients
-                                    case clientMaybe of
-                                        Just client -> do
-                                            let Client connection _ _ = client
-                                            putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorText)
-                                            catch (shutdown connection ShutdownBoth) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
-                                        Nothing -> return ())
+                            mconcat (map (\(uid, errorText) -> case Data.Map.Strict.lookup uid clients of
+                                    Just client -> do
+                                        let Client connection _ _ = client
+                                        putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorText)
+                                        catch (shutdown connection ShutdownBoth) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
+                                    Nothing -> return ())
                                 errors)
 
                             nextLoop (foldl (\clients (uid, _) -> delete uid clients) clients errors)
