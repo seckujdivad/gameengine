@@ -1,6 +1,6 @@
 module Main where
 
-import Network.Socket (SockAddr, Socket, shutdown, ShutdownCmd (ShutdownBoth))
+import Network.Socket (SockAddr, Socket, gracefulClose)
 import Network.Socket.ByteString (recv, sendAll)
 
 import Control.Monad (forever, unless, when)
@@ -106,7 +106,7 @@ serverMainloopInner mainloopIn clients = do
                                     Just client -> do
                                         let Client connection _ _ = client
                                         putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorText)
-                                        catch (shutdown connection ShutdownBoth) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
+                                        catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
                                     Nothing -> return ()
 
                             mconcat (map connectionDropper errors)
