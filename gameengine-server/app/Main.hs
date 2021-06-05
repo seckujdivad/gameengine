@@ -19,10 +19,11 @@ import AtomicTChan (sendToTChan, readFromTChan)
 
 import Packet (Packet (ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName), serialise, deserialise)
 
-data ClientPacket = ClientPacket Integer (Maybe Packet) | NewClient ConnInfo Socket
+data ReceiverMsg = ReceiverMsg ConnInfo ReceiverMsgInner
+data ReceiverMsgInner = ClientConnEstablished Socket | PackedReceived Packet | ClientConnClosed | ReceiverException String deriving (Show)
 
-instance Show ClientPacket where
-    show (ClientPacket uid packetMaybe) = show uid ++ ": " ++ maybe "no packet" show packetMaybe
+instance Show ReceiverMsg where
+    show (ReceiverMsg (ConnInfo uid _) inner) = show uid ++ ": " ++ show inner
 
 -- |All information stored about a client
 data Client =
@@ -37,42 +38,51 @@ main = do
     runTCPServer Nothing "4321" (connHandler mainloopIn)
 
 -- |Called when a new connection to a client is established
-connHandler :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
+connHandler :: TChan ReceiverMsg -> Socket -> ConnInfo -> IO ()
 connHandler mainloopIn connection connInfo = do
     putStrLn ("New connection: " ++ show connInfo)
-    sendToTChan mainloopIn (NewClient connInfo connection)
+    sendToTChan mainloopIn (ReceiverMsg connInfo (ClientConnEstablished connection))
     connReceiver mainloopIn connection connInfo
     where
         ConnInfo uid _ = connInfo
 
 -- |Listens to a client
-connReceiver :: TChan ClientPacket -> Socket -> ConnInfo -> IO ()
-connReceiver mainloopIn connection connInfo = do
+connReceiver :: TChan ReceiverMsg -> Socket -> ConnInfo -> IO ()
+connReceiver mainloopIn connection connInfo = catch (do
     message <- recv connection 1024
     let socketClosed = Data.ByteString.null message
     if socketClosed then do
         putStrLn ("Client receiver closed - " ++ show connInfo)
-        writeToInput $ ClientPacket uid Nothing
+        sendMessage $ ClientConnClosed
     else do
-        writeToInput $ ClientPacket uid $ Just $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
-        connReceiver mainloopIn connection connInfo
+        sendMessage $ PackedReceived $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
+        connReceiver mainloopIn connection connInfo)
+    (\exception -> do
+        sendMessage $ ReceiverException (show (exception :: IOException)))
     where
-        ConnInfo uid address = connInfo
-        writeToInput = sendToTChan mainloopIn
+        sendMessage = (sendToTChan mainloopIn) . (ReceiverMsg connInfo)
 
 -- |Handles inter-client communication and the server state
-serverMainloop :: TChan ClientPacket -> IO ()
+serverMainloop :: TChan ReceiverMsg -> IO ()
 serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty >> putStrLn "Mainloop stopped"
 
-serverMainloopInner :: TChan ClientPacket -> Map Integer Client -> IO ()
+serverMainloopInner :: TChan ReceiverMsg -> Map Integer Client -> IO ()
 serverMainloopInner mainloopIn clients = do
-    clientComm <- readFromTChan mainloopIn
-    case clientComm of
-        ClientPacket uid packetMaybe -> case Data.Map.Strict.lookup uid clients of
-            Just client -> do
-                let Client _ connInfo clientNameMaybe = client
-                case packetMaybe of
-                    Just packet -> case packet of
+    ReceiverMsg connInfo msgInner <- readFromTChan mainloopIn
+    let ConnInfo uid address = connInfo
+    case msgInner of
+        ClientConnEstablished connection -> do
+            sendPacket connection (ConnEstablished uid)
+            nextLoop $ insert uid (Client connection (ConnInfo uid address) Nothing) clients
+        
+        _ ->  case Data.Map.Strict.lookup uid clients of
+            Just client -> case msgInner of
+                ClientConnEstablished connection -> do
+                    sendPacket connection (ConnEstablished uid)
+                    nextLoop $ insert uid (Client connection (ConnInfo uid address) Nothing) clients
+
+                PackedReceived packet -> case Data.Map.Strict.lookup uid clients of
+                    Just client -> case packet of
                         ConnEstablished _ -> do
                             putStrLn $ showClientMessage client "client shouldn't send ConnEstablished"
                             nextLoop clients
@@ -99,7 +109,9 @@ serverMainloopInner mainloopIn clients = do
                             errorMaybes <- clientErrors
 
                             let
-                                errors = [case errorMaybe of Just error -> error | errorMaybe <- errorMaybes, maybe False (const True) errorMaybe]
+                                errors = concat (fmap (\errorMaybe -> case errorMaybe of
+                                    Just error -> [error]
+                                    Nothing -> []) errorMaybes)
 
                                 connectionDropper :: (Integer, String) -> IO ()
                                 connectionDropper (uid, errorText) = case Data.Map.Strict.lookup uid clients of
@@ -119,19 +131,28 @@ serverMainloopInner mainloopIn clients = do
                         SetClientName newName -> do
                             putStrLn $ showClientMessage client ("name set to " ++ newName)
                             nextLoop (update (\(Client connection connInfo _) -> Just (Client connection connInfo (Just newName))) uid clients)
+                
+                ReceiverException errorMsg -> do
+                    putStrLn $ showClientMessage client "listener threw an error - " ++ errorMsg
+                    newClients <- closeClient client
+                    nextLoop newClients
 
-                    Nothing -> do
-                        putStrLn $ showClientMessage client "cleaning client"
-                        nextLoop $ delete uid clients
-            
+                ClientConnClosed -> do
+                    newClients <- closeClient client
+                    nextLoop newClients
+
             Nothing -> putStrLn $ "Client UID " ++ show uid ++ " does not exist"
-
-        NewClient (ConnInfo uid address) connection -> do
-            sendPacket connection (ConnEstablished uid)
-            nextLoop $ insert uid (Client connection (ConnInfo uid address) Nothing) clients
 
     where
         nextLoop = serverMainloopInner mainloopIn
+
+        -- |Close the given 'Client' and give the leftover clients
+        closeClient :: Client -> IO (Map Integer Client)
+        closeClient client = do
+            putStrLn $ showClientMessage client "closing client"
+            let Client connection (ConnInfo uid _) _ = client
+            catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
+            return (delete uid clients)
 
 -- |Sends a 'Packet' to a 'Socket'. Returns 'True' if the 'Packet' was sent without error, 'False' otherwise
 sendPacket :: Socket -> Packet -> IO (Maybe String)
