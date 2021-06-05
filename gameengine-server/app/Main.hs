@@ -99,14 +99,8 @@ serverMainloopInner mainloopIn clients = do
                                             Just errMsg -> return (Just (key, errMsg))
                                             Nothing -> return Nothing
                                     Nothing -> return Nothing
-                                
-                                sendResults :: [IO (Maybe (Integer, String))]
-                                sendResults = map clientProcessor (keys clients)
-
-                                clientErrors :: IO [Maybe (Integer, String)]
-                                clientErrors = foldl mappend (return []) (map (\operation -> operation >>= (\errorDescriptionMaybe -> return [errorDescriptionMaybe])) sendResults)
                             
-                            errorMaybes <- clientErrors
+                            errorMaybes <- listIOToIOList (map clientProcessor (keys clients))
 
                             let
                                 errors = concat (fmap (\errorMaybe -> case errorMaybe of
@@ -122,7 +116,7 @@ serverMainloopInner mainloopIn clients = do
                                     Nothing -> return ()
 
                             mconcat (map connectionDropper errors)
-                            nextLoop (foldl (\clients (uid, _) -> delete uid clients) clients errors)
+                            nextLoop (foldr (\(uid, _) clients -> delete uid clients) clients errors)
                         
                         ServerChatMessage _ _ -> do
                             putStrLn $ showClientMessage client "client shouldn't send ServerChatMessage"
@@ -173,3 +167,7 @@ getClientIdentifier alwaysIncludeUID (Client _ (ConnInfo uid _) nameMaybe) = cas
 -- |Show a 'String' in the console that is caused by a 'Client'
 showClientMessage :: Client -> String -> String
 showClientMessage client message = (getClientIdentifier True client) ++ " - " ++ message
+
+-- |Convert a list of 'IO' operations and their values to a single 'IO' operation with all their values preserved in a list
+listIOToIOList :: [IO a] -> IO [a]
+listIOToIOList = mconcat . map (fmap (\x -> [x]))
