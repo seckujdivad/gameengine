@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 09a6d87ad472a4c99fc64ac2bcec886558d2c40c6a60e821a1f596c09cfae002
+-- hash: 7350540e4ffcfd1b93770f45a13f8f6c8c3c9c4cd79dc22c83dab02be33d82ce
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -14,8 +14,6 @@ bug-reports:    https://github.com/seckujdivad/gameengine/issues
 author:         David Juckes
 maintainer:     David Juckes
 build-type:     Simple
-data-files:
-    resources/file.txt
 
 source-repository head
   type: git

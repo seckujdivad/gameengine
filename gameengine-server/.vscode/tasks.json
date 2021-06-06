@@ -6,7 +6,7 @@
         {
             "label": "Run compiled (quick)",
             "type": "shell",
-            "command": "stack build --fast && stack run gameengine-server ",
+            "command": "stack build --fast && cd resources && stack run gameengine-server",
             "problemMatcher": []
         },
         {
