@@ -31,6 +31,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\gtest.yml = .github\workflows\gtest.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scenes", "scenes", "{739A180D-9822-48F0-A479-F9D2A27B98D6}"
+	ProjectSection(SolutionItems) = preProject
+		scenes\simplescene.json = scenes\simplescene.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "textures", "textures", "{3E08C3E8-5CA4-47AE-A8A7-A03EC3EDB4A6}"
+	ProjectSection(SolutionItems) = preProject
+		scenes\textures\bricks2.jpg = scenes\textures\bricks2.jpg
+		scenes\textures\bricks2_disp.jpg = scenes\textures\bricks2_disp.jpg
+		scenes\textures\bricks2_normal.jpg = scenes\textures\bricks2_normal.jpg
+		scenes\textures\cube_normals.png = scenes\textures\cube_normals.png
+		scenes\textures\sky.jpg = scenes\textures\sky.jpg
+		scenes\textures\SuzanneSpecularMap.png = scenes\textures\SuzanneSpecularMap.png
+		scenes\textures\TwoTone.png = scenes\textures\TwoTone.png
+		scenes\textures\unnamed.jpg = scenes\textures\unnamed.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{B3E2EC33-CDE0-40CF-ABD6-B890DF8C4B2E}"
+	ProjectSection(SolutionItems) = preProject
+		scenes\models\cube.ply = scenes\models\cube.ply
+		scenes\models\doom_E1M1.obj = scenes\models\doom_E1M1.obj
+		scenes\models\flat plane.ply = scenes\models\flat plane.ply
+		scenes\models\joining section.ply = scenes\models\joining section.ply
+		scenes\models\level.ply = scenes\models\level.ply
+		scenes\models\opened cube.ply = scenes\models\opened cube.ply
+		scenes\models\suzanne.ply = scenes\models\suzanne.ply
+		scenes\models\teapotCGA.bpt = scenes\models\teapotCGA.bpt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "perfprofiles", "perfprofiles", "{1EE5B919-EB72-4DB9-A431-638EB4EB1347}"
+	ProjectSection(SolutionItems) = preProject
+		scenes\perfprofiles\high.json = scenes\perfprofiles\high.json
+		scenes\perfprofiles\low.json = scenes\perfprofiles\low.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -69,6 +104,10 @@ Global
 		{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
 		{B4177548-9D46-4B5A-BFB3-3422E96328B1} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
 		{02CF9FCD-26A8-45F6-BA14-9D051DDC3C5C} = {B4177548-9D46-4B5A-BFB3-3422E96328B1}
+		{739A180D-9822-48F0-A479-F9D2A27B98D6} = {769039FF-934C-4034-AD31-63FD5F1CCA49}
+		{3E08C3E8-5CA4-47AE-A8A7-A03EC3EDB4A6} = {739A180D-9822-48F0-A479-F9D2A27B98D6}
+		{B3E2EC33-CDE0-40CF-ABD6-B890DF8C4B2E} = {739A180D-9822-48F0-A479-F9D2A27B98D6}
+		{1EE5B919-EB72-4DB9-A431-638EB4EB1347} = {739A180D-9822-48F0-A479-F9D2A27B98D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63979F0E-A6D0-403D-AFA4-4FD1400E4095}
