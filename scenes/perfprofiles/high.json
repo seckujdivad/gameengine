@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../gameengine/json-schemas/perffile-schema.json",
+  "$schema": "../../gameengine/json-schemas/perffile-schema.json",
   "scene": {
     "cubemap": {
       "texture": [
