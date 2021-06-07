@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "description": "Config file for packing the results of multiple different builds into ZIP files with their dependencies ready for release",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema for the document"
+    },
+    "projects": {
+      "type": "object",
+      "description": "Project folder name (in root)",
+      "patternProperties": {
+        "^.+$": {
+          "type": "object",
+          "description": "A project folder name",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "description": "Build type (e.g. instruction set and platform). Can be blank",
+              "properties": {
+                "include": {
+                  "type": "object",
+                  "description": "Files to include. Key is the source, value is the destination. Supports wildcards, files and directories. Source paths are relative to the project folder",
+                  "patternProperties": {
+                    "^.+$": {
+                      "type": "string",
+                      "description": "Destination to copy the file/folder/pattern to"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "remove": {
+                  "type": "array",
+                  "description": "Files to remove from the result",
+                  "items": {
+                    "type": "string",
+                    "description": "File to remove from the result"
+                  }
+                }
+              },
+              "required": ["include"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "additional files": {
+      "type": "object",
+      "description": "Individual files to place alongside the ZIPs uncompressed. Key is the source, value is the destination. Supports wildcards, files and directories",
+      "patternProperties": {
+        "^.+$": {
+          "type": "string",
+          "description": "Destination to copy the file/folder/pattern to"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["projects", "additional files"],
+  "additionalProperties": false
+}

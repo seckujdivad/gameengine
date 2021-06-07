@@ -1,4 +1,5 @@
 {
+  "$schema": "../packaged-releases/packages-schema.json",
   "projects": {
     "demo-cube": {
       "win-x86": {
