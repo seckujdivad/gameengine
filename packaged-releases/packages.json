@@ -5,21 +5,31 @@
         "include": {
           "Release/demo-cube.exe": "demo-cube.exe",
           "Release/*.dll": "",
-          "demo-cube/resources/": "resources/"
+          "demo-cube/app-root/*": ""
         },
         "remove": [
-          "resources/settings.json"
+          "settings.json",
+          "gameengine_GL.log"
         ]
       },
       "win-x64": {
         "include": {
           "x64/Release/demo-cube.exe": "demo-cube.exe",
           "x64/Release/*.dll": "",
-          "demo-cube/resources/": "resources/"
+          "demo-cube/app-root/*": ""
         },
         "remove": [
-          "resources/settings.json"
+          "settings.json",
+          "gameengine_GL.log"
         ]
+      }
+    },
+    "gameengine-server": {
+      "": {
+        "include": {
+          "gameengine-server/app-root/*": "",
+          "gameengine-server/build/*":  ""
+        }
       }
     }
   },

@@ -60,13 +60,16 @@ def remove_file(path):
 
 #interpret package config
 for project_name in packages_config["projects"]:
-    for build_type in packages_config["projects"][project_name]:
-        build_name = "{}-{}".format(project_name, build_type)
+    for type_suffix in packages_config["projects"][project_name]:
+        if type_suffix == "":
+            build_name = project_name
+        else:
+            build_name = "{}-{}".format(project_name, type_suffix)
 
         #collect included files
         print("Collecting " + build_name + "...", end = "")
 
-        build_config = packages_config["projects"][project_name][build_type]
+        build_config = packages_config["projects"][project_name][type_suffix]
         package_path = os.path.join(sys.path[0], "package sources", build_name)
         
         os.mkdir(package_path)
@@ -81,10 +84,13 @@ for project_name in packages_config["projects"]:
             print(" failed (one or more files not found, has this package been built?)")
         
         #remove excluded files that have been included
-        print("Removing excluded files...", end = "")
-        for to_remove in build_config["remove"]:
-            remove_file(os.path.join(package_path, to_remove))
-        print(" done")
+        if "remove" in build_config:
+            print("Removing excluded files...", end = "")
+            for to_remove in build_config["remove"]:
+                remove_file(os.path.join(package_path, to_remove))
+            print(" done")
+        else:
+            print("No excluded files provided at \"remove\"")
 
         #package the collected files into a zip file
         print("Archiving " + build_name + "...", end = "")
