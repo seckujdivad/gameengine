@@ -4,5 +4,5 @@
 #include <gameengine/shaders.rc>
 #include <gameengine/models.rc>
 
-ApplicationIcon ICON "main.ico"
-ICONPRG ICON "main.ico"
+ApplicationIcon ICON "resources/main.ico"
+ICONPRG ICON "resources/main.ico"

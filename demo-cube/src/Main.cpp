@@ -20,6 +20,9 @@
 
 #include "Chat.h"
 
+constexpr char SETTINGS_FILE[] = "settings.json";
+constexpr char DEFAULT_SETTINGS_FILE[] = "settings.default.json";
+
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
 	//set up menu bar
@@ -214,7 +217,7 @@ void Main::ReloadSettings()
 
 	try
 	{
-		settings_file = LoadFile("resources/settings.json");
+		settings_file = LoadFile(SETTINGS_FILE);
 	}
 	catch (std::invalid_argument&)
 	{
@@ -226,8 +229,8 @@ void Main::ReloadSettings()
 		try
 		{
 			std::filesystem::copy_file(
-				std::filesystem::path("resources/settings.default.json"),
-				std::filesystem::path("resources/settings.json"),
+				std::filesystem::path(DEFAULT_SETTINGS_FILE),
+				std::filesystem::path(SETTINGS_FILE),
 				std::filesystem::copy_options::overwrite_existing
 			);
 		}
@@ -238,7 +241,7 @@ void Main::ReloadSettings()
 
 		try
 		{
-			settings_file = LoadFile("resources/settings.json");
+			settings_file = LoadFile(SETTINGS_FILE);
 		}
 		catch (std::invalid_argument&)
 		{

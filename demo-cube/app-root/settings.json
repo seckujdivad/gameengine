@@ -1,8 +1,11 @@
 {
   "$schema": "../json-schemas/settings-schema.json",
   "scene": {
-    "root": "resources",
+    "root": "scenes",
     "file": "simplescene.json"
   },
-  "performance level": 0
+  "performance level": 0,
+  "network": {
+    "username": "snekky"
+  }
 }

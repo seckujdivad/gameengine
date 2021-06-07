@@ -218,9 +218,9 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="app-root\settings.default.json" />
+    <None Include="app-root\settings.json" />
     <None Include="json-schemas\settings-schema.json" />
-    <None Include="resources\settings.default.json" />
-    <None Include="resources\settings.json" />
     <None Include="scripts\post_build.py" />
     <None Include="scripts\post_build_debug.py" />
     <None Include="scripts\post_build_release.py" />
@@ -244,21 +244,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="main.ico">
-      <DeploymentContent>false</DeploymentContent>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="gameengine_GL.log" />
+    <Image Include="resources\main.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="app-root\gameengine_GL.log" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties json-schemas_4settings-schema_1json__JsonSchema="https://json-schema.org/draft-04/schema" resources_4settings_1json__JsonSchema="..\json-schemas\settings-schema.json" />
+      <UserProperties json-schemas_4settings-schema_1json__JsonSchema="https://json-schema.org/draft-04/schema" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

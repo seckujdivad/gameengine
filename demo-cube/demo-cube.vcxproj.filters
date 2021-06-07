@@ -19,14 +19,11 @@
     <Filter Include="JSON Schemas">
       <UniqueIdentifier>{b560ec34-f52b-448b-b850-10d4b4b5e501}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App Root">
+      <UniqueIdentifier>{d249f026-6b17-462d-93e3-729bbf677f2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\settings.json">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\settings.default.json">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="scripts\post_build.py">
       <Filter>Resource Files\scripts</Filter>
     </None>
@@ -38,6 +35,12 @@
     </None>
     <None Include="json-schemas\settings-schema.json">
       <Filter>JSON Schemas</Filter>
+    </None>
+    <None Include="app-root\settings.default.json">
+      <Filter>App Root</Filter>
+    </None>
+    <None Include="app-root\settings.json">
+      <Filter>App Root</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -69,18 +72,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="main.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="gameengine_GL.log">
+    <Image Include="resources\main.ico">
       <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="app-root\gameengine_GL.log">
+      <Filter>App Root</Filter>
     </Text>
   </ItemGroup>
 </Project>
