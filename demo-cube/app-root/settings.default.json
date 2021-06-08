@@ -4,5 +4,14 @@
     "root": "scenes",
     "file": "simplescene.json"
   },
-  "performance level": 0
+  "performance level": 0,
+  "network": {
+    "servers": [
+      {
+        "name": "Local machine",
+        "address": "localhost",
+        "port": 4321
+      }
+    ]
+  }
 }

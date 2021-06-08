@@ -20,7 +20,9 @@
     "performance level": {
       "type": "integer",
       "description": "Index to select the appropriate set of predefined scene settings (e.g. cubemap resolution) for the system",
-      "default": 0
+      "default": 0,
+      "minimum": 0,
+      "exclusiveMinimum": false
     },
     "render mode": {
       "type": "string",
@@ -34,8 +36,36 @@
         "username": {
           "type": "string",
           "description": "Username to be displayed when connected to a server"
+        },
+        "servers": {
+          "type": "array",
+          "description": "Servers that are displayed on the server list ready to be connected to",
+          "items": {
+            "type": "object",
+            "description": "Server information",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the server"
+              },
+              "address": {
+                "type": "string",
+                "description": "Address to connect to"
+              },
+              "port": {
+                "type": "integer",
+                "description": "Port to connect to. Ideally pick from https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml",
+                "minimum": 1024,
+                "maximum": 49151,
+                "exclusiveMinimum": false,
+                "exclusiveMaximum": false
+              }
+            },
+            "required": ["name", "address", "port"]
+          }
         }
-      }
+      },
+      "required": ["servers"]
     }
   },
   "required": [ "scene", "performance level" ]

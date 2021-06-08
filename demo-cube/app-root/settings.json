@@ -6,6 +6,14 @@
   },
   "performance level": 0,
   "network": {
-    "username": "snekky"
+    "username": "snekky",
+    "servers": [
+      {
+        "name": "Local machine",
+        "address": "localhost",
+        "port": 4321
+      }
+    ],
+    "default server": 0
   }
 }
