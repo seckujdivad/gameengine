@@ -19,8 +19,21 @@ import AtomicTChan (sendToTChan, readFromTChan)
 
 import Packet (Packet (ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName), serialise, deserialise)
 
-data ReceiverMsg = ReceiverMsg ConnInfo ReceiverMsgInner
-data ReceiverMsgInner = ClientConnEstablished Socket | PackedReceived Packet | ClientConnClosed | ReceiverException String deriving (Show)
+-- |Message sent from a receiver thread to the main thread
+data ReceiverMsg =
+    -- |Message sent from a receiver thread to the main thread
+    ReceiverMsg ConnInfo ReceiverMsgInner
+-- |Body of a 'ReceiverMsg'
+data ReceiverMsgInner =
+    -- |Sent when a new connection is made
+    ClientConnEstablished Socket
+    -- |Sent when a 'Packet' is received and successfully parsed
+    | PackedReceived Packet
+    -- |Sent when the connection is closed without error
+    | ClientConnClosed
+    -- |Sent when an error occurs in the receiver thread
+    | ReceiverException String
+    deriving (Show)
 
 instance Show ReceiverMsg where
     show (ReceiverMsg (ConnInfo uid _) inner) = show uid ++ ": " ++ show inner
