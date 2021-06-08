@@ -343,8 +343,7 @@ healthchecksdb
 packaged-releases/packages/*
 packaged-releases/package sources/*
 
-demo-cube/resources/settings.json
-demo-cube/resources/server/*
+demo-cube/app-root/settings.json
 
 *.cxl
 
