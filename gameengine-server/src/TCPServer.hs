@@ -12,7 +12,9 @@ import Control.Monad (forever)
 
 
 -- |Store information about a connection
-data ConnInfo = ConnInfo Integer SockAddr
+data ConnInfo =
+    -- |A connection's unique ID and address
+    ConnInfo Integer SockAddr
 
 instance Eq ConnInfo where
     (==) (ConnInfo uid1 _) (ConnInfo uid2 _) = uid1 == uid2
@@ -30,7 +32,7 @@ connAccepter :: (Socket -> ConnInfo -> IO ()) -> Integer -> Socket -> IO ()
 connAccepter handlerFunc uid sock = do
     (connection, address) <- accept sock --accept all incoming connections
     let connInfo = ConnInfo uid address
-    forkFinally (handlerFunc connection connInfo) (\_ -> gracefulClose connection 5000)
+    forkFinally (handlerFunc connection connInfo) (const $ gracefulClose connection 5000)
     connAccepter handlerFunc (uid + 1) sock
 
 startListen :: AddrInfo -> IO Socket
