@@ -2,6 +2,10 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema for the document"
+    },
     "scene": {
       "type": "object",
       "properties": {
@@ -61,12 +65,21 @@
                 "exclusiveMaximum": false
               }
             },
-            "required": ["address", "port"]
+            "required": ["address", "port"],
+            "additionalProperties": false
           }
+        },
+        "default server": {
+          "type": "integer",
+          "description": "Index of the server to connect to upon opening demo-cube (optional)",
+          "minimum": 0,
+          "exclusiveMinimum": false
         }
       },
-      "required": ["servers"]
+      "required": ["servers"],
+      "additionalProperties": false
     }
   },
-  "required": [ "scene", "performance level" ]
+  "required": ["scene", "performance level"],
+  "additionalProperties": false
 }
