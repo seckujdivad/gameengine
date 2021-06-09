@@ -61,7 +61,7 @@
                 "exclusiveMaximum": false
               }
             },
-            "required": ["name", "address", "port"]
+            "required": ["address", "port"]
           }
         }
       },
