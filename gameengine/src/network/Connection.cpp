@@ -88,6 +88,7 @@ void Connection::SendBytes(const char* bytes, std::size_t num_bytes)
 Connection::Connection(std::string address, unsigned short port) : m_asio_socket(this->m_asio_service), m_continue_running(true)
 {
 	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(address), port));
+	this->m_continue_running.store(true);
 
 	this->m_listener = std::thread(&Connection::Listener, this);
 }
@@ -98,4 +99,9 @@ Connection::~Connection()
 	this->m_asio_socket.shutdown(asio::socket_base::shutdown_both);
 	this->m_listener.join();
 	this->m_asio_socket.close();
+}
+
+bool Connection::IsConnected() const
+{
+	return this->m_continue_running.load();
 }

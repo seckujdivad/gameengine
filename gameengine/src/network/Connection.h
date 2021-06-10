@@ -5,6 +5,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <mutex>
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501
@@ -22,7 +23,7 @@ private:
 	asio::io_service m_asio_service;
 	asio::ip::tcp::socket m_asio_socket;
 
-	std::atomic<bool> m_continue_running;
+	std::atomic<bool> m_continue_running = false;
 	std::thread m_listener;
 	void Listener();
 	std::optional<std::vector<char>> ReadBytes(std::size_t bytes);
@@ -40,4 +41,6 @@ public:
 	Connection(Connection&&) = delete;
 	Connection& operator=(Connection&&) = delete;
 	~Connection();
+
+	bool IsConnected() const;
 };
