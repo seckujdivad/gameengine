@@ -7,7 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "loaders/SceneLoader.h"
-#include "network/wx/PacketEvent.h"
+#include "network/wx/ConnectionEvent.h"
 
 #include "VectorCtrl.h"
 
@@ -48,6 +48,7 @@ private:
 	wxMenuBar* m_mb;
 
 	void mb_Server_Chat(wxCommandEvent& evt);
+	void mb_Server_Picker(wxCommandEvent& evt);
 	
 	EngineCanvas* m_glcanvas;
 	EngineCanvasController* m_glcanvas_controller;
@@ -74,7 +75,7 @@ private:
 
 	void Mainloop(wxIdleEvent& evt);
 
-	void HandlePacket(PacketEvent& evt);
+	void HandleConnectionEvent(ConnectionEvent& evt);
 
 public:
 	Main();
@@ -84,4 +85,8 @@ public:
 	void ReloadSettings();
 	nlohmann::json& GetSettings();
 	const nlohmann::json& GetSettings() const;
+
+	const std::shared_ptr<EngineConnection>& GetConnection() const;
+	void ConnectTo(std::string address, int port);
+	bool IsConnected() const;
 };

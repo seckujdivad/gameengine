@@ -396,9 +396,6 @@
     <ClInclude Include="src\network\Packet.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
-    <ClInclude Include="src\network\wx\PacketEvent.h">
-      <Filter>Header Files\network\wx</Filter>
-    </ClInclude>
     <ClInclude Include="src\network\serialiser\Type.h">
       <Filter>Header Files\network\serialiser</Filter>
     </ClInclude>
@@ -410,6 +407,15 @@
     </ClInclude>
     <ClInclude Include="src\network\serialiser\Deserialise.h">
       <Filter>Header Files\network\serialiser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\wx\ConnectionEvent.h">
+      <Filter>Header Files\network\wx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\EngineConnectionEvent.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network\ConnectionTarget.h">
+      <Filter>Header Files\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -629,8 +635,14 @@
     <ClCompile Include="src\network\Packet.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
-    <ClCompile Include="src\network\wx\PacketEvent.cpp">
+    <ClCompile Include="src\network\wx\ConnectionEvent.cpp">
       <Filter>Source Files\network\wx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\EngineConnectionEvent.cpp">
+      <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network\ConnectionTarget.cpp">
+      <Filter>Source Files\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

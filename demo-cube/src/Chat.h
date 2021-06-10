@@ -4,12 +4,14 @@
 
 #include <wx/frame.h>
 
-#include "network/wx/PacketEvent.h"
+#include "network/wx/ConnectionEvent.h"
 
 class wxGridBagSizer;
 class wxButton;
 class wxListBox;
 class wxTextCtrl;
+
+class Main;
 
 class EngineConnection;
 
@@ -22,10 +24,10 @@ private:
 
 	void txt_message_KeyPressed(wxKeyEvent& evt);
 
-	void OnPacketReceived(PacketEvent& evt);
+	void OnConnectionEvent(ConnectionEvent& evt);
 
-	std::shared_ptr<EngineConnection> m_connection;
+	Main* GetParent() const;
 
 public:
-	Chat(wxWindow* parent, std::shared_ptr<EngineConnection> connection);
+	Chat(Main* parent);
 };

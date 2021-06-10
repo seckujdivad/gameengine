@@ -7,6 +7,7 @@
 //only required for naming the thread, a debugging convenience
 #ifdef _WIN32
 #include <windows.h>
+#include "ConnectionTarget.h"
 #endif
 
 constexpr char PACKET_DELIMITER = '\n';
@@ -85,9 +86,13 @@ void Connection::SendBytes(const char* bytes, std::size_t num_bytes)
 	this->SendBytes(std::vector<char>(bytes, bytes + num_bytes));
 }
 
-Connection::Connection(std::string address, unsigned short port) : m_asio_socket(this->m_asio_service), m_continue_running(true)
+Connection::Connection(std::string address, unsigned short port) : Connection(ConnectionTarget(address, port))
 {
-	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(address), port));
+}
+
+Connection::Connection(ConnectionTarget target) : m_asio_socket(this->m_asio_service), m_continue_running(true)
+{
+	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(target.address), target.port));
 	this->m_continue_running.store(true);
 
 	this->m_listener = std::thread(&Connection::Listener, this);

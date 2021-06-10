@@ -7,6 +7,7 @@
 #include <wx/stattext.h>
 #include <wx/radiobox.h>
 #include <wx/menu.h>
+#include <wx/msgdlg.h>
 
 #include "Engine.h"
 #include "generic/std_glm.h"
@@ -19,6 +20,7 @@
 #include "network/EngineConnection.h"
 
 #include "Chat.h"
+#include "ServerPicker.h"
 
 constexpr char SETTINGS_FILE[] = "settings.json";
 constexpr char DEFAULT_SETTINGS_FILE[] = "settings.default.json";
@@ -30,6 +32,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 
 	wxMenu* menu_server = new wxMenu();
 	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Chat, this, menu_server->Append(wxID_ANY, "Chat", "Open a new chat window")->GetId());
+	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Picker, this, menu_server->Append(wxID_ANY, "Server picker", "Open a new chat window")->GetId());
 	this->m_mb->Append(menu_server, "Server");
 
 	this->SetMenuBar(this->m_mb);
@@ -37,9 +40,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	//load settings file
 	this->ReloadSettings();
 
-	//connect to the server
-	this->Bind(EVT_PACKET, &Main::HandlePacket, this);
-	this->m_connection = std::make_shared<EngineConnection>("127.0.0.1", 4321);
+	//register server packet handler
+	this->Bind(EVT_CONNECTION, &Main::HandleConnectionEvent, this);
 
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));
@@ -269,6 +271,28 @@ const nlohmann::json& Main::GetSettings() const
 	return this->m_settings;
 }
 
+const std::shared_ptr<EngineConnection>& Main::GetConnection() const
+{
+	return this->m_connection;
+}
+
+void Main::ConnectTo(std::string address, int port)
+{
+	this->m_connection = std::make_shared<EngineConnection>(address, port);
+}
+
+bool Main::IsConnected() const
+{
+	if (this->m_connection.get() == nullptr)
+	{
+		return false;
+	}
+	else
+	{
+		return this->m_connection->IsConnected();
+	}
+}
+
 SceneLoaderConfig Main::GetSceneLoaderConfig() const
 {
 	SceneLoaderConfig config;
@@ -283,8 +307,23 @@ SceneLoaderConfig Main::GetSceneLoaderConfig() const
 
 void Main::mb_Server_Chat(wxCommandEvent& evt)
 {
-	Chat* chat_window = new Chat(this, this->m_connection);
-	chat_window->Show();
+	if (this->IsConnected())
+	{
+		Chat* chat_window = new Chat(this);
+		chat_window->Show();
+	}
+	else
+	{
+		wxMessageBox("You must connect to the server before you use the chat window", "Not connected");
+	}
+
+	evt.Skip();
+}
+
+void Main::mb_Server_Picker(wxCommandEvent& evt)
+{
+	ServerPicker* server_picker = new ServerPicker(this);
+	server_picker->Show();
 
 	evt.Skip();
 }
@@ -366,23 +405,30 @@ void Main::Mainloop(wxIdleEvent& evt)
 {
 	this->m_engine->Render(true);
 
-	this->m_connection->ProcessOutstandingPackets(this);
+	if (this->IsConnected())
+	{
+		this->m_connection->ProcessOutstandingPackets(this);
+	}
 
 	evt.RequestMore();
 	evt.Skip();
 }
 
-void Main::HandlePacket(PacketEvent& evt)
+void Main::HandleConnectionEvent(ConnectionEvent& evt)
 {
-	const Packet& packet = evt.GetPacket();
-	if (packet.GetType() == Packet::Type::ConnEstablished)
+	if (evt.GetEvent().GetType() == EngineConnectionEvent::Type::PacketReceived)
 	{
-		if (this->GetSettings().contains("network")
-			&& this->GetSettings()["network"].is_object()
-			&& this->GetSettings()["network"].contains("username")
-			&& this->GetSettings()["network"]["username"].is_string())
+		const Packet& packet = evt.GetEvent().GetPacket();
+		if (packet.GetType() == Packet::Type::ConnEstablished)
 		{
-			this->m_connection->SendPacket(Packet(Packet::SetClientName(this->GetSettings()["network"]["username"].get<std::string>())));
+			if (this->GetSettings().contains("network")
+				&& this->GetSettings()["network"].is_object()
+				&& this->GetSettings()["network"].contains("username")
+				&& this->GetSettings()["network"]["username"].is_string()
+				&& this->IsConnected())
+			{
+				this->m_connection->SendPacket(Packet(Packet::SetClientName(this->GetSettings()["network"]["username"].get<std::string>())));
+			}
 		}
 	}
 }

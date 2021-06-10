@@ -15,6 +15,8 @@
 #include <asio.hpp>
 #endif
 
+#include "ConnectionTarget.h"
+
 class Scene;
 
 class Connection
@@ -36,11 +38,12 @@ protected:
 
 public:
 	Connection(std::string address, unsigned short port);
+	Connection(ConnectionTarget target);
 	Connection(const Connection&) = delete;
 	Connection& operator=(const Connection&) = delete;
 	Connection(Connection&&) = delete;
 	Connection& operator=(Connection&&) = delete;
-	~Connection();
+	virtual ~Connection();
 
 	bool IsConnected() const;
 };

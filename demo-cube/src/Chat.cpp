@@ -3,16 +3,28 @@
 #include <wx/gbsizer.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
+#include <wx/msgdlg.h>
 
 #include "network/EngineConnection.h"
+#include "network/EngineConnectionEvent.h"
 #include "network/Packet.h"
+
+#include "Main.h"
 
 void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 {
 	if (evt.GetKeyCode() == WXK_RETURN)
 	{
-		std::string to_send = this->m_txt_message->GetValue();
-		this->m_connection->SendPacket(Packet(Packet::ClientChatMessage(to_send)));
+		if (this->GetParent()->IsConnected())
+		{
+			std::string to_send = this->m_txt_message->GetValue();
+			this->GetParent()->GetConnection()->SendPacket(Packet(Packet::ClientChatMessage(to_send)));
+		}
+		else
+		{
+			wxMessageBox("Must be connected to send a message", "Not connected");
+		}
+		
 		this->m_txt_message->SetValue("");
 	}
 	else
@@ -21,16 +33,24 @@ void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 	}
 }
 
-void Chat::OnPacketReceived(PacketEvent& evt)
+void Chat::OnConnectionEvent(ConnectionEvent& evt)
 {
-	const Packet& packet = evt.GetPacket();
-	if (packet.GetType() == Packet::Type::ServerChatMessage)
+	if (evt.GetEvent().GetType() == EngineConnectionEvent::Type::PacketReceived)
 	{
-		this->m_lb_messages->AppendString(packet.GetData<Packet::ServerChatMessage>().name + ": " + packet.GetData<Packet::ServerChatMessage>().message);
+		const Packet& packet = evt.GetEvent().GetPacket();
+		if (packet.GetType() == Packet::Type::ServerChatMessage)
+		{
+			this->m_lb_messages->AppendString(packet.GetData<Packet::ServerChatMessage>().name + ": " + packet.GetData<Packet::ServerChatMessage>().message);
+		}
 	}
 }
 
-Chat::Chat(wxWindow* parent, std::shared_ptr<EngineConnection> connection) : wxFrame(parent, wxID_ANY, "Chat"), m_connection(connection)
+Main* Chat::GetParent() const
+{
+	return reinterpret_cast<Main*>(this->m_parent);
+}
+
+Chat::Chat(Main* parent) : wxFrame(parent, wxID_ANY, "Chat")
 {
 	this->m_sizer = new wxGridBagSizer(0, 0);
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
@@ -50,5 +70,5 @@ Chat::Chat(wxWindow* parent, std::shared_ptr<EngineConnection> connection) : wxF
 	this->Centre(wxBOTH);
 	this->Layout();
 
-	parent->Bind(EVT_PACKET, &Chat::OnPacketReceived, this);
+	parent->Bind(EVT_CONNECTION, &Chat::OnConnectionEvent, this);
 }

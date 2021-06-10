@@ -4,15 +4,11 @@
 
 #include <wx/window.h>
 
-#include "wx/PacketEvent.h"
-
 void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
-	this->m_packets_received_lock.lock();
-
-	this->m_packets_received.emplace(bytes);
-
-	this->m_packets_received_lock.unlock();
+	this->m_events_lock.lock();
+	this->m_events.emplace(EngineConnectionEvent(EngineConnectionEvent::Type::PacketReceived, bytes));
+	this->m_events_lock.unlock();
 }
 
 EngineConnection::EngineConnection(std::string address, unsigned short port) : Connection(address, port)
@@ -33,74 +29,73 @@ void EngineConnection::SendPacket(Packet packet)
 	this->SendBytes(packet.Serialise());
 }
 
-std::optional<Packet> EngineConnection::GetLatestPacket()
+std::optional<EngineConnectionEvent> EngineConnection::GetLatestEvent()
 {
-	std::optional<Packet> result;
+	std::optional<EngineConnectionEvent> result;
 
-	this->m_packets_received_lock.lock();
-
-	if (!this->m_packets_received.empty())
+	this->m_events_lock.lock();
+	if (!this->m_events.empty())
 	{
-		result = this->m_packets_received.front();
-		this->m_packets_received.pop();
+		result = this->m_events.front();
+		this->m_events.pop();
 	}
-
-	this->m_packets_received_lock.unlock();
+	this->m_events_lock.unlock();
 
 	return result;
 }
 
-bool EngineConnection::HasUnprocessedPackets()
+bool EngineConnection::HasUnprocessedEvents()
 {
-	this->m_packets_received_lock.lock();
-
-	bool is_empty = this->m_packets_received.empty();
-
-	this->m_packets_received_lock.unlock();
+	this->m_events_lock.lock();
+	bool is_empty = this->m_events.empty();
+	this->m_events_lock.unlock();
 
 	return !is_empty;
 }
 
-std::size_t EngineConnection::GetNumUnprocessedPackets()
+std::size_t EngineConnection::GetNumUnprocessedEvents()
 {
-	this->m_packets_received_lock.lock();
-
-	std::size_t num_packets = this->m_packets_received.size();
-
-	this->m_packets_received_lock.unlock();
+	this->m_events_lock.lock();
+	std::size_t num_packets = this->m_events.size();
+	this->m_events_lock.unlock();
 
 	return num_packets;
 }
 
 void EngineConnection::ProcessOutstandingPackets(wxWindow* emit_events_from)
 {
-	std::optional<Packet> latest_packet = this->GetLatestPacket();
-	while (latest_packet.has_value())
+	std::optional<EngineConnectionEvent> latest_event = this->GetLatestEvent();
+	while (latest_event.has_value())
 	{
-		//handle this packet
-		Packet& packet = latest_packet.value();
+		//handle this event
+		EngineConnectionEvent& event = latest_event.value();
 
-		bool packet_type_receivable = false;
-		for (Packet::Type receivable_type : RECEIVABLE_PACKET_TYPES)
+		if (event.GetType() == EngineConnectionEvent::Type::PacketReceived)
 		{
-			if (receivable_type == packet.GetType())
+			const Packet& packet = event.GetPacket();
+
+			bool packet_type_receivable = false;
+			for (Packet::Type receivable_type : RECEIVABLE_PACKET_TYPES)
 			{
-				packet_type_receivable = true;
+				if (receivable_type == packet.GetType())
+				{
+					packet_type_receivable = true;
+				}
+			}
+
+			if (!packet_type_receivable)
+			{
+				throw std::runtime_error("Packet type " + std::to_string(static_cast<int>(packet.GetType())) + " not found in list of receivable packets");
+			}
+
+			if (emit_events_from != nullptr)
+			{
+				ConnectionEvent wx_event = ConnectionEvent(event, emit_events_from);
+				emit_events_from->ProcessWindowEvent(wx_event);
 			}
 		}
 
-		if (!packet_type_receivable)
-		{
-			throw std::runtime_error("Packet type " + std::to_string(static_cast<int>(packet.GetType())) + " not found in list of receivable packets");
-		}
-
-		if (emit_events_from != nullptr)
-		{
-			PacketEvent event = PacketEvent(latest_packet.value(), emit_events_from);
-			emit_events_from->ProcessWindowEvent(event);
-		}
-
 		//get the next packet
-		latest_packet = this->GetLatestPacket();
+		latest_event = this->GetLatestEvent();
 	}
 }
