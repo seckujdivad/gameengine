@@ -77,7 +77,10 @@ connReceiver mainloopIn connection connInfo = catch (do
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan ReceiverMsg -> IO ()
-serverMainloop mainloopIn = putStrLn "Awaiting connections..." >> serverMainloopInner mainloopIn empty >> putStrLn "Mainloop stopped"
+serverMainloop mainloopIn = do
+    putStrLn "Awaiting connections..."
+    serverMainloopInner mainloopIn empty
+    putStrLn "Mainloop stopped"
 
 serverMainloopInner :: TChan ReceiverMsg -> Map Integer Client -> IO ()
 serverMainloopInner mainloopIn clients = do
