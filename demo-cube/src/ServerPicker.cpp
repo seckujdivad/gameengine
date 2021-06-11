@@ -24,6 +24,14 @@ void ServerPicker::lb_servers_DoubleClicked(wxCommandEvent& evt)
 	evt.Skip();
 }
 
+void ServerPicker::OnConnectionEvent(ConnectionEvent& evt)
+{
+	if (evt.GetEvent().GetType() == EngineConnectionEvent::Type::ConnEstablished)
+	{
+		this->Close();
+	}
+}
+
 void ServerPicker::RefreshServers()
 {
 	this->m_servers.clear();
@@ -95,4 +103,6 @@ ServerPicker::ServerPicker(Main* parent) : wxFrame(parent, wxID_ANY, "Server pic
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
 	this->Layout();
+
+	parent->Bind(EVT_CONNECTION, &ServerPicker::OnConnectionEvent, this);
 }

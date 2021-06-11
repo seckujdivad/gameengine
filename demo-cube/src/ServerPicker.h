@@ -5,6 +5,8 @@
 
 #include <wx/frame.h>
 
+#include "network/ConnectionTarget.h"
+
 class wxListBox;
 class wxGridBagSizer;
 
@@ -27,6 +29,7 @@ private:
 	wxListBox* m_lb_servers = nullptr;
 
 	void lb_servers_DoubleClicked(wxCommandEvent& evt);
+	void OnConnectionEvent(ConnectionEvent& evt);
 
 	void RefreshServers();
 
