@@ -431,4 +431,6 @@ void Main::HandleConnectionEvent(ConnectionEvent& evt)
 			}
 		}
 	}
+
+	evt.Skip();
 }

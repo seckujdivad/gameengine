@@ -43,6 +43,8 @@ void Chat::OnConnectionEvent(ConnectionEvent& evt)
 			this->m_lb_messages->AppendString(packet.GetData<Packet::ServerChatMessage>().name + ": " + packet.GetData<Packet::ServerChatMessage>().message);
 		}
 	}
+
+	evt.Skip();
 }
 
 Main* Chat::GetParent() const

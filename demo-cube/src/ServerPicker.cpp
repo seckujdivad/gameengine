@@ -29,6 +29,8 @@ void ServerPicker::OnConnectionEvent(ConnectionEvent& evt)
 	{
 		this->Close();
 	}
+
+	evt.Skip();
 }
 
 void ServerPicker::RefreshServers()
