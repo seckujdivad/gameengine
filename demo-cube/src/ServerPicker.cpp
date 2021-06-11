@@ -13,8 +13,7 @@ void ServerPicker::lb_servers_DoubleClicked(wxCommandEvent& evt)
 	int index = evt.GetInt();
 	if (index >= 0 && index < static_cast<int>(this->m_servers.size()))
 	{
-		const Server& server = this->m_servers.at(index);
-		this->GetParent()->ConnectTo(server.address, server.port);
+		this->GetParent()->ConnectTo(this->m_servers.at(index));
 	}
 	else
 	{
@@ -54,19 +53,19 @@ void ServerPicker::RefreshServers()
 
 				if (server_info["address"].is_string() && server_info["port"].is_number_integer())
 				{
-					Server server = Server(server_info["address"].get<std::string>(), server_info["port"].get<int>());
+					ConnectionTarget target = ConnectionTarget(server_info["address"].get<std::string>(), server_info["port"].get<unsigned short>());
 
-					std::string destination = server.address + ":" + std::to_string(server.port);
+					std::string destination = target.address + ":" + std::to_string(target.port);
 					if (name.has_value())
 					{
-						this->m_lb_servers->AppendString(name.value() + " (" + destination + ")");
+						this->m_lb_servers->AppendString(name.value() + " (" + target.Display() + ")");
 					}
 					else
 					{
 						this->m_lb_servers->AppendString(destination);
 					}
 
-					this->m_servers.push_back(std::move(server));
+					this->m_servers.push_back(std::move(target));
 				}
 				else
 				{

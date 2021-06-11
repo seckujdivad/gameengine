@@ -7,12 +7,15 @@
 void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
 	this->m_events_lock.lock();
-	this->m_events.emplace(EngineConnectionEvent(EngineConnectionEvent::Type::PacketReceived, bytes));
+	this->m_events.emplace(EngineConnectionEvent::Type::PacketReceived, bytes);
 	this->m_events_lock.unlock();
 }
 
-EngineConnection::EngineConnection(std::string address, unsigned short port) : Connection(address, port)
+EngineConnection::EngineConnection(ConnectionTarget target) : Connection(target)
 {
+	this->m_events_lock.lock();
+	this->m_events.emplace(EngineConnectionEvent::Type::ConnEstablished, target);
+	this->m_events_lock.unlock();
 }
 
 void EngineConnection::SendPacket(Packet packet)
@@ -87,12 +90,12 @@ void EngineConnection::ProcessOutstandingPackets(wxWindow* emit_events_from)
 			{
 				throw std::runtime_error("Packet type " + std::to_string(static_cast<int>(packet.GetType())) + " not found in list of receivable packets");
 			}
+		}
 
-			if (emit_events_from != nullptr)
-			{
-				ConnectionEvent wx_event = ConnectionEvent(event, emit_events_from);
-				emit_events_from->ProcessWindowEvent(wx_event);
-			}
+		if (emit_events_from != nullptr)
+		{
+			ConnectionEvent wx_event = ConnectionEvent(event, emit_events_from);
+			emit_events_from->ProcessWindowEvent(wx_event);
 		}
 
 		//get the next packet

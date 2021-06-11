@@ -6,6 +6,7 @@
 
 #include "Connection.h"
 #include "Packet.h"
+#include "ConnectionTarget.h"
 #include "wx/ConnectionEvent.h"
 
 class wxWindow;
@@ -20,7 +21,7 @@ protected:
 	void BytesReceived(std::vector<char> bytes) override;
 
 public:
-	EngineConnection(std::string address, unsigned short port);
+	EngineConnection(ConnectionTarget target);
 
 	void SendPacket(Packet packet);
 	std::optional<EngineConnectionEvent> GetLatestEvent();

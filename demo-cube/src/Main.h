@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "loaders/SceneLoader.h"
+#include "network/ConnectionTarget.h"
 #include "network/wx/ConnectionEvent.h"
 
 #include "VectorCtrl.h"
@@ -87,6 +88,6 @@ public:
 	const nlohmann::json& GetSettings() const;
 
 	const std::shared_ptr<EngineConnection>& GetConnection() const;
-	void ConnectTo(std::string address, int port);
+	void ConnectTo(ConnectionTarget target);
 	bool IsConnected() const;
 };

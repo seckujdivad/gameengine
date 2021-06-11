@@ -6,6 +6,7 @@
 #include <wx/frame.h>
 
 #include "network/ConnectionTarget.h"
+#include "network/wx/ConnectionEvent.h"
 
 class wxListBox;
 class wxGridBagSizer;
@@ -15,15 +16,7 @@ class Main;
 class ServerPicker : public wxFrame
 {
 private:
-	struct Server
-	{
-		inline Server(std::string address, int port) : address(address), port(port) {};
-
-		std::string address;
-		int port;
-	};
-
-	std::vector<Server> m_servers;
+	std::vector<ConnectionTarget> m_servers;
 
 	wxGridBagSizer* m_sizer = nullptr;
 	wxListBox* m_lb_servers = nullptr;

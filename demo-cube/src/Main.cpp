@@ -276,9 +276,9 @@ const std::shared_ptr<EngineConnection>& Main::GetConnection() const
 	return this->m_connection;
 }
 
-void Main::ConnectTo(std::string address, int port)
+void Main::ConnectTo(ConnectionTarget target)
 {
-	this->m_connection = std::make_shared<EngineConnection>(address, port);
+	this->m_connection = std::make_shared<EngineConnection>(target);
 }
 
 bool Main::IsConnected() const
