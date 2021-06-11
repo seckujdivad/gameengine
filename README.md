@@ -28,9 +28,9 @@ OpenGL renderer using wxWidgets components.
   * Post-2012 hardware (released 2012)
   * NVIDIA GeForce 400 series (or newer)
   * AMD Radeon HD 5000 series (or newer)
-* Windows or Linux
+* Windows
   * Windows compatibility likely goes as far back as XP, but MSVC++ will need to be reconfigured to run pre-Vista
-  * Linux compatibility is only theoretical, you will need your own toolchain
+  * Linux compatibility would rely on making makefiles and writing a linux-compatible resource embedder
 
 Tested on Windows 10 (NVIDIA and AMD)
 
@@ -53,6 +53,7 @@ if (PORT STREQUAL wxwidgets)
 	set(VCPKG_LIBRARY_LINKAGE static)
 endif()
 ```
+This is what prevents vcpkg manifests being used - they require you to use the same triplet for all of your dependencies.
 
 ## Python
 When the project is built in `Release` mode, Visual Studio runs a Python script that creates ZIP archives containing all the runtime dependencies for the x86 and x64 versions of the application. This script should run on any Python 3 version without any PIP requirements. You can still run the application inside Visual Studio without running this script (in debug mode or by removing the post build event), or collect the runtime dependencies yourself.
