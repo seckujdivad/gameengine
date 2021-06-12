@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7350540e4ffcfd1b93770f45a13f8f6c8c3c9c4cd79dc22c83dab02be33d82ce
+-- hash: acf14c662d8e4622d8d5caac10637dcce3b5f54aa8c761c3b258e05432885009
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -28,7 +28,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      aeson ==1.5.*
+    , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*
@@ -39,13 +40,18 @@ library
 executable gameengine-server
   main-is: Main.hs
   other-modules:
+      Client
+      Mainloop
+      MainloopMessage
       Packet
+      UserInterface
       Paths_gameengine_server
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson ==1.5.*
+    , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*
@@ -63,7 +69,8 @@ test-suite gameengine-server-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson ==1.5.*
+    , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*

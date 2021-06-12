@@ -19,6 +19,7 @@ dependencies:
 - stm >= 2.5
 - containers >= 0.6 && < 0.7
 - binary >= 0.8 && < 0.9
+- aeson >= 1.5 && < 1.6
 
 library:
   source-dirs: src
