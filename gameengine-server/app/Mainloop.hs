@@ -11,9 +11,9 @@ import Network.Socket.ByteString (sendAll)
 
 import AtomicTChan (readFromTChan)
 import TCPServer (ConnInfo (ConnInfo))
-import Packet (Packet (ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName), serialise)
+import Packet (Packet (..), serialise)
 import Client (Client (Client), getClientIdentifier, showClientMessage)
-import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException))
+import MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import ConfigLoader (Config (..), CfgLevel (..))
 
 -- |Handles inter-client communication and the server state
