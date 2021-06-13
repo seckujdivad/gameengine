@@ -71,7 +71,7 @@ instance FromJSON CfgLevel where
         <*> obj .: "file"
 
 instance Show CfgLevel where
-    show (CfgLevel root file) = "Config {root: " ++ root ++ ", file: " ++ file ++ "}"
+    show (CfgLevel root file) = "Config {root: \"" ++ root ++ "\", file: \"" ++ file ++ "\"}"
 
 loadConfig :: IO (Maybe Config)
 loadConfig = do
