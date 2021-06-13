@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "description": "Server settings",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema for the document"
+    },
+    "initial scene": {
+      "description": "Scene to load on start up",
+      "properties": {
+        "root": {
+          "type": "string",
+          "description": "Path to the directory containing the scene file and its components"
+        },
+        "file": {
+          "type": "string",
+          "description": "Path to the scene config file relative to the 'path' string"
+        }
+      },
+      "required": ["file", "root"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

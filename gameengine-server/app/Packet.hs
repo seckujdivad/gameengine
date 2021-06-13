@@ -25,7 +25,7 @@ instance Show Packet where
     show (ConnEstablished uid) = "ConnEstablished {uid: " ++ show uid ++ "}"
     show (ClientChatMessage message) = "ClientChatMessage {message: \"" ++ show message ++ "\"}"
     show (ServerChatMessage name message) = "ChatMessage {name: \"" ++ name ++ "\", " ++ "message: \"" ++ show message ++ "\"}"
-    show (SetClientName message) = "ChatMessage {message: \"" ++ show message ++ "\"}"
+    show (SetClientName name) = "SetClientName {name: \"" ++ show name ++ "\"}"
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString

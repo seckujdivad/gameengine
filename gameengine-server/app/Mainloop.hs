@@ -14,16 +14,17 @@ import TCPServer (ConnInfo (ConnInfo))
 import Packet (Packet (ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName), serialise)
 import Client (Client (Client), getClientIdentifier, showClientMessage)
 import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException))
+import ConfigLoader (Config (..), CfgLevel (..))
 
 -- |Handles inter-client communication and the server state
-serverMainloop :: TChan MainloopMessage -> IO ()
-serverMainloop mainloopIn = do
+serverMainloop :: TChan MainloopMessage -> Config -> IO ()
+serverMainloop mainloopIn config = do
     putStrLn "Awaiting connections..."
-    serverMainloopInner mainloopIn empty
+    serverMainloopInner mainloopIn config empty
     putStrLn "Mainloop stopped"
 
-serverMainloopInner :: TChan MainloopMessage -> Map Integer Client -> IO ()
-serverMainloopInner mainloopIn clients = do
+serverMainloopInner :: TChan MainloopMessage -> Config -> Map Integer Client -> IO ()
+serverMainloopInner mainloopIn config clients = do
     ReceiverMsg connInfo msgInner <- readFromTChan mainloopIn
     let ConnInfo uid address = connInfo
     case msgInner of
@@ -94,7 +95,7 @@ serverMainloopInner mainloopIn clients = do
             Nothing -> putStrLn $ "Client UID " ++ show uid ++ " does not exist"
 
     where
-        nextLoop = serverMainloopInner mainloopIn
+        nextLoop = serverMainloopInner mainloopIn config
 
         -- |Close the given 'Client' and give the leftover clients
         closeClient :: Client -> IO (Map Integer Client)

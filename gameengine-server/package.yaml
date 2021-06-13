@@ -1,7 +1,7 @@
-name:                gameengine-server
-version:             0.1.0.0
-github:              "seckujdivad/gameengine"
-author:              "David Juckes"
+name: gameengine-server
+version: 0.1.0.0
+github: "seckujdivad/gameengine"
+author: "David Juckes"
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -20,14 +20,17 @@ dependencies:
 - containers >= 0.6 && < 0.7
 - binary >= 0.8 && < 0.9
 - aeson >= 1.5 && < 1.6
+- directory >= 1.3 && < 1.4
+- text >= 1.2 && < 1.3
+- filepath >= 1.4 && < 1.5
 
 library:
   source-dirs: src
 
 executables:
   gameengine-server:
-    main:                Main.hs
-    source-dirs:         app
+    main: Main.hs
+    source-dirs: app
     ghc-options:
     - -threaded
     - -rtsopts
@@ -37,8 +40,8 @@ executables:
 
 tests:
   gameengine-server-test:
-    main:                Spec.hs
-    source-dirs:         test
+    main: Spec.hs
+    source-dirs: test
     ghc-options:
     - -threaded
     - -rtsopts

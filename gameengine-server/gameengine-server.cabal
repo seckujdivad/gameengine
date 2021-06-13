@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: acf14c662d8e4622d8d5caac10637dcce3b5f54aa8c761c3b258e05432885009
+-- hash: 1d0c151cb42e3c7517e2c3ece1e34d5ca99e87e49315418ddc09e5ce38d5682b
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -33,18 +33,21 @@ library
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*
+    , directory ==1.3.*
+    , filepath ==1.4.*
     , network ==3.1.1.*
     , stm >=2.5
+    , text ==1.2.*
   default-language: Haskell2010
 
 executable gameengine-server
   main-is: Main.hs
   other-modules:
       Client
+      ConfigLoader
       Mainloop
       MainloopMessage
       Packet
-      UserInterface
       Paths_gameengine_server
   hs-source-dirs:
       app
@@ -55,9 +58,12 @@ executable gameengine-server
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*
+    , directory ==1.3.*
+    , filepath ==1.4.*
     , gameengine-server
     , network ==3.1.1.*
     , stm >=2.5
+    , text ==1.2.*
   default-language: Haskell2010
 
 test-suite gameengine-server-test
@@ -74,7 +80,10 @@ test-suite gameengine-server-test
     , binary ==0.8.*
     , bytestring
     , containers ==0.6.*
+    , directory ==1.3.*
+    , filepath ==1.4.*
     , gameengine-server
     , network ==3.1.1.*
     , stm >=2.5
+    , text ==1.2.*
   default-language: Haskell2010

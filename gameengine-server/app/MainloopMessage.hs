@@ -1,4 +1,6 @@
-module MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException)) where
+module MainloopMessage (MainloopMessage (ReceiverMsg, UIMsg),
+    ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException),
+    UIMsgInner (ChatMessage)) where
 
 import Network.Socket (Socket)
 
@@ -10,6 +12,11 @@ import TCPServer (ConnInfo (ConnInfo))
 data MainloopMessage =
     -- |Message sent from a receiver thread to the main thread
     ReceiverMsg ConnInfo ReceiverMsgInner
+    -- |
+    | UIMsg UIMsgInner
+
+instance Show MainloopMessage where
+    show (ReceiverMsg (ConnInfo uid _) inner) = show uid ++ ": " ++ show inner
 
 -- |Body of a 'ReceiverMsg'
 data ReceiverMsgInner =
@@ -23,5 +30,7 @@ data ReceiverMsgInner =
     | ReceiverException String
     deriving (Show)
 
-instance Show MainloopMessage where
-    show (ReceiverMsg (ConnInfo uid _) inner) = show uid ++ ": " ++ show inner
+-- |Body of a 'UIMsg'
+data UIMsgInner =
+    -- |Send a 'String' to all clients
+    ChatMessage String

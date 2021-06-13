@@ -10,18 +10,24 @@ import Control.Exception (catch, IOException)
 
 import qualified Data.ByteString (null)
 
-import TCPServer (runTCPServer, ConnInfo (ConnInfo))
+import TCPServer (runTCPServer, ConnInfo (..))
 import AtomicTChan (sendToTChan)
 import Mainloop (serverMainloop)
-import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException))
+import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (..))
 import Packet (deserialise)
+import ConfigLoader (loadConfig)
 
 -- |Entry point
 main :: IO ()
 main = do
-    mainloopIn <- atomically newTChan
-    forkIO (serverMainloop mainloopIn)
-    runTCPServer Nothing "4321" (connHandler mainloopIn)
+    configMaybe <- loadConfig
+    case configMaybe of
+        Just config -> do
+            mainloopIn <- atomically newTChan
+            forkIO (serverMainloop mainloopIn config)
+            runTCPServer Nothing "4321" (connHandler mainloopIn)
+
+        Nothing -> putStrLn "Couldn't load config file"
 
 -- |Called when a new connection to a client is established
 connHandler :: TChan MainloopMessage -> Socket -> ConnInfo -> IO ()

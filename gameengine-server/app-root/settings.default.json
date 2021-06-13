@@ -1,0 +1,7 @@
+{
+    "$schema": "../json-schemas/settings-schema.json",
+    "initial scene": {
+        "root": "scenes",
+        "file": "simplescene.json"
+    }
+}
