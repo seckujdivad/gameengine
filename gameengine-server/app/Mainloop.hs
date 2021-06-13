@@ -92,7 +92,9 @@ serverMainloopInner mainloopIn config clients = do
                     newClients <- closeClient client
                     nextLoop newClients
 
-            Nothing -> putStrLn $ "Client UID " ++ show uid ++ " does not exist"
+            Nothing -> do
+                putStrLn $ "Client UID " ++ show uid ++ " does not exist"
+                nextLoop clients
 
     where
         nextLoop = serverMainloopInner mainloopIn config
