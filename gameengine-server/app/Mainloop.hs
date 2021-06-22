@@ -84,6 +84,9 @@ serverMainloopInner mainloopIn config serverState = do
                         SetClientName newName -> do
                             putStrLn $ showClientMessage client ("name set to " ++ newName)
                             nextLoop $ serverState {ssClients = update (\(Client connection connInfo _) -> Just (Client connection connInfo (Just newName))) uid (ssClients serverState)}
+                    
+                    Nothing -> do
+                        putStrLn $ "Packet received for client with UID " ++ show uid ++ ", but this client doesn't exist"
                 
                 ReceiverException errorMsg -> do
                     putStrLn $ showClientMessage client "listener threw an error - " ++ errorMsg
