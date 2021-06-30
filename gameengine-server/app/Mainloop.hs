@@ -15,7 +15,7 @@ import Packet (Packet (..), serialise)
 import Client (Client (Client), getClientIdentifier, showClientMessage)
 import MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import ConfigLoader (Config (..), CfgLevel (..))
-import ServerState (ServerState (..), initialServerState)
+import ServerState (ServerState (..), initialServerState, forEachClient)
 
 -- |Sends a 'Packet' to a 'Socket'. Returns 'True' if the 'Packet' was sent without error, 'False' otherwise
 sendPacket :: Socket -> Packet -> IO (Maybe String)
@@ -26,10 +26,6 @@ sendPacket socket packet = catch (do
 -- |Sends a 'Packet' to a 'Socket'
 sendPacketInner :: Socket -> Packet -> IO ()
 sendPacketInner socket = sendAll socket . serialise
-
--- |Convert a list of 'IO' operations and their values to a single 'IO' operation with all their values preserved in a list
-listIOToIOList :: [IO a] -> IO [a]
-listIOToIOList = mconcat . map (fmap (\x -> [x]))
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan MainloopMessage -> Config -> IO ()
@@ -90,35 +86,28 @@ handlePacket mainloopIn config serverState client packet = case packet of
         nextLoop serverState
 
     ClientChatMessage strMessage -> do
-        putStrLn $ showClientMessage client ("Chat message - " ++ strMessage)
-
         let
-            clientProcessor :: Integer -> IO (Maybe (Integer, String))
-            clientProcessor key = case Data.Map.Strict.lookup key (ssClients serverState) of
-                Just (Client connection _ _) -> do
-                    errMsgMaybe <- sendPacket connection (ServerChatMessage (getClientIdentifier False client) strMessage)
-                    case errMsgMaybe of
-                        Just errMsg -> return (Just (key, errMsg))
-                        Nothing -> return Nothing
-                Nothing -> return Nothing
+            clientProcessor :: Client -> IO (Maybe Client)
+            clientProcessor client = do
+                let Client connection _ _ = client
+                clientOrError <- clientProcessorInner client
+                case clientOrError of
+                    Left client -> return $ Just client
+                    Right errorMsg -> do
+                        putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorMsg)
+                        catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
+                        return Nothing
+
+            clientProcessorInner :: Client -> IO (Either Client String)
+            clientProcessorInner client = do
+                let Client connection _ _ = client
+                errorMsgMaybe <- sendPacket connection (ServerChatMessage (getClientIdentifier False client) strMessage)
+                case errorMsgMaybe of
+                    Just errorMsg -> return $ Right errorMsg
+                    Nothing -> return $ Left client
         
-        errorMaybes <- listIOToIOList (map clientProcessor (keys (ssClients serverState)))
-
-        let
-            errors = concat (fmap (\errorMaybe -> case errorMaybe of
-                Just error -> [error]
-                Nothing -> []) errorMaybes)
-
-            connectionDropper :: (Integer, String) -> IO ()
-            connectionDropper (uid, errorText) = case Data.Map.Strict.lookup uid (ssClients serverState) of
-                Just client -> do
-                    let Client connection _ _ = client
-                    putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorText)
-                    catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
-                Nothing -> return ()
-
-        mconcat (map connectionDropper errors)
-        nextLoop $ serverState {ssClients = foldr (\(uid, _) clients -> delete uid clients) (ssClients serverState) errors}
+        newServerState <- forEachClient serverState clientProcessor
+        nextLoop newServerState
     
     ServerChatMessage _ _ -> do
         putStrLn $ showClientMessage client "client shouldn't send ServerChatMessage"
