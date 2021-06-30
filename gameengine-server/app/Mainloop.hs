@@ -41,17 +41,17 @@ serverMainloop mainloopIn config = do
 serverMainloopInner :: TChan MainloopMessage -> Config -> ServerState -> IO ()
 serverMainloopInner mainloopIn config serverState = do
     ReceiverMsg connInfo msgInner <- readFromTChan mainloopIn
-    let ConnInfo uid address = connInfo
+    let ConnInfo uid _ = connInfo
     case msgInner of
         ClientConnEstablished connection -> do
             sendPacket connection (ConnEstablished uid)
-            nextLoop $ serverState {ssClients = insert uid (Client connection (ConnInfo uid address) Nothing) (ssClients serverState)}
+            nextLoop $ serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)}
         
         _ ->  case Data.Map.Strict.lookup uid (ssClients serverState) of
             Just client -> case msgInner of
                 ClientConnEstablished connection -> do
                     sendPacket connection (ConnEstablished uid)
-                    nextLoop $ serverState {ssClients = insert uid (Client connection (ConnInfo uid address) Nothing) (ssClients serverState)}
+                    nextLoop $ serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)}
 
                 PackedReceived packet -> case Data.Map.Strict.lookup uid (ssClients serverState) of
                     Just client -> handlePacket mainloopIn config serverState client packet
@@ -130,3 +130,4 @@ handlePacket mainloopIn config serverState client packet = case packet of
     
     where
         nextLoop = serverMainloopInner mainloopIn config
+        Client _ (ConnInfo uid _) _ = client
