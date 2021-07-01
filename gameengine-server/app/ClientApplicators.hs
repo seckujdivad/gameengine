@@ -10,7 +10,16 @@ import Client (Client (Client), showClientMessage)
 import SocketOperations (closeConnection)
 import qualified ServerState
 
--- |Type of function to be wrapped by 'clientApplicatorWrapper'
+{-|
+Type of function to be wrapped by 'clientApplicatorWrapper'
+
+When applied to a 'Client' in a 'ServerState', the result will have the following effect:
+- If Left Just 'Client' is returned, the processed 'Client' will be replaced with the returned 'Client'.
+- If Left Nothing is returned, the processed 'Client' is removed with a simple message. The implication is that this is a normal, expected code path.
+- If Right 'String' is returned, the provided 'String' is outputted in the context of being an error message and the processed 'Client' is removed.
+
+When either result causes the 'Client' to be removed, the 'Socket' associated with that client is also closed.
+-}
 type ClientApplicator = Client -> IO (Either (Maybe Client) String)
 
 -- |Implements 'ServerState.applyToAllClients', but wraps the 'Client' processor in 'clientApplicatorWrapper'
