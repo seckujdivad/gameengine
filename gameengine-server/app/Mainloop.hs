@@ -39,9 +39,7 @@ serverMainloopInner mainloopIn config serverState = do
 
                 PackedReceived packet -> case Data.Map.Strict.lookup uid (ssClients serverState) of
                     Just client -> handlePacket mainloopIn config serverState client packet
-                    
-                    Nothing -> do
-                        putStrLn $ "Packet received for client with UID " ++ show uid ++ ", but this client doesn't exist"
+                    Nothing -> putStrLn $ "Packet received for client with UID " ++ show uid ++ ", but this client doesn't exist"
                 
                 ReceiverException errorMsg -> do
                     putStrLn $ showClientMessage client "listener threw an error - " ++ errorMsg
