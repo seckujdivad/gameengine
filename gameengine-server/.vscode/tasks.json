@@ -29,6 +29,12 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Output build plan and make Cabal file",
+            "type": "shell",
+            "command": "stack build --dry-run",
+            "problemMatcher": []
         }
     ]
 }
