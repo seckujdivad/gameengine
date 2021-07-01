@@ -22,10 +22,8 @@ initialServerState = ServerState empty
 
 -- |Apply a function to each 'Client'. If 'Nothing' is returned, that 'Client' is removed (cleanup is not handled)
 applyToAllClients :: (Client -> IO (Maybe Client)) -> ServerState -> IO ServerState
-applyToAllClients clientProcessor serverState = do
-    let
-        clientKeys = keys (ssClients serverState)
-
+applyToAllClients clientProcessor serverState = foldl clientFolder (return serverState) (keys (ssClients serverState))
+    where
         clientFolder :: IO ServerState -> Integer -> IO ServerState
         clientFolder serverStateIO uid = do
             serverState <- serverStateIO
@@ -33,15 +31,11 @@ applyToAllClients clientProcessor serverState = do
             case newServerStateMaybe of
                 Just newServerState -> return newServerState
                 Nothing -> error "This UID should exist"
-    
-    foldl clientFolder (return serverState) clientKeys
 
 -- |Apply a function to a 'Client', removing it if 'Nothing' is returned and returning 'Nothing' if the UID doesn't exist
 applyToClient :: (Client -> IO (Maybe Client)) -> Integer -> ServerState -> IO (Maybe ServerState)
-applyToClient clientProcessor uid serverState = do
-    let clientMaybe = Data.Map.lookup uid (ssClients serverState)
-    case clientMaybe of
-        Just client -> do
-            processedClientMaybe <- clientProcessor client
-            return $ Just $ serverState {ssClients = update (const processedClientMaybe) uid (ssClients serverState)}
-        Nothing -> return Nothing
+applyToClient clientProcessor uid serverState = case Data.Map.lookup uid (ssClients serverState) of
+    Just client -> do
+        processedClientMaybe <- clientProcessor client
+        return $ Just $ serverState {ssClients = update (const processedClientMaybe) uid (ssClients serverState)}
+    Nothing -> return Nothing
