@@ -1,31 +1,21 @@
 module Mainloop (serverMainloop) where
 
 import Control.Concurrent.STM.TChan (TChan)
-import Control.Exception (catch, IOException)
 
 import Data.Map (Map)
 import Data.Map.Strict (insert, update, lookup, empty, delete, keys)
 
-import Network.Socket (Socket, gracefulClose)
-import Network.Socket.ByteString (sendAll)
+import Network.Socket (Socket)
 
 import AtomicTChan (readFromTChan)
 import TCPServer (ConnInfo (ConnInfo))
-import Packet (Packet (..), serialise)
+import Packet (Packet (..))
 import Client (Client (Client), getClientIdentifier, showClientMessage)
 import MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import ConfigLoader (Config (..), CfgLevel (..))
-import ServerState (ServerState (..), initialServerState, forEachClient)
-
--- |Sends a 'Packet' to a 'Socket'. Returns 'True' if the 'Packet' was sent without error, 'False' otherwise
-sendPacket :: Socket -> Packet -> IO (Maybe String)
-sendPacket socket packet = catch (do
-        sendPacketInner socket packet
-        return Nothing) (\error -> return (Just (show (error :: IOException))))
-
--- |Sends a 'Packet' to a 'Socket'
-sendPacketInner :: Socket -> Packet -> IO ()
-sendPacketInner socket = sendAll socket . serialise
+import ServerState (ServerState (..), initialServerState)
+import ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
+import MainloopClientApplicators (closeClient, sendPacketToClient)
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan MainloopMessage -> Config -> IO ()
@@ -40,14 +30,12 @@ serverMainloopInner mainloopIn config serverState = do
     let ConnInfo uid _ = connInfo
     case msgInner of
         ClientConnEstablished connection -> do
-            sendPacket connection (ConnEstablished uid)
-            nextLoop $ serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)}
+            Just newState <- applyToClient (sendPacketToClient (ConnEstablished uid)) uid (serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)})
+            nextLoop $ newState
         
-        _ ->  case Data.Map.Strict.lookup uid (ssClients serverState) of
+        _ -> case Data.Map.Strict.lookup uid (ssClients serverState) of
             Just client -> case msgInner of
-                ClientConnEstablished connection -> do
-                    sendPacket connection (ConnEstablished uid)
-                    nextLoop $ serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)}
+                ClientConnEstablished connection -> error "This case should be handled above - this line only exists to silence warnings"
 
                 PackedReceived packet -> case Data.Map.Strict.lookup uid (ssClients serverState) of
                     Just client -> handlePacket mainloopIn config serverState client packet
@@ -57,12 +45,12 @@ serverMainloopInner mainloopIn config serverState = do
                 
                 ReceiverException errorMsg -> do
                     putStrLn $ showClientMessage client "listener threw an error - " ++ errorMsg
-                    newClients <- closeClient client
-                    nextLoop newClients
+                    Just newServerState <- applyToClient closeClient uid serverState
+                    nextLoop newServerState
 
                 ClientConnClosed -> do
-                    newClients <- closeClient client
-                    nextLoop newClients
+                    Just newServerState <- applyToClient closeClient uid serverState
+                    nextLoop newServerState
 
             Nothing -> do
                 putStrLn $ "Client UID " ++ show uid ++ " does not exist"
@@ -71,14 +59,6 @@ serverMainloopInner mainloopIn config serverState = do
     where
         nextLoop = serverMainloopInner mainloopIn config
 
-        -- |Close the given 'Client' and give the resulting server state
-        closeClient :: Client -> IO (ServerState)
-        closeClient client = do
-            putStrLn $ showClientMessage client "closing client"
-            let Client connection (ConnInfo uid _) _ = client
-            catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
-            return $ serverState {ssClients = delete uid (ssClients serverState)}
-
 handlePacket :: TChan MainloopMessage -> Config -> ServerState -> Client -> Packet -> IO ()
 handlePacket mainloopIn config serverState client packet = case packet of
     ConnEstablished _ -> do
@@ -86,27 +66,7 @@ handlePacket mainloopIn config serverState client packet = case packet of
         nextLoop serverState
 
     ClientChatMessage strMessage -> do
-        let
-            clientProcessor :: Client -> IO (Maybe Client)
-            clientProcessor client = do
-                let Client connection _ _ = client
-                clientOrError <- clientProcessorInner client
-                case clientOrError of
-                    Left client -> return $ Just client
-                    Right errorMsg -> do
-                        putStrLn (showClientMessage client "dropping connection - error while sending to client: " ++ errorMsg)
-                        catch (gracefulClose connection 5000) (const (return ()) :: IOException -> IO ()) --throws if the connection isn't active
-                        return Nothing
-
-            clientProcessorInner :: Client -> IO (Either Client String)
-            clientProcessorInner client = do
-                let Client connection _ _ = client
-                errorMsgMaybe <- sendPacket connection (ServerChatMessage (getClientIdentifier False client) strMessage)
-                case errorMsgMaybe of
-                    Just errorMsg -> return $ Right errorMsg
-                    Nothing -> return $ Left client
-        
-        newServerState <- forEachClient serverState clientProcessor
+        newServerState <- applyToAllClients (sendPacketToClient (ServerChatMessage (getClientIdentifier False client) strMessage)) serverState
         nextLoop newServerState
     
     ServerChatMessage _ _ -> do

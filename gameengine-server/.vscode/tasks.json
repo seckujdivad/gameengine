@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run compiled (quick)",
+            "label": "Run compiled",
             "type": "shell",
-            "command": "stack build --fast; cd \"app-root\"; stack run gameengine-server",
+            "command": "stack build; cd \"app-root\"; stack run gameengine-server",
             "problemMatcher": []
         },
         {
@@ -21,7 +21,7 @@
             "command": "py \"copy-to-demo-cube.py\""
         },
         {
-            "label": "Build (release)",
+            "label": "Build and copy",
             "type": "shell",
             "command": "stack build --copy-bins --local-bin-path build",
             "problemMatcher": [],
