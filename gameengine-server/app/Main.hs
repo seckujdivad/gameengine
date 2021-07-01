@@ -44,7 +44,7 @@ connReceiver mainloopIn connection connInfo = catch (do
     message <- recv connection 1024
     let socketClosed = Data.ByteString.null message
     if socketClosed then do
-        putStrLn ("Client receiver closed - " ++ show connInfo)
+        putStrLn $ show connInfo ++ " - connection was interrupted"
         sendMessage $ ClientConnClosed
     else do
         sendMessage $ PackedReceived $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
