@@ -11,7 +11,9 @@ function-by-function basis.
 -}
 
 import Data.Map (Map, empty, update, toList, delete, lookup, keys)
+
 import Client (Client (Client))
+
 
 -- |Describes the current state of the server
 data ServerState = ServerState {ssClients :: (Map Integer Client)}

@@ -4,6 +4,7 @@ import Network.Socket (Socket)
 
 import TCPServer (ConnInfo (ConnInfo))
 
+
 -- |All information stored about a client
 data Client =
     -- |A normal client

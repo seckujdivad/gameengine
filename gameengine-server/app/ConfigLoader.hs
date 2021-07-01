@@ -12,6 +12,7 @@ import Data.ByteString (readFile)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 import Data.ByteString.Lazy.Char8 (pack, unpack)
 
+
 configPathRelative :: FilePath
 configPathRelative = "settings.json"
 

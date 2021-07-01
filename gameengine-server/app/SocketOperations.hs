@@ -11,6 +11,7 @@ import Control.Exception (catch, IOException)
 
 import Packet (Packet, serialise)
 
+
 -- |Sends a 'Packet' to a 'Socket'. Returns 'Nothing' if the 'Packet' was sent without error, 'Just String' otherwise
 sendPacket :: Socket -> Packet -> IO (Maybe String)
 sendPacket socket packet = catch (do

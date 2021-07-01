@@ -4,8 +4,8 @@ module MainloopMessage (MainloopMessage (ReceiverMsg),
 import Network.Socket (Socket)
 
 import Packet (Packet)
-
 import TCPServer (ConnInfo (ConnInfo))
+
 
 -- |Message sent to the main thread
 data MainloopMessage =

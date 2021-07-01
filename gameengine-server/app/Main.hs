@@ -17,6 +17,7 @@ import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (..))
 import Packet (deserialise)
 import ConfigLoader (loadConfig)
 
+
 -- |Entry point
 main :: IO ()
 main = do

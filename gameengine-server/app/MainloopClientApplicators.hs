@@ -6,6 +6,7 @@ import SocketOperations (sendPacket)
 import Client (Client (Client))
 import TCPServer (ConnInfo (ConnInfo))
 
+
 closeClient :: ClientApplicator
 closeClient _ = return $ Left $ Nothing
 

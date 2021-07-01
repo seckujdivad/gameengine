@@ -3,7 +3,7 @@ module Mainloop (serverMainloop) where
 import Control.Concurrent.STM.TChan (TChan)
 
 import Data.Map (Map)
-import Data.Map.Strict (insert, update, lookup, empty, delete, keys)
+import Data.Map.Strict (insert, update, lookup)
 
 import Network.Socket (Socket)
 
@@ -16,6 +16,7 @@ import ConfigLoader (Config (..), CfgLevel (..))
 import ServerState (ServerState (..), initialServerState)
 import ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
 import MainloopClientApplicators (closeClient, sendPacketToClient)
+
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan MainloopMessage -> Config -> IO ()

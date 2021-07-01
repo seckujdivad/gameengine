@@ -10,6 +10,7 @@ import Client (Client (Client), showClientMessage)
 import SocketOperations (closeConnection)
 import qualified ServerState
 
+
 {-|
 Type of function to be wrapped by 'clientApplicatorWrapper'
 
