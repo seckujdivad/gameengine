@@ -31,8 +31,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_mb = new wxMenuBar();
 
 	wxMenu* menu_server = new wxMenu();
+	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Picker, this, menu_server->Append(wxID_ANY, "Choose Server", "Connect to a server")->GetId());
 	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Chat, this, menu_server->Append(wxID_ANY, "Chat", "Open a new chat window")->GetId());
-	menu_server->Bind(wxEVT_MENU, &Main::mb_Server_Picker, this, menu_server->Append(wxID_ANY, "Server picker", "Open a new chat window")->GetId());
 	this->m_mb->Append(menu_server, "Server");
 
 	this->SetMenuBar(this->m_mb);
