@@ -14,7 +14,12 @@ import Control.Monad (forever)
 -- |Store information about a connection
 data ConnInfo =
     -- |A connection's unique ID and address
-    ConnInfo Integer SockAddr
+    ConnInfo {
+        -- |Unique identifier given to all connections
+        ciUID :: Integer,
+        -- |Destination address of the connection
+        ciAddress :: SockAddr
+    }
 
 instance Eq ConnInfo where
     (==) (ConnInfo uid1 _) (ConnInfo uid2 _) = uid1 == uid2
@@ -28,6 +33,7 @@ runTCPServer host port connHandler = withSocketsDo $ do
     address <- resolveAddress host (Just port)
     bracket (startListen address) close (connAccepter connHandler 0) --listen to the given address and close the connection when the listen function exits
 
+-- |Accept all connection requests and call the 
 connAccepter :: (Socket -> ConnInfo -> IO ()) -> Integer -> Socket -> IO ()
 connAccepter handlerFunc uid sock = do
     (connection, address) <- accept sock --accept all incoming connections
@@ -35,8 +41,9 @@ connAccepter handlerFunc uid sock = do
     forkFinally (handlerFunc connection connInfo) (const $ gracefulClose connection 5000)
     connAccepter handlerFunc (uid + 1) sock
 
+-- |Create a 'Socket' that is listening on the given address
 startListen :: AddrInfo -> IO Socket
-startListen address = do --create a socket that is listening on the given address
+startListen address = do
     sock <- socket (addrFamily address) (addrSocketType address) (addrProtocol address)
     setSocketOption sock ReuseAddr 1
     withFdSocket sock setCloseOnExecIfNeeded

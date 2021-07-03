@@ -8,7 +8,14 @@ import TCPServer (ConnInfo (ConnInfo))
 -- |All information stored about a client
 data Client =
     -- |A normal client
-    Client Socket ConnInfo (Maybe String)
+    Client {
+        -- |'Socket' used to communicate with the client
+        clSocket :: Socket,
+        -- |Information about the connection to the client
+        clConnInfo :: ConnInfo,
+        -- |Display name for the client
+        clUsername :: Maybe String
+    }
 
 -- |Get a human-readable identifier for a 'Client'. The first 'Bool' controls whether or not the UID is always included
 getClientIdentifier :: Bool -> Client -> String
