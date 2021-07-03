@@ -77,7 +77,13 @@ defaultConfigPathRelative = "settings.default.json"
 defaultconfigPath :: IO FilePath
 defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
 
-data Config = Config {cfgInitialScene :: CfgLevel}
+-- |Stores configuration options for the server
+data Config =
+    -- |Stores configuration options for the server
+    Config {
+        -- |Information on the scene to load when the server loads
+        cfgInitialScene :: CfgLevel
+    }
 
 instance FromJSON Config where
     parseJSON = withObject "Config" $ \obj -> Config
@@ -86,7 +92,15 @@ instance FromJSON Config where
 instance Show Config where
     show (Config initialScene) = "Config {initial scene: " ++ show initialScene ++ "}"
 
-data CfgLevel = CfgLevel {cfglvlRoot :: String, cfglvlFile :: String}
+-- |Stores information on a scene file
+data CfgLevel =
+    -- |Stores information on a scene file
+    CfgLevel {
+        -- |Root path to use when loading the scene file
+        cfglvlRoot :: String,
+        -- |Path to the scene file relative to the root path
+        cfglvlFile :: String
+    }
 
 instance FromJSON CfgLevel where
     parseJSON = withObject "CfgLevel" $ \obj -> CfgLevel
