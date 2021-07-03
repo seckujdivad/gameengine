@@ -13,18 +13,11 @@ import Data.ByteString.Lazy (ByteString, fromStrict)
 import Data.ByteString.Lazy.Char8 (pack, unpack)
 
 
-configPathRelative :: FilePath
-configPathRelative = "settings.json"
+{-|
+:Load the 'Data.ByteString.Lazy.ByteString' that contains the JSON file in the app root.
 
-configPath :: IO FilePath
-configPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
-
-defaultConfigPathRelative :: FilePath
-defaultConfigPathRelative = "settings.default.json"
-
-defaultconfigPath :: IO FilePath
-defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
-
+If the normal config file exists, it will be loaded. If not, the default config file will be copied to where the normal one should be and the normal one is loaded.
+-}
 loadConfigString :: IO (Maybe ByteString)
 loadConfigString = do
     customConfig <- loadCustomConfig
@@ -55,6 +48,35 @@ loadConfigString = do
             else
                 return Nothing
 
+{-|
+Load the 'Config' data from the JSON file in the app root.
+
+If the normal config file exists, it will be loaded. If not, the default config file will be copied to where the normal one should be and the normal one is loaded.
+-}
+loadConfig :: IO (Maybe Config)
+loadConfig = do
+    configTextMaybe <- loadConfigString
+    case configTextMaybe of
+        Just configText -> do
+            return (decode configText)
+        Nothing -> return Nothing
+
+-- |Relative path to the config file (relative to the app root)
+configPathRelative :: FilePath
+configPathRelative = "settings.json"
+
+-- |Absolute path to the config file
+configPath :: IO FilePath
+configPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
+
+-- |Relative path to the default config file (relative to the app root)
+defaultConfigPathRelative :: FilePath
+defaultConfigPathRelative = "settings.default.json"
+
+-- |Absolute path to the default config file
+defaultconfigPath :: IO FilePath
+defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
+
 data Config = Config {cfgInitialScene :: CfgLevel}
 
 instance FromJSON Config where
@@ -73,11 +95,3 @@ instance FromJSON CfgLevel where
 
 instance Show CfgLevel where
     show (CfgLevel root file) = "Config {root: \"" ++ root ++ "\", file: \"" ++ file ++ "\"}"
-
-loadConfig :: IO (Maybe Config)
-loadConfig = do
-    configTextMaybe <- loadConfigString
-    case configTextMaybe of
-        Just configText -> do
-            return (decode configText :: Maybe Config)
-        Nothing -> return Nothing
