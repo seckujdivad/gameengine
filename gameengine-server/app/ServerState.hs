@@ -10,13 +10,18 @@ that common results (like exceptions) should be handled by the applicator, not o
 function-by-function basis.
 -}
 
-import Data.Map (Map, empty, update, toList, delete, lookup, keys)
+import Data.Map (Map, empty, update, lookup, keys)
 
 import Client (Client (Client))
 
 
 -- |Describes the current state of the server
-data ServerState = ServerState {ssClients :: (Map Integer Client)}
+data ServerState =
+    -- |Describes the current state of the server
+    ServerState {
+        -- |'Client's that are connected to the server
+        ssClients :: Map Integer Client
+    }
 
 -- |The 'ServerState' when the server starts
 initialServerState :: ServerState
