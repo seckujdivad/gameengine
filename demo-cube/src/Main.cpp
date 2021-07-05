@@ -41,7 +41,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->ReloadSettings();
 
 	//register server packet handler
-	this->Bind(EVT_CONNECTION, &Main::HandleConnectionEvent, this);
+	this->m_event_handler.BindToEvent<NetworkEvent>(std::bind(&Main::HandleNetworkEvent, this, std::placeholders::_1));
 
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));
@@ -293,6 +293,16 @@ bool Main::IsConnected() const
 	}
 }
 
+EventHandler& Main::GetEventHandler()
+{
+	return this->m_event_handler;
+}
+
+const EventHandler& Main::GetEventHandler() const
+{
+	return this->m_event_handler;
+}
+
 SceneLoaderConfig Main::GetSceneLoaderConfig() const
 {
 	SceneLoaderConfig config;
@@ -405,20 +415,22 @@ void Main::Mainloop(wxIdleEvent& evt)
 {
 	this->m_engine->Render(true);
 
+	double x = 0.00000785;
+
 	if (this->IsConnected())
 	{
-		this->m_connection->ProcessOutstandingPackets(this);
+		this->m_connection->ProcessOutstandingPackets(std::vector({ &this->m_event_handler }));
 	}
 
 	evt.RequestMore();
 	evt.Skip();
 }
 
-void Main::HandleConnectionEvent(ConnectionEvent& evt)
+void Main::HandleNetworkEvent(const NetworkEvent& evt)
 {
-	if (evt.GetEvent().GetType() == EngineConnectionEvent::Type::PacketReceived)
+	if (evt.GetType() == NetworkEvent::Type::PacketReceived)
 	{
-		const Packet& packet = evt.GetEvent().GetPacket();
+		const Packet& packet = evt.GetPacket();
 		if (packet.GetType() == Packet::Type::ConnEstablished)
 		{
 			if (this->GetSettings().contains("network")
@@ -431,6 +443,4 @@ void Main::HandleConnectionEvent(ConnectionEvent& evt)
 			}
 		}
 	}
-
-	evt.Skip();
 }

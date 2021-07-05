@@ -221,13 +221,12 @@
     <ClInclude Include="src\network\Connection.h" />
     <ClInclude Include="src\network\ConnectionTarget.h" />
     <ClInclude Include="src\network\EngineConnection.h" />
-    <ClInclude Include="src\network\EngineConnectionEvent.h" />
+    <ClInclude Include="src\network\NetworkEvent.h" />
     <ClInclude Include="src\network\Packet.h" />
     <ClInclude Include="src\network\serialiser\Deserialise.h" />
     <ClInclude Include="src\network\serialiser\Field.h" />
     <ClInclude Include="src\network\serialiser\Serialise.h" />
     <ClInclude Include="src\network\serialiser\Type.h" />
-    <ClInclude Include="src\network\wx\ConnectionEvent.h" />
     <ClInclude Include="src\PatchSize.h" />
     <ClInclude Include="src\render\controllers\CubemapController.h" />
     <ClInclude Include="src\render\controllers\EngineCanvasController.h" />
@@ -306,9 +305,8 @@
     <ClCompile Include="src\network\Connection.cpp" />
     <ClCompile Include="src\network\ConnectionTarget.cpp" />
     <ClCompile Include="src\network\EngineConnection.cpp" />
-    <ClCompile Include="src\network\EngineConnectionEvent.cpp" />
+    <ClCompile Include="src\network\NetworkEvent.cpp" />
     <ClCompile Include="src\network\Packet.cpp" />
-    <ClCompile Include="src\network\wx\ConnectionEvent.cpp" />
     <ClCompile Include="src\render\controllers\CubemapController.cpp" />
     <ClCompile Include="src\render\controllers\EngineCanvasController.cpp" />
     <ClCompile Include="src\render\controllers\ReflectionController.cpp" />

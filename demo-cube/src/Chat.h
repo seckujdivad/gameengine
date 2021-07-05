@@ -4,7 +4,7 @@
 
 #include <wx/frame.h>
 
-#include "network/wx/ConnectionEvent.h"
+#include "network/NetworkEvent.h"
 
 class wxGridBagSizer;
 class wxButton;
@@ -24,7 +24,7 @@ private:
 
 	void txt_message_KeyPressed(wxKeyEvent& evt);
 
-	void OnConnectionEvent(ConnectionEvent& evt);
+	void OnNetworkEvent(const NetworkEvent& evt);
 
 	Main* GetParent() const;
 

@@ -4,8 +4,9 @@
 
 #include "Packet.h"
 #include "ConnectionTarget.h"
+#include "../events/Event.h"
 
-class EngineConnectionEvent
+class NetworkEvent : public Event
 {
 public:
 	enum class Type
@@ -20,7 +21,7 @@ private:
 	Type m_type;
 
 public:
-	EngineConnectionEvent(Type type, std::variant<Packet, ConnectionTarget> data);
+	NetworkEvent(Type type, std::variant<Packet, ConnectionTarget> data);
 
 	Type GetType() const;
 

@@ -1,8 +1,8 @@
-#include "EngineConnectionEvent.h"
+#include "NetworkEvent.h"
 
 #include <stdexcept>
 
-EngineConnectionEvent::EngineConnectionEvent(Type type, std::variant<Packet, ConnectionTarget> data) : m_type(type), m_data(data)
+NetworkEvent::NetworkEvent(Type type, std::variant<Packet, ConnectionTarget> data) : m_type(type), m_data(data)
 {
 	if (type == Type::ConnEstablished || type == Type::ConnClosed)
 	{
@@ -24,17 +24,17 @@ EngineConnectionEvent::EngineConnectionEvent(Type type, std::variant<Packet, Con
 	}
 }
 
-EngineConnectionEvent::Type EngineConnectionEvent::GetType() const
+NetworkEvent::Type NetworkEvent::GetType() const
 {
 	return this->m_type;
 }
 
-const Packet& EngineConnectionEvent::GetPacket() const
+const Packet& NetworkEvent::GetPacket() const
 {
 	return std::get<Packet>(this->m_data);
 }
 
-const ConnectionTarget& EngineConnectionEvent::GetConnectionTarget() const
+const ConnectionTarget& NetworkEvent::GetConnectionTarget() const
 {
 	return std::get<ConnectionTarget>(this->m_data);
 }

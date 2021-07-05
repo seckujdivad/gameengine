@@ -6,7 +6,6 @@
 #include <wx/msgdlg.h>
 
 #include "network/EngineConnection.h"
-#include "network/EngineConnectionEvent.h"
 #include "network/Packet.h"
 
 #include "Main.h"
@@ -33,18 +32,16 @@ void Chat::txt_message_KeyPressed(wxKeyEvent& evt)
 	}
 }
 
-void Chat::OnConnectionEvent(ConnectionEvent& evt)
+void Chat::OnNetworkEvent(const NetworkEvent& evt)
 {
-	if (evt.GetEvent().GetType() == EngineConnectionEvent::Type::PacketReceived)
+	if (evt.GetType() == NetworkEvent::Type::PacketReceived)
 	{
-		const Packet& packet = evt.GetEvent().GetPacket();
+		const Packet& packet = evt.GetPacket();
 		if (packet.GetType() == Packet::Type::ServerChatMessage)
 		{
 			this->m_lb_messages->AppendString(packet.GetData<Packet::ServerChatMessage>().name + ": " + packet.GetData<Packet::ServerChatMessage>().message);
 		}
 	}
-
-	evt.Skip();
 }
 
 Main* Chat::GetParent() const
@@ -72,5 +69,5 @@ Chat::Chat(Main* parent) : wxFrame(parent, wxID_ANY, "Chat")
 	this->Centre(wxBOTH);
 	this->Layout();
 
-	parent->Bind(EVT_CONNECTION, &Chat::OnConnectionEvent, this);
+	parent->GetEventHandler().BindToEvent<NetworkEvent>(std::bind(&Chat::OnNetworkEvent, this, std::placeholders::_1));
 }

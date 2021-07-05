@@ -8,7 +8,8 @@
 
 #include "loaders/SceneLoader.h"
 #include "network/ConnectionTarget.h"
-#include "network/wx/ConnectionEvent.h"
+#include "network/NetworkEvent.h"
+#include "events/EventHandler.h"
 
 #include "VectorCtrl.h"
 
@@ -76,7 +77,9 @@ private:
 
 	void Mainloop(wxIdleEvent& evt);
 
-	void HandleConnectionEvent(ConnectionEvent& evt);
+	EventHandler m_event_handler;
+
+	void HandleNetworkEvent(const NetworkEvent& evt);
 
 public:
 	Main();
@@ -90,4 +93,7 @@ public:
 	const std::shared_ptr<EngineConnection>& GetConnection() const;
 	void ConnectTo(ConnectionTarget target);
 	bool IsConnected() const;
+
+	EventHandler& GetEventHandler();
+	const EventHandler& GetEventHandler() const;
 };

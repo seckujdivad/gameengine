@@ -2,19 +2,19 @@
 
 #include <stdexcept>
 
-#include <wx/window.h>
+#include "../events/EventHandler.h"
 
 void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
 	this->m_events_lock.lock();
-	this->m_events.emplace(EngineConnectionEvent::Type::PacketReceived, bytes);
+	this->m_events.emplace(NetworkEvent::Type::PacketReceived, bytes);
 	this->m_events_lock.unlock();
 }
 
 EngineConnection::EngineConnection(ConnectionTarget target) : Connection(target)
 {
 	this->m_events_lock.lock();
-	this->m_events.emplace(EngineConnectionEvent::Type::ConnEstablished, target);
+	this->m_events.emplace(NetworkEvent::Type::ConnEstablished, target);
 	this->m_events_lock.unlock();
 }
 
@@ -32,9 +32,9 @@ void EngineConnection::SendPacket(Packet packet)
 	this->SendBytes(packet.Serialise());
 }
 
-std::optional<EngineConnectionEvent> EngineConnection::GetLatestEvent()
+std::optional<NetworkEvent> EngineConnection::GetLatestEvent()
 {
-	std::optional<EngineConnectionEvent> result;
+	std::optional<NetworkEvent> result;
 
 	this->m_events_lock.lock();
 	if (!this->m_events.empty())
@@ -65,15 +65,15 @@ std::size_t EngineConnection::GetNumUnprocessedEvents()
 	return num_packets;
 }
 
-void EngineConnection::ProcessOutstandingPackets(wxWindow* emit_events_from)
+void EngineConnection::ProcessOutstandingPackets(std::vector<EventHandler*> handlers)
 {
-	std::optional<EngineConnectionEvent> latest_event = this->GetLatestEvent();
+	std::optional<NetworkEvent> latest_event = this->GetLatestEvent();
 	while (latest_event.has_value())
 	{
 		//handle this event
-		EngineConnectionEvent& event = latest_event.value();
+		NetworkEvent& event = latest_event.value();
 
-		if (event.GetType() == EngineConnectionEvent::Type::PacketReceived)
+		if (event.GetType() == NetworkEvent::Type::PacketReceived)
 		{
 			const Packet& packet = event.GetPacket();
 
@@ -92,10 +92,9 @@ void EngineConnection::ProcessOutstandingPackets(wxWindow* emit_events_from)
 			}
 		}
 
-		if (emit_events_from != nullptr)
+		for (const auto& handler : handlers)
 		{
-			ConnectionEvent wx_event = ConnectionEvent(event, emit_events_from);
-			emit_events_from->ProcessWindowEvent(wx_event);
+			handler->BroadcastEvent(event);
 		}
 
 		//get the next packet
