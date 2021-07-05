@@ -65,6 +65,10 @@ private:
 public:
 	EventHandler();
 
+	//enforce no copying - the unique ptrs should enforce this anyway, but make it explicit
+	EventHandler(const EventHandler&) = delete;
+	EventHandler& operator=(const EventHandler&) = delete;
+
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline BoundFunctionUID BindToEvent(EventCallback<DerivedEvent> callback)
 	{

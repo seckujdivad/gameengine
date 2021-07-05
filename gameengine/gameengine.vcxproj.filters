@@ -432,6 +432,9 @@
     <ClInclude Include="src\events\EventUID.h">
       <Filter>Header Files\events</Filter>
     </ClInclude>
+    <ClInclude Include="src\events\EventBinding.h">
+      <Filter>Header Files\events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
