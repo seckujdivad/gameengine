@@ -42,7 +42,7 @@ private:
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline void InitialiseEventFunctions()
 	{
-		this->m_bound_functions.insert(std::pair(uid, std::vector<EventCallback<DerivedEvent>>()));
+		this->m_bound_functions.insert(std::pair(GetDerivedEventUID<DerivedEvent>(), std::vector<EventCallback<DerivedEvent>>()));
 		return this->GetEventFunctions();
 	}
 
