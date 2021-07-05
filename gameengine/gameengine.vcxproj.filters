@@ -169,6 +169,12 @@
     <Filter Include="JSON Schemas">
       <UniqueIdentifier>{d8a53362-9fa2-4983-8a21-4235ad59aaa6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\events">
+      <UniqueIdentifier>{b2064071-9d13-42e8-9465-93ec31cc76ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\events">
+      <UniqueIdentifier>{b42d2bb7-ca3e-4992-80be-83e4ad638933}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -417,6 +423,15 @@
     <ClInclude Include="src\network\ConnectionTarget.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
+    <ClInclude Include="src\events\EventHandler.h">
+      <Filter>Header Files\events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\events\Event.h">
+      <Filter>Header Files\events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\events\EventUID.h">
+      <Filter>Header Files\events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -643,6 +658,12 @@
     </ClCompile>
     <ClCompile Include="src\network\ConnectionTarget.cpp">
       <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\events\EventHandler.cpp">
+      <Filter>Source Files\events</Filter>
+    </ClCompile>
+    <ClCompile Include="src\events\EventUID.cpp">
+      <Filter>Source Files\events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
