@@ -21,20 +21,20 @@ private:
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	using FunctionCollection = std::unordered_map<BoundFunctionUID, EventCallback<DerivedEvent>>;
 
-	std::unordered_map<EventUID, std::unique_ptr<void>> m_bound_functions;
+	std::unordered_map<EventUID, std::unique_ptr<int>> m_bound_functions;
 
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline FunctionCollection<DerivedEvent>& GetEventFunctions()
 	{
-		std::unique_ptr<void>& functions_uncast = this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>());
-		FunctionCollection<DerivedEvent>& functions = *reinterpret_cast<std::vector<EventCallback<DerivedEvent>>*>(functions_uncast.get());
+		std::unique_ptr<int>& functions_uncast = this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>());
+		FunctionCollection<DerivedEvent>& functions = *reinterpret_cast<FunctionCollection<DerivedEvent>*>(functions_uncast.get());
 		return functions;
 	}
 
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline const FunctionCollection<DerivedEvent>& GetEventFunctions() const
 	{
-		const std::unique_ptr<void>& functions_uncast = this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>());
+		const std::unique_ptr<int>& functions_uncast = this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>());
 		const FunctionCollection<DerivedEvent>& functions = *reinterpret_cast<FunctionCollection<DerivedEvent>*>(functions_uncast.get());
 		return functions;
 	}
@@ -42,8 +42,8 @@ private:
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline void InitialiseEventFunctions()
 	{
-		this->m_bound_functions.insert(std::pair(GetDerivedEventUID<DerivedEvent>(), std::vector<EventCallback<DerivedEvent>>()));
-		return this->GetEventFunctions();
+		FunctionCollection<DerivedEvent>* functions = new FunctionCollection<DerivedEvent>();
+		this->m_bound_functions.insert(std::pair(GetDerivedEventUID<DerivedEvent>(), std::unique_ptr<int>(reinterpret_cast<int*>(functions))));
 	}
 
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
