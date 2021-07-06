@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <any>
 
 #include "Event.h"
 #include "EventUID.h"
@@ -18,65 +19,34 @@ public:
 private:
 	BoundFunctionUID m_bound_function_counter;
 
-	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
-	using FunctionCollection = std::unordered_map<BoundFunctionUID, EventCallback<DerivedEvent>>;
-	using DefaultCollection = FunctionCollection<Event>;
-
-	std::unordered_map<EventUID, std::unique_ptr<DefaultCollection>> m_bound_functions;
-
-	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
-	inline FunctionCollection<DerivedEvent>& GetEventFunctions() const
-	{
-		const std::unique_ptr<DefaultCollection>& functions_uncast = this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>());
-		return *reinterpret_cast<FunctionCollection<DerivedEvent>*>(functions_uncast.get());
-	}
-
-	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
-	inline void InitialiseEventFunctions()
-	{
-		FunctionCollection<DerivedEvent>* functions = new FunctionCollection<DerivedEvent>;
-		this->m_bound_functions.emplace(GetDerivedEventUID<DerivedEvent>(), std::unique_ptr<DefaultCollection>(reinterpret_cast<DefaultCollection*>(functions)));
-	}
-
-	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
-	inline FunctionCollection<DerivedEvent>& ForceGetEventFunctions()
-	{
-		if (this->m_bound_functions.count(GetDerivedEventUID<DerivedEvent>()) == 0)
-		{
-			this->InitialiseEventFunctions<DerivedEvent>();
-		}
-		return this->GetEventFunctions<DerivedEvent>();
-	}
-
-	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
-	inline bool DerivedEventHasBoundFunctions() const
-	{
-		return this->m_bound_functions.count(GetDerivedEventUID<DerivedEvent>()) != 0;
-	}
+	std::unordered_map<EventUID, std::unordered_map<BoundFunctionUID, std::any>> m_bound_functions; //the any is always EventCallback<DerivedEvent>
 
 public:
 	EventHandler();
 
-	//enforce no copying - the unique ptrs should enforce this anyway, but make it explicit
-	EventHandler(const EventHandler&) = delete;
-	EventHandler& operator=(const EventHandler&) = delete;
-
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline BoundFunctionUID BindToEvent(EventCallback<DerivedEvent> callback)
 	{
+		EventUID derived_uid = GetDerivedEventUID<DerivedEvent>();
 		BoundFunctionUID uid = this->m_bound_function_counter += 1;
-		this->ForceGetEventFunctions<DerivedEvent>().insert(std::pair(uid, callback));
+		
+		if (this->m_bound_functions.count(derived_uid) == 0)
+		{
+			this->m_bound_functions.emplace(derived_uid, std::unordered_map<BoundFunctionUID, std::any>());
+		}
+		this->m_bound_functions.at(derived_uid).emplace(uid, callback);
+
 		return uid;
 	}
 
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline void BroadcastEvent(DerivedEvent event) const
 	{
-		if (this->DerivedEventHasBoundFunctions<DerivedEvent>())
+		if (this->m_bound_functions.count(GetDerivedEventUID<DerivedEvent>()) != 0)
 		{
-			for (const auto& [uid, function] : this->GetEventFunctions<DerivedEvent>())
+			for (const auto& [uid, function] : this->m_bound_functions.at(GetDerivedEventUID<DerivedEvent>()))
 			{
-				function(event);
+				std::any_cast<EventCallback<DerivedEvent>>(function)(event);
 			}
 		}
 	}
@@ -84,16 +54,16 @@ public:
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline void RemoveBoundFunction(BoundFunctionUID uid)
 	{
-		if (this->DerivedEventHasBoundFunctions<DerivedEvent>())
+		EventUID derived_uid = GetDerivedEventUID<DerivedEvent>();
+		if (this->m_bound_functions.count(derived_uid) != 0)
 		{
-			const FunctionCollection<DerivedEvent>& functions = this->GetEventFunctions<DerivedEvent>();
-			if (this->m_bound_functions.count(uid) == 0)
+			if (this->m_bound_functions.at(derived_uid).count(uid) == 0)
 			{
 				throw std::invalid_argument("This UID has not been given");
 			}
 			else
 			{
-				this->m_bound_functions.erase(uid);
+				this->m_bound_functions.at(derived_uid).erase(uid);
 			}
 		}
 		else
