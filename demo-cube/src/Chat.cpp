@@ -69,5 +69,5 @@ Chat::Chat(Main* parent) : wxFrame(parent, wxID_ANY, "Chat")
 	this->Centre(wxBOTH);
 	this->Layout();
 
-	parent->GetEventHandler().BindToEvent<NetworkEvent>(std::bind(&Chat::OnNetworkEvent, this, std::placeholders::_1));
+	parent->GetEventHandler().BindToEvent<NetworkEvent>(&Chat::OnNetworkEvent, this);
 }

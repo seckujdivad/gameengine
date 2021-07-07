@@ -39,6 +39,12 @@ public:
 		return uid;
 	}
 
+	template<class DerivedEvent, class MemberParent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
+	inline BoundFunctionUID BindToEvent(void (MemberParent::*callback_member)(const DerivedEvent& event), MemberParent* callback_parent)
+	{
+		return this->BindToEvent<DerivedEvent>(std::bind(callback_member, callback_parent, std::placeholders::_1));
+	}
+
 	template<class DerivedEvent, typename = std::enable_if_t<std::is_base_of_v<Event, DerivedEvent>>>
 	inline void BroadcastEvent(DerivedEvent event) const
 	{

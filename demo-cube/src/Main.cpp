@@ -41,7 +41,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->ReloadSettings();
 
 	//register server packet handler
-	this->m_event_handler.BindToEvent<NetworkEvent>(std::bind(&Main::HandleNetworkEvent, this, std::placeholders::_1));
+	this->m_event_handler.BindToEvent<NetworkEvent>(&Main::HandleNetworkEvent, this);
 
 	//configure window
 	this->SetBackgroundColour(wxColour(238, 238, 238));

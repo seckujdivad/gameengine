@@ -103,5 +103,5 @@ ServerPicker::ServerPicker(Main* parent) : wxFrame(parent, wxID_ANY, "Server pic
 	this->Centre(wxBOTH);
 	this->Layout();
 
-	parent->GetEventHandler().BindToEvent<NetworkEvent>(std::bind(&ServerPicker::OnNetworkEvent, this, std::placeholders::_1));
+	parent->GetEventHandler().BindToEvent<NetworkEvent>(&ServerPicker::OnNetworkEvent, this);
 }
