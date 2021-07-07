@@ -102,7 +102,12 @@ Connection::~Connection()
 {
 	this->m_continue_running.store(false);
 	this->m_asio_socket.shutdown(asio::socket_base::shutdown_both);
-	this->m_listener.value().join();
+
+	if (this->m_listener.has_value())
+	{
+		this->m_listener.value().join();
+	}
+
 	this->m_asio_socket.close();
 }
 
