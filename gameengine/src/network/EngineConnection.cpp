@@ -7,15 +7,15 @@
 void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
 	this->m_events_lock.lock();
+	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
 	this->m_events.emplace(NetworkEvent::Type::PacketReceived, bytes);
-	this->m_events_lock.unlock();
 }
 
 EngineConnection::EngineConnection(ConnectionTarget target) : Connection(target)
 {
 	this->m_events_lock.lock();
+	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
 	this->m_events.emplace(NetworkEvent::Type::ConnEstablished, target);
-	this->m_events_lock.unlock();
 }
 
 void EngineConnection::SendPacket(Packet packet)
@@ -34,35 +34,32 @@ void EngineConnection::SendPacket(Packet packet)
 
 std::optional<NetworkEvent> EngineConnection::GetLatestEvent()
 {
-	std::optional<NetworkEvent> result;
-
 	this->m_events_lock.lock();
+	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
 	if (!this->m_events.empty())
 	{
-		result = this->m_events.front();
+		std::optional<NetworkEvent> result = this->m_events.front();
 		this->m_events.pop();
+		return result;
 	}
-	this->m_events_lock.unlock();
-
-	return result;
+	else
+	{
+		return std::optional<NetworkEvent>();
+	}
 }
 
 bool EngineConnection::HasUnprocessedEvents()
 {
 	this->m_events_lock.lock();
-	bool is_empty = this->m_events.empty();
-	this->m_events_lock.unlock();
-
-	return !is_empty;
+	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	return !this->m_events.empty();
 }
 
 std::size_t EngineConnection::GetNumUnprocessedEvents()
 {
 	this->m_events_lock.lock();
-	std::size_t num_packets = this->m_events.size();
-	this->m_events_lock.unlock();
-
-	return num_packets;
+	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	return this->m_events.size();
 }
 
 void EngineConnection::ProcessOutstandingPackets(std::vector<EventHandler*> handlers)
