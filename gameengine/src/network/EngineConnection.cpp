@@ -6,16 +6,14 @@
 
 void EngineConnection::BytesReceived(std::vector<char> bytes) //CALLED FROM A SEPARATE THREAD
 {
-	this->m_events_lock.lock();
-	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	const std::unique_lock<std::mutex> events_lock = std::unique_lock(this->m_events_lock);
 	this->m_events.emplace(NetworkEvent::Type::PacketReceived, bytes);
 }
 
 EngineConnection::EngineConnection(ConnectionTarget target) : Connection(target)
 {
-	this->m_events_lock.lock();
-	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
 	this->m_events.emplace(NetworkEvent::Type::ConnEstablished, target);
+	this->StartListening();
 }
 
 void EngineConnection::SendPacket(Packet packet)
@@ -34,8 +32,7 @@ void EngineConnection::SendPacket(Packet packet)
 
 std::optional<NetworkEvent> EngineConnection::GetLatestEvent()
 {
-	this->m_events_lock.lock();
-	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	const std::unique_lock<std::mutex> events_lock = std::unique_lock(this->m_events_lock);
 	if (!this->m_events.empty())
 	{
 		std::optional<NetworkEvent> result = this->m_events.front();
@@ -50,15 +47,13 @@ std::optional<NetworkEvent> EngineConnection::GetLatestEvent()
 
 bool EngineConnection::HasUnprocessedEvents()
 {
-	this->m_events_lock.lock();
-	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	const std::unique_lock<std::mutex> events_lock = std::unique_lock(this->m_events_lock);
 	return !this->m_events.empty();
 }
 
 std::size_t EngineConnection::GetNumUnprocessedEvents()
 {
-	this->m_events_lock.lock();
-	const std::lock_guard<std::mutex> events_lock = std::lock_guard<std::mutex>(this->m_events_lock, std::adopt_lock);
+	const std::unique_lock<std::mutex> events_lock = std::unique_lock(this->m_events_lock);
 	return this->m_events.size();
 }
 

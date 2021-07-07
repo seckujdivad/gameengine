@@ -95,15 +95,20 @@ Connection::Connection(ConnectionTarget target) : m_asio_socket(this->m_asio_ser
 	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(target.address), target.port));
 	this->m_continue_running.store(true);
 
-	this->m_listener = std::thread(&Connection::Listener, this);
+	
 }
 
 Connection::~Connection()
 {
 	this->m_continue_running.store(false);
 	this->m_asio_socket.shutdown(asio::socket_base::shutdown_both);
-	this->m_listener.join();
+	this->m_listener.value().join();
 	this->m_asio_socket.close();
+}
+
+void Connection::StartListening()
+{
+	this->m_listener = std::thread(&Connection::Listener, this);
 }
 
 bool Connection::IsConnected() const
