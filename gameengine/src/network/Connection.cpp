@@ -94,8 +94,6 @@ Connection::Connection(ConnectionTarget target) : m_asio_socket(this->m_asio_ser
 {
 	this->m_asio_socket.connect(asio::ip::tcp::endpoint(asio::ip::address::from_string(target.address), target.port));
 	this->m_continue_running.store(true);
-
-	
 }
 
 Connection::~Connection()
