@@ -130,3 +130,13 @@ std::shared_ptr<Skybox> Model::GetSkybox() const
 {
 	return this->m_skybox;
 }
+
+std::mutex& Model::GetGeometryMutex()
+{
+	return this->m_geometry_lock;
+}
+
+const std::mutex& Model::GetGeometryMutex() const
+{
+	return this->m_geometry_lock;
+}

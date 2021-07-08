@@ -426,6 +426,9 @@
     <ClInclude Include="src\network\NetworkEvent.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\models\AsyncLoader.h">
+      <Filter>Header Files\loaders\models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -655,6 +658,9 @@
     </ClCompile>
     <ClCompile Include="src\network\NetworkEvent.cpp">
       <Filter>Source Files\network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\models\AsyncLoader.cpp">
+      <Filter>Source Files\loaders\models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

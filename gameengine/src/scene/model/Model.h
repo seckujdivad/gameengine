@@ -2,17 +2,18 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include <glm/glm.hpp>
 
+#include "Material.h"
+#include "../Nameable.h"
+#include "../Referenceable.h"
+#include "../SceneChild.h"
+#include "../texture/Texture.h"
 #include "../transformations/Positionable.h"
 #include "../transformations/Rotatable.h"
 #include "../transformations/Scalable.h"
-#include "../Nameable.h"
-#include "Material.h"
-#include "../Referenceable.h"
-#include "../texture/Texture.h"
-#include "../SceneChild.h"
 
 class Scene;
 class Skybox;
@@ -21,7 +22,9 @@ class Geometry;
 class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>, public SceneChild
 {
 private:
+	std::mutex m_geometry_lock;
 	std::vector<std::shared_ptr<Geometry>> m_geometry;
+
 	Material m_material;
 
 	//textures - all need to be replaced before they can be used
@@ -60,4 +63,7 @@ public:
 
 	void SetSkybox(std::shared_ptr<Skybox> skybox);
 	std::shared_ptr<Skybox> GetSkybox() const;
+
+	std::mutex& GetGeometryMutex();
+	const std::mutex& GetGeometryMutex() const;
 };
