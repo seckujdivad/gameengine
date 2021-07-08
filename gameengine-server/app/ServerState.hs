@@ -13,6 +13,7 @@ function-by-function basis.
 import Data.Map (Map, empty, update, lookup, keys)
 
 import Client (Client (Client))
+import ConfigLoader (Config (..), CfgLevel (..))
 
 
 -- |Describes the current state of the server
@@ -20,12 +21,13 @@ data ServerState =
     -- |Describes the current state of the server
     ServerState {
         -- |'Client's that are connected to the server
-        ssClients :: Map Integer Client
+        ssClients :: Map Integer Client,
+        ssCurrentLevel :: CfgLevel
     }
 
 -- |The 'ServerState' when the server starts
-initialServerState :: ServerState
-initialServerState = ServerState empty
+initialServerState :: Config -> ServerState
+initialServerState config = ServerState empty (cfgInitialScene config)
 
 -- |Apply a function to each 'Client'. If 'Nothing' is returned, that 'Client' is removed (cleanup is not handled)
 applyToAllClients :: (Client -> IO (Maybe Client)) -> ServerState -> IO ServerState

@@ -22,7 +22,7 @@ import MainloopClientApplicators (closeClient, sendPacketToClient)
 serverMainloop :: TChan MainloopMessage -> Config -> IO ()
 serverMainloop mainloopIn config = do
     putStrLn "Awaiting connections..."
-    serverMainloopInner mainloopIn config initialServerState
+    serverMainloopInner mainloopIn config (initialServerState config)
     putStrLn "Mainloop stopped"
 
 serverMainloopInner :: TChan MainloopMessage -> Config -> ServerState -> IO ()
