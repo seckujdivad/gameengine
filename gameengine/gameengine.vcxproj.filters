@@ -429,6 +429,9 @@
     <ClInclude Include="src\loaders\models\AsyncLoader.h">
       <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\GetVector.h">
+      <Filter>Header Files\loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -661,6 +664,9 @@
     </ClCompile>
     <ClCompile Include="src\loaders\models\AsyncLoader.cpp">
       <Filter>Source Files\loaders\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\GetVector.cpp">
+      <Filter>Source Files\loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

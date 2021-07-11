@@ -240,6 +240,7 @@
     <ClInclude Include="src\generic\SplitOnChar.h" />
     <ClInclude Include="src\generic\std_glm.h" />
     <ClInclude Include="src\GLComponents.h" />
+    <ClInclude Include="src\loaders\GetVector.h" />
     <ClInclude Include="src\loaders\models\AsyncLoader.h" />
     <ClInclude Include="src\loaders\models\BptLoader.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
@@ -325,6 +326,7 @@
     <ClCompile Include="src\generic\SplitOnChar.cpp" />
     <ClCompile Include="src\generic\std_glm.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
+    <ClCompile Include="src\loaders\GetVector.cpp" />
     <ClCompile Include="src\loaders\models\AsyncLoader.cpp" />
     <ClCompile Include="src\loaders\models\BptLoader.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
