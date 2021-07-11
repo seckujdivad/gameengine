@@ -44,7 +44,22 @@ Material& Model::GetMaterial()
 	return this->m_material;
 }
 
-std::vector<std::shared_ptr<Geometry>> Model::GetGeometry()
+void Model::AddGeometry(std::shared_ptr<Geometry> geometry)
+{
+	this->m_geometry.push_back(geometry);
+}
+
+void Model::SetGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
+{
+	this->m_geometry = geometry;
+}
+
+void Model::ClearGeometry()
+{
+	this->m_geometry.clear();
+}
+
+const std::vector<std::shared_ptr<Geometry>>& Model::GetGeometry() const
 {
 	return this->m_geometry;
 }
@@ -54,7 +69,17 @@ Texture& Model::GetColourTexture()
 	return this->m_texture_colour;
 }
 
+const Texture& Model::GetColourTexture() const
+{
+	return this->m_texture_colour;
+}
+
 Texture& Model::GetReflectionTexture()
+{
+	return this->m_texture_reflection;
+}
+
+const Texture& Model::GetReflectionTexture() const
 {
 	return this->m_texture_reflection;
 }
@@ -64,7 +89,17 @@ Texture& Model::GetSpecularTexture()
 	return this->m_texture_specular;
 }
 
+const Texture& Model::GetSpecularTexture() const
+{
+	return this->m_texture_specular;
+}
+
 Texture& Model::GetNormalTexture()
+{
+	return this->m_texture_normal;
+}
+
+const Texture& Model::GetNormalTexture() const
 {
 	return this->m_texture_normal;
 }
@@ -74,7 +109,17 @@ Texture& Model::GetSkyboxMaskTexture()
 	return this->m_texture_skybox_mask;
 }
 
+const Texture& Model::GetSkyboxMaskTexture() const
+{
+	return this->m_texture_skybox_mask;
+}
+
 Texture& Model::GetDisplacementTexture()
+{
+	return this->m_texture_displacement;
+}
+
+const Texture& Model::GetDisplacementTexture() const
 {
 	return this->m_texture_displacement;
 }

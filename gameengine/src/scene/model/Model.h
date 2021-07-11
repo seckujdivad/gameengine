@@ -47,14 +47,23 @@ public:
 
 	Material& GetMaterial();
 
-	std::vector<std::shared_ptr<Geometry>> GetGeometry();
+	void AddGeometry(std::shared_ptr<Geometry> geometry);
+	void SetGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
+	void ClearGeometry();
+	const std::vector<std::shared_ptr<Geometry>>& GetGeometry() const;
 
 	Texture& GetColourTexture();
+	const Texture& GetColourTexture() const;
 	Texture& GetReflectionTexture();
+	const Texture& GetReflectionTexture() const;
 	Texture& GetSpecularTexture();
+	const Texture& GetSpecularTexture() const;
 	Texture& GetNormalTexture();
+	const Texture& GetNormalTexture() const;
 	Texture& GetSkyboxMaskTexture();
+	const Texture& GetSkyboxMaskTexture() const;
 	Texture& GetDisplacementTexture();
+	const Texture& GetDisplacementTexture() const;
 
 	void SetWireframeColours(std::vector<glm::vec3> colours);
 	void SetCurrentWireframeIndex(int index);
