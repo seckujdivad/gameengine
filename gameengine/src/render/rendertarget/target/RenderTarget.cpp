@@ -156,6 +156,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 					has_cleared = true;
 				}
 
+				std::unique_lock<std::mutex> geometry_lock = std::unique_lock(model->GetGeometryMutex());
 				for (const std::shared_ptr<Geometry>& geometry : model->GetGeometry())
 				{
 					Geometry::RenderInfo render_info = geometry->GetRenderInfo();

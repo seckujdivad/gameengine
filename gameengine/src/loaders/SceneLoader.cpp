@@ -24,64 +24,9 @@
 
 #include "models/PlyLoader.h"
 #include "models/BptLoader.h"
+#include "models/AsyncLoader.h"
 
-template<unsigned int dimensions, typename T = double>
-using vec = glm::vec<dimensions, T, glm::packed_highp>;
-
-template<unsigned int dimensions, typename T = double>
-vec<dimensions, T> GetVector(const nlohmann::json& data, vec<dimensions, T> default_value)
-{
-	static_assert(dimensions > 0, "Dimensions must be greater than zero");
-	static_assert(dimensions < 5, "Dimensions must be 4 or below");
-
-	if (data.is_array())
-	{
-		if (data.size() == dimensions)
-		{
-			bool is_nums = true;
-			for (unsigned int i = 0; i < dimensions; i++)
-			{
-				if (!data.at(i).is_number())
-				{
-					is_nums = false;
-				}
-			}
-
-			if (is_nums)
-			{
-				std::vector<T> values;
-				for (auto& el : data.items())
-				{
-					values.push_back(el.value().get<T>());
-				}
-
-				vec<dimensions, T> result = default_value;
-				for (int i = 0; i < (int)std::min(static_cast<unsigned int>(values.size()), dimensions); i++)
-				{
-					result[i] = values.at(i);
-				}
-
-				return result;
-			}
-			else
-			{
-				throw std::runtime_error("All values in a vector must be numbers");
-			}
-		}
-		else
-		{
-			throw std::runtime_error("Dimensions (" + std::to_string(dimensions) + ") are not equal to the number of given values (" + std::to_string(data.size()) + ")");
-		}
-	}
-	else if (data.is_number())
-	{
-		return vec<dimensions, T>(data.get<T>());
-	}
-	else
-	{
-		return default_value;
-	}
-}
+#include "GetVector.h"
 
 Texture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, TextureReference reference, glm::vec3 default_value, TextureFiltering default_mag_filter, TextureFiltering default_min_filter)
 {
@@ -282,87 +227,6 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		perf_data = nlohmann::json::parse(LoadFile(config.path.root / perf_profile_path));
 	}
 
-	//load all models
-	std::unordered_map<std::string, std::vector<std::shared_ptr<Geometry>>> geometry_lookup;
-
-	if (scene_data["models"]["ply"].is_object())
-	{
-		for (auto it = scene_data["models"]["ply"].begin(); it != scene_data["models"]["ply"].end(); it++)
-		{
-			std::shared_ptr<Polygonal> model_geometry = ModelFromPly((config.path.root / it.value()["path"].get<std::string>()).string());
-
-			if (it.value()["merge geometry"].is_object())
-			{
-				if (it.value()["merge geometry"]["enable"].is_boolean() && it.value()["merge geometry"]["distance"].is_number())
-				{
-					if (it.value()["merge geometry"]["enable"].get<bool>())
-					{
-						double merge_distance = it.value()["merge geometry"]["distance"].get<double>();
-						if (merge_distance >= 0)
-						{
-							model_geometry->MergeVertices(merge_distance);
-						}
-						else
-						{
-							throw std::runtime_error("Merge distance is less than 0 (" + std::to_string(merge_distance) + ")");
-						}
-					}
-				}
-				else
-				{
-					throw std::runtime_error("Merge geometry field must contain 'enabled' (bool) and 'distance' (number)");
-				}
-			}
-
-			if (it.value()["invert normals"].is_boolean())
-			{
-				if (it.value()["invert normals"].get<bool>())
-				{
-					model_geometry->InvertNormals();
-				}
-			}
-
-			model_geometry->SnapVerticesToGrid(GetVector(it.value()["grid"], glm::dvec3(0.0)));
-
-			std::string model_name = it.key();
-
-			if (geometry_lookup.count(model_name) == 0)
-			{
-				geometry_lookup.insert(std::pair(model_name, std::vector<std::shared_ptr<Geometry>>({ std::dynamic_pointer_cast<Geometry>(model_geometry) })));
-			}
-			else
-			{
-				throw std::runtime_error("Model identifier '" + model_name + "' is not unique");
-			}
-		}
-	}
-
-	if (scene_data["models"]["bpt"].is_object())
-	{
-		for (auto it = scene_data["models"]["bpt"].begin(); it != scene_data["models"]["bpt"].end(); it++)
-		{
-			std::string model_name = it.key();
-
-			std::vector<std::shared_ptr<Patch>> patches = PatchesFromBPT((config.path.root / it.value()["path"].get<std::string>()).string());
-
-			std::vector<std::shared_ptr<Geometry>> geometry;
-			geometry.reserve(patches.size());
-			for (const std::shared_ptr<Patch>& patch : patches)
-			{
-				geometry.push_back(std::dynamic_pointer_cast<Geometry>(patch));
-			}
-
-			if (geometry_lookup.count(model_name) == 0)
-			{
-				geometry_lookup.insert(std::pair(model_name, geometry));
-			}
-			else
-			{
-				throw std::runtime_error("Model identifier '" + model_name + "' is not unique");
-			}
-		}
-	}
-
 	//initialise scene object
 	Scene* scene = new Scene();
 
@@ -559,23 +423,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 					}
 				}
 
-				std::vector<std::shared_ptr<Geometry>> geometries;
-				for (std::string geometry_name : geometry_names)
-				{
-					if (geometry_lookup.count(geometry_name) == 0)
-					{
-						throw std::runtime_error("Model geometry '" + geometry_name + "' has not been loaded");
-					}
-					else
-					{
-						for (const std::shared_ptr<Geometry>& geometry : geometry_lookup.at(geometry_name))
-						{
-							geometries.push_back(geometry);
-						}
-					}
-				}
-
-				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), geometries, scene);
+				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), scene);
 
 				if (el.value()["identifier"].is_string())
 				{
@@ -695,6 +543,8 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 			}
 		}
 	}
+
+	LoadModelGeometry()
 
 	//load all reflections with model ptrs
 	for (auto& el : scene_data["reflections"].items())
