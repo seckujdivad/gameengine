@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <thread>
 
 #include <wx/image.h>
 
@@ -21,6 +22,7 @@
 #include "../scene/model/Model.h"
 
 #include "../generic/LoadFile.h"
+#include "../generic/ThreadNamer.h"
 
 #include "models/PlyLoader.h"
 #include "models/BptLoader.h"
@@ -139,7 +141,7 @@ Texture GetTexture(const nlohmann::json& data, std::filesystem::path root_path, 
 	return texture;
 }
 
-void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, Scene* scene)
+void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, std::shared_ptr<Scene> scene)
 {
 	glm::dvec2 clips = GetVector(data["clips"], glm::dvec2(std::get<0>(cubemap->GetClips()), std::get<1>(cubemap->GetClips())));
 	cubemap->SetClips({ clips.x, clips.y });
@@ -214,8 +216,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 	}
 }
 
-
-Scene* SceneFromJSON(SceneLoaderConfig config)
+std::tuple<std::shared_ptr<Scene>, std::thread> SceneFromJSON(SceneLoaderConfig config)
 {
 	//load scene json
 	nlohmann::json scene_data = nlohmann::json::parse(LoadFile(config.path.root / config.path.file));
@@ -228,7 +229,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 	}
 
 	//initialise scene object
-	Scene* scene = new Scene();
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
 	if (scene_data["metadata"].is_object())
 	{
@@ -423,7 +424,7 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 					}
 				}
 
-				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), scene);
+				std::shared_ptr<Model> model = std::make_shared<Model>(scene->GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), scene.get());
 
 				if (el.value()["identifier"].is_string())
 				{
@@ -544,7 +545,11 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		}
 	}
 
-	LoadModelGeometry()
+	std::thread geometry_loader_thread = std::thread([config, scene, scene_data]()
+		{
+			NameThread(L"Model loader");
+			ModelLoader loader = ModelLoader(config.path.root.string(), scene_data["layout"], scene_data["models"], scene);
+		});
 
 	//load all reflections with model ptrs
 	for (auto& el : scene_data["reflections"].items())
@@ -723,5 +728,5 @@ Scene* SceneFromJSON(SceneLoaderConfig config)
 		}
 	}
 
-	return scene;
+	return std::tuple(scene, std::move(geometry_loader_thread));
 }

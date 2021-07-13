@@ -49,6 +49,14 @@ void Model::AddGeometry(std::shared_ptr<Geometry> geometry)
 	this->m_geometry.push_back(geometry);
 }
 
+void Model::AddGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
+{
+	for (const std::shared_ptr<Geometry>& single_geometry : geometry)
+	{
+		this->AddGeometry(single_geometry);
+	}
+}
+
 void Model::SetGeometry(std::vector<std::shared_ptr<Geometry>> geometry)
 {
 	this->m_geometry = geometry;
@@ -174,14 +182,4 @@ void Model::SetSkybox(std::shared_ptr<Skybox> skybox)
 std::shared_ptr<Skybox> Model::GetSkybox() const
 {
 	return this->m_skybox;
-}
-
-std::mutex& Model::GetGeometryMutex()
-{
-	return this->m_geometry_lock;
-}
-
-const std::mutex& Model::GetGeometryMutex() const
-{
-	return this->m_geometry_lock;
 }

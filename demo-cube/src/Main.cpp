@@ -54,9 +54,14 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-	//create glcanvas
-	this->m_scene = std::unique_ptr<Scene>(SceneFromJSON(this->GetSceneLoaderConfig()));
+	//load scene data
+	{
+		std::tuple<std::shared_ptr<Scene>, std::thread> loaded_scene = SceneFromJSON(this->GetSceneLoaderConfig());
+		this->m_scene = std::get<0>(loaded_scene);
+		this->m_geometry_loader_thread = std::move(std::get<1>(loaded_scene));
+	}
 
+	//create glcanvas
 	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
 		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
@@ -168,6 +173,14 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
 	this->Layout();
+}
+
+Main::~Main()
+{
+	if (this->m_geometry_loader_thread.has_value() && this->m_geometry_loader_thread.value().joinable())
+	{
+		this->m_geometry_loader_thread.value().join();
+	}
 }
 
 void Main::SetModel(std::shared_ptr<Model> model)

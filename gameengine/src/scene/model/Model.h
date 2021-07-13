@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <memory>
-#include <mutex>
 
 #include <glm/glm.hpp>
 
@@ -22,7 +21,6 @@ class Geometry;
 class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>, public SceneChild
 {
 private:
-	std::mutex m_geometry_lock;
 	std::vector<std::shared_ptr<Geometry>> m_geometry;
 
 	Material m_material;
@@ -48,6 +46,7 @@ public:
 	Material& GetMaterial();
 
 	void AddGeometry(std::shared_ptr<Geometry> geometry);
+	void AddGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 	void SetGeometry(std::vector<std::shared_ptr<Geometry>> geometry);
 	void ClearGeometry();
 	const std::vector<std::shared_ptr<Geometry>>& GetGeometry() const;
@@ -72,7 +71,4 @@ public:
 
 	void SetSkybox(std::shared_ptr<Skybox> skybox);
 	std::shared_ptr<Skybox> GetSkybox() const;
-
-	std::mutex& GetGeometryMutex();
-	const std::mutex& GetGeometryMutex() const;
 };

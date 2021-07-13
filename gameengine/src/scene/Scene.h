@@ -5,6 +5,7 @@
 #include <tuple>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 #include "OrientedBoundingBox.h"
 #include "Nameable.h"
@@ -38,6 +39,8 @@ private:
 	ModelReference m_reference_model = 0;
 	RenderTextureReference m_reference_render_texture = 0;
 	TextureReference m_reference_texture = 0;
+
+	std::mutex m_scene_mutex; //allows one thread to take exclusive ownership of the Scene when rendering or doing operations that can't take place while rendering
 
 public:
 	Scene();
@@ -91,4 +94,7 @@ public:
 	ModelReference GetNewModelReference();
 	RenderTextureReference GetNewRenderTextureReference();
 	TextureReference GetNewTextureReference();
+
+	std::mutex& GetMutex();
+	const std::mutex& GetMutex() const;
 };

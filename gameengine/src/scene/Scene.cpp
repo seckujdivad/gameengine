@@ -125,6 +125,16 @@ TextureReference Scene::GetNewTextureReference()
 	return this->m_reference_texture++;
 }
 
+std::mutex& Scene::GetMutex()
+{
+	return this->m_scene_mutex;
+}
+
+const std::mutex& Scene::GetMutex() const
+{
+	return this->m_scene_mutex;
+}
+
 void Scene::SetClearColour(glm::vec4 colour)
 {
 	this->m_clear_colour = colour;

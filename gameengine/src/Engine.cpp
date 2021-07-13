@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 #include <algorithm>
+#include <mutex>
 
 #include <wx/image.h>
 
@@ -250,6 +251,8 @@ void Engine::Render(bool continuous_draw)
 {
 	if (this->GetScene() != nullptr)
 	{
+		std::unique_lock<std::mutex> lock = std::unique_lock(this->GetScene()->GetMutex());
+
 		this->MakeContextCurrent();
 
 		//update static textures

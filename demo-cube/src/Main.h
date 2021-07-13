@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <thread>
+#include <optional>
 
 #include <wx/frame.h>
 
@@ -33,7 +35,7 @@ class Main : public wxFrame
 private:
 	//gameengine
 	std::unique_ptr<Engine> m_engine;
-	std::unique_ptr<Scene> m_scene;
+	std::shared_ptr<Scene> m_scene;
 	std::unique_ptr<Camera> m_camera;
 
 	std::shared_ptr<Model> m_model_selected = nullptr;
@@ -41,6 +43,8 @@ private:
 	std::shared_ptr<EngineConnection> m_connection;
 
 	nlohmann::json m_settings;
+
+	std::optional<std::thread> m_geometry_loader_thread;
 
 	SceneLoaderConfig GetSceneLoaderConfig() const;
 
@@ -83,6 +87,7 @@ private:
 
 public:
 	Main();
+	~Main();
 
 	void SetModel(std::shared_ptr<Model> model);
 
