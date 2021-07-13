@@ -55,11 +55,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
 	//load scene data
-	{
-		std::tuple<std::shared_ptr<Scene>, std::thread> loaded_scene = SceneFromJSON(this->GetSceneLoaderConfig());
-		this->m_scene = std::get<0>(loaded_scene);
-		this->m_geometry_loader_thread = std::move(std::get<1>(loaded_scene));
-	}
+	this->LoadScene(this->GetSceneLoaderConfig());
 
 	//create glcanvas
 	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
@@ -314,6 +310,18 @@ EventHandler& Main::GetEventHandler()
 const EventHandler& Main::GetEventHandler() const
 {
 	return this->m_event_handler;
+}
+
+void Main::LoadScene(const SceneLoaderConfig& scene_config)
+{
+	std::tuple<std::shared_ptr<Scene>, std::thread> loaded_scene = SceneFromJSON(scene_config);
+	this->m_scene = std::get<0>(loaded_scene);
+
+	if (this->m_geometry_loader_thread.has_value())
+	{
+		this->m_geometry_loader_thread->join();
+	}
+	this->m_geometry_loader_thread = std::move(std::get<1>(loaded_scene));
 }
 
 SceneLoaderConfig Main::GetSceneLoaderConfig() const

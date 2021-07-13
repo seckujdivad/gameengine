@@ -101,4 +101,6 @@ public:
 
 	EventHandler& GetEventHandler();
 	const EventHandler& GetEventHandler() const;
+
+	void LoadScene(const SceneLoaderConfig& scene_config);
 };
