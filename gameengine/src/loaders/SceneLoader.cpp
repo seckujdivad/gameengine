@@ -24,9 +24,7 @@
 #include "../generic/LoadFile.h"
 #include "../generic/ThreadNamer.h"
 
-#include "models/PlyLoader.h"
-#include "models/BptLoader.h"
-#include "models/AsyncLoader.h"
+#include "models/ModelLoader.h"
 
 #include "GetVector.h"
 

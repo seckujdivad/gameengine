@@ -1,4 +1,4 @@
-#include "AsyncLoader.h"
+#include "ModelLoader.h"
 
 #include "BptLoader.h"
 #include "PlyLoader.h"

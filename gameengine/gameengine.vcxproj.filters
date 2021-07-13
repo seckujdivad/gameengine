@@ -426,14 +426,14 @@
     <ClInclude Include="src\network\NetworkEvent.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
-    <ClInclude Include="src\loaders\models\AsyncLoader.h">
-      <Filter>Header Files\loaders\models</Filter>
-    </ClInclude>
     <ClInclude Include="src\loaders\GetVector.h">
       <Filter>Header Files\loaders</Filter>
     </ClInclude>
     <ClInclude Include="src\generic\ThreadNamer.h">
       <Filter>Header Files\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loaders\models\ModelLoader.h">
+      <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -665,14 +665,14 @@
     <ClCompile Include="src\network\NetworkEvent.cpp">
       <Filter>Source Files\network</Filter>
     </ClCompile>
-    <ClCompile Include="src\loaders\models\AsyncLoader.cpp">
-      <Filter>Source Files\loaders\models</Filter>
-    </ClCompile>
     <ClCompile Include="src\loaders\GetVector.cpp">
       <Filter>Source Files\loaders</Filter>
     </ClCompile>
     <ClCompile Include="src\generic\ThreadNamer.cpp">
       <Filter>Source Files\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\models\ModelLoader.cpp">
+      <Filter>Source Files\loaders\models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

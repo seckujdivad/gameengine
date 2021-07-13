@@ -242,8 +242,8 @@
     <ClInclude Include="src\generic\ThreadNamer.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\GetVector.h" />
-    <ClInclude Include="src\loaders\models\AsyncLoader.h" />
     <ClInclude Include="src\loaders\models\BptLoader.h" />
+    <ClInclude Include="src\loaders\models\ModelLoader.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\LogMessage.h" />
@@ -329,8 +329,8 @@
     <ClCompile Include="src\generic\ThreadNamer.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\GetVector.cpp" />
-    <ClCompile Include="src\loaders\models\AsyncLoader.cpp" />
     <ClCompile Include="src\loaders\models\BptLoader.cpp" />
+    <ClCompile Include="src\loaders\models\ModelLoader.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\loaders\SceneLoader.cpp" />
     <ClCompile Include="src\LogMessage.cpp" />
