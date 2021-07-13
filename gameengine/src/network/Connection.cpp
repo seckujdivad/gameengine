@@ -4,20 +4,14 @@
 
 #include <asio/error.hpp>
 
-//only required for naming the thread, a debugging convenience
-#ifdef _WIN32
-#include <windows.h>
 #include "ConnectionTarget.h"
-#endif
+#include "../generic/ThreadNamer.h"
 
 constexpr char PACKET_DELIMITER = '\n';
 
 void Connection::Listener()
 {
-#ifdef _WIN32
-	//https://docs.microsoft.com/en-us/visualstudio/debugger/how-to-set-a-thread-name-in-native-code?view=vs-2019
-	SetThreadDescription(GetCurrentThread(), L"Socket listener");
-#endif
+	NameThread(L"Socket Listener");
 
 	while (this->m_continue_running.load())
 	{
