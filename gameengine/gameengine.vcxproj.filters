@@ -435,6 +435,9 @@
     <ClInclude Include="src\loaders\models\ModelLoader.h">
       <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\GetTexture.h">
+      <Filter>Header Files\loaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -673,6 +676,9 @@
     </ClCompile>
     <ClCompile Include="src\loaders\models\ModelLoader.cpp">
       <Filter>Source Files\loaders\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\GetTexture.cpp">
+      <Filter>Source Files\loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
