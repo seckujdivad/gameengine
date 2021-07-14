@@ -1,4 +1,4 @@
-module ClientApplicators (ClientApplicator, applyToAllClients, applyToClient) where
+module ClientApplicators (ClientApplicator (..), applyToAllClients, applyToClient) where
 
 {-
 Functions for applying an operation onto a 'Client'. They wrap the
@@ -21,7 +21,18 @@ When applied to a 'Client' in a 'ServerState', the result will have the followin
 
 When either result causes the 'Client' to be removed, the 'Socket' associated with that client is also closed.
 -}
-type ClientApplicator = Client -> IO (Either (Maybe Client) String)
+data ClientApplicator =
+    -- |See type documentation
+    ClientApplicator (Client -> IO (Either (Maybe Client) String))
+
+instance Semigroup ClientApplicator where
+    ClientApplicator left <> ClientApplicator right = ClientApplicator $ \client -> do
+        leftResult <- left client
+        case leftResult of
+            Left clientMaybe -> case clientMaybe of
+                Just client -> right client
+                Nothing -> return leftResult
+            Right _ -> return leftResult
 
 -- |Implements 'ServerState.applyToAllClients', but wraps the 'Client' processor in 'clientApplicatorWrapper'
 applyToAllClients :: ClientApplicator -> ServerState.ServerState -> IO ServerState.ServerState
@@ -33,7 +44,7 @@ applyToClient = ServerState.applyToClient . clientApplicatorWrapper
 
 -- |Wraps a function that is applied to a 'Client' that may throw an error (in the form of returning a 'String')
 clientApplicatorWrapper :: ClientApplicator -> Client -> IO (Maybe Client)
-clientApplicatorWrapper clientApplicator client = do
+clientApplicatorWrapper (ClientApplicator clientApplicator) client = do
     let Client connection _ _ = client
     clientMaybeOrError <- clientApplicator client
     case clientMaybeOrError of

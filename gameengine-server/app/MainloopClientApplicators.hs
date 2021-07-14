@@ -1,6 +1,6 @@
 module MainloopClientApplicators (sendPacketToClient, closeClient) where
 
-import ClientApplicators (ClientApplicator)
+import ClientApplicators (ClientApplicator (..))
 import Packet (Packet (..))
 import SocketOperations (sendPacket)
 import Client (Client (Client))
@@ -8,10 +8,10 @@ import TCPServer (ConnInfo (ConnInfo))
 
 
 closeClient :: ClientApplicator
-closeClient _ = return $ Left $ Nothing
+closeClient = ClientApplicator $ \_ -> return $ Left $ Nothing
 
 sendPacketToClient :: Packet -> ClientApplicator
-sendPacketToClient packet client = do
+sendPacketToClient packet  = ClientApplicator $ \client -> do
     let Client connection _ _ = client
     errorTextMaybe <- sendPacket connection packet
     case errorTextMaybe of
