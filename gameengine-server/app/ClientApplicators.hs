@@ -34,6 +34,9 @@ instance Semigroup ClientApplicator where
                 Nothing -> return leftResult
             Right _ -> return leftResult
 
+instance Monoid ClientApplicator where
+    mempty = ClientApplicator $ \client -> return $ Left $ Just client
+
 -- |Implements 'ServerState.applyToAllClients', but wraps the 'Client' processor in 'clientApplicatorWrapper'
 applyToAllClients :: ClientApplicator -> ServerState.ServerState -> IO ServerState.ServerState
 applyToAllClients = ServerState.applyToAllClients . clientApplicatorWrapper
