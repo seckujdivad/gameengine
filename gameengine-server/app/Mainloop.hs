@@ -9,7 +9,7 @@ import Network.Socket (Socket)
 
 import AtomicTChan (readFromTChan)
 import TCPServer (ConnInfo (ConnInfo))
-import Packet (Packet (..))
+import Packet (Packet (..), PacketType (..), packetToPacketType)
 import Client (Client (Client), getClientIdentifier, showClientMessage)
 import MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import ConfigLoader (Config (..), CfgLevel (..))
@@ -32,6 +32,7 @@ serverMainloopInner mainloopIn config serverState = do
     case msgInner of
         ClientConnEstablished connection -> do
             Just newState <- applyToClient (sendPacketToClient (ConnEstablished uid)) uid (serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)})
+            -- send current scene to client
             nextLoop $ newState
         
         _ -> case Data.Map.Strict.lookup uid (ssClients serverState) of
@@ -60,21 +61,17 @@ serverMainloopInner mainloopIn config serverState = do
 
 handlePacket :: TChan MainloopMessage -> Config -> ServerState -> Client -> Packet -> IO ()
 handlePacket mainloopIn config serverState client packet = case packet of
-    ConnEstablished _ -> do
-        putStrLn $ showClientMessage client "client shouldn't send ConnEstablished"
-        nextLoop serverState
-
     ClientChatMessage strMessage -> do
         newServerState <- applyToAllClients (sendPacketToClient (ServerChatMessage (getClientIdentifier False client) strMessage)) serverState
         nextLoop newServerState
     
-    ServerChatMessage _ _ -> do
-        putStrLn $ showClientMessage client "client shouldn't send ServerChatMessage"
-        nextLoop serverState
-    
     SetClientName newName -> do
         putStrLn $ showClientMessage client ("name set to " ++ newName)
         nextLoop $ serverState {ssClients = update (\(Client connection connInfo _) -> Just (Client connection connInfo (Just newName))) uid (ssClients serverState)}
+    
+    _ -> do
+        putStrLn $ showClientMessage client $ "client shouldn't send packet of type " ++ (show $ packetToPacketType packet)
+        nextLoop serverState
     
     where
         nextLoop = serverMainloopInner mainloopIn config
