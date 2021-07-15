@@ -41,7 +41,7 @@ private:
 	std::shared_ptr<Skybox> m_skybox = nullptr;
 
 public:
-	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene = nullptr);
+	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene);
 
 	Material& GetMaterial();
 
@@ -63,6 +63,8 @@ public:
 	const Texture& GetSkyboxMaskTexture() const;
 	Texture& GetDisplacementTexture();
 	const Texture& GetDisplacementTexture() const;
+
+	void DefaultInitialiseTextures();
 
 	void SetWireframeColours(std::vector<glm::vec3> colours);
 	void SetCurrentWireframeIndex(int index);

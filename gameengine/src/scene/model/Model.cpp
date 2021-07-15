@@ -19,24 +19,14 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 	SceneChild(scene),
 	m_geometry(geometry)
 {
-	if (scene == nullptr)
-	{
-		this->m_texture_colour = Texture(-1);
-		this->m_texture_reflection = Texture(-1);
-		this->m_texture_specular = Texture(-1);
-		this->m_texture_normal = Texture(-1);
-		this->m_texture_skybox_mask = Texture(-1);
-		this->m_texture_displacement = Texture(-1);
-	}
-	else
-	{
-		this->m_texture_colour = Texture(scene->GetNewTextureReference());
-		this->m_texture_reflection = Texture(scene->GetNewTextureReference());
-		this->m_texture_specular = Texture(scene->GetNewTextureReference());
-		this->m_texture_normal = Texture(scene->GetNewTextureReference());
-		this->m_texture_skybox_mask = Texture(scene->GetNewTextureReference());
-		this->m_texture_displacement = Texture(scene->GetNewTextureReference());
-	}
+	this->m_texture_colour = Texture(scene->GetNewTextureReference());
+	this->m_texture_reflection = Texture(scene->GetNewTextureReference());
+	this->m_texture_specular = Texture(scene->GetNewTextureReference());
+	this->m_texture_normal = Texture(scene->GetNewTextureReference());
+	this->m_texture_skybox_mask = Texture(scene->GetNewTextureReference());
+	this->m_texture_displacement = Texture(scene->GetNewTextureReference());
+
+	this->DefaultInitialiseTextures();
 }
 
 Material& Model::GetMaterial()
@@ -130,6 +120,16 @@ Texture& Model::GetDisplacementTexture()
 const Texture& Model::GetDisplacementTexture() const
 {
 	return this->m_texture_displacement;
+}
+
+void Model::DefaultInitialiseTextures()
+{
+	this->m_texture_colour.SetVector(glm::vec3(1.0f));
+	this->m_texture_reflection.SetVector(glm::vec3(0.0f));
+	this->m_texture_specular.SetVector(glm::vec3(0.0f));
+	this->m_texture_normal.SetVector(glm::vec3(0.5f, 0.5f, 1.0f));
+	this->m_texture_skybox_mask.SetVector(glm::vec3(0.0f));
+	this->m_texture_displacement.SetVector(glm::vec3(0.0f));
 }
 
 void Model::SetWireframeColours(std::vector<glm::vec3> colours)
