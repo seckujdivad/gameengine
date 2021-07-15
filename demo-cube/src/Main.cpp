@@ -25,7 +25,7 @@
 constexpr char SETTINGS_FILE[] = "settings.json";
 constexpr char DEFAULT_SETTINGS_FILE[] = "settings.default.json";
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_scene(true)
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 {
 	//set up menu bar
 	this->m_mb = new wxMenuBar();
@@ -148,7 +148,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_scene(true)
 
 	//set window title
 	this->SetTitle("Render Test: no scene");
-	this->LoadScene(this->GetSceneLoaderConfig("scenes", "simplescene.json"));
 
 	this->SetModel(nullptr);
 
