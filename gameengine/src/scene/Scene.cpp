@@ -13,8 +13,12 @@
 #include "Skybox.h"
 #include "VisBox.h"
 
-Scene::Scene() : Nameable()
+Scene::Scene(bool ensure_drawable) : Nameable()
 {
+	if (ensure_drawable)
+	{
+		this->EnsureDrawable();
+	}
 }
 
 void Scene::Add(std::shared_ptr<Model> model)
@@ -133,6 +137,37 @@ std::mutex& Scene::GetMutex()
 const std::mutex& Scene::GetMutex() const
 {
 	return this->m_scene_mutex;
+}
+
+void Scene::ClearObjects()
+{
+	if (!this->IsCleared())
+	{
+		this->m_models.clear();
+		this->m_pointlights.clear();
+		this->m_reflections.clear();
+		this->m_skyboxes.clear();
+		this->m_visboxes.clear();
+		this->m_approximations.clear();
+	}
+}
+
+bool Scene::IsCleared() const
+{
+	return this->m_models.size() == 0
+		&& this->m_pointlights.size() == 0
+		&& this->m_reflections.size() == 0
+		&& this->m_skyboxes.size() == 0
+		&& this->m_visboxes.size() == 0
+		&& this->m_approximations.size() == 0;
+}
+
+void Scene::EnsureDrawable()
+{
+	this->ClearObjects();
+	this->Add(std::make_shared<PointLight>(this->GetNewRenderTextureReference()));
+	this->Add(std::make_shared<Reflection>(this->GetNewRenderTextureReference()));
+	this->Add(OrientedBoundingBox());
 }
 
 void Scene::SetClearColour(glm::vec4 colour)

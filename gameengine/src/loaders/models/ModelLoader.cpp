@@ -107,7 +107,7 @@ void ModelLoader::SendToModels(std::string geometry_name, std::vector<std::share
 		const std::vector<std::shared_ptr<Model>>& models = this->m_models.at(geometry_name);
 		for (const std::shared_ptr<Model>& model : models)
 		{
-			std::unique_lock<std::mutex> lock = std::unique_lock(this->m_scene->GetMutex());
+			std::unique_lock<std::mutex> lock = std::unique_lock(this->m_scene.GetMutex());
 			model->AddGeometry(geometry);
 		}
 	}
@@ -137,7 +137,7 @@ void ModelLoader::DistributeOutstandingGeometry()
 	}
 }
 
-ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json geometry_info, std::shared_ptr<Scene> scene) : m_layout(layout), m_geom_info(geometry_info), m_root_path(root), m_scene(scene)
+ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json geometry_info, Scene& scene) : m_layout(layout), m_geom_info(geometry_info), m_root_path(root), m_scene(scene)
 {
 	//get the shared_ptrs for all the models and the Geometry that they all require
 	for (auto it = layout.begin(); it != layout.end(); ++it)
@@ -145,7 +145,7 @@ ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json
 		std::string identifier = it.value()["identifier"].get<std::string>();
 
 		std::shared_ptr<Model> model = nullptr;
-		for (const std::shared_ptr<Model>& model_candidate : scene->GetModels())
+		for (const std::shared_ptr<Model>& model_candidate : scene.GetModels())
 		{
 			if (model_candidate->GetIdentifier() == identifier)
 			{

@@ -40,10 +40,10 @@ private:
 	RenderTextureReference m_reference_render_texture = 0;
 	TextureReference m_reference_texture = 0;
 
-	std::mutex m_scene_mutex; //allows one thread to take exclusive ownership of the Scene when rendering or doing operations that can't take place while rendering
+	std::mutex m_scene_mutex; //allows one thread to take exclusive ownership of the Scene when rendering or doing operations that can't take place while rendering - the scene itself won't bother trying to acquire this mutex
 
 public:
-	Scene();
+	Scene(bool ensure_drawable = false);
 
 	void Add(std::shared_ptr<Model> model);
 	void Remove(std::shared_ptr<Model> model);
@@ -97,4 +97,8 @@ public:
 
 	std::mutex& GetMutex();
 	const std::mutex& GetMutex() const;
+
+	void ClearObjects(); //clear all scene objects while preserving UIDs
+	bool IsCleared() const;
+	void EnsureDrawable(); //set to the simplest state that can still be drawn
 };

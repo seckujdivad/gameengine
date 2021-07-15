@@ -26,7 +26,7 @@ private:
 	nlohmann::json m_geom_info;
 	std::filesystem::path m_root_path;
 
-	std::shared_ptr<Scene> m_scene;
+	Scene& m_scene;
 
 	std::unordered_map<std::string, std::vector<std::shared_ptr<Model>>> m_models;
 
@@ -58,7 +58,7 @@ private:
 	void DistributeOutstandingGeometry();
 
 public:
-	ModelLoader(std::string root, nlohmann::json layout, nlohmann::json geometry_info, std::shared_ptr<Scene> scene);
+	ModelLoader(std::string root, nlohmann::json layout, nlohmann::json geometry_info, Scene& scene);
 	ModelLoader(const ModelLoader&) = delete;
 	ModelLoader& operator=(const ModelLoader&) = delete;
 	ModelLoader(ModelLoader&&) = delete;

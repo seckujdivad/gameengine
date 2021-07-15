@@ -25,7 +25,7 @@
 constexpr char SETTINGS_FILE[] = "settings.json";
 constexpr char DEFAULT_SETTINGS_FILE[] = "settings.default.json";
 
-Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
+Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test"), m_scene(true)
 {
 	//set up menu bar
 	this->m_mb = new wxMenuBar();
@@ -54,11 +54,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->SetFlexibleDirection(wxBOTH);
 	this->m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-	//load scene data
-	this->LoadScene(this->GetSceneLoaderConfig());
-
 	//create glcanvas
-	this->m_engine = std::make_unique<Engine>(this, this->m_scene.get(), true);
+	this->m_engine = std::make_unique<Engine>(this, &this->m_scene, true);
 	this->m_engine->SetDebugMessageLevel(std::vector({
 		Engine::DebugMessageConfig({ GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, false })
 		}));
@@ -109,11 +106,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_lb_models->Bind(wxEVT_CHAR, &Main::lb_models_OnChar, this);
 	this->m_sizer->Add(this->m_lb_models, wxGBPosition(0, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
-	for (const std::shared_ptr<Model> model : this->m_scene->GetModels())
-	{
-		this->m_lb_models->Append(model->GetIdentifier());
-	}
-
 	//make vector controls for modifying models
 	VectorCtrlConfig vct_cfg;
 	vct_cfg.num_fields = 3;
@@ -155,7 +147,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->m_sizer->Add(this->m_rdobx_render_mode, wxGBPosition(4, 1), wxGBSpan(1, 2), wxEXPAND | wxALL);
 
 	//set window title
-	this->SetTitle("Render Test: viewing " + this->m_scene->GetIdentifier());
+	this->SetTitle("Render Test: no scene");
+	this->LoadScene(this->GetSceneLoaderConfig("scenes", "simplescene.json"));
 
 	this->SetModel(nullptr);
 
@@ -203,7 +196,7 @@ void Main::SetModel(std::shared_ptr<Model> model)
 	{
 		model->SetCurrentWireframeIndex(1);
 			
-		std::vector<std::shared_ptr<Model>> models = this->m_scene->GetModels();
+		std::vector<std::shared_ptr<Model>> models = this->m_scene.GetModels();
 		for (size_t i = 0; i < models.size(); i++)
 		{
 			if (models.at(i) == model)
@@ -314,22 +307,31 @@ const EventHandler& Main::GetEventHandler() const
 
 void Main::LoadScene(const SceneLoaderConfig& scene_config)
 {
-	std::tuple<std::shared_ptr<Scene>, std::thread> loaded_scene = SceneFromJSON(scene_config);
-	this->m_scene = std::get<0>(loaded_scene);
-
+	//await previous model loader thread completion
 	if (this->m_geometry_loader_thread.has_value())
 	{
 		this->m_geometry_loader_thread->join();
 	}
-	this->m_geometry_loader_thread = std::move(std::get<1>(loaded_scene));
+
+	//load scene
+	this->m_geometry_loader_thread = SceneFromJSON(this->m_scene, scene_config);
+
+	//load scene info into UI
+	this->m_lb_models->Clear();
+	for (const std::shared_ptr<Model> model : this->m_scene.GetModels())
+	{
+		this->m_lb_models->Append(model->GetIdentifier());
+	}
+
+	this->SetTitle("Render Test: viewing " + this->m_scene.GetIdentifier());
 }
 
-SceneLoaderConfig Main::GetSceneLoaderConfig() const
+SceneLoaderConfig Main::GetSceneLoaderConfig(std::filesystem::path root, std::filesystem::path file) const
 {
 	SceneLoaderConfig config;
 
-	config.path.root = this->GetSettings()["scene"]["root"].get<std::string>();
-	config.path.file = this->GetSettings()["scene"]["file"].get<std::string>();
+	config.path.root = root;
+	config.path.file = file;
 
 	config.performance.index = this->GetSettings()["performance level"].get<int>();
 
@@ -364,7 +366,7 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 	int selection_index = this->m_lb_models->GetSelection();
 	if (selection_index != wxNOT_FOUND)
 	{
-		const std::vector<std::shared_ptr<Model>>& models = this->m_scene->GetModels();
+		const std::vector<std::shared_ptr<Model>>& models = this->m_scene.GetModels();
 		this->SetModel(models.at(selection_index));
 	}
 }
@@ -462,6 +464,10 @@ void Main::HandleNetworkEvent(const NetworkEvent& evt)
 			{
 				this->m_connection->SendPacket(Packet(Packet::SetClientName(this->GetSettings()["network"]["username"].get<std::string>())));
 			}
+		}
+		else if (packet.GetType() == Packet::Type::SetScene)
+		{
+			this->LoadScene(this->GetSceneLoaderConfig(packet.GetData<Packet::SetScene>().root, packet.GetData<Packet::SetScene>().file));
 		}
 	}
 }

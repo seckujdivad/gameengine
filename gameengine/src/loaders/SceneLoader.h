@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <tuple>
 #include <thread>
 
 class Scene;
@@ -20,4 +19,4 @@ struct SceneLoaderConfig
 	} performance;
 };
 
-std::tuple<std::shared_ptr<Scene>, std::thread> SceneFromJSON(SceneLoaderConfig config);
+std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config);

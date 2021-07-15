@@ -12,6 +12,7 @@
 #include "network/ConnectionTarget.h"
 #include "network/NetworkEvent.h"
 #include "events/EventHandler.h"
+#include "scene/Scene.h"
 
 #include "VectorCtrl.h"
 
@@ -24,7 +25,6 @@ class wxMenuBar;
 class Engine;
 class EngineCanvas;
 class EngineCanvasController;
-class Scene;
 class Camera;
 class Model;
 
@@ -35,7 +35,7 @@ class Main : public wxFrame
 private:
 	//gameengine
 	std::unique_ptr<Engine> m_engine;
-	std::shared_ptr<Scene> m_scene;
+	Scene m_scene;
 	std::unique_ptr<Camera> m_camera;
 
 	std::shared_ptr<Model> m_model_selected = nullptr;
@@ -46,7 +46,7 @@ private:
 
 	std::optional<std::thread> m_geometry_loader_thread;
 
-	SceneLoaderConfig GetSceneLoaderConfig() const;
+	SceneLoaderConfig GetSceneLoaderConfig(std::filesystem::path root, std::filesystem::path file) const;
 
 	//wxwidgets
 	wxGridBagSizer* m_sizer;

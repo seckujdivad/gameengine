@@ -10,7 +10,7 @@
 #include "../scene/Scene.h"
 #include "../scene/model/Model.h"
 
-void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, std::shared_ptr<Scene> scene)
+void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_data, Cubemap* cubemap, Scene& scene)
 {
 	glm::dvec2 clips = GetVector(data["clips"], glm::dvec2(std::get<0>(cubemap->GetClips()), std::get<1>(cubemap->GetClips())));
 	cubemap->SetClips({ clips.x, clips.y });
@@ -31,7 +31,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
+				std::optional<std::shared_ptr<Model>> model = scene.GetModel(el2.value().get<std::string>());
 				if (model.has_value())
 				{
 					cubemap->AddStaticModel(model.value()->GetReference());
@@ -54,7 +54,7 @@ void ConfigureCubemap(const nlohmann::json& data, const nlohmann::json& perf_dat
 		{
 			if (el2.value().is_string())
 			{
-				std::optional<std::shared_ptr<Model>> model = scene->GetModel(el2.value().get<std::string>());
+				std::optional<std::shared_ptr<Model>> model = scene.GetModel(el2.value().get<std::string>());
 				if (model.has_value())
 				{
 					cubemap->AddDynamicModel(model.value()->GetReference());

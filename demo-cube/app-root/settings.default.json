@@ -1,9 +1,5 @@
 {
   "$schema": "../json-schemas/settings-schema.json",
-  "scene": {
-    "root": "scenes",
-    "file": "simplescene.json"
-  },
   "performance level": 0,
   "network": {
     "servers": [
