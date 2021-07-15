@@ -1,5 +1,11 @@
 #version 430 core
 
+#if 0
+#define APPROXIMATION_OBB_NUM 0
+#define POINT_LIGHT_NUM 0
+#define REFLECTION_NUM 0
+#endif
+
 //directives to avoid editor showing errors
 #if !defined(POINT_LIGHT_NUM)
 #define POINT_LIGHT_NUM 1
@@ -109,8 +115,10 @@ struct PointLight
 	int texture_dimensions;
 };
 
+#if POINT_LIGHT_NUM > 0
 uniform PointLight light_points[POINT_LIGHT_NUM];
 uniform samplerCubeShadow light_shadow_cubemaps[POINT_LIGHT_NUM];
+#endif
 
 uniform bool light_shadow_draw;
 
@@ -126,9 +134,11 @@ uniform struct Reflection
 };
 
 uniform bool reflections_enabled;
+#if REFLECTION_NUM > 0
 uniform Reflection reflections[REFLECTION_NUM];
 uniform samplerCube reflection_cubemaps[REFLECTION_NUM * NUM_NORMAL_TEXTURES];
 uniform samplerCubeShadow reflection_depth_cubemaps[REFLECTION_NUM];
+#endif
 uniform int reflection_count;
 
 //scene approximation
@@ -140,7 +150,9 @@ struct ApproximationOBB
 	mat3 rotation_inverse;
 };
 
-uniform ApproximationOBB scene_approximations[APPROXIMATION_OBB_NUM]; 
+#if APPROXIMATION_OBB_NUM > 0
+uniform ApproximationOBB scene_approximations[APPROXIMATION_OBB_NUM];
+#endif
 
 //skybox
 uniform sampler2D skyboxMaskTexture;
@@ -251,6 +263,7 @@ float Get16x16Dither(ivec2 pos, bool correct)
 	}
 }
 
+#if POINT_LIGHT_NUM > 0
 float GetShadowIntensity(vec3 fragpos, int lightindex)
 {
 	if (light_shadow_draw)
@@ -265,6 +278,7 @@ float GetShadowIntensity(vec3 fragpos, int lightindex)
 		return 1.0f;
 	}
 }
+#endif
 
 /*
 Finds the two points of intersection between an oriented bounding box and a line (if the points exist)
@@ -418,10 +432,12 @@ float GetDepthFromDistance(float dist, float clip_near, float clip_far)
 	return ((clip_near + clip_far - ((2.0f * clip_near * clip_far) / dist)) / (clip_far - clip_near) + 1.0f) / 2.0f;
 }
 
+#if REFLECTION_NUM > 0
 float GetDistanceFromReflection(int index, float depth_sample)
 {
 	return GetDistanceFromDepth(depth_sample, reflections[index].clip_near, reflections[index].clip_far);
 }
+#endif
 
 void main()
 {
@@ -463,6 +479,7 @@ void main()
 
 	vec3 fragtocam = normalize(0 - cam_translate.xyz - geomSceneSpacePos); //get direction from the fragment to the camera
 
+#if POINT_LIGHT_NUM > 0
 	for (int i = 0; i < POINT_LIGHT_NUM; i++)
 	{
 		//calculate light
@@ -482,6 +499,7 @@ void main()
 		//apply light to fragment
 		frag_intensity = frag_intensity + (light_change * GetShadowIntensity(geomSceneSpacePos, i));
 	}
+#endif
 
 	//apply lighting to fragment
 	colour_out[0] = vec4(frag_intensity, 1.0f) * colour_out[0];
@@ -660,6 +678,7 @@ void main()
 
 		if (!ssr_reflection_applied)
 		{
+#if REFLECTION_NUM > 0
 			if (reflections_enabled)
 			{
 				//find reflection to use
@@ -784,6 +803,7 @@ void main()
 				}
 			}
 			else
+#endif
 			{
 				reflection_intensity = 0.0f;
 				reflection_colour = vec3(0.0f);
