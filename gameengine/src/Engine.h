@@ -8,11 +8,9 @@
 
 #include <string>
 #include <vector>
-#include <map>
 #include <unordered_map>
 #include <memory>
 #include <tuple>
-#include <set>
 
 #include "GLComponents.h"
 

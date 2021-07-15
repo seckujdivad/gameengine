@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <mutex>
+#include <set>
 
 #include <wx/image.h>
 
