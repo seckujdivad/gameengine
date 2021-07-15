@@ -166,8 +166,12 @@ void Scene::EnsureDrawable()
 {
 	this->ClearObjects();
 	this->Add(std::make_shared<PointLight>(this->GetNewRenderTextureReference()));
-	this->Add(std::make_shared<Reflection>(this->GetNewRenderTextureReference()));
 	this->Add(OrientedBoundingBox());
+
+	std::shared_ptr<Reflection> reflection = std::make_shared<Reflection>(this->GetNewRenderTextureReference());
+	reflection->SetDrawReflections(false);
+	reflection->SetDrawShadows(false);
+	this->Add(reflection);
 }
 
 void Scene::SetClearColour(glm::vec4 colour)
