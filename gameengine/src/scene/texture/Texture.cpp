@@ -10,6 +10,11 @@ Texture::Texture(TextureReference reference) : Referenceable<TextureReference>(r
 {
 }
 
+Texture::Texture(TextureReference reference, glm::vec3 colour) : Texture(reference)
+{
+	this->SetVector(colour);
+}
+
 void Texture::SetFullTexture(glm::vec3 colour, std::tuple<int, int> dimensions)
 {
 	const std::size_t pixels = std::size_t(std::get<0>(dimensions)) * std::size_t(std::get<1>(dimensions));

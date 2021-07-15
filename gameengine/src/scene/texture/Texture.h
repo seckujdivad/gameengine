@@ -42,6 +42,7 @@ private:
 
 public:
 	Texture(TextureReference reference);
+	Texture(TextureReference reference, glm::vec3 colour);
 
 	Type GetType() const;
 
