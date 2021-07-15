@@ -43,7 +43,7 @@ private:
 	std::mutex m_scene_mutex; //allows one thread to take exclusive ownership of the Scene when rendering or doing operations that can't take place while rendering - the scene itself won't bother trying to acquire this mutex
 
 public:
-	Scene(bool ensure_drawable = false);
+	Scene();
 
 	void Add(std::shared_ptr<Model> model);
 	void Remove(std::shared_ptr<Model> model);
@@ -100,5 +100,4 @@ public:
 
 	void ClearObjects(); //clear all scene objects while preserving UIDs
 	bool IsCleared() const;
-	void EnsureDrawable(); //set to the simplest state that can still be drawn
 };

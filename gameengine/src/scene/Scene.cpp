@@ -7,18 +7,15 @@
 #include <algorithm>
 
 #include "Cubemap.h"
-#include "model/Model.h"
-#include "light/PointLight.h"
-#include "model/Reflection.h"
 #include "Skybox.h"
 #include "VisBox.h"
+#include "model/Model.h"
+#include "model/Reflection.h"
+#include "model/geometry/PresetGeometry.h"
+#include "light/PointLight.h"
 
-Scene::Scene(bool ensure_drawable) : Nameable()
+Scene::Scene() : Nameable()
 {
-	if (ensure_drawable)
-	{
-		this->EnsureDrawable();
-	}
 }
 
 void Scene::Add(std::shared_ptr<Model> model)
@@ -160,18 +157,6 @@ bool Scene::IsCleared() const
 		&& this->m_skyboxes.size() == 0
 		&& this->m_visboxes.size() == 0
 		&& this->m_approximations.size() == 0;
-}
-
-void Scene::EnsureDrawable()
-{
-	this->ClearObjects();
-	this->Add(std::make_shared<PointLight>(this->GetNewRenderTextureReference()));
-	this->Add(OrientedBoundingBox());
-
-	std::shared_ptr<Reflection> reflection = std::make_shared<Reflection>(this->GetNewRenderTextureReference());
-	reflection->SetDrawReflections(false);
-	reflection->SetDrawShadows(false);
-	this->Add(reflection);
 }
 
 void Scene::SetClearColour(glm::vec4 colour)
