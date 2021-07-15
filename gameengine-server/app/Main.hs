@@ -41,16 +41,19 @@ connHandler mainloopIn connection connInfo = do
 
 -- |Listens to a client
 connReceiver :: TChan MainloopMessage -> Socket -> ConnInfo -> IO ()
-connReceiver mainloopIn connection connInfo = catch (do
-    message <- recv connection 1024
-    let socketClosed = Data.ByteString.null message
-    if socketClosed then do
-        putStrLn $ show connInfo ++ " - connection was interrupted"
-        sendMessage $ ClientConnClosed
-    else do
-        sendMessage $ PackedReceived $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
-        connReceiver mainloopIn connection connInfo)
+connReceiver mainloopIn connection connInfo = catch (
+        do
+            message <- recv connection 1024
+            let socketClosed = Data.ByteString.null message
+            if socketClosed then do
+                putStrLn $ show connInfo ++ " - connection was interrupted"
+                sendMessage ClientConnClosed
+            else do
+                sendMessage $ PackedReceived $ deserialise message --deserialise might throw an error, but sending malformed packets will only crash the receiver thread for that client
+                connReceiver mainloopIn connection connInfo
+        )
     (\exception -> do
         sendMessage $ ReceiverException (show (exception :: IOException)))
     where
-        sendMessage = (sendToTChan mainloopIn) . (ReceiverMsg connInfo)
+        sendMessage :: ReceiverMsgInner -> IO ()
+        sendMessage message = sendToTChan mainloopIn (ReceiverMsg connInfo message)
