@@ -11,18 +11,17 @@ private:
 	ReferenceType m_reference;
 
 protected:
-	void SetReference(ReferenceType reference)
+	constexpr void SetReference(ReferenceType reference)
 	{
 		this->m_reference = reference;
 	}
 
 public:
-	Referenceable(ReferenceType reference)
+	constexpr Referenceable(ReferenceType reference) : m_reference(reference)
 	{
-		this->m_reference = reference;
 	};
 
-	ReferenceType GetReference() const
+	constexpr ReferenceType GetReference() const
 	{
 		return this->m_reference;
 	}
