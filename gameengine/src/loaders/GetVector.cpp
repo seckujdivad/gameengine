@@ -1,6 +1,6 @@
 #include "GetVector.h"
 
-template<unsigned int dimensions, typename T = double>
+template<unsigned int dimensions, typename T>
 vec<dimensions, T> GetVector(const nlohmann::json& data, vec<dimensions, T> default_value)
 {
 	static_assert(dimensions > 0, "Dimensions must be greater than zero");
