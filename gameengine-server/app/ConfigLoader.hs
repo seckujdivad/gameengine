@@ -14,7 +14,7 @@ import Data.ByteString.Lazy.Char8 (pack, unpack)
 
 
 {-|
-:Load the 'Data.ByteString.Lazy.ByteString' that contains the JSON file in the app root.
+Load the 'Data.ByteString.Lazy.ByteString' that contains the JSON file in the app root.
 
 If the normal config file exists, it will be loaded. If not, the default config file will be copied to where the normal one should be and the normal one is loaded.
 -}
@@ -75,7 +75,7 @@ defaultConfigPathRelative = "settings.default.json"
 
 -- |Absolute path to the default config file
 defaultconfigPath :: IO FilePath
-defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> configPathRelative)
+defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> defaultConfigPathRelative)
 
 -- |Stores configuration options for the server
 data Config =
