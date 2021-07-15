@@ -31,8 +31,8 @@ serverMainloopInner mainloopIn config serverState = do
     let ConnInfo uid _ = connInfo
     case msgInner of
         ClientConnEstablished connection -> do
-            Just newState <- applyToClient (sendPacketToClient (ConnEstablished uid)) uid (serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)})
-            -- send current scene to client
+            let clientActions = sendPacketToClient (ConnEstablished uid) <> sendPacketToClient (SetScene (cfglvlRoot $ ssCurrentLevel serverState) (cfglvlFile $ ssCurrentLevel serverState))
+            Just newState <- applyToClient clientActions uid (serverState {ssClients = insert uid (Client connection connInfo Nothing) (ssClients serverState)})
             nextLoop $ newState
         
         _ -> case Data.Map.Strict.lookup uid (ssClients serverState) of
