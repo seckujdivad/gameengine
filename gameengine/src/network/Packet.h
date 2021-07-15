@@ -11,10 +11,12 @@
 
 /*
 * To add a new Packet type:
-* * Add to Packet::type
+* * Add to Packet::Type
 * * Add struct to Packet
 * * Add to struct to variant m_data
 * * Add layout to Packet::GetFields
+* * Add to Packet::SetType
+* * Add to Packet::Deserialise
 * * Add to [RECEIVABLE|SENDABLE]_PACKET_TYPES
 */
 

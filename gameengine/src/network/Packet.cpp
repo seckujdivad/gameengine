@@ -74,6 +74,10 @@ void Packet::SetType(Type type)
 	{
 		this->m_data = SetClientName();
 	}
+	else if (type == Type::SetScene)
+	{
+		this->m_data = SetScene();
+	}
 	else
 	{
 		throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(type)));
@@ -144,6 +148,10 @@ void Packet::Deserialise(std::vector<char> bytes)
 		else if (this->GetType() == Type::SetClientName)
 		{
 			this->m_data = Serialiser::Deserialise<SetClientName>(bytes, fields, 1);
+		}
+		else if (this->GetType() == Type::SetScene)
+		{
+			this->m_data = Serialiser::Deserialise<SetScene>(bytes, fields, 1);
 		}
 		else
 		{
