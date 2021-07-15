@@ -33,6 +33,13 @@ std::vector<Serialiser::Field> Packet::GetFields(Type type)
 			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(SetClientName, name))
 			});
 	}
+	else if (type == Type::SetScene)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::NullTerminatedString, offsetof(SetScene, root)),
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(SetScene, file))
+			});
+	}
 	else
 	{
 		throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(type)));

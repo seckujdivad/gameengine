@@ -9,6 +9,15 @@
 
 #include "serialiser/Field.h"
 
+/*
+* To add a new Packet type:
+* * Add to Packet::type
+* * Add struct to Packet
+* * Add to struct to variant m_data
+* * Add layout to Packet::GetFields
+* * Add to [RECEIVABLE|SENDABLE]_PACKET_TYPES
+*/
+
 class Packet
 {
 public: //type definitions
@@ -17,7 +26,8 @@ public: //type definitions
 		ConnEstablished,
 		ClientChatMessage,
 		ServerChatMessage,
-		SetClientName
+		SetClientName,
+		SetScene
 	};
 
 	struct PacketInner {};
@@ -51,8 +61,16 @@ public: //type definitions
 		std::string name;
 	};
 
+	struct SetScene : public PacketInner
+	{
+		inline SetScene(std::string root = "", std::string file = "") : root(root), file(file) {};
+
+		std::string root;
+		std::string file;
+	};
+
 private:
-	std::variant<ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName> m_data;
+	std::variant<ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName, SetScene> m_data;
 
 	static std::vector<Serialiser::Field> GetFields(Type type);
 	std::vector<Serialiser::Field> GetFields() const;
@@ -83,9 +101,10 @@ public:
 	void Deserialise(std::vector<char> bytes);
 };
 
-constexpr std::array<Packet::Type, 2> RECEIVABLE_PACKET_TYPES = {
+constexpr std::array<Packet::Type, 3> RECEIVABLE_PACKET_TYPES = {
 	Packet::Type::ConnEstablished,
-	Packet::Type::ServerChatMessage
+	Packet::Type::ServerChatMessage,
+	Packet::Type::SetScene
 };
 
 constexpr std::array<Packet::Type, 2> SENDABLE_PACKET_TYPES = {
