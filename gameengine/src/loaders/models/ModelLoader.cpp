@@ -241,7 +241,7 @@ ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json
 	}
 
 	//create thread pool
-	std::size_t thread_pool_size = std::min(std::thread::hardware_concurrency(), this->m_to_load.size());
+	std::size_t thread_pool_size = std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), this->m_to_load.size());
 	if (thread_pool_size > 0)
 	{
 		for (std::size_t i = 0; i < thread_pool_size; i++)
