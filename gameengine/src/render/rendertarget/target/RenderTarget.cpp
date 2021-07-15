@@ -184,6 +184,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 			if (!has_cleared)
 			{
+				this->m_shader_program->Select();
 				this->DoClear();
 				has_cleared = true;
 			}
