@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packaged-releases", "packaged-releases", "{7C5BCB80-93B0-42B7-80AF-B3B16C28B23A}"
 	ProjectSection(SolutionItems) = preProject
+		packaged-releases\apitrace-x64.ps1 = packaged-releases\apitrace-x64.ps1
+		packaged-releases\apitrace-x86.ps1 = packaged-releases\apitrace-x86.ps1
 		packaged-releases\package-releases.py = packaged-releases\package-releases.py
 		packaged-releases\packages.json = packaged-releases\packages.json
 	EndProjectSection
