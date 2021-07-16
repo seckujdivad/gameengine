@@ -18,7 +18,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "stack build --copy-bins",
+            "command": "stack build",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
