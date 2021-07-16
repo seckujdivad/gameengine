@@ -10,17 +10,33 @@ import Control.Exception (catch, IOException)
 
 import qualified Data.ByteString (null)
 
+import System.Environment (getArgs)
+import System.Directory (setCurrentDirectory)
+
 import TCPServer (runTCPServer, ConnInfo (..))
 import AtomicTChan (sendToTChan)
 import Mainloop (serverMainloop)
 import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (..))
 import Packet (deserialise)
 import ConfigLoader (loadConfig)
+import FlagProcessing (Flag (..), getFlags, getFlagUsageInfo)
 
 
 -- |Entry point
 main :: IO ()
 main = do
+    rawArgs <- getArgs
+
+    let
+        flagProcessor :: Flag -> IO ()
+        flagProcessor flag = case flag of
+            Help -> putStrLn getFlagUsageInfo
+            WorkingDirectory newDirectory -> setCurrentDirectory newDirectory
+
+    case getFlags rawArgs of
+        Left flags -> mconcat $ fmap flagProcessor flags
+        Right message -> error message
+
     configMaybe <- loadConfig
     case configMaybe of
         Just config -> do

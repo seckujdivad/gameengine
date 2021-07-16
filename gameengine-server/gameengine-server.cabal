@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c0b77420cf6895b84957d0749adf46f703d7546e08d0ebcdb1476525ddb76c92
+-- hash: 43985cb1c776706ee91db74f6588b0e1aebad78e4c71c5f4e9e952e1d2f8eedd
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -46,6 +46,7 @@ executable gameengine-server
       Client
       ClientApplicators
       ConfigLoader
+      FlagProcessing
       Mainloop
       MainloopClientApplicators
       MainloopMessage
