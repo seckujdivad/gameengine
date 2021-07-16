@@ -6,7 +6,7 @@
         {
             "label": "Run compiled",
             "type": "shell",
-            "command": "stack build; cd \"app-root\"; stack run gameengine-server",
+            "command": "stack build --copy-bins; cd \"app-root\"; stack run gameengine-server",
             "problemMatcher": []
         },
         {
@@ -23,7 +23,7 @@
         {
             "label": "Build and copy",
             "type": "shell",
-            "command": "stack build --copy-bins --local-bin-path build",
+            "command": "stack build --copy-bins",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
