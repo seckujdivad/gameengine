@@ -6,7 +6,7 @@
         {
             "label": "Run compiled",
             "type": "shell",
-            "command": "stack build --copy-bins; cd \"app-root\"; stack run gameengine-server",
+            "command": "stack build --copy-bins; .\\build\\gameengine-server.exe --cwd app-root",
             "problemMatcher": []
         },
         {
