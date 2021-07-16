@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run compiled",
+            "label": "Build and run",
             "type": "shell",
-            "command": "stack build --copy-bins; .\\build\\gameengine-server.exe --cwd app-root",
+            "command": "stack build; .\\build\\gameengine-server.exe --cwd app-root",
             "problemMatcher": []
         },
         {
@@ -16,12 +16,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Copy to demo-cube",
-            "type": "shell",
-            "command": "py \"copy-to-demo-cube.py\""
-        },
-        {
-            "label": "Build and copy",
+            "label": "Build",
             "type": "shell",
             "command": "stack build --copy-bins",
             "problemMatcher": [],

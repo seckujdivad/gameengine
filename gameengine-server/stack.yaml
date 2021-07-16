@@ -67,3 +67,6 @@ extra-deps: []
 # compiler-check: newer-minor
 
 local-bin-path: build
+
+build:
+  copy-bins: true
