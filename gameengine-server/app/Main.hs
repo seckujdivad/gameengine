@@ -35,7 +35,7 @@ main = do
 
     case getFlags rawArgs of
         Left flags -> mconcat $ fmap flagProcessor flags
-        Right message -> error message
+        Right message -> error ("\n" ++ message)
 
     configMaybe <- loadConfig
     case configMaybe of

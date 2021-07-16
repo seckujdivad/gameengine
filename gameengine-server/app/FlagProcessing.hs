@@ -8,7 +8,7 @@ data Flag = WorkingDirectory String
 
 options :: [OptDescr Flag]
 options = [
-        Option [] ["cwd"] (ReqArg WorkingDirectory "CWD") "set working directory",
+        Option [] ["cwd"] (ReqArg WorkingDirectory "working directory") "set working directory",
         Option ['h'] ["help"] (NoArg Help) "show help"
     ]
 
@@ -18,9 +18,9 @@ getFlags rawFlags = do
     if null errors && null unrecognisedOptions then
         Left flags
     else do
-        Right ((if null errors then "" else "Unrecognised options:\n" ++ unlines unrecognisedOptions)
-            ++ (if null errors then "" else "Errors:\n" ++ unlines errors)
+        Right ((if null unrecognisedOptions then "" else "\nUnrecognised options:\n" ++ unlines unrecognisedOptions)
+            ++ (if null errors then "" else "\nErrors:\n" ++ unlines errors)
             ++ getFlagUsageInfo)
 
 getFlagUsageInfo :: String
-getFlagUsageInfo = usageInfo "" options
+getFlagUsageInfo = usageInfo "gameengine-server.exe options:" options
