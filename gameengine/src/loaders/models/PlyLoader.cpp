@@ -1,33 +1,130 @@
 #include "PlyLoader.h"
 
 #include <fstream>
+#include <vector>
+#include <stdexcept>
+#include <tuple>
+#include <variant>
 #include <unordered_map>
 
 #include "../../generic/SplitOnChar.h"
 
-struct PlyType
+struct Property
 {
-	bool is_list;
-	bool is_ints;
-};
+	enum class Type
+	{
+		Double,
+		Integer
+	};
 
-struct PlyElement
-{
+	inline Property(std::string name, Type type, bool is_list) : name(name), type(type), is_list(is_list) {};
+
 	std::string name;
-	int num_elements = 0;
-	std::vector<PlyType> types;
-	std::vector<std::string> field_names;
-	std::unordered_map<std::string, int> field_name_map;
+	Type type;
+	bool is_list;
 };
 
-struct PlyValueList
+bool StartsWith(const std::string& string, const std::string& substring)
 {
-	bool is_ints;
-	std::vector<double> values_double;
-	std::vector<int> values_ints;
+	return string.rfind(substring, 0) == 0;
+}
+
+struct Element
+{
+	inline Element(std::string name, int num_occurrences, std::vector<Property> properties) : name(name), num_occurrences(num_occurrences), properties(properties) {};
+
+	std::string name;
+	int num_occurrences;
+
+	std::vector<Property> properties;
+
+	using Parsed = std::unordered_map<std::string, std::variant<double, int, std::vector<double>, std::vector<int>>>;
+
+	inline Parsed GetParsed(const std::vector<std::string>& tokens) const
+	{
+		std::unordered_map<std::string, std::variant<double, int, std::vector<double>, std::vector<int>>> result;
+		std::size_t current_token = 0;
+		for (const Property& property : this->properties)
+		{
+			if (current_token >= tokens.size())
+			{
+				throw std::invalid_argument("Not enough tokens to parse all properties");
+			}
+
+			if (property.is_list)
+			{
+				int num_elements_signed = std::stoi(tokens.at(current_token));
+				if (num_elements_signed < 0)
+				{
+					throw std::invalid_argument("List size must be greater than or equal to zero");
+				}
+				std::size_t num_elements = static_cast<std::size_t>(num_elements_signed);
+
+				std::size_t first_token = current_token + 1;
+				std::size_t end_token = first_token + num_elements;
+				if (end_token > tokens.size())
+				{
+					throw std::invalid_argument("List size requires more tokens than are provided");
+				}
+				else
+				{
+					if (property.type == Property::Type::Double)
+					{
+						std::vector<double> values;
+						values.reserve(num_elements);
+						for (std::size_t list_token = first_token; list_token < end_token; list_token++)
+						{
+							values.push_back(std::stod(tokens.at(list_token)));
+						}
+						result.insert(std::pair(property.name, values));
+					}
+					else if (property.type == Property::Type::Integer)
+					{
+						std::vector<int> values;
+						values.reserve(num_elements);
+						for (std::size_t list_token = first_token; list_token < end_token; list_token++)
+						{
+							values.push_back(std::stoi(tokens.at(list_token)));
+						}
+						result.insert(std::pair(property.name, values));
+					}
+					else
+					{
+						throw std::runtime_error("Unknown property type");
+					}
+					
+					current_token = end_token; //move to first token after the list
+				}
+			}
+			else
+			{
+				if (property.type == Property::Type::Double)
+				{
+					result.insert(std::pair(property.name, std::stod(tokens.at(current_token))));
+				}
+				else if (property.type == Property::Type::Integer)
+				{
+					result.insert(std::pair(property.name, std::stoi(tokens.at(current_token))));
+				}
+				else
+				{
+					throw std::runtime_error("Unknown property type");
+				}
+
+				current_token++;
+			}
+		}
+
+		if (current_token < tokens.size())
+		{
+			throw std::invalid_argument("Too many tokens provided");
+		}
+
+		return result;
+	}
 };
 
-bool IsPlyInt(std::string type_name)
+Property::Type TranslatePlyType(std::string type_name)
 {
 	if ((type_name == "char")
 		|| (type_name == "uchar")
@@ -40,7 +137,7 @@ bool IsPlyInt(std::string type_name)
 		|| (type_name == "int32")
 		|| (type_name == "uint32"))
 	{
-		return true;
+		return Property::Type::Integer;
 	}
 	else if ((type_name == "short")
 		|| (type_name == "ushort")
@@ -49,7 +146,7 @@ bool IsPlyInt(std::string type_name)
 		|| (type_name == "float32")
 		|| (type_name == "float64"))
 	{
-		return false;
+		return Property::Type::Double;
 	}
 	else
 	{
@@ -57,207 +154,221 @@ bool IsPlyInt(std::string type_name)
 	}
 }
 
-std::shared_ptr<Polygonal> ModelFromPlyText(std::string text)
+std::shared_ptr<Polygonal> ModelFromPlyText(const std::string& text)
 {
-	//ply files could (in theory) contain pretty much any kind of data
-	//I have restricted this parser to work with Blender-style properties
-	std::ifstream file; //ply filestream
-	std::string line; //current line of ply file
+	return ModelFromPlyText(SplitOnLineEnd(text));
+}
 
-	PlyElement* current_element = nullptr;
-	std::vector<PlyElement*> header_layout;
-	PlyType current_type = PlyType();
-
-	bool in_header = true; //cursor is in header
-	int element_index = -1;
-	int line_index = 0; //line index in the ply file
-	int pattern_index = 0; //current pattern index (post header)
-	int pattern_subindex = 0; //number of elements of the current pattern that have been read (post header)
-	std::vector<int> vertex_indices;
-
-	std::vector<glm::dvec3> vertex_normals;
-	std::vector<glm::dvec3> face_normals;
-	std::vector<glm::dvec2> vertex_uvs;
-	std::vector<glm::dvec2> face_uvs;
-
-	std::vector<std::string> sliced_string;
-
-	std::unordered_map<std::string, PlyValueList> values;
-
-	std::vector<int> vertex_id_lookup;
-
-	std::shared_ptr<Polygonal> result = std::make_shared<Polygonal>();
-
-	std::vector<std::string> lines = SplitOnChar(text, '\n');
-
-	for (std::string line : lines)
+std::shared_ptr<Polygonal> ModelFromPlyText(const std::vector<std::string>& text)
+{
+	//remove all comments and blank lines
+	std::vector<std::string> text_filtered;
+	text_filtered.reserve(text.size()); //grab a bigger allocation than necessary and (then shrink it after)
+	for (const std::string& line : text)
 	{
-		if ((line_index == 0) && (line != "ply"))
+		if (!line.empty() && !StartsWith(line, "comment "))
 		{
-			throw std::runtime_error("Invalid file format: line 1 of header should be \"ply\", not \"" + line + "\"");
+			text_filtered.push_back(line);
 		}
-		else if ((line_index == 1) && (line != "format ascii 1.0"))
+	}
+	text_filtered.shrink_to_fit();
+
+	if (text_filtered.size() < 2)
+	{
+		throw std::invalid_argument("Header must start with two lines of format identification information");
+	}
+
+	//check initial file format info
+	if (text_filtered.at(0) != "ply")
+	{
+		throw std::invalid_argument("First line must be \"ply\"");
+	}
+
+	if (text_filtered.at(1) != "format ascii 1.0")
+	{
+		throw std::invalid_argument("Second line must be \"format ascii 1.0\"");
+	}
+
+	//process header
+	bool end_of_header_found = false;
+	std::vector<Element> elements;
+	std::size_t current_line = 2;
+	for (current_line = 2; (current_line < text_filtered.size()) && !end_of_header_found; current_line++)
+	{
+		const std::string& line = text_filtered.at(current_line);
+		if (line == "end_header")
 		{
-			throw std::runtime_error("Invalid file format subtype: line 2 must be \"format ascii 1.0\", not \"" + line + "\"");
-		}
-		else if (line.substr(0, 8) == "comment ")
-		{
-			//ignore comments
+			end_of_header_found = true;
 		}
 		else
 		{
-			if (in_header) //interpret data formats
+			std::vector<std::string> split_line = SplitOnChar(line, ' ');
+			if (split_line.size() == 3 || split_line.size() == 5)
 			{
-				if (line == "end_header")
+				if (split_line.at(0) == "element")
 				{
-					for (int i = 0; i < (int)header_layout.size(); i++)
+					if (split_line.size() == 3)
 					{
-						current_element = header_layout.at(i);
-						for (int j = 0; j < (int)current_element->field_names.size(); j++)
-						{
-							current_element->field_name_map.insert(std::pair<std::string, int>(current_element->field_names.at(j), j));
-						}
-					}
-
-					in_header = false;
-				}
-				else if (line.substr(0, 8) == "element ")
-				{
-					current_element = new PlyElement();
-					sliced_string = SplitOnChar(line, ' ');
-
-					if (sliced_string.size() == 3)
-					{
-						current_element->name = sliced_string.at(1);
-						current_element->num_elements = std::stoi(sliced_string.at(2));
-						header_layout.push_back(current_element);
+						elements.push_back(Element(split_line.at(1), std::stoi(split_line.at(2)), {}));
 					}
 					else
 					{
-						throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + " in element definition: 3 items required, but " + std::to_string(sliced_string.size()) + " found");
+						throw std::invalid_argument("\"element\" declaration must contain exactly 3 tokens");
 					}
 				}
-				else if (line.substr(0, 9) == "property ")
+				else if (split_line.at(0) == "property")
 				{
-					if (current_element != nullptr)
+					if (elements.size() == 0)
 					{
-						sliced_string = SplitOnChar(line, ' ');
-
-						if (sliced_string.size() == 3)
+						throw std::invalid_argument("\"property\" declaration must not appear before the first \"element\" declaration");
+					}
+					else
+					{
+						Element& element = *elements.rbegin();
+						if (split_line.size() == 3) //single element property
 						{
-							current_type.is_list = false;
-							current_type.is_ints = IsPlyInt(sliced_string.at(1));
-							current_element->field_names.push_back(sliced_string.at(2));
-							current_element->types.push_back(current_type);
+							element.properties.push_back(Property(split_line.at(2), TranslatePlyType(split_line.at(1)), false));
 						}
-						else if (sliced_string.size() == 5)
+						else if (split_line.size() == 5) //list property
 						{
-							if (sliced_string.at(1) == "list")
+							if (split_line.at(1) == "list")
 							{
-								current_type.is_list = true;
-								current_type.is_ints = IsPlyInt(sliced_string.at(3));
-								current_element->field_names.push_back(sliced_string.at(4));
-								current_element->types.push_back(current_type);
+								if (TranslatePlyType(split_line.at(2)) == Property::Type::Integer)
+								{
+									element.properties.push_back(Property(split_line.at(4), TranslatePlyType(split_line.at(3)), true));
+								}
+								else
+								{
+									throw std::invalid_argument("List property size type must be an integer-like");
+								}
 							}
 							else
 							{
-								throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": if there are 5 elements, the second must be \"list\"");
+								throw std::invalid_argument("\"property\" declarations with 5 tokens must be declaring list properties");
 							}
 						}
 						else
 						{
-							throw std::runtime_error("Exception on line " + std::to_string(line_index + 1) + ": 3 or 5 items required, but " + std::to_string(sliced_string.size()) + " found");
+							throw std::invalid_argument("\"property\" declaration must contain exactly 3 or 5 tokens");
 						}
 					}
 				}
+				else
+				{
+					throw std::invalid_argument("Unknown leading token \"" + split_line.at(0) + "\"");
+				}
 			}
-			else //interpret body
+			else
 			{
-				sliced_string = SplitOnChar(line, ' ');
+				throw std::invalid_argument("Wrong number of tokens on line");
+			}
+		}
+	}
 
-				if (header_layout.at(pattern_index)->name == "vertex")
-				{
-					vertex_id_lookup.push_back(result->AddVertex(glm::dvec3(
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("x"))),
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("y"))),
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("z")))
-					)));
-					vertex_normals.push_back(glm::dvec3(
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nx"))),
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("ny"))),
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("nz")))
-					));
-					vertex_uvs.push_back(glm::dvec2(
-						std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("s"))),
-						1.0 - std::stod(sliced_string.at(header_layout.at(pattern_index)->field_name_map.at("t"))) //switch from top left (images) to bottom left (opengl) coordinate system
-					));
-				}
-				else if (header_layout.at(pattern_index)->name == "face")
-				{
-					vertex_indices.clear();
-					face_normals.clear();
-					face_uvs.clear();
+	if (end_of_header_found)
+	{
+		//process body
+		std::unordered_map<std::string, std::vector<Element::Parsed>> parsed_elements;
+		for (const Element& element : elements)
+		{
+			parsed_elements.insert(std::pair(element.name, std::vector<Element::Parsed>({})));
+			
+			for (int i = 0; i < element.num_occurrences; i++)
+			{
+				const std::string& line = text_filtered.at(current_line);
+				std::vector<std::string> tokens = SplitOnChar(line, ' ');
 
-					for (int i = 1; i < std::stoi(sliced_string.at(0)) + 1; i++)
-					{
-						vertex_indices.push_back(std::stoi(sliced_string.at(i)));
-						face_normals.push_back(vertex_normals.at(std::stoi(sliced_string.at(i))));
-						face_uvs.push_back(vertex_uvs.at(std::stoi(sliced_string.at(i))));
-					}
+				parsed_elements.at(element.name).push_back(element.GetParsed(tokens));
 
-					glm::dvec3 face_normal = glm::dvec3(0.0f, 0.0f, 0.0f);
-					for (size_t i = 0; i < face_normals.size(); i++)
-					{
-						face_normal = face_normal + face_normals.at(i);
-					}
-
-					Polygonal::Face face = Polygonal::Face(*result);
-					face.SetNormal(glm::normalize(face_normal));
-
-					for (int i = 0; i < static_cast<int>(vertex_indices.size()); i++)
-					{
-						Polygonal::Face::IndexedVertex vertex = Polygonal::Face::IndexedVertex(vertex_id_lookup.at(vertex_indices.at(i)), face_uvs.at(i));
-						face.AddVertex(vertex);
-					}
-
-					result->AddFace(face);
-				}
-
-				//move to next subpattern
-				pattern_subindex++;
-				if (header_layout.at(pattern_index)->num_elements == pattern_subindex)
-				{
-					pattern_subindex = 0;
-					pattern_index++;
-				}
+				current_line++;
 			}
 		}
 
-		line_index++;
-	}
+		if (current_line < text_filtered.size())
+		{
+			throw std::invalid_argument("Too many lines provided");
+		}
+		else
+		{
+			//turn loaded data into Polygonal object - this is the only part that is not specific to parsing the file format itself
+			std::shared_ptr<Polygonal> polygonal = std::make_shared<Polygonal>();
 
-	//free header layout memory
-	for (size_t i = 0; i < header_layout.size(); i++)
+			//load vertices
+			std::unordered_map<std::size_t, int> vertex_indices; //key is the file vertex index, value is the Polygonal-returned index
+			for (std::size_t i = 0; i < parsed_elements.at("vertex").size(); i++)
+			{
+				const Element::Parsed& vertex = parsed_elements.at("vertex").at(i);
+				glm::dvec3 vertex_position = glm::dvec3(
+					std::get<double>(vertex.at("x")),
+					std::get<double>(vertex.at("y")),
+					std::get<double>(vertex.at("z"))
+				);
+				vertex_indices.insert(std::pair(i, polygonal->AddVertex(vertex_position)));
+			}
+
+			//load faces
+			for (const Element::Parsed& parsed_element : parsed_elements.at("face"))
+			{
+				Polygonal::Face face = Polygonal::Face(*polygonal);
+
+				std::vector<glm::dvec3> normals;
+				for (int vertex_index : std::get<std::vector<int>>(parsed_element.at("vertex_indices")))
+				{
+					const Element::Parsed& vertex = parsed_elements.at("vertex").at(vertex_index);
+
+					//the UV properties aren't outputted by Blender if the model hasn't been unwrapped, so provide a default value if they don't exist
+					glm::dvec2 uv = glm::dvec2(0.0);
+					if (vertex.count("s") > 0 && vertex.count("t") > 0)
+					{
+						uv.x = std::get<double>(vertex.at("s"));
+						uv.y = 1.0 - std::get<double>(vertex.at("t"));
+
+						/*
+						* Blender (and maybe others) exports UVs with the origin in the top left, however OpenGL
+						* has the origin in the bottom left
+						*/
+					}
+
+					normals.push_back(glm::dvec3(
+						std::get<double>(vertex.at("nx")),
+						std::get<double>(vertex.at("ny")),
+						std::get<double>(vertex.at("nz"))
+					));
+
+					face.AddVertex(Polygonal::Face::IndexedVertex(vertex_indices.at(vertex_index), uv));
+				}
+
+				glm::dvec3 normal = glm::dvec3(0.0);
+				for (const glm::dvec3 vertex_normal : normals)
+				{
+					normal += vertex_normal;
+				}
+				face.SetNormal(glm::normalize(normal));
+
+				polygonal->AddFace(face);
+			}
+
+			return polygonal;
+		}
+	}
+	else
 	{
-		delete header_layout.at(i);
+		throw std::invalid_argument("Never found line end_header - the header must end in the file");
 	}
-
-	//return model
-	return result;
 }
 
 std::shared_ptr<Polygonal> ModelFromPly(std::string path)
 {
 	std::ifstream file;
-	std::string file_contents;
-	std::string line;
+	std::vector<std::string> file_contents;
 
 	file.open(path);
 	if (file.is_open())
 	{
+		std::string line;
 		while (std::getline(file, line))
 		{
-			file_contents += line + '\n';
+			file_contents.push_back(line);
 		}
 	}
 	else
@@ -267,4 +378,3 @@ std::shared_ptr<Polygonal> ModelFromPly(std::string path)
 
 	return ModelFromPlyText(file_contents);
 }
-
