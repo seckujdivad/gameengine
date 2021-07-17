@@ -246,6 +246,7 @@
     <ClInclude Include="src\loaders\GetVector.h" />
     <ClInclude Include="src\loaders\models\BptLoader.h" />
     <ClInclude Include="src\loaders\models\ModelLoader.h" />
+    <ClInclude Include="src\loaders\models\PLYData.h" />
     <ClInclude Include="src\loaders\models\PlyLoader.h" />
     <ClInclude Include="src\loaders\SceneLoader.h" />
     <ClInclude Include="src\LogMessage.h" />
@@ -335,6 +336,7 @@
     <ClCompile Include="src\loaders\GetVector.cpp" />
     <ClCompile Include="src\loaders\models\BptLoader.cpp" />
     <ClCompile Include="src\loaders\models\ModelLoader.cpp" />
+    <ClCompile Include="src\loaders\models\PLYData.cpp" />
     <ClCompile Include="src\loaders\models\PlyLoader.cpp" />
     <ClCompile Include="src\loaders\SceneLoader.cpp" />
     <ClCompile Include="src\LogMessage.cpp" />

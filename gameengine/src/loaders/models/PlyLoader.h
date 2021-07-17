@@ -2,8 +2,9 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
-#include "../../scene/model/geometry/Polygonal.h"
+class Polygonal;
 
 std::shared_ptr<Polygonal> ModelFromPly(std::string path);
 std::shared_ptr<Polygonal> ModelFromPlyText(const std::string& text);

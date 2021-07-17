@@ -441,6 +441,9 @@
     <ClInclude Include="src\loaders\ConfigureCubemap.h">
       <Filter>Header Files\loaders</Filter>
     </ClInclude>
+    <ClInclude Include="src\loaders\models\PLYData.h">
+      <Filter>Header Files\loaders\models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -685,6 +688,9 @@
     </ClCompile>
     <ClCompile Include="src\loaders\ConfigureCubemap.cpp">
       <Filter>Source Files\loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loaders\models\PLYData.cpp">
+      <Filter>Source Files\loaders\models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -16,3 +16,5 @@ enum class LineEnding
 };
 
 LineEnding GetLineEnding(const std::string& string);
+
+bool StartsWith(const std::string& string, const std::string& substring);

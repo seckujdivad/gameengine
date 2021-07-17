@@ -87,3 +87,8 @@ LineEnding GetLineEnding(const std::string& string)
 
 	return LineEnding::None;
 }
+
+bool StartsWith(const std::string& string, const std::string& substring)
+{
+	return string.rfind(substring, 0) == 0;
+}
