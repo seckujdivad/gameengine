@@ -21,6 +21,7 @@
 
 #include "Chat.h"
 #include "ServerPicker.h"
+#include "Settings.h"
 
 constexpr char SETTINGS_FILE[] = "settings.json";
 constexpr char DEFAULT_SETTINGS_FILE[] = "settings.default.json";
@@ -161,6 +162,14 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	this->SetSizer(this->m_sizer);
 	this->Centre(wxBOTH);
 	this->Layout();
+
+	//connect to the default server if there is one
+	if (this->GetSettings()["network"]["default server"].is_number_integer())
+	{
+		int server_index = this->GetSettings()["network"]["default server"].get<int>();
+		const nlohmann::json& server_config = this->GetSettings()["network"]["servers"][server_index];
+		this->ConnectTo(std::get<1>(GetConnectionTarget(server_config)));
+	}
 }
 
 Main::~Main()

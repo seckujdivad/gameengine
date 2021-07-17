@@ -7,6 +7,7 @@
 #include <wx/listbox.h>
 
 #include "Main.h"
+#include "Settings.h"
 
 void ServerPicker::lb_servers_DoubleClicked(wxCommandEvent& evt)
 {
@@ -43,39 +44,19 @@ void ServerPicker::RefreshServers()
 	{
 		for (const nlohmann::json& server_info : this->GetParent()->GetSettings()["network"]["servers"])
 		{
-			if (server_info.is_object())
+			const auto& [name, target] = GetConnectionTarget(server_info);
+
+			std::string destination = target.address + ":" + std::to_string(target.port);
+			if (name.has_value())
 			{
-				std::optional<std::string> name;
-				if (server_info["name"].is_string())
-				{
-					name = server_info["name"].get<std::string>();
-				}
-
-				if (server_info["address"].is_string() && server_info["port"].is_number_integer())
-				{
-					ConnectionTarget target = ConnectionTarget(server_info["address"].get<std::string>(), server_info["port"].get<unsigned short>());
-
-					std::string destination = target.address + ":" + std::to_string(target.port);
-					if (name.has_value())
-					{
-						this->m_lb_servers->AppendString(name.value() + " (" + target.Display() + ")");
-					}
-					else
-					{
-						this->m_lb_servers->AppendString(destination);
-					}
-
-					this->m_servers.push_back(std::move(target));
-				}
-				else
-				{
-					throw std::runtime_error("\"address\" must be a string and \"port\" must be an integer - both are required");
-				}
+				this->m_lb_servers->AppendString(name.value() + " (" + target.Display() + ")");
 			}
 			else
 			{
-				throw std::runtime_error("All server elements must be objects");
+				this->m_lb_servers->AppendString(destination);
 			}
+
+			this->m_servers.push_back(target);
 		}
 	}
 }

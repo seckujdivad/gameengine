@@ -264,6 +264,7 @@
     <ClInclude Include="src\Chat.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\ServerPicker.h" />
+    <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\VectorCtrl.h" />
   </ItemGroup>
   <ItemGroup>
@@ -271,6 +272,7 @@
     <ClCompile Include="src\Chat.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ServerPicker.cpp" />
+    <ClCompile Include="src\Settings.cpp" />
     <ClCompile Include="src\VectorCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
