@@ -12,5 +12,5 @@ public:
 	LocallyMovable();
 
 	void MoveLocally(double x, double y, double z);
-	void MoveLocally(glm::dvec3 vec);
+	void MoveLocally(glm::dvec3 vec, bool inverse_rotation = false);
 };

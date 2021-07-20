@@ -90,36 +90,41 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 		//poll keyboard movement keys
 		if (this->m_keyboard_move_active)
 		{
-			double move_increment = this->m_keyboard_move_increment;
-			if (wxGetKeyState(WXK_SPACE))
-			{
-				move_increment = move_increment * 5.0;
-			}
+			glm::dvec3 local_translation = glm::dvec3(0.0);
 
 			if (wxGetKeyState(wxKeyCode('W')))
 			{
-				this->GetControlledCamera()->MoveLocally(0.0, 0.0, move_increment);
+				local_translation += glm::dvec3(0.0, 0.0, -1.0);
 			}
 			if (wxGetKeyState(wxKeyCode('S')))
 			{
-				this->GetControlledCamera()->MoveLocally(0.0, 0.0, 0.0 - move_increment);
+				local_translation += glm::dvec3(0.0, 0.0, 1.0);
 			}
 			if (wxGetKeyState(wxKeyCode('D')))
 			{
-				this->GetControlledCamera()->MoveLocally(0.0 - move_increment, 0.0, 0.0);
+				local_translation += glm::dvec3(1.0, 0.0, 0.0);
 			}
 			if (wxGetKeyState(wxKeyCode('A')))
 			{
-				this->GetControlledCamera()->MoveLocally(move_increment, 0.0, 0.0);
+				local_translation += glm::dvec3(-1.0, 0.0, 0.0);
 			}
 			if (wxGetKeyState(WXK_CONTROL))
 			{
-				this->GetControlledCamera()->MoveLocally(0.0, move_increment, 0.0);
+				local_translation += glm::dvec3(0.0, -1.0, 0.0);
 			}
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				this->GetControlledCamera()->MoveLocally(0.0, 0.0 - move_increment, 0.0);
+				local_translation += glm::dvec3(0.0, 1.0, 0.0);
 			}
+
+			//apply movement speed modifiers
+			local_translation *= this->m_keyboard_move_increment;
+			if (wxGetKeyState(WXK_SPACE))
+			{
+				local_translation *= 5.0;
+			}
+
+			this->GetControlledCamera()->MoveLocally(local_translation, true);
 		}
 	}
 
