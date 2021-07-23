@@ -25,7 +25,11 @@ dependencies:
 - filepath >= 1.4 && < 1.5
 
 library:
-  source-dirs: src
+  source-dirs:
+  - src
+  - src/server-state
+  - src/network
+  - src/mainloop
 
 executables:
   gameengine-server:
