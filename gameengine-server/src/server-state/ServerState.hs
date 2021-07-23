@@ -13,7 +13,7 @@ function-by-function basis.
 import Data.Map (Map, empty, update, lookup, keys)
 
 import Client (Client (Client))
-import ConfigLoader (Config (..), CfgLevel (..))
+import Config (Config (..), CfgLevel (..))
 
 
 -- |Describes the current state of the server

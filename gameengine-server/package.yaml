@@ -30,6 +30,7 @@ library:
   - src/server-state
   - src/network
   - src/mainloop
+  - src/config
 
 executables:
   gameengine-server:

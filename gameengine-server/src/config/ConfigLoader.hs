@@ -1,16 +1,15 @@
-{-# LANGUAGE OverloadedStrings #-}
-
-module ConfigLoader (loadConfig, loadConfigString, Config (..), CfgLevel (..)) where
+module ConfigLoader (loadConfig, loadConfigString) where
 
 import Prelude hiding (readFile)
 
 import System.Directory (Permissions (readable), doesFileExist, copyFile, getPermissions, getCurrentDirectory)
 import System.FilePath ((</>))
 
-import Data.Aeson (FromJSON, parseJSON, (.:), withObject, decode, encode)
+import Data.Aeson (decode)
 import Data.ByteString (readFile)
 import Data.ByteString.Lazy (ByteString, fromStrict)
-import Data.ByteString.Lazy.Char8 (pack, unpack)
+
+import Config (Config (..), CfgLevel (..))
 
 
 {-|
@@ -76,36 +75,3 @@ defaultConfigPathRelative = "settings.default.json"
 -- |Absolute path to the default config file
 defaultconfigPath :: IO FilePath
 defaultconfigPath = getCurrentDirectory >>= (\root -> return $ root </> defaultConfigPathRelative)
-
--- |Stores configuration options for the server
-data Config =
-    -- |Stores configuration options for the server
-    Config {
-        -- |Information on the scene to load when the server loads
-        cfgInitialScene :: CfgLevel
-    }
-
-instance FromJSON Config where
-    parseJSON = withObject "Config" $ \obj -> Config
-        <$> obj .: "initial scene"
-
-instance Show Config where
-    show (Config initialScene) = "Config {initial scene: " ++ show initialScene ++ "}"
-
--- |Stores information on a scene file
-data CfgLevel =
-    -- |Stores information on a scene file
-    CfgLevel {
-        -- |Root path to use when loading the scene file
-        cfglvlRoot :: String,
-        -- |Path to the scene file relative to the root path
-        cfglvlFile :: String
-    }
-
-instance FromJSON CfgLevel where
-    parseJSON = withObject "CfgLevel" $ \obj -> CfgLevel
-        <$> obj .: "root"
-        <*> obj .: "file"
-
-instance Show CfgLevel where
-    show (CfgLevel root file) = "Config {root: \"" ++ root ++ "\", file: \"" ++ file ++ "\"}"
