@@ -6,7 +6,7 @@
         {
             "label": "Build and run",
             "type": "shell",
-            "command": "stack build; .\\build\\gameengine-server.exe --cwd app-root",
+            "command": "./.vscode/buildrun.ps1",
             "problemMatcher": []
         },
         {
