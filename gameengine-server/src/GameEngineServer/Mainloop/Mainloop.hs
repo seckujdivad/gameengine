@@ -13,9 +13,9 @@ import GameEngineServer.Network.Packet (Packet (..), PacketType (..), packetToPa
 import GameEngineServer.Mainloop.MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import GameEngineServer.Mainloop.MainloopClientApplicators (closeClient, sendPacketToClient)
 import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
-import GameEngineServer.ServerState.ServerState (ServerState (..), initialServerState)
-import GameEngineServer.ServerState.ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
-import GameEngineServer.ServerState.Client (Client (Client), getClientIdentifier, showClientMessage)
+import GameEngineServer.State.ServerState (ServerState (..), initialServerState)
+import GameEngineServer.State.ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
+import GameEngineServer.State.Client (Client (Client), getClientIdentifier, showClientMessage)
 
 
 -- |Handles inter-client communication and the server state

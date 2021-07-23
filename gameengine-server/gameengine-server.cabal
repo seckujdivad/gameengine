@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d204b0eb108d15d8337a0c2462850d4a72b774b54d9fb2ed3c856a8b9420821e
+-- hash: 79fc2f58124be1432c45dca5dbbeaa6c7bd6cdd0f7cf3a2f4a6fa6bf0ded4036
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -30,9 +30,9 @@ library
       GameEngineServer.Network.Packet
       GameEngineServer.Network.SocketOperations
       GameEngineServer.Network.TCPServer
-      GameEngineServer.ServerState.Client
-      GameEngineServer.ServerState.ClientApplicators
-      GameEngineServer.ServerState.ServerState
+      GameEngineServer.State.Client
+      GameEngineServer.State.ClientApplicators
+      GameEngineServer.State.ServerState
   other-modules:
       Paths_gameengine_server
   hs-source-dirs:

@@ -1,4 +1,4 @@
-module GameEngineServer.ServerState.ClientApplicators (ClientApplicator (..), applyToAllClients, applyToClient) where
+module GameEngineServer.State.ClientApplicators (ClientApplicator (..), applyToAllClients, applyToClient) where
 
 {-
 Functions for applying an operation onto a 'Client'. They wrap the
@@ -7,8 +7,8 @@ functionality.
 -}
 
 import GameEngineServer.Network.SocketOperations (closeConnection)
-import qualified GameEngineServer.ServerState.ServerState as ServerState
-import GameEngineServer.ServerState.Client (Client (Client), showClientMessage)
+import qualified GameEngineServer.State.ServerState as ServerState
+import GameEngineServer.State.Client (Client (Client), showClientMessage)
 
 
 {-|
