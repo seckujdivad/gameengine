@@ -1,4 +1,4 @@
-module Mainloop (serverMainloop) where
+module GameEngineServer.Mainloop.Mainloop (serverMainloop) where
 
 import Control.Concurrent.STM.TChan (TChan)
 
@@ -7,15 +7,15 @@ import Data.Map.Strict (insert, update, lookup)
 
 import Network.Socket (Socket)
 
-import AtomicTChan (readFromTChan)
-import TCPServer (ConnInfo (ConnInfo))
-import Packet (Packet (..), PacketType (..), packetToPacketType)
-import Client (Client (Client), getClientIdentifier, showClientMessage)
-import MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
-import Config (Config (..), CfgLevel (..))
-import ServerState (ServerState (..), initialServerState)
-import ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
-import MainloopClientApplicators (closeClient, sendPacketToClient)
+import GameEngineServer.AtomicTChan (readFromTChan)
+import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
+import GameEngineServer.Network.Packet (Packet (..), PacketType (..), packetToPacketType)
+import GameEngineServer.Mainloop.MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
+import GameEngineServer.Mainloop.MainloopClientApplicators (closeClient, sendPacketToClient)
+import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
+import GameEngineServer.ServerState.ServerState (ServerState (..), initialServerState)
+import GameEngineServer.ServerState.ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
+import GameEngineServer.ServerState.Client (Client (Client), getClientIdentifier, showClientMessage)
 
 
 -- |Handles inter-client communication and the server state

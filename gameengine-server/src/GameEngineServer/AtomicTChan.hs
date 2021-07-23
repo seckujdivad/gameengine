@@ -1,4 +1,4 @@
-module AtomicTChan (sendToTChan, readFromTChan) where
+module GameEngineServer.AtomicTChan (sendToTChan, readFromTChan) where
 
 import Control.Monad.STM (atomically)
 import Control.Concurrent.STM.TChan (TChan, writeTChan, readTChan)

@@ -1,10 +1,9 @@
-module MainloopMessage (MainloopMessage (ReceiverMsg),
-    ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException)) where
+module GameEngineServer.Mainloop.MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (ClientConnEstablished, PackedReceived, ClientConnClosed, ReceiverException)) where
 
 import Network.Socket (Socket)
 
-import Packet (Packet)
-import TCPServer (ConnInfo (ConnInfo))
+import GameEngineServer.Network.Packet (Packet)
+import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
 
 
 -- |Message sent to the main thread

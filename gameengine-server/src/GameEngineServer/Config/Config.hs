@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Config (Config (..), CfgLevel (..)) where
+module GameEngineServer.Config.Config (Config (..), CfgLevel (..)) where
 
 import Data.Aeson (FromJSON, parseJSON, (.:), withObject)
 

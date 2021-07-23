@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 936966c45041ba360060927a8b317f549061aab25bad8034ea21cdf19fd3ed19
+-- hash: d204b0eb108d15d8337a0c2462850d4a72b774b54d9fb2ed3c856a8b9420821e
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -21,26 +21,22 @@ source-repository head
 
 library
   exposed-modules:
-      AtomicTChan
-      Client
-      ClientApplicators
-      ServerState
-      Packet
-      SocketOperations
-      TCPServer
-      Mainloop
-      MainloopClientApplicators
-      MainloopMessage
-      Config
-      ConfigLoader
+      GameEngineServer.AtomicTChan
+      GameEngineServer.Config.Config
+      GameEngineServer.Config.ConfigLoader
+      GameEngineServer.Mainloop.Mainloop
+      GameEngineServer.Mainloop.MainloopClientApplicators
+      GameEngineServer.Mainloop.MainloopMessage
+      GameEngineServer.Network.Packet
+      GameEngineServer.Network.SocketOperations
+      GameEngineServer.Network.TCPServer
+      GameEngineServer.ServerState.Client
+      GameEngineServer.ServerState.ClientApplicators
+      GameEngineServer.ServerState.ServerState
   other-modules:
       Paths_gameengine_server
   hs-source-dirs:
       src
-      src/server-state
-      src/network
-      src/mainloop
-      src/config
   build-depends:
       aeson ==1.5.*
     , base >=4.7 && <5

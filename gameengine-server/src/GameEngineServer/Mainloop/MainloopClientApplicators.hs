@@ -1,10 +1,10 @@
-module MainloopClientApplicators (sendPacketToClient, closeClient) where
+module GameEngineServer.Mainloop.MainloopClientApplicators (sendPacketToClient, closeClient) where
 
-import ClientApplicators (ClientApplicator (..))
-import Packet (Packet (..))
-import SocketOperations (sendPacket)
-import Client (Client (Client))
-import TCPServer (ConnInfo (ConnInfo))
+import GameEngineServer.ServerState.ClientApplicators (ClientApplicator (..))
+import GameEngineServer.ServerState.Client (Client (Client))
+import GameEngineServer.Network.Packet (Packet (..))
+import GameEngineServer.Network.SocketOperations (sendPacket)
+import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
 
 
 closeClient :: ClientApplicator

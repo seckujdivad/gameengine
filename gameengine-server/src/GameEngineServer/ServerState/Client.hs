@@ -1,8 +1,8 @@
-module Client (Client (Client), getClientIdentifier, showClientMessage) where
+module GameEngineServer.ServerState.Client (Client (Client), getClientIdentifier, showClientMessage) where
 
 import Network.Socket (Socket)
 
-import TCPServer (ConnInfo (ConnInfo))
+import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
 
 
 -- |All information stored about a client

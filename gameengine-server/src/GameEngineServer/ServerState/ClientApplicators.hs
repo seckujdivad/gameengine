@@ -1,4 +1,4 @@
-module ClientApplicators (ClientApplicator (..), applyToAllClients, applyToClient) where
+module GameEngineServer.ServerState.ClientApplicators (ClientApplicator (..), applyToAllClients, applyToClient) where
 
 {-
 Functions for applying an operation onto a 'Client'. They wrap the
@@ -6,9 +6,9 @@ functions in ServerState.hs with cleanup and error message
 functionality.
 -}
 
-import Client (Client (Client), showClientMessage)
-import SocketOperations (closeConnection)
-import qualified ServerState
+import GameEngineServer.Network.SocketOperations (closeConnection)
+import qualified GameEngineServer.ServerState.ServerState as ServerState
+import GameEngineServer.ServerState.Client (Client (Client), showClientMessage)
 
 
 {-|

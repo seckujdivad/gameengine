@@ -13,12 +13,13 @@ import qualified Data.ByteString (null)
 import System.Environment (getArgs)
 import System.Directory (setCurrentDirectory)
 
-import TCPServer (runTCPServer, ConnInfo (..))
-import AtomicTChan (sendToTChan)
-import Mainloop (serverMainloop)
-import MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (..))
-import Packet (deserialise)
-import ConfigLoader (loadConfig)
+import GameEngineServer.AtomicTChan (sendToTChan)
+import GameEngineServer.Network.TCPServer (runTCPServer, ConnInfo (..))
+import GameEngineServer.Network.Packet (deserialise)
+import GameEngineServer.Mainloop.Mainloop (serverMainloop)
+import GameEngineServer.Mainloop.MainloopMessage (MainloopMessage (ReceiverMsg), ReceiverMsgInner (..))
+import GameEngineServer.Config.ConfigLoader (loadConfig)
+
 import FlagProcessing (Flag (..), getFlags, getFlagUsageInfo)
 
 

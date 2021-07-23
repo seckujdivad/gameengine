@@ -1,4 +1,4 @@
-module TCPServer (runTCPServer, ConnInfo (ConnInfo)) where
+module GameEngineServer.Network.TCPServer (runTCPServer, ConnInfo (ConnInfo)) where
 
 import Network.Socket (ServiceName, SocketType(Stream), AddrInfo(addrFlags, addrSocketType),
     HostName, defaultHints, getAddrInfo, AddrInfoFlag(AI_PASSIVE), Socket, SockAddr, Socket, HostName, ServiceName, withSocketsDo,

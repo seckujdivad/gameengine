@@ -1,4 +1,4 @@
-module ConfigLoader (loadConfig, loadConfigString) where
+module GameEngineServer.Config.ConfigLoader (loadConfig, loadConfigString) where
 
 import Prelude hiding (readFile)
 
@@ -9,7 +9,7 @@ import Data.Aeson (decode)
 import Data.ByteString (readFile)
 import Data.ByteString.Lazy (ByteString, fromStrict)
 
-import Config (Config (..), CfgLevel (..))
+import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 
 
 {-|

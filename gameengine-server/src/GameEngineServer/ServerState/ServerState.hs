@@ -1,4 +1,4 @@
-module ServerState (ServerState (..), initialServerState, applyToAllClients, applyToClient) where
+module GameEngineServer.ServerState.ServerState (ServerState (..), initialServerState, applyToAllClients, applyToClient) where
 
 {-
 Describes the current state of the server and provides utility methods for operating on that state.
@@ -12,8 +12,8 @@ function-by-function basis.
 
 import Data.Map (Map, empty, update, lookup, keys)
 
-import Client (Client (Client))
-import Config (Config (..), CfgLevel (..))
+import GameEngineServer.ServerState.Client (Client (Client))
+import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 
 
 -- |Describes the current state of the server

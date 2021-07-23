@@ -1,4 +1,4 @@
-module SocketOperations (sendPacket, closeConnection) where
+module GameEngineServer.Network.SocketOperations (sendPacket, closeConnection) where
 
 {-
 Simplifies common operations of 'Socket's.
@@ -9,7 +9,7 @@ import Network.Socket.ByteString (sendAll)
 
 import Control.Exception (catch, IOException)
 
-import Packet (Packet, serialise)
+import GameEngineServer.Network.Packet (Packet, serialise)
 
 
 -- |Sends a 'Packet' to a 'Socket'. Returns 'Nothing' if the 'Packet' was sent without error, 'Just String' otherwise

@@ -1,4 +1,4 @@
-module Packet (Packet (..), serialise, deserialise, PacketType (..), packetToPacketType) where
+module GameEngineServer.Network.Packet (Packet (..), serialise, deserialise, PacketType (..), packetToPacketType) where
 
 import qualified Data.ByteString
 import qualified Data.ByteString.Lazy
