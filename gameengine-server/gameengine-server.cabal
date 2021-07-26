@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 79fc2f58124be1432c45dca5dbbeaa6c7bd6cdd0f7cf3a2f4a6fa6bf0ded4036
+-- hash: 8e58195000f6a33ee2dd65336af8aa4b366fa10ed7c2e563767034e98f60bfaa
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -32,6 +32,12 @@ library
       GameEngineServer.Network.TCPServer
       GameEngineServer.State.Client
       GameEngineServer.State.ClientApplicators
+      GameEngineServer.State.Scene.Model
+      GameEngineServer.State.Scene.Nameable
+      GameEngineServer.State.Scene.Positionable
+      GameEngineServer.State.Scene.Rotatable
+      GameEngineServer.State.Scene.Scalable
+      GameEngineServer.State.Scene.Scene
       GameEngineServer.State.ServerState
   other-modules:
       Paths_gameengine_server
@@ -45,6 +51,7 @@ library
     , containers ==0.6.*
     , directory ==1.3.*
     , filepath ==1.4.*
+    , linear ==1.21.*
     , network ==3.1.1.*
     , stm >=2.5
     , text ==1.2.*
@@ -67,6 +74,7 @@ executable gameengine-server
     , directory ==1.3.*
     , filepath ==1.4.*
     , gameengine-server
+    , linear ==1.21.*
     , network ==3.1.1.*
     , stm >=2.5
     , text ==1.2.*
@@ -89,6 +97,7 @@ test-suite gameengine-server-test
     , directory ==1.3.*
     , filepath ==1.4.*
     , gameengine-server
+    , linear ==1.21.*
     , network ==3.1.1.*
     , stm >=2.5
     , text ==1.2.*
