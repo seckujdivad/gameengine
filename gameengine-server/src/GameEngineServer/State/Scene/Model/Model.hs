@@ -1,4 +1,4 @@
-module GameEngineServer.State.Scene.Model (Model (Model)) where
+module GameEngineServer.State.Scene.Model.Model (Model (Model)) where
 
 import Linear.V3 (V3)
 
@@ -6,6 +6,7 @@ import GameEngineServer.State.Scene.Positionable (Positionable (..))
 import GameEngineServer.State.Scene.Rotatable (Rotatable (..))
 import GameEngineServer.State.Scene.Scalable (Scalable (..))
 import GameEngineServer.State.Scene.Nameable (Nameable (..))
+import GameEngineServer.State.Scene.Model.Geometry (Geometry (..))
 
 
 -- |Model in a scene
@@ -15,7 +16,8 @@ data Model =
         mdlPosition :: V3 Double,
         mdlRotation :: V3 Double,
         mdlScale :: V3 Double,
-        mdlName :: String
+        mdlName :: String,
+        mdlGeometries :: [Geometry]
     }
 
 instance Positionable Model where
