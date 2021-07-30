@@ -1,4 +1,4 @@
-module GameEngineServer.State.Scene.Scene () where
+module GameEngineServer.State.Scene.Scene (Scene (..)) where
 
 import GameEngineServer.State.Scene.Model.Model (Model (..))
 
