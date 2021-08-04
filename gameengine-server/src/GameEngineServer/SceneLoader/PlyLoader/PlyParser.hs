@@ -1,29 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module GameEngineServer.SceneLoader.PlyLoader (loadPolygonalFromPLY) where
+module GameEngineServer.SceneLoader.PlyLoader.PlyParser (parser, Parse (..), ElementType (..), ParseError (..)) where
 
 import Data.ByteString.Lazy (ByteString, reverse, null, tail, head, pack, unpack)
 import Data.ByteString.Lazy.Char8 (splitWith, head, readInteger)
 
 import Data.Maybe (catMaybes)
 
-import GameEngineServer.State.Scene.Model.Model (Model (..))
-import GameEngineServer.State.Scene.Model.Geometry (Geometry (Polygonal), Face (Face))
 
-{-
-check preamble
-load header
-load body
-
-lexer
--}
-
-loadPolygonalFromPLY :: ByteString -> Maybe Geometry
-loadPolygonalFromPLY file = Just $ Polygonal []
-    where
-        parsedFile = parser file
-
-data Parse = Malformed ParseError
+-- |Represents a parsed single line from a PLY file
+data Parse =
+    Malformed ParseError
     | FileType
     | Format Bool
     | Element ByteString Integer
@@ -32,8 +19,10 @@ data Parse = Malformed ParseError
     | EndHeader
     | Body [ByteString]
 
+-- |Represents a type in a PLY file
 data ElementType = FloatingPoint | Integer | UnsignedInteger deriving (Show, Eq, Enum)
 
+-- |Represents an error that may occur while parsing a PLY file
 data ParseError =
     UnrecognisedLeadToken String
     | WrongNumberOfTokens String
