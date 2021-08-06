@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2767e7eced95055a6a6d813c62eff0d87b13f7598af59069616139a5b2fab52e
+-- hash: a05cd08edb3fb3f5a2a76f20eb000f28e2c26c5cfc530691763b722bfbfcc8f2
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -56,6 +56,7 @@ library
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
+    , bytestring-lexing ==0.5.*
     , containers ==0.6.*
     , directory ==1.3.*
     , filepath ==1.4.*
@@ -78,6 +79,7 @@ executable gameengine-server
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
+    , bytestring-lexing ==0.5.*
     , containers ==0.6.*
     , directory ==1.3.*
     , filepath ==1.4.*
@@ -101,6 +103,7 @@ test-suite gameengine-server-test
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring
+    , bytestring-lexing ==0.5.*
     , containers ==0.6.*
     , directory ==1.3.*
     , filepath ==1.4.*
