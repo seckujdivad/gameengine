@@ -2,7 +2,7 @@ module GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PL
 
 import Data.Maybe (mapMaybe)
 
-import Data.Map (Map, empty, update, lookup, keys, fromList, insert)
+import Data.Map (Map, empty, insert, adjust, member)
 
 import qualified Data.ByteString.Lazy as LBS (ByteString, null, fromStrict, fromStrict, toStrict)
 import Data.ByteString.Lex.Fractional (readDecimal, readSigned)
@@ -63,7 +63,7 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
                             True -> doNextParse $ EndOfFile newPLyFile
                             False -> doNextParse $ Body headerElements 0 newPLyFile
                     where
-                        newPLyFile = PLYFile (insert elementName element elementMap)
+                        newPLyFile = PLYFile (if member elementName elementMap then adjust (\elements -> element:elements) elementName elementMap else insert elementName [element] elementMap)
                         moveToNextElement = numOfElementProcessed + 1 >= elementCount
                 
                 Right error -> Right error
@@ -126,7 +126,7 @@ elementTypeToHeaderValue elementType = case elementType of
     PlyParser.Integer -> HeaderIntegerValue
     PlyParser.UnsignedInteger -> HeaderIntegerValue
 
-data PLYFile = PLYFile (Map LBS.ByteString Element)
+data PLYFile = PLYFile (Map LBS.ByteString [Element])
 data Element = Element (Map LBS.ByteString Property)
 data Property = ValueProperty Value | ListProperty [Value]
 data Value = DoubleValue Double | IntegerValue Integer
