@@ -6,8 +6,7 @@ import System.Directory (Permissions (readable), doesFileExist, copyFile, getPer
 import System.FilePath ((</>))
 
 import Data.Aeson (decode)
-import Data.ByteString (readFile)
-import Data.ByteString.Lazy (ByteString, fromStrict)
+import Data.ByteString.Lazy (ByteString, readFile)
 
 import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 
@@ -41,7 +40,7 @@ loadConfigString = do
                 permissions <- getPermissions configPath
                 if readable permissions then do
                     fileContents <- readFile configPath
-                    return $ Just $ fromStrict fileContents
+                    return $ Just $ fileContents
                 else
                     return Nothing
             else
