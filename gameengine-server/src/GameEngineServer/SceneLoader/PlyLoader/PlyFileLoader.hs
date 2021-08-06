@@ -1,8 +1,8 @@
-module GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PLYFileGenerationError (..), PLYFileGenerationErrorInner (..), PLYFile (..), Element (..), Property (..), Value (..)) where
+module GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PLYFileGenerationError (..), PLYFileGenerationErrorInner (..), PLYFile (..), Element (..), Property (..), Value (..), getDoubleFromElement, getIntegerFromElement, getDoubleListFromElement, getIntegerListFromElement) where
 
 import Data.Maybe (mapMaybe)
 
-import Data.Map (Map, empty, insert, adjust, member)
+import Data.Map (Map, empty, insert, adjust, member, lookup)
 
 import qualified Data.ByteString.Lazy as LBS (ByteString, null, fromStrict, fromStrict, toStrict)
 import Data.ByteString.Lex.Fractional (readDecimal, readSigned)
@@ -201,3 +201,39 @@ loadValue lineNumber HeaderIntegerValue byteString = case (readSigned readDecima
         True -> Left $ IntegerValue $ round value
         False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Bytes were left over after parsing value"
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
+
+getDoubleFromElement :: LBS.ByteString -> Element -> Maybe Double
+getDoubleFromElement name (Element propertyMap) = do
+    property <- Data.Map.lookup name propertyMap
+    case property of
+        ValueProperty value -> case value of
+            DoubleValue x -> return x
+            IntegerValue _ -> Nothing
+        ListProperty _ -> Nothing
+
+getIntegerFromElement :: LBS.ByteString -> Element -> Maybe Integer
+getIntegerFromElement name (Element propertyMap) = do
+    property <- Data.Map.lookup name propertyMap
+    case property of
+        ValueProperty value -> case value of
+            IntegerValue x -> return x
+            DoubleValue _ -> Nothing
+        ListProperty _ -> Nothing
+
+getDoubleListFromElement :: LBS.ByteString -> Element -> Maybe [Double]
+getDoubleListFromElement name (Element propertyMap) = do
+    property <- Data.Map.lookup name propertyMap
+    case property of
+        ValueProperty value -> Nothing
+        ListProperty values -> return $ mapMaybe (\value -> case value of
+            DoubleValue x -> Just x
+            IntegerValue _ -> Nothing) values
+
+getIntegerListFromElement :: LBS.ByteString -> Element -> Maybe [Integer]
+getIntegerListFromElement name (Element propertyMap) = do
+    property <- Data.Map.lookup name propertyMap
+    case property of
+        ValueProperty value -> Nothing
+        ListProperty values -> return $ mapMaybe (\value -> case value of
+            DoubleValue _ -> Nothing
+            IntegerValue x -> Just x) values
