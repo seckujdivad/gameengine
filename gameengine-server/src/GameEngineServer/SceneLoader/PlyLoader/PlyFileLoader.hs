@@ -13,13 +13,14 @@ import qualified GameEngineServer.SceneLoader.PlyLoader.PlyParser as PlyParser (
 -- |Generates 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
 generatePLYFile :: [(Int, PlyParser.Parse)] -> Either PLYFile PLYFileGenerationError
 generatePLYFile parses = case null parseErrors of
-        True -> generatePLYFileInner parses initialState
+        True -> generatePLYFileInner parses geometryGeneratorinitialState
         False -> Right $ ParsingErrors parseErrors
     where
         parseErrors = mapMaybe (\(lineNumber, parse) -> case parse of
             PlyParser.Malformed parseError -> Just (lineNumber, parseError)
             _ -> Nothing) parses
 
+-- |Inner function of 'generatePLYFile'
 generatePLYFileInner :: [(Int, PlyParser.Parse)] -> GeometryGeneratorState -> Either PLYFile PLYFileGenerationError
 generatePLYFileInner [] state = case state of
     EndOfFile plyFile -> Left $ plyFile
@@ -80,9 +81,11 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
         generateError error = Right $ PLYFileGenerationError (Just lineNumber) error
         doNextParse = generatePLYFileInner remainingParses
         
-
+-- |Represents an error encountered in the process of taking a .PLY file and turning it into a 'PLYFile'
 data PLYFileGenerationError =
+    -- |Passes through an error encountered by the parser along with the line number
     ParsingErrors [(Int, PlyParser.ParseError)]
+    -- |Wraps an error encountered when taking an array of 'Parse' and turning it into 'PLYFile'. Also optionally stores the line number that the 'Parse' is logically associated with.
     | PLYFileGenerationError (Maybe Int) PLYFileGenerationErrorInner
 
 instance Show PLYFileGenerationError where
@@ -96,47 +99,95 @@ instance Show PLYFileGenerationError where
         Just lineNumber -> "Line " ++ show lineNumber ++ ": "
         Nothing -> "") ++ show errorInner
 
+-- |Represents an error encountered when taking an array of 'Parse' and turning it into 'PLYFile'
 data PLYFileGenerationErrorInner =
+    -- |The end of the file was unexpected in this state
     UnexpectedEOF
+    -- |The preamble (format and version information) contained an error (described in the 'String')
     | BadPreamble String
+    -- |The header (element and property declarations) contained an error (described in the 'String')
     | BadHeader String
+    -- |The body (a collection of integers and real numbers, each line representing an element as declared in the header) contained an error (described in the 'String')
     | BadBody String
+    -- |The end of the file was expected in this state, but didn't happen
     | ExpectedEOF
+    -- |A value (in the body) couldn't be deserialised into the type specified in the header
     | ValueUnparseable String
     deriving (Show)
 
 data GeometryGeneratorState =
     -- |Preamble of the PLY file. First 'Bool' is whether or not 'FileType' has been seen, second is the same but for 'Format'
     Preamble Bool Bool
+    -- |Header. Contains all the 'HeaderElement's deserialised so far
     | Header [HeaderElement]
+    -- |Body. Contains all the 'HeaderElement's deserialised in the header that have yet to be fully deserialised (i.e. the specified count satisfied) in the body, the number of times the first 'HeaderElement' has been deserialised from the body and the current state of the 'PLYFile' that elements are loaded into. Once the number of deserialised 'Element's matches the expected number given by the 'HeaderElement', the first 'HeaderElement' is removed from the list.
     | Body [HeaderElement] Int PLYFile
-    -- |The end of the file is expected
+    -- |The end of the file is expected. Contains the 'PLYFile that the function will eventually return.
     | EndOfFile PLYFile
 
-initialState :: GeometryGeneratorState
-initialState = Preamble False False
+-- |Initial state of 'generatePLYFileInner'
+geometryGeneratorinitialState :: GeometryGeneratorState
+geometryGeneratorinitialState = Preamble False False
 
-data HeaderElement = HeaderElement LBS.ByteString Int [HeaderProperty]
-data HeaderProperty = HeaderValueProperty LBS.ByteString HeaderValue | HeaderListProperty LBS.ByteString HeaderValue
-data HeaderValue = HeaderDoubleValue | HeaderIntegerValue
+-- |Represents an element declaration from a .PLY file header. Contains the name of the element, the number of elements expected in the body and the properties of the element
+data HeaderElement =
+    -- |Represents an element declaration from a .PLY file header. Contains the name of the element, the number of elements expected in the body and the properties of the element
+    HeaderElement LBS.ByteString Int [HeaderProperty]
 
+-- |Represents a property declaration from a .PLY file header. Is logically the child of a 'HeaderElement'
+data HeaderProperty =
+    -- |Property that is a single value. Stores the name and type
+    HeaderValueProperty LBS.ByteString HeaderValue
+    -- |Property that is a list of values. Stores the name and type
+    | HeaderListProperty LBS.ByteString HeaderValue
+
+-- |Represents a type as specified in the header of a .PLY file
+data HeaderValue =
+    -- |Represents any .PLY type that represents real numbers
+    HeaderDoubleValue
+    -- |Represents .PLY types that represent integers but not real numbers
+    | HeaderIntegerValue
+
+-- |Converts between the broader family of parsed 'PlyParser.ElementType' to the narrower 'HeaderValue'
 elementTypeToHeaderValue :: PlyParser.ElementType -> HeaderValue
 elementTypeToHeaderValue elementType = case elementType of
     PlyParser.FloatingPoint -> HeaderDoubleValue
     PlyParser.Integer -> HeaderIntegerValue
     PlyParser.UnsignedInteger -> HeaderIntegerValue
 
-data PLYFile = PLYFile (Map LBS.ByteString [Element])
-data Element = Element (Map LBS.ByteString Property)
-data Property = ValueProperty Value | ListProperty [Value]
-data Value = DoubleValue Double | IntegerValue Integer
+-- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
+data PLYFile =
+    -- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
+    PLYFile (Map LBS.ByteString [Element])
 
+-- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
+data Element =
+    -- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
+    Element (Map LBS.ByteString Property)
+
+-- |A property in a .PLY file. Logically is the child of an 'Element'. Stores either a single 'Value' or a list of 'Value's.
+data Property =
+    -- |A property in a .PLY file. Logically is the child of an 'Element'. Stores a single 'Value'.
+    ValueProperty Value
+    -- |A property in a .PLY file. Logically is the child of an 'Element'. Stores a list of 'Value's.
+    | ListProperty [Value]
+
+-- |A value in a .PLY file. Logically is the child of a 'Property'. Stores either a 'Double' or an 'Integer'
+data Value =
+    -- |A value in a .PLY file. Logically is the child of a 'Property'. Stores a 'Double'.
+    DoubleValue Double
+    -- |A value in a .PLY file. Logically is the child of a 'Property'. Stores an 'Integer'.
+    | IntegerValue Integer
+
+-- |Represents the base state of a 'PLYFile'. Contains no elements.
 emptyPLYFile :: PLYFile
 emptyPLYFile = PLYFile empty
 
+-- |Applies a function to the final element in a list.
 modifyLast :: (a -> a) -> [a] -> [a]
 modifyLast f xs = (init xs) ++ [f (last xs)]
 
+-- |Loads an 'Element' (or generates an appropriate error message) from a 'HeaderElement' and a list of 'LBS.ByteString' (each item in the list containing a value which should be used to construct the 'Element'). The list of 'LBS.ByteString' is parsed from a single line in the body of the .PLY file split on each " ". A line number must also be provided for error messages.
 loadElement :: Int -> HeaderElement -> [LBS.ByteString] -> Either Element PLYFileGenerationError
 loadElement lineNumber (HeaderElement name _ properties) bodyByteStrings = case loadedElementByteStringOrError of
         Left (element, remainingByteString) -> case null remainingByteString of
@@ -144,9 +195,9 @@ loadElement lineNumber (HeaderElement name _ properties) bodyByteStrings = case 
             False -> Right $ PLYFileGenerationError (Just lineNumber) $ BadBody "Too many values/not enough properties"
         Right error -> Right error
     where
-        loadedElementByteStringOrError = foldl (loadElementInner lineNumber) (Left $ (Element empty, bodyByteStrings)) properties
+        loadedElementByteStringOrError = foldl (loadElementInner lineNumber) (Left $ (Element empty, bodyByteStrings)) properties -- fold across each property (i.e. iterate over each 'Property' from left to right), greedily consuming the required amount of 'LBS.ByteString'
 
-
+-- |Inner function for 'loadElement'. Applied as a fold to a list of 'HeaderProperty' that make up a 'HeaderElement', greedily consuming the list of 'LBS.ByteString' and producing an 'Element'.
 loadElementInner :: Int -> Either (Element, [LBS.ByteString]) PLYFileGenerationError -> HeaderProperty -> Either (Element, [LBS.ByteString]) PLYFileGenerationError
 loadElementInner _ (Right error) _ = Right error
 loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case headerProperty of
@@ -184,11 +235,13 @@ loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case 
                         False -> generateError $ BadBody $ "List size is " ++ show listSize ++ ", but there is/are only " ++ show (length byteStrings - 1) ++ " value(s) left"
                     where
                         intListSize = fromIntegral listSize
-                Left (DoubleValue _) -> Prelude.error "loadValue returned double when the type was specified as integer"
+                
+                Left (DoubleValue _) -> Prelude.error "loadValue returned double when the type was specified as integer" -- this state should never be reached. I feel, therefore, that it is cleaner to simply generate an error and crash the program (in this scenario that should never happen, not even as part of exceptional behaviour) rather than introduce a whole new type constructor
                 Right error -> Right error
     where
         generateError error = Right $ PLYFileGenerationError (Just lineNumber) error
 
+-- |Load a 'Value', its type determined by the given 'HeaderValue', from the given 'LBS.ByteString'. A line number must also be provided for error messages.
 loadValue :: Int -> HeaderValue -> LBS.ByteString -> Either Value PLYFileGenerationError
 loadValue lineNumber HeaderDoubleValue byteString = case (readSigned readDecimal) $ LBS.toStrict byteString of
     Just (value, remainingByteString) -> case LBS.null $ LBS.fromStrict remainingByteString of
@@ -202,6 +255,7 @@ loadValue lineNumber HeaderIntegerValue byteString = case (readSigned readDecima
         False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Bytes were left over after parsing value"
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
 
+-- |Access a 'Double' property from an 'Element'. Returns 'Nothing' if the property is not a property containing a single real number.
 getDoubleFromElement :: LBS.ByteString -> Element -> Maybe Double
 getDoubleFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
@@ -211,6 +265,7 @@ getDoubleFromElement name (Element propertyMap) = do
             IntegerValue _ -> Nothing
         ListProperty _ -> Nothing
 
+-- |Access an 'Integer' property from an 'Element'. Returns 'Nothing' if the property is not a property containing a single integer.
 getIntegerFromElement :: LBS.ByteString -> Element -> Maybe Integer
 getIntegerFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
@@ -220,6 +275,7 @@ getIntegerFromElement name (Element propertyMap) = do
             DoubleValue _ -> Nothing
         ListProperty _ -> Nothing
 
+-- |Access a list of 'Double' property from an 'Element'. Strips all values from the returned list that aren't contained in a 'DoubleValue'. Returns 'Nothing' if the property is not a property containing a list of values.
 getDoubleListFromElement :: LBS.ByteString -> Element -> Maybe [Double]
 getDoubleListFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
@@ -229,6 +285,7 @@ getDoubleListFromElement name (Element propertyMap) = do
             DoubleValue x -> Just x
             IntegerValue _ -> Nothing) values
 
+-- |Access a list of 'Integer' property from an 'Element'. Strips all values from the returned list that aren't contained in an 'IntegerValue'. Returns 'Nothing' if the property is not a property containing a list of values.
 getIntegerListFromElement :: LBS.ByteString -> Element -> Maybe [Integer]
 getIntegerListFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
