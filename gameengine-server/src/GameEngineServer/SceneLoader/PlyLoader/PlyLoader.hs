@@ -12,5 +12,5 @@ import GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (PLYFileGenerationEr
 
 
 -- |Load a 'Polygonal' 'Geometry' from a PLY file given as a 'ByteString'
-loadPolygonalFromPLY :: ByteString -> Either Geometry PLYFileGenerationError
+loadPolygonalFromPLY :: ByteString -> Either Geometry (Either String PLYFileGenerationError)
 loadPolygonalFromPLY file = generateGeometry $ parser file
