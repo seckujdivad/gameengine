@@ -7,29 +7,52 @@ import Data.ByteString.Lazy.Char8 (splitWith, head, readInteger)
 
 import Data.Maybe (catMaybes)
 
+{-
+Whenever something is referred to as a token, it refers to the groups of characters resulting from a line being split into groups of (including zero) of characters separated by a " ". A token can have zero length, but this isn't always valid in every situation.
+-}
 
 -- |Represents a parsed single line from a PLY file
 data Parse =
+    -- |A line that could not be parsed
     Malformed ParseError
+    -- |The "ply" line from the header
     | FileType
+    -- |The "format ascii 1.0". Contains a 'Bool' that specifies whether or not it is correct for this loader (i.e. "format ascii 1.0").
     | Format Bool
+    -- |The start of an element declaration. Stores the name of the element and the number of times it should appear in the body of the file.
     | Element ByteString Integer
+    -- |The declaration of a property that contains only one value
     | Property ByteString ElementType
+    -- |The declaration of a property that contains a list of values
     | ListProperty ByteString ElementType ElementType
+    -- |The "end_header" line
     | EndHeader
+    -- |A line from the body. Stores the line split into tokens based on " ". No validation of the tokens takes places at this stage and all lines that can't be parsed any other way are parsed as 'Body'.
     | Body [ByteString]
 
 -- |Represents a type in a PLY file
-data ElementType = FloatingPoint | Integer | UnsignedInteger deriving (Show, Eq, Enum)
+data ElementType =
+    -- |Represents any size of type storing real numbers
+    FloatingPoint
+    -- |Represents any size of type storing signed integers
+    | Integer
+    -- |Represents any size of type storing unsigned integers
+    | UnsignedInteger deriving (Show, Eq, Enum)
 
 -- |Represents an error that may occur while parsing a PLY file
 data ParseError =
-    UnrecognisedLeadToken String
-    | WrongNumberOfTokens String
+    -- |More tokens than expected given the tokens already processed
+    WrongNumberOfTokens String
+    -- |A token expected to be an integer in the file couldn't be read
     | IntegerUnparseable
+    -- |A token that was expected to be one of the PLY preset types wasn't recognised
     | UnknownType
+    -- |A specific token which must have an exact value to be valid was of a different value (and therefore invalid)
     | TokenRequired String
+    -- |A certain family of type must be specified in this situation, but it was not
     | WrongType String
+    -- |A line was started with " ", producing a token of zero length (which is not allowed)
+    | NoStartingLineWithSpace
     deriving (Show)
 
 -- |Parse a 'ByteString' containing a PLY file into a list of 'Parse' objects representing every meaningful line alongside their line number
@@ -37,8 +60,8 @@ parser :: ByteString -> [(Int, Parse)]
 parser file = catMaybes parsedLinesWithIndexMaybes
     where
         linesWithReturn = splitWith (== '\n') file --might contain carriage returns
-        hasCarriageReturn = or $ map (byteStringEndsInChar '\r') linesWithReturn
-        lines = if hasCarriageReturn then map (\line -> if Data.ByteString.Lazy.null line then line else Data.ByteString.Lazy.reverse $ Data.ByteString.Lazy.tail $ Data.ByteString.Lazy.reverse line) linesWithReturn else linesWithReturn
+        hasCarriageReturn = or $ map (byteStringEndsInChar '\r') linesWithReturn -- check file for carriage returns
+        lines = if hasCarriageReturn then map (\line -> if Data.ByteString.Lazy.null line then line else Data.ByteString.Lazy.reverse $ Data.ByteString.Lazy.tail $ Data.ByteString.Lazy.reverse line) linesWithReturn else linesWithReturn --strip off carriage return if the file had it
 
         parsedLineMaybes = map parseLine lines
         parsedLinesWithIndexMaybes :: [Maybe (Int, Parse)]
@@ -53,10 +76,10 @@ byteStringEndsInChar c bs = if Data.ByteString.Lazy.null bs then False else c ==
 -- |Parse one line from a PLY file
 parseLine :: ByteString -> Maybe Parse
 parseLine line = if Prelude.null $ splitOnSpaces then
-        Nothing
+        Nothing -- ignore empty lines
     else
         case Prelude.head splitOnSpaces of
-            "" -> Nothing
+            "" -> Just $ Malformed NoStartingLineWithSpace
 
             "ply" -> if length splitOnSpaces == 1 then
                     Just FileType
@@ -68,7 +91,7 @@ parseLine line = if Prelude.null $ splitOnSpaces then
                 else
                     Malformed $ WrongNumberOfTokens "When the first token is format, there must be exactly 2 other tokens"
             
-            "comment" -> Nothing
+            "comment" -> Nothing -- ignore comments
 
             "element" -> Just $ if length splitOnSpaces == 3 then
                     case readInteger (splitOnSpaces !! 2) of
@@ -78,11 +101,11 @@ parseLine line = if Prelude.null $ splitOnSpaces then
                     Malformed $ WrongNumberOfTokens "When the first token is element, there must be exactly 2 other tokens"
             
             "property" -> case length splitOnSpaces of
-                3 -> case getType (splitOnSpaces !! 1) of
+                3 -> case getType (splitOnSpaces !! 1) of -- single value property
                     Just elementType -> Just $ Property (splitOnSpaces !! 2) elementType
                     Nothing -> Just $ Malformed $ UnknownType
                 
-                5 -> if splitOnSpaces !! 1 == "list" then
+                5 -> if splitOnSpaces !! 1 == "list" then -- list property
                         case getType (splitOnSpaces !! 2) of
                             Just sizeType -> if sizeType == Integer || sizeType == UnsignedInteger then
                                     case getType (splitOnSpaces !! 3) of
