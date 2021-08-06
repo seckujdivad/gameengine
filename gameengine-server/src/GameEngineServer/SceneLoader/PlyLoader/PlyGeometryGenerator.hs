@@ -4,17 +4,20 @@ module GameEngineServer.SceneLoader.PlyLoader.PlyGeometryGenerator (generateGeom
 
 import Linear.V3 (V3 (..))
 import Linear.V2 (V2 (..))
+import Linear.Metric (normalize)
 
 import Data.Map (lookup)
 
 import Data.Maybe (mapMaybe, fromMaybe)
 
-import GameEngineServer.State.Scene.Model.Geometry (Geometry (Polygonal), Face (Face))
+import Data.List (genericIndex)
+
+import GameEngineServer.State.Scene.Model.Geometry (Geometry (Polygonal), Face (..))
 import GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PLYFileGenerationError (..), PLYFileGenerationErrorInner (..), PLYFile (..), Element (..), Property (..), Value (..), getDoubleFromElement, getIntegerListFromElement)
 import GameEngineServer.SceneLoader.PlyLoader.PlyParser (Parse)
 
 
--- |Generates 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
+-- |Generates 'Polygonal' 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
 generateGeometry :: [(Int, Parse)] -> Either Geometry (Either String PLYFileGenerationError)
 generateGeometry parses = case generatePLYFile parses of
     Left (PLYFile elementMap) -> case Data.Map.lookup "vertex" elementMap of --Right $ PLYFileGenerationError Nothing UnexpectedEOF -- TODO
@@ -54,5 +57,14 @@ plyVertexFromVertexElement element = do
         t = fromMaybe 0 $ getDoubleFromElement "t" element
     return PLYVertex {plyvPos = V3 x y z, plyvNormal = V3 nx ny nz, plyvUV = V2 s t}
 
+-- |Generate a 'Polygonal' from a list of 'PLYVertex' and a list of faces, each represented as a list of vertex indices
 geometryFromValues :: [PLYVertex] -> [[Integer]] -> Geometry
-geometryFromValues vertices vertexIndicesList = Polygonal []
+geometryFromValues vertices vertexIndicesList = Polygonal faces
+    where
+        faceVertices = map (map $ genericIndex vertices) vertexIndicesList
+
+        faceVertexNormals = map (map plyvNormal) faceVertices
+        faceNormalSums = map (foldr (+) (V3 0 0 0)) faceVertexNormals
+        faceNormals = map normalize faceNormalSums
+
+        faces = zipWith (\vertices normal -> Face {faceNormal = normal, faceVertices = map plyvPos vertices}) faceVertices faceNormals
