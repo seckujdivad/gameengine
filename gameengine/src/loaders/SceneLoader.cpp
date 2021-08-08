@@ -190,48 +190,6 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 		{
 			for (auto& el : scene_data["layout"].items())
 			{
-				std::vector<std::string> geometry_names;
-				
-				if (el.value()["model"].is_string())
-				{
-					geometry_names.push_back(el.value()["model"].get<std::string>());
-				}
-
-				if (el.value()["model"].is_array())
-				{
-					for (auto& el2 : el.value()["model"].items())
-					{
-						if (el2.value().is_string())
-						{
-							geometry_names.push_back(el2.value().get<std::string>());
-						}
-						else
-						{
-							throw std::runtime_error("All elements in \"model\" must be strings");
-						}
-					}
-				}
-
-				if (el.value()["models"].is_string())
-				{
-					geometry_names.push_back(el.value()["models"].get<std::string>());
-				}
-
-				if (el.value()["models"].is_array())
-				{
-					for (auto& el2 : el.value()["models"].items())
-					{
-						if (el2.value().is_string())
-						{
-							geometry_names.push_back(el2.value().get<std::string>());
-						}
-						else
-						{
-							throw std::runtime_error("All elements in \"models\" must be strings");
-						}
-					}
-				}
-
 				std::shared_ptr<Model> model = std::make_shared<Model>(scene.GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), &scene);
 
 				if (el.value()["identifier"].is_string())
