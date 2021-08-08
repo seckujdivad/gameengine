@@ -346,10 +346,3 @@ packaged-releases/package sources/*
 demo-cube/app-root/settings.json
 
 *.cxl
-
-# stack
-gameengine-server/.stack-work/
-gameengine-server/*~
-gameengine-server/build/
-gameengine-server/.vscode/phoityne.log
-gameengine-server/app-root/settings.json
