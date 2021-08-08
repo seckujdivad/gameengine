@@ -536,5 +536,5 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 		}
 	}
 
-	return std::move(geometry_loader_thread);
+	return geometry_loader_thread;
 }
