@@ -187,23 +187,11 @@
                   "type": "boolean",
                   "description": "Inverts all normals stored in the model file"
                 },
-                "merge geometry": {
-                  "type": "object",
-                  "description": "Can be used to merge nearby vertices into one. Helps to remove gaps in models caused by floating point imprecision",
-                  "properties": {
-                    "enable": {
-                      "type": "boolean",
-                      "description": "Specifies whether or not to merge the vertices"
-                    },
-                    "distance": {
-                      "type": "number",
-                      "description": "The distance between vertices which causes them to be merged",
-                      "minimum": 0,
-                      "exclusiveMinimum": true
-                    }
-                  },
-                  "required": ["enable", "distance"],
-                  "additionalProperties": false
+                "merge geometry distance": {
+                  "type": "number",
+                  "description": "The distance between vertices which causes them to be merged into one. Helps to remove gaps in models caused by floating point imprecision",
+                  "minimum": 0,
+                  "exclusiveMinimum": true
                 },
                 "grid": {
                   "description": "All loaded vertices will be clamped to a grid with the given increments along each axis. Serves the same purpose as \"merge geometry\". Must be non-zero in all axes",

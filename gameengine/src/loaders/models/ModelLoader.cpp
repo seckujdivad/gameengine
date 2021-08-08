@@ -48,26 +48,16 @@ std::vector<std::shared_ptr<Geometry>> ModelLoader::LoadGeometry(std::string geo
 
 		std::shared_ptr<Polygonal> model_geometry = ModelFromPly(path);
 
-		if (config["merge geometry"].is_object())
+		if (config["merge geometry distance"].is_number())
 		{
-			if (config["merge geometry"]["enable"].is_boolean() && config["merge geometry"]["distance"].is_number())
+			double merge_distance = config["merge geometry distance"].get<double>();
+			if (merge_distance > 0)
 			{
-				if (config["merge geometry"]["enable"].get<bool>())
-				{
-					double merge_distance = config["merge geometry"]["distance"].get<double>();
-					if (merge_distance >= 0.0)
-					{
-						model_geometry->MergeVertices(merge_distance);
-					}
-					else
-					{
-						throw std::invalid_argument("Merge distance is less than 0 (" + std::to_string(merge_distance) + ")");
-					}
-				}
+				model_geometry->MergeVertices(merge_distance);
 			}
 			else
 			{
-				throw std::invalid_argument("Merge geometry field must contain 'enable' (bool) and 'distance' (number)");
+				throw std::invalid_argument("Merge distance must be greater than zero");
 			}
 		}
 

@@ -11,25 +11,16 @@
     "ply": {
       "cube": {
         "path": "models/cube.ply",
-        "merge geometry": {
-          "enable": true,
-          "distance": 0.01
-        }
+        "merge geometry distance": 0.01
       },
       "level": {
         "path": "models/level.ply",
         "invert normals": true,
-        "merge geometry": {
-          "enable": true,
-          "distance": 0.01
-        }
+        "merge geometry distance": 0.01
       },
       "suzanne": {
         "path": "models/suzanne.ply",
-        "merge geometry": {
-          "enable": true,
-          "distance": 0.01
-        }
+        "merge geometry distance": 0.01
       },
       "flat plane": {
         "path": "models/flat plane.ply"
