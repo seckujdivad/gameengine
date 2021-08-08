@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c0333d6e8de9d29f31db9e3c3552de21be6e9d031c0c12a280f454b892c82523
+-- hash: 681f17da3aade95385c943c93566615df3426771d7d99b5dc5f75b6639cbb198
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -52,6 +52,7 @@ library
       Paths_gameengine_server
   hs-source-dirs:
       src
+  ghc-options: -Wall -Wincomplete-uni-patterns
   build-depends:
       aeson ==1.5.*
     , base >=4.7 && <5
@@ -75,7 +76,7 @@ executable gameengine-server
       Paths_gameengine_server
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Wincomplete-uni-patterns
   build-depends:
       aeson ==1.5.*
     , base >=4.7 && <5
