@@ -6,6 +6,7 @@ import Data.Map (Map, empty, insert, adjust, member, lookup)
 
 import qualified Data.ByteString.Lazy as LBS (ByteString, null, fromStrict, fromStrict, toStrict)
 import Data.ByteString.Lex.Fractional (readDecimal, readSigned)
+import Data.ByteString.Lazy.Char8 (readInteger)
 
 import qualified GameEngineServer.SceneLoader.PlyLoader.PlyParser as PlyParser (ParseError, Parse (..), ElementType (..))
 
@@ -67,7 +68,7 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
                         newPLyFile = PLYFile (if member elementName elementMap then adjust (\elements -> element:elements) elementName elementMap else insert elementName [element] elementMap)
                         moveToNextElement = numOfElementProcessed + 1 >= elementCount
                 
-                Right error -> Right error
+                Right genError -> Right genError
             where
                 HeaderElement elementName elementCount _ = headerElement
         
@@ -78,7 +79,7 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
     EndOfFile _ -> generateError $ ExpectedEOF
 
     where
-        generateError error = Right $ PLYFileGenerationError (Just lineNumber) error
+        generateError genError = Right $ PLYFileGenerationError (Just lineNumber) genError
         doNextParse = generatePLYFileInner remainingParses
         
 -- |Represents an error encountered in the process of taking a .PLY file and turning it into a 'PLYFile'
@@ -189,23 +190,23 @@ modifyLast f xs = (init xs) ++ [f (last xs)]
 
 -- |Loads an 'Element' (or generates an appropriate error message) from a 'HeaderElement' and a list of 'LBS.ByteString' (each item in the list containing a value which should be used to construct the 'Element'). The list of 'LBS.ByteString' is parsed from a single line in the body of the .PLY file split on each " ". A line number must also be provided for error messages.
 loadElement :: Int -> HeaderElement -> [LBS.ByteString] -> Either Element PLYFileGenerationError
-loadElement lineNumber (HeaderElement name _ properties) bodyByteStrings = case loadedElementByteStringOrError of
+loadElement lineNumber (HeaderElement _ _ properties) bodyByteStrings = case loadedElementByteStringOrError of
         Left (element, remainingByteString) -> case null remainingByteString of
             True -> Left $ element
             False -> Right $ PLYFileGenerationError (Just lineNumber) $ BadBody "Too many values/not enough properties"
-        Right error -> Right error
+        Right genError -> Right genError
     where
         loadedElementByteStringOrError = foldl (loadElementInner lineNumber) (Left $ (Element empty, bodyByteStrings)) properties -- fold across each property (i.e. iterate over each 'Property' from left to right), greedily consuming the required amount of 'LBS.ByteString'
 
 -- |Inner function for 'loadElement'. Applied as a fold to a list of 'HeaderProperty' that make up a 'HeaderElement', greedily consuming the list of 'LBS.ByteString' and producing an 'Element'.
 loadElementInner :: Int -> Either (Element, [LBS.ByteString]) PLYFileGenerationError -> HeaderProperty -> Either (Element, [LBS.ByteString]) PLYFileGenerationError
-loadElementInner _ (Right error) _ = Right error
+loadElementInner _ (Right genError) _ = Right genError
 loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case headerProperty of
         HeaderValueProperty name valueType -> case null byteStrings of
                 True -> generateError $ BadBody "Can't read value property - no more values left"
                 False -> case loadValue lineNumber valueType (head byteStrings) of
                     Left value -> Left $ (Element $ insert name (ValueProperty value) propertyMap, tail byteStrings)
-                    Right error -> Right error
+                    Right genError -> Right genError
             where
                 Element propertyMap = element
         HeaderListProperty name valueType -> case null byteStrings of
@@ -220,7 +221,7 @@ loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case 
 
                                         values = mapMaybe (\valueOrError -> case valueOrError of
                                             Left value -> Just value
-                                            Right error -> Nothing
+                                            Right _ -> Nothing
                                             ) valuesOrErrors
 
                                 False -> Right $ head errors
@@ -228,8 +229,8 @@ loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case 
                                 valuesOrErrors = map (loadValue lineNumber valueType) (take intListSize (tail byteStrings))
 
                                 errors = mapMaybe (\valueOrError -> case valueOrError of
-                                    Left value -> Nothing
-                                    Right error -> Just error
+                                    Left _ -> Nothing
+                                    Right genError -> Just genError
                                     ) valuesOrErrors
 
                         False -> generateError $ BadBody $ "List size is " ++ show listSize ++ ", but there is/are only " ++ show (length byteStrings - 1) ++ " value(s) left"
@@ -237,9 +238,9 @@ loadElementInner lineNumber (Left (element, byteStrings)) headerProperty = case 
                         intListSize = fromIntegral listSize
                 
                 Left (DoubleValue _) -> Prelude.error "loadValue returned double when the type was specified as integer" -- this state should never be reached. I feel, therefore, that it is cleaner to simply generate an error and crash the program (in this scenario that should never happen, not even as part of exceptional behaviour) rather than introduce a whole new type constructor
-                Right error -> Right error
+                Right genError -> Right genError
     where
-        generateError error = Right $ PLYFileGenerationError (Just lineNumber) error
+        generateError genError = Right $ PLYFileGenerationError (Just lineNumber) genError
 
 -- |Load a 'Value', its type determined by the given 'HeaderValue', from the given 'LBS.ByteString'. A line number must also be provided for error messages.
 loadValue :: Int -> HeaderValue -> LBS.ByteString -> Either Value PLYFileGenerationError
@@ -249,9 +250,9 @@ loadValue lineNumber HeaderDoubleValue byteString = case (readSigned readDecimal
         False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Bytes were left over after parsing value"
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
 
-loadValue lineNumber HeaderIntegerValue byteString = case (readSigned readDecimal) $ LBS.toStrict byteString of
-    Just (value, remainingByteString) -> case LBS.null $ LBS.fromStrict remainingByteString of
-        True -> Left $ IntegerValue $ round value
+loadValue lineNumber HeaderIntegerValue byteString = case (readInteger byteString) of
+    Just (value, remainingByteString) -> case LBS.null remainingByteString of
+        True -> Left $ IntegerValue value
         False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Bytes were left over after parsing value"
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
 
@@ -280,7 +281,7 @@ getDoubleListFromElement :: LBS.ByteString -> Element -> Maybe [Double]
 getDoubleListFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
     case property of
-        ValueProperty value -> Nothing
+        ValueProperty _ -> Nothing
         ListProperty values -> return $ mapMaybe (\value -> case value of
             DoubleValue x -> Just x
             IntegerValue _ -> Nothing) values
@@ -290,7 +291,7 @@ getIntegerListFromElement :: LBS.ByteString -> Element -> Maybe [Integer]
 getIntegerListFromElement name (Element propertyMap) = do
     property <- Data.Map.lookup name propertyMap
     case property of
-        ValueProperty value -> Nothing
+        ValueProperty _ -> Nothing
         ListProperty values -> return $ mapMaybe (\value -> case value of
             DoubleValue _ -> Nothing
             IntegerValue x -> Just x) values
