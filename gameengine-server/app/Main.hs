@@ -42,7 +42,7 @@ main = do
     case configMaybe of
         Just config -> do
             mainloopIn <- atomically newTChan
-            forkIO (serverMainloop mainloopIn config)
+            _ <- forkIO (serverMainloop mainloopIn config)
             runTCPServer Nothing "4321" (connHandler mainloopIn)
 
         Nothing -> putStrLn "Couldn't load config file"
@@ -53,8 +53,6 @@ connHandler mainloopIn connection connInfo = do
     putStrLn ("New connection: " ++ show connInfo)
     sendToTChan mainloopIn (ReceiverMsg connInfo (ClientConnEstablished connection))
     connReceiver mainloopIn connection connInfo
-    where
-        ConnInfo uid _ = connInfo
 
 -- |Listens to a client
 connReceiver :: TChan MainloopMessage -> Socket -> ConnInfo -> IO ()
