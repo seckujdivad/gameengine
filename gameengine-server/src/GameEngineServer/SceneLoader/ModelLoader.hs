@@ -4,17 +4,15 @@ module GameEngineServer.SceneLoader.ModelLoader (UnloadedModel (..), loadModel) 
 
 import Prelude hiding (lookup)
 
-import Data.Aeson (FromJSON, parseJSON, (.:), (.:?), withObject)
+import Data.Aeson (FromJSON, parseJSON, (.:?), withObject)
 
 import Linear.V3 (V3 (V3))
 
 import Data.Maybe (fromMaybe)
-import Data.Map (Map, lookup, keys)
-
-import Control.Monad (mapM)
+import Data.Map (Map, lookup)
 
 import GameEngineServer.State.Scene.Model.Model (Model (..))
-import GameEngineServer.SceneLoader.VectorLoader (V3)
+import GameEngineServer.SceneLoader.VectorLoader ()
 import GameEngineServer.State.Scene.Model.Geometry (Geometry)
 
 
