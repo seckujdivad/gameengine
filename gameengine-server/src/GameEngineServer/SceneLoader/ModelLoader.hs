@@ -12,7 +12,7 @@ import Data.Maybe (fromMaybe)
 import Data.Map (Map, lookup)
 
 import GameEngineServer.State.Scene.Model.Model (Model (..))
-import GameEngineServer.SceneLoader.VectorLoader ()
+import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)
 import GameEngineServer.State.Scene.Model.Geometry (Geometry)
 
 
@@ -21,9 +21,14 @@ data UnloadedModel = UnloadedModel (V3 Double) (V3 Double) (V3 Double) String [S
 instance FromJSON UnloadedModel where
     parseJSON = withObject "UnloadedModel" $ \obj -> do
         identifierMaybe <- obj .:? "identifier"
-        positionMaybe <- obj .:? "position"
-        rotationMaybe <- obj .:? "rotation"
-        scaleMaybe <- obj .:? "scale"
+        positionMaybeWrapped <- obj .:? "position"
+        rotationMaybeWrapped <- obj .:? "rotation"
+        scaleMaybeWrapped <- obj .:? "scale"
+
+        let
+            positionMaybe = fmap extractJSONableV3 positionMaybeWrapped
+            rotationMaybe = fmap extractJSONableV3 rotationMaybeWrapped
+            scaleMaybe = fmap extractJSONableV3 scaleMaybeWrapped
 
         singleGeomMaybe <- obj .:? "model"
         singleGeomsMaybe <- obj .:? "model"
