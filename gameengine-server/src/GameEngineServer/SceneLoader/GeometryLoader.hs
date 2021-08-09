@@ -21,7 +21,7 @@ import Data.Maybe (fromMaybe, mapMaybe)
 
 import Data.ByteString.Lazy (readFile)
 
-import GameEngineServer.State.Scene.Model.Geometry (Geometry (..), invertNormals)
+import GameEngineServer.State.Scene.Model.Geometry (Geometry (..), invertNormals, snapVerticesToGrid)
 import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)
 import GameEngineServer.SceneLoader.PlyLoader.PlyLoader (loadPolygonalFromPLY)
 
@@ -126,7 +126,10 @@ loadGeometry rootPath geometryInfo = case geometryInfo of
         case loadedGeometryOrError of
             Left loadedGeometry -> return $ Just $ composedFunction loadedGeometry
                 where
-                    composedFunction = if plyInvertNormals then invertNormals else id
+                    composedFunction = (if plyInvertNormals then invertNormals else id)
+                        . (case plyGridSizeMaybe of
+                        Just gridSize -> snapVerticesToGrid gridSize
+                        Nothing -> id)
 
             Right loadingError -> do
                 putStrLn $ fullPath ++ ": "
