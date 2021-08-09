@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module GameEngineServer.SceneLoader.GeometryLoader () where
+module GameEngineServer.SceneLoader.GeometryLoader (GeometryInfoTable (..), GeometryInfo (..), createGeometryTable) where
+
+import Prelude hiding (readFile)
 
 import qualified Data.Map as Map
 
@@ -11,20 +13,23 @@ import Data.Aeson.Types (Parser)
 
 import Data.Text (Text)
 
-import System.FilePath (FilePath)
+import System.FilePath ((</>))
 
 import Linear.V3 (V3 (..))
 
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
 
-import GameEngineServer.State.Scene.Model.Geometry (Geometry (..))
-import GameEngineServer.SceneLoader.VectorLoader (V3)
+import Data.ByteString.Lazy (readFile)
+
+import GameEngineServer.State.Scene.Model.Geometry (Geometry (..), invertNormals)
+import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)
+import GameEngineServer.SceneLoader.PlyLoader.PlyLoader (loadPolygonalFromPLY)
 
 
 -- |Lookup table for mapping geometry names (found in scene files) to 'GeometryInfo' to be used for loading
-data GeometryTable =
+data GeometryInfoTable =
     -- |Lookup table for mapping geometry names (found in scene files) to 'GeometryInfo' to be used for loading
-    GeometryTable (Map.Map Text [GeometryInfo])
+    GeometryInfoTable (Map.Map Text [GeometryInfo])
 
 -- |Stores information to allow another function to load 'Geometry'
 data GeometryInfo =
@@ -36,38 +41,42 @@ data GeometryInfo =
         plygMerge :: Maybe Double
     }
 
-instance FromJSON GeometryTable where
+instance FromJSON GeometryInfoTable where
     parseJSON = withObject "GeometryTable" $ \obj -> do
         plysMaybe <- obj .:? "ply"
         geometryTable <- case plysMaybe of
-            Just plys -> withObject "GeometryTable PLYs" (\obj -> (loadPLYGeometryTable) (GeometryTable Map.empty) obj) plys
-            Nothing -> return $ GeometryTable Map.empty
+            Just plys -> withObject "GeometryTable PLYs" (\plyObj -> (loadPLYGeometryTable) (GeometryInfoTable Map.empty) plyObj) plys
+            Nothing -> return $ GeometryInfoTable Map.empty
         
         -- TODO: load BPTs
 
         return geometryTable
 
 -- |Load the "ply" section of the "models" section of a scene file
-loadPLYGeometryTable :: GeometryTable -> Object -> Parser GeometryTable
+loadPLYGeometryTable :: GeometryInfoTable -> Object -> Parser GeometryInfoTable
 loadPLYGeometryTable geometryTable obj = foldr (load) (return geometryTable) mapContents
     where
         mapContents = HashMap.toList obj
 
         -- |Load a single 'PLYGeometry' into the 'GeometryTable'
-        load :: (Text, Value) -> Parser GeometryTable -> Parser GeometryTable
+        load :: (Text, Value) -> Parser GeometryInfoTable -> Parser GeometryInfoTable
         load (key, value) geometryParser = withObject "PLY config" plyConfigParser value
             where
-                plyConfigParser :: Object -> Parser GeometryTable
-                plyConfigParser obj = do
-                    geometryTable <- geometryParser
-                    let GeometryTable geometryMap = geometryTable
+                plyConfigParser :: Object -> Parser GeometryInfoTable
+                plyConfigParser plyJSONObj = do
+                    geometryInfoTable <- geometryParser
+                    let GeometryInfoTable geometryMap = geometryInfoTable
                     
-                    plyPath <- obj .: "path"
-                    plyInvertNormalsMaybe <- obj .:? "invert normals"
-                    plyGrid <- obj .:? "grid"
-                    plyMergeGeometryDistance <- obj .:? "merge geometry distance"
-                    
+                    plyPath <- plyJSONObj .: "path"
+                    plyInvertNormalsMaybe <- plyJSONObj .:? "invert normals"
+                    plyGridWrapped <- plyJSONObj .:? "grid"
+                    plyMergeGeometryDistance <- plyJSONObj .:? "merge geometry distance"
+
                     let
+                        plyGrid = case plyGridWrapped of
+                            Just vector -> Just $ extractJSONableV3 vector
+                            Nothing -> Nothing
+                        
                         geometry = PLYGeometry {
                             plygPath = plyPath,
                             plygInvertNormals = fromMaybe False plyInvertNormalsMaybe,
@@ -81,4 +90,45 @@ loadPLYGeometryTable geometryTable obj = foldr (load) (return geometryTable) map
                             Just geometries -> Just $ geometry:geometries
                             Nothing -> Just [geometry]
 
-                    return $ GeometryTable $ Map.alter geometryInserter key geometryMap
+                    return $ GeometryInfoTable $ Map.alter geometryInserter key geometryMap
+
+-- |Lookup table for mapping geometry names onto 'Geometry'
+data GeometryTable =
+    -- |Lookup table for mapping geometry names onto 'Geometry'
+    GeometryTable (Map.Map Text [Geometry])
+
+-- |Construct a 'GeometryTable' from a 'GeometryInfoTable' and the root 'FilePath'
+createGeometryTable :: GeometryInfoTable -> FilePath -> IO GeometryTable
+createGeometryTable (GeometryInfoTable infoMap) rootPath = do
+    let
+        geometryMapMultipleIO = fmap (map (loadGeometry rootPath)) infoMap
+        geometryMapIOValues = fmap sequence geometryMapMultipleIO
+
+        translationFunc :: [(Text, IO [Maybe Geometry])] -> [(Text, [Geometry])] -> IO [(Text, [Geometry])]
+        translationFunc [] geometryMapListIO = return geometryMapListIO
+        translationFunc ((key, geometryListIO):remaining) geometryMapList = do
+            geometryList <- geometryListIO
+            let newGeometryMapList = (key, mapMaybe id geometryList):geometryMapList
+            finalGeometryMapList <- translationFunc remaining newGeometryMapList
+            return $ finalGeometryMapList
+    
+    geometryMapList <- translationFunc (Map.toList geometryMapIOValues) []
+    
+    return $ GeometryTable (Map.fromList geometryMapList)
+
+-- |Loads 'Geometry' from a root 'FilePath' and 'GeometryInfo'. When an error occurs, outputs it to console and returns 'Nothing'.
+loadGeometry :: FilePath -> GeometryInfo -> IO (Maybe Geometry)
+loadGeometry rootPath geometryInfo = case geometryInfo of
+    PLYGeometry plyPath plyInvertNormals plyGridSizeMaybe plyMergeDistanceMaybe -> do
+        let fullPath = rootPath </> plyPath
+        fileContents <- readFile fullPath
+        let loadedGeometryOrError = loadPolygonalFromPLY fileContents
+        case loadedGeometryOrError of
+            Left loadedGeometry -> return $ Just $ composedFunction loadedGeometry
+                where
+                    composedFunction = if plyInvertNormals then invertNormals else id
+
+            Right loadingError -> do
+                putStrLn $ fullPath ++ ": "
+                print loadingError
+                return Nothing
