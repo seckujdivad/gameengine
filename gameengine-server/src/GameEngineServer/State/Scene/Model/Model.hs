@@ -1,4 +1,4 @@
-module GameEngineServer.State.Scene.Model.Model (Model (Model)) where
+module GameEngineServer.State.Scene.Model.Model (Model (..)) where
 
 import Linear.V3 (V3)
 

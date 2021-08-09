@@ -26,11 +26,11 @@ data ClientApplicator =
     ClientApplicator (Client -> IO (Either (Maybe Client) String))
 
 instance Semigroup ClientApplicator where
-    ClientApplicator left <> ClientApplicator right = ClientApplicator $ \client -> do
-        leftResult <- left client
+    ClientApplicator left <> ClientApplicator right = ClientApplicator $ \inputClient -> do
+        leftResult <- left inputClient
         case leftResult of
-            Left clientMaybe -> case clientMaybe of
-                Just client -> right client
+            Left clientAfterLeftMaybe -> case clientAfterLeftMaybe of
+                Just clientAfterLeft -> right clientAfterLeft
                 Nothing -> return leftResult
             Right _ -> return leftResult
 
@@ -52,7 +52,7 @@ clientApplicatorWrapper (ClientApplicator clientApplicator) client = do
     clientMaybeOrError <- clientApplicator client
     case clientMaybeOrError of
         Left clientMaybe -> case clientMaybe of
-            Just client -> return $ Just client
+            Just newClient -> return $ Just newClient
             Nothing -> do
                 putStrLn (showClientMessage client "dropping connection")
                 closeConnection connection

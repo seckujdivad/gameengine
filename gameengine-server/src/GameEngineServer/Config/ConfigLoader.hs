@@ -8,7 +8,7 @@ import System.FilePath ((</>))
 import Data.Aeson (decode)
 import Data.ByteString.Lazy (ByteString, readFile)
 
-import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
+import GameEngineServer.Config.Config (Config (..))
 
 
 {-|
@@ -25,8 +25,8 @@ loadConfigString = do
             defaultConfigPath <- defaultconfigPath
             defaultConfigExists <- doesFileExist defaultConfigPath
             if defaultConfigExists then do
-                configPath <- configPath
-                copyFile defaultConfigPath configPath
+                configPathExtracted <- configPath
+                copyFile defaultConfigPath configPathExtracted
                 loadCustomConfig
             else
                 return Nothing
@@ -34,12 +34,12 @@ loadConfigString = do
     where
         loadCustomConfig :: IO (Maybe ByteString)
         loadCustomConfig = do
-            configPath <- configPath
-            configExists <- doesFileExist configPath
+            configPathExtracted <- configPath
+            configExists <- doesFileExist configPathExtracted
             if configExists then do
-                permissions <- getPermissions configPath
+                permissions <- getPermissions configPathExtracted
                 if readable permissions then do
-                    fileContents <- readFile configPath
+                    fileContents <- readFile configPathExtracted
                     return $ Just $ fileContents
                 else
                     return Nothing

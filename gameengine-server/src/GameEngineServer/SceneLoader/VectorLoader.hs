@@ -2,7 +2,7 @@
 
 module GameEngineServer.SceneLoader.VectorLoader (V1, V2, V3, V4) where
 
-import Data.Aeson (FromJSON, parseJSON, (.:), Value (..))
+import Data.Aeson (FromJSON, parseJSON, Value (..))
 import Data.Aeson.Types (typeMismatch, Parser)
 
 import Linear.V1 (V1 (V1))
@@ -15,17 +15,13 @@ import Linear.V4 (V4 (V4))
 parseFixedSize :: FromJSON a => Int -> Value -> Parser [a]
 parseFixedSize n (Array jsonValue) = do
     values <- parseJSON (Array jsonValue)
-    if length values == n then
-        return values
-    else
-        typeMismatch (show n ++ "D vector") (Array jsonValue)
-
+    case length values == n of
+        True -> return values
+        False -> typeMismatch (show n ++ "D vector") (Array jsonValue)
 parseFixedSize n (Number jsonValue) = do
     value <- parseJSON (Number jsonValue)
     return $ map (const value) [1..n]
-
 parseFixedSize n jsonValue = typeMismatch (show n ++ "D vector") jsonValue
-
 
 instance FromJSON a => FromJSON (V1 a) where
     parseJSON jsonValue = do

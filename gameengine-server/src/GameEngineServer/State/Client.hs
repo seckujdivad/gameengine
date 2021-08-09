@@ -1,4 +1,4 @@
-module GameEngineServer.State.Client (Client (Client), getClientIdentifier, showClientMessage) where
+module GameEngineServer.State.Client (Client (..), getClientIdentifier, showClientMessage) where
 
 import Network.Socket (Socket)
 

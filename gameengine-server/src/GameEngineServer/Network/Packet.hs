@@ -2,12 +2,12 @@ module GameEngineServer.Network.Packet (Packet (..), serialise, deserialise, Pac
 
 import qualified Data.ByteString
 import qualified Data.ByteString.Lazy
-import Data.ByteString.Char8 (pack, unpack, readInteger)
+import Data.ByteString.Char8 (unpack)
 import Data.ByteString.Builder (toLazyByteString, Builder, string8, word8, int32LE, char8)
-import Data.Word (Word8)
-import Data.Int (Int32)
-import Data.Char (chr)
-import Data.Binary.Get (Get, runGet, getWord8, getInt32le, getRemainingLazyByteString)
+
+import Data.Binary.Get (Get, runGet, getWord8, getRemainingLazyByteString)
+
+import Data.Int (Int64)
 
 {-
 Checklist for adding new Packet types:
@@ -41,7 +41,7 @@ instance Show Packet where
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
-serialise packet = if body_length > (2 ^ 8) then error "Body must contain less than 256 bytes" else (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
+serialise packet = if body_length > (2 ^ (8 :: Int64)) then error "Body must contain less than 256 bytes" else (Data.ByteString.Lazy.toStrict . Data.ByteString.Lazy.concat) [header, body]
     where
         body = toLazyByteString (mappend ((word8 . packetToNum) packet) (serialiseInner packet))
         body_length = Data.ByteString.Lazy.length body

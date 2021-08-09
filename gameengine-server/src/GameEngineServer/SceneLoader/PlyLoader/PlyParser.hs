@@ -2,7 +2,9 @@
 
 module GameEngineServer.SceneLoader.PlyLoader.PlyParser (parser, Parse (..), ElementType (..), ParseError (..)) where
 
-import Data.ByteString.Lazy (ByteString, reverse, null, tail, head, pack, unpack)
+import Prelude hiding (lines)
+
+import Data.ByteString.Lazy (ByteString, reverse, null, tail)
 import Data.ByteString.Lazy.Char8 (splitWith, head, readInteger)
 
 import Data.Maybe (catMaybes)

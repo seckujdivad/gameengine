@@ -42,7 +42,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -Werror
+    - -Wall
     - -Wincomplete-uni-patterns
     dependencies:
     - gameengine-server

@@ -2,19 +2,16 @@ module GameEngineServer.Mainloop.Mainloop (serverMainloop) where
 
 import Control.Concurrent.STM.TChan (TChan)
 
-import Data.Map (Map)
 import Data.Map.Strict (insert, update, lookup)
-
-import Network.Socket (Socket)
 
 import GameEngineServer.AtomicTChan (readFromTChan)
 import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
-import GameEngineServer.Network.Packet (Packet (..), PacketType (..), packetToPacketType)
+import GameEngineServer.Network.Packet (Packet (..), packetToPacketType)
 import GameEngineServer.Mainloop.MainloopMessage (MainloopMessage (..), ReceiverMsgInner (..))
 import GameEngineServer.Mainloop.MainloopClientApplicators (closeClient, sendPacketToClient)
 import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 import GameEngineServer.State.ServerState (ServerState (..), initialServerState)
-import GameEngineServer.State.ClientApplicators (ClientApplicator, applyToAllClients, applyToClient)
+import GameEngineServer.State.ClientApplicators (applyToAllClients, applyToClient)
 import GameEngineServer.State.Client (Client (Client), getClientIdentifier, showClientMessage)
 
 
@@ -37,11 +34,9 @@ serverMainloopInner mainloopIn config serverState = do
         
         _ -> case Data.Map.Strict.lookup uid (ssClients serverState) of
             Just client -> case msgInner of
-                ClientConnEstablished connection -> error "This case should be handled above - this line only exists to silence warnings"
+                ClientConnEstablished _ -> error "This case should be handled above - this line only exists to silence warnings"
 
-                PackedReceived packet -> case Data.Map.Strict.lookup uid (ssClients serverState) of
-                    Just client -> handlePacket mainloopIn config serverState client packet
-                    Nothing -> putStrLn $ "Packet received for client with UID " ++ show uid ++ ", but this client doesn't exist"
+                PackedReceived packet -> handlePacket mainloopIn config serverState client packet
                 
                 ReceiverException errorMsg -> do
                     putStrLn $ showClientMessage client "listener threw an error - " ++ errorMsg

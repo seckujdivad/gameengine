@@ -16,7 +16,7 @@ import GameEngineServer.Network.Packet (Packet, serialise)
 sendPacket :: Socket -> Packet -> IO (Maybe String)
 sendPacket socket packet = catch (do
         sendPacketInner socket packet
-        return Nothing) (\error -> return (Just (show (error :: IOException))))
+        return Nothing) (\sendError -> return (Just (show (sendError :: IOException))))
 
 -- |Sends a 'Packet' to a 'Socket'
 sendPacketInner :: Socket -> Packet -> IO ()

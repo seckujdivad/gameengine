@@ -4,7 +4,6 @@ import GameEngineServer.State.ClientApplicators (ClientApplicator (..))
 import GameEngineServer.State.Client (Client (Client))
 import GameEngineServer.Network.Packet (Packet (..))
 import GameEngineServer.Network.SocketOperations (sendPacket)
-import GameEngineServer.Network.TCPServer (ConnInfo (ConnInfo))
 
 
 closeClient :: ClientApplicator

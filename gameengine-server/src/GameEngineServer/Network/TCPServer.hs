@@ -1,4 +1,4 @@
-module GameEngineServer.Network.TCPServer (runTCPServer, ConnInfo (ConnInfo)) where
+module GameEngineServer.Network.TCPServer (runTCPServer, ConnInfo (..)) where
 
 import Network.Socket (ServiceName, SocketType(Stream), AddrInfo(addrFlags, addrSocketType),
     HostName, defaultHints, getAddrInfo, AddrInfoFlag(AI_PASSIVE), Socket, SockAddr, Socket, HostName, ServiceName, withSocketsDo,
@@ -8,7 +8,6 @@ import Network.Socket (ServiceName, SocketType(Stream), AddrInfo(addrFlags, addr
 
 import Control.Exception (bracket)
 import Control.Concurrent (forkFinally)
-import Control.Monad (forever)
 
 
 -- |Store information about a connection
@@ -38,7 +37,7 @@ connAccepter :: (Socket -> ConnInfo -> IO ()) -> Integer -> Socket -> IO ()
 connAccepter handlerFunc uid sock = do
     (connection, address) <- accept sock --accept all incoming connections
     let connInfo = ConnInfo uid address
-    forkFinally (handlerFunc connection connInfo) (const $ gracefulClose connection 5000)
+    _ <- forkFinally (handlerFunc connection connInfo) (const $ gracefulClose connection 5000)
     connAccepter handlerFunc (uid + 1) sock
 
 -- |Create a 'Socket' that is listening on the given address

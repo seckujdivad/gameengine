@@ -12,7 +12,7 @@ function-by-function basis.
 
 import Data.Map (Map, empty, update, lookup, keys)
 
-import GameEngineServer.State.Client (Client (Client))
+import GameEngineServer.State.Client (Client)
 import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 
 
@@ -35,10 +35,10 @@ applyToAllClients clientProcessor serverState = foldl clientFolder (return serve
     where
         clientFolder :: IO ServerState -> Integer -> IO ServerState
         clientFolder serverStateIO uid = do
-            serverState <- serverStateIO
-            newServerStateMaybe <- applyToClient clientProcessor uid serverState
-            case newServerStateMaybe of
-                Just newServerState -> return newServerState
+            newServerState <- serverStateIO
+            resultingServerStateMaybe <- applyToClient clientProcessor uid newServerState
+            case resultingServerStateMaybe of
+                Just resultingServerState -> return resultingServerState
                 Nothing -> error "This UID should exist"
 
 -- |Apply a function to a 'Client', removing it if 'Nothing' is returned and returning 'Nothing' if the UID doesn't exist
