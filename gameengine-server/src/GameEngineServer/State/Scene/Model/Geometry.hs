@@ -1,6 +1,9 @@
-module GameEngineServer.State.Scene.Model.Geometry (Geometry (..), Face (..), invertNormals, snapVerticesToGrid) where
+module GameEngineServer.State.Scene.Model.Geometry (Geometry (..), Face (..), invertNormals, snapVerticesToGrid, mergeVertices) where
 
 import Linear.V3 (V3 (..))
+import Linear.Metric (distance)
+
+import Data.List (find)
 
 
 -- |A data type for storing geometry
@@ -30,6 +33,22 @@ roundToIncrement increment value = (fpRound (value * increment)) / increment
 -- |Floating point rounding of 'RealFrac's (i.e. 'Double' and 'Float'). Inefficient, but the best implementation I can come up with.
 fpRound :: (RealFrac a, Num b) => a -> b
 fpRound x = fromIntegral (round x :: Integer)
+
+-- |Merge all vertices together that are less than a certain distance apart into one vertex (i.e. they have the same value). The value is guaranteed to be bounded by the vertices that make up the set of vertices that have been merged into that value
+mergeVertices :: Double -> Geometry -> Geometry
+mergeVertices mergeDistance (Polygonal faces) = Polygonal resultingFaces
+    where
+        (resultingFaces, _) = foldl faceFunction ([], []) faces
+
+        faceFunction :: ([Face], [V3 Double]) -> Face -> ([Face], [V3 Double])
+        faceFunction (existingFaces, vertexPool) newFace = (faces, vertexPool) -- todo: complete
+            where
+                processVertex :: [V3 Double] -> V3 Double -> ([V3 Double], V3 Double)
+                processVertex pool vertex = case vertexInRangeMaybe of
+                        Just vertexInRange -> (pool, vertexInRange)
+                        Nothing -> (vertex:pool, vertex)
+                    where
+                        vertexInRangeMaybe = find (\poolVertex -> (distance poolVertex vertex) < mergeDistance) pool
 
 -- |Represents one face of a 'Polygonal'
 data Face =
