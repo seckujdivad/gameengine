@@ -41,14 +41,15 @@ mergeVertices mergeDistance (Polygonal faces) = Polygonal resultingFaces
         (resultingFaces, _) = foldl faceFunction ([], []) faces
 
         faceFunction :: ([Face], [V3 Double]) -> Face -> ([Face], [V3 Double])
-        faceFunction (existingFaces, vertexPool) newFace = (faces, vertexPool) -- todo: complete
+        faceFunction (existingFaces, vertexPool) face = ((face {faceVertices = newVertices}):existingFaces, newVertexPool)
             where
-                processVertex :: [V3 Double] -> V3 Double -> ([V3 Double], V3 Double)
-                processVertex pool vertex = case vertexInRangeMaybe of
-                        Just vertexInRange -> (pool, vertexInRange)
-                        Nothing -> (vertex:pool, vertex)
-                    where
-                        vertexInRangeMaybe = find (\poolVertex -> (distance poolVertex vertex) < mergeDistance) pool
+                (newVertexPool, newVertices) = foldl vertexFold (vertexPool, []) (faceVertices face)
+
+                vertexFold :: ([V3 Double], [V3 Double]) -> V3 Double -> ([V3 Double], [V3 Double])
+                vertexFold ([], currentVertices) vertex = ([vertex], vertex:currentVertices)
+                vertexFold (pool, currentVertices) vertex = case find (\poolVertex -> (distance poolVertex vertex) < mergeDistance) pool of
+                        Just vertexInRange -> (pool, vertexInRange:currentVertices)
+                        Nothing -> (vertex:pool, vertex:currentVertices)
 
 -- |Represents one face of a 'Polygonal'
 data Face =
