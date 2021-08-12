@@ -18,7 +18,7 @@ data Model =
         mdlScale :: V3 Double,
         mdlName :: String,
         mdlGeometries :: [Geometry]
-    }
+    } deriving (Show)
 
 instance Positionable Model where
     setPosition model position = model {mdlPosition = position}

@@ -8,4 +8,4 @@ data Scene =
     -- |Represents a Scene (that is rendered by clients)
     Scene {
         scnModels :: [Model]
-    }
+    } deriving (Show)

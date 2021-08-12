@@ -13,14 +13,20 @@ import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 import GameEngineServer.State.ServerState (ServerState (..), initialServerState)
 import GameEngineServer.State.ClientApplicators (applyToAllClients, applyToClient)
 import GameEngineServer.State.Client (Client (Client), getClientIdentifier, showClientMessage)
+import GameEngineServer.SceneLoader.SceneLoader (loadScene)
 
 
 -- |Handles inter-client communication and the server state
 serverMainloop :: TChan MainloopMessage -> Config -> IO ()
 serverMainloop mainloopIn config = do
-    putStrLn "Awaiting connections..."
-    serverMainloopInner mainloopIn config (initialServerState config)
-    putStrLn "Mainloop stopped"
+    sceneMaybe <- loadScene (cfglvlRoot $ cfgInitialScene config) (cfglvlFile $ cfgInitialScene config)
+    case sceneMaybe of
+        Just scene -> do
+            print scene
+            putStrLn "Awaiting connections..."
+            serverMainloopInner mainloopIn config ((initialServerState config) {ssScene = scene})
+            putStrLn "Mainloop stopped"
+        Nothing -> putStrLn "Couldn't load scene"
 
 serverMainloopInner :: TChan MainloopMessage -> Config -> ServerState -> IO ()
 serverMainloopInner mainloopIn config serverState = do

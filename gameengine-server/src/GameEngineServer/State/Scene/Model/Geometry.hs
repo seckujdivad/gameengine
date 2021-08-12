@@ -9,7 +9,7 @@ import Data.List (find)
 -- |A data type for storing geometry
 data Geometry =
     -- |Geometry made up of 'Polygon's
-    Polygonal [Face]
+    Polygonal [Face] deriving (Show)
 
 -- |Invert the normals of a 'Geometry'
 invertNormals :: Geometry -> Geometry
@@ -59,4 +59,4 @@ data Face =
         faceVertices :: [V3 Double],
         -- |Normal vector of the face
         faceNormal :: V3 Double
-    }
+    } deriving (Show)

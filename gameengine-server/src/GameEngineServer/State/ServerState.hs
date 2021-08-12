@@ -14,6 +14,7 @@ import Data.Map (Map, empty, update, lookup, keys)
 
 import GameEngineServer.State.Client (Client)
 import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
+import GameEngineServer.State.Scene.Scene (Scene (..))
 
 
 -- |Describes the current state of the server
@@ -22,12 +23,13 @@ data ServerState =
     ServerState {
         -- |'Client's that are connected to the server
         ssClients :: Map Integer Client,
-        ssCurrentLevel :: CfgLevel
+        ssCurrentLevel :: CfgLevel,
+        ssScene :: Scene
     }
 
 -- |The 'ServerState' when the server starts
 initialServerState :: Config -> ServerState
-initialServerState config = ServerState empty (cfgInitialScene config)
+initialServerState config = ServerState empty (cfgInitialScene config) (Scene [])
 
 -- |Apply a function to each 'Client'. If 'Nothing' is returned, that 'Client' is removed (cleanup is not handled)
 applyToAllClients :: (Client -> IO (Maybe Client)) -> ServerState -> IO ServerState
