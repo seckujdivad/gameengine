@@ -4,7 +4,7 @@ module GameEngineServer.SceneLoader.SceneLoader (loadScene) where
 
 import Prelude hiding (readFile)
 
-import Data.Aeson (FromJSON, parseJSON, (.:), withObject, decode, withArray)
+import Data.Aeson (FromJSON, parseJSON, (.:), withObject, withArray, eitherDecode)
 
 import System.FilePath ((</>))
 
@@ -41,9 +41,11 @@ instance FromJSON UnloadedScene where
 loadScene :: FilePath -> FilePath -> IO (Maybe Scene)
 loadScene rootPath configPath = do
     sceneConfig <- readFile $ rootPath </> configPath
-    case decode sceneConfig of
-        Just unloadedScene -> do
+    case eitherDecode sceneConfig of
+        Left errorMsg -> do
+            putStrLn errorMsg
+            return Nothing
+        Right unloadedScene -> do
             let UnloadedScene unloadedModels geometryInfoTable = unloadedScene
             geometryTable <- createGeometryTable geometryInfoTable rootPath
             return $ Just $ Scene (mapMaybe (loadModel geometryTable) unloadedModels)
-        Nothing -> return Nothing
