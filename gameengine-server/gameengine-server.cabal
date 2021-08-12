@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 681f17da3aade95385c943c93566615df3426771d7d99b5dc5f75b6639cbb198
+-- hash: 1a4433dc8b99d3e3994f33e2f735eed4cf65ea8895706de0f291a7bd3e5ce7ec
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -67,6 +67,7 @@ library
     , stm >=2.5
     , text ==1.2.*
     , unordered-containers ==0.2.*
+    , vector ==0.12.*
   default-language: Haskell2010
 
 executable gameengine-server
@@ -92,6 +93,7 @@ executable gameengine-server
     , stm >=2.5
     , text ==1.2.*
     , unordered-containers ==0.2.*
+    , vector ==0.12.*
   default-language: Haskell2010
 
 test-suite gameengine-server-test
@@ -117,4 +119,5 @@ test-suite gameengine-server-test
     , stm >=2.5
     , text ==1.2.*
     , unordered-containers ==0.2.*
+    , vector ==0.12.*
   default-language: Haskell2010
