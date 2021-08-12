@@ -9,14 +9,20 @@ import Data.Aeson (FromJSON, parseJSON, (.:?), withObject)
 import Linear.V3 (V3 (V3))
 
 import Data.Maybe (fromMaybe)
-import Data.Map (Map, lookup)
+
+import Data.Map (lookup)
+
+import Data.Text (pack)
 
 import GameEngineServer.State.Scene.Model.Model (Model (..))
 import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)
-import GameEngineServer.State.Scene.Model.Geometry (Geometry)
+import GameEngineServer.SceneLoader.GeometryLoader (GeometryTable (..))
 
 
-data UnloadedModel = UnloadedModel (V3 Double) (V3 Double) (V3 Double) String [String]
+-- |Information on how to load a model that hasn't yet been loaded
+data UnloadedModel =
+    -- |Information on how to load a model that hasn't yet been loaded
+    UnloadedModel (V3 Double) (V3 Double) (V3 Double) String [String]
 
 instance FromJSON UnloadedModel where
     parseJSON = withObject "UnloadedModel" $ \obj -> do
@@ -44,7 +50,7 @@ joinMaybe (Just x) xs = x:xs
 joinMaybe Nothing xs = xs
 
 -- |Look up the unloaded geometry of an 'UnloadedModel', turning it into a 'Model' (failing if any model strings can't be resolved)
-loadModel :: Map String Geometry -> UnloadedModel -> Maybe Model
-loadModel loadedGeometry (UnloadedModel position rotation scale identifier geometryNames) = do
-    geometries <- mapM (\name -> lookup name loadedGeometry) geometryNames
-    return $ Model position rotation scale identifier geometries
+loadModel :: GeometryTable -> UnloadedModel -> Maybe Model
+loadModel (GeometryTable loadedGeometry) (UnloadedModel position rotation scale identifier geometryNames) = do
+    geometries <- mapM (\name -> lookup (pack name) loadedGeometry) geometryNames
+    return $ Model position rotation scale identifier (concat geometries)
