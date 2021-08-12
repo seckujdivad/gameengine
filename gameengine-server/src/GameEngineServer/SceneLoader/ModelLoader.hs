@@ -17,6 +17,7 @@ import Data.Text (pack)
 import GameEngineServer.State.Scene.Model.Model (Model (..))
 import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)
 import GameEngineServer.SceneLoader.GeometryLoader (GeometryTable (..))
+import GameEngineServer.SceneLoader.ListOrValue (listOrValueToList)
 
 
 -- |Information on how to load a model that hasn't yet been loaded
@@ -36,18 +37,12 @@ instance FromJSON UnloadedModel where
             rotationMaybe = fmap extractJSONableV3 rotationMaybeWrapped
             scaleMaybe = fmap extractJSONableV3 scaleMaybeWrapped
 
-        singleGeomMaybe <- obj .:? "model"
-        singleGeomsMaybe <- obj .:? "model"
-        pluralGeomMaybe <- obj .:? "models"
-        pluralGeomsMaybe <- obj .:? "models"
+        singleGeoms <- obj .:? "model"
+        pluralGeoms <- obj .:? "models"
 
-        let geometryNames = joinMaybe singleGeomMaybe $ joinMaybe pluralGeomMaybe $ (fromMaybe [] singleGeomsMaybe) ++ (fromMaybe [] pluralGeomsMaybe)
+        let geometryNames = (fromMaybe [] (fmap listOrValueToList singleGeoms)) ++ (fromMaybe [] (fmap listOrValueToList pluralGeoms))
 
         return $ UnloadedModel (fromMaybe (V3 0 0 0) positionMaybe) (fromMaybe (V3 0 0 0) rotationMaybe) (fromMaybe (V3 0 0 0) scaleMaybe) (fromMaybe "" identifierMaybe) geometryNames
-
-joinMaybe :: Maybe a -> [a] -> [a]
-joinMaybe (Just x) xs = x:xs
-joinMaybe Nothing xs = xs
 
 -- |Look up the unloaded geometry of an 'UnloadedModel', turning it into a 'Model' (failing if any model strings can't be resolved)
 loadModel :: GeometryTable -> UnloadedModel -> Maybe Model
