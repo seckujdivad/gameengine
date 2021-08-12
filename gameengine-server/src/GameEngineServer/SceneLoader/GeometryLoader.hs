@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module GameEngineServer.SceneLoader.GeometryLoader (GeometryInfoTable (..), GeometryInfo (..), createGeometryTable) where
+module GameEngineServer.SceneLoader.GeometryLoader (GeometryInfoTable (..), GeometryInfo (..), createGeometryTable, GeometryTable (..)) where
 
 import Prelude hiding (readFile)
 
@@ -45,7 +45,7 @@ instance FromJSON GeometryInfoTable where
     parseJSON = withObject "GeometryTable" $ \obj -> do
         plysMaybe <- obj .:? "ply"
         geometryTable <- case plysMaybe of
-            Just plys -> withObject "GeometryTable PLYs" (\plyObj -> (loadPLYGeometryTable) (GeometryInfoTable Map.empty) plyObj) plys
+            Just plys -> withObject "GeometryTable PLYs" (\plyObj -> loadPLYGeometryTable plyObj) plys
             Nothing -> return $ GeometryInfoTable Map.empty
         
         -- TODO: load BPTs
@@ -53,8 +53,8 @@ instance FromJSON GeometryInfoTable where
         return geometryTable
 
 -- |Load the "ply" section of the "models" section of a scene file
-loadPLYGeometryTable :: GeometryInfoTable -> Object -> Parser GeometryInfoTable
-loadPLYGeometryTable geometryTable obj = foldr (load) (return geometryTable) mapContents
+loadPLYGeometryTable :: Object -> Parser GeometryInfoTable
+loadPLYGeometryTable obj = foldr (load) (return $ GeometryInfoTable Map.empty) mapContents
     where
         mapContents = HashMap.toList obj
 
