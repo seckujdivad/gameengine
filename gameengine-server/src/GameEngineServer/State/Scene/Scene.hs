@@ -7,5 +7,6 @@ import GameEngineServer.State.Scene.Model.Model (Model (..))
 data Scene =
     -- |Represents a Scene (that is rendered by clients)
     Scene {
+        -- |'Model's contained by the scene
         scnModels :: [Model]
     } deriving (Show)
