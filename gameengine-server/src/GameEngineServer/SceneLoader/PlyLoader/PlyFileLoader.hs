@@ -61,11 +61,11 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
         PlyParser.Body byteStrings -> case loadElement lineNumber headerElement byteStrings of
                 Left element -> case moveToNextElement of
                         True -> case null headerElements of
-                            True -> doNextParse $ EndOfFile newPLyFile
-                            False -> doNextParse $ Body headerElements 0 newPLyFile
-                        False -> doNextParse $ Body (headerElement:headerElements) (numOfElementProcessed + 1) newPLyFile
+                            True -> doNextParse $ EndOfFile newPLYFile
+                            False -> doNextParse $ Body headerElements 0 newPLYFile
+                        False -> doNextParse $ Body (headerElement:headerElements) (numOfElementProcessed + 1) newPLYFile
                     where
-                        newPLyFile = PLYFile (if member elementName elementMap then adjust (\elements -> element:elements) elementName elementMap else insert elementName [element] elementMap)
+                        newPLYFile = PLYFile (if member elementName elementMap then adjust (\elements -> element:elements) elementName elementMap else insert elementName [element] elementMap)
                         moveToNextElement = numOfElementProcessed + 1 >= elementCount
                 
                 Right genError -> Right genError
