@@ -247,13 +247,13 @@ loadValue :: Int -> HeaderValue -> LBS.ByteString -> Either Value PLYFileGenerat
 loadValue lineNumber HeaderDoubleValue byteString = case (readSigned readDecimal) $ LBS.toStrict byteString of
     Just (value, remainingByteString) -> case LBS.null $ LBS.fromStrict remainingByteString of
         True -> Left $ DoubleValue value
-        False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable $ "Bytes were left over after parsing double value: " ++ show remainingByteString
+        False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable $ "Bytes were left over after parsing double value: " ++ show byteString ++ " -> " ++ show remainingByteString
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
 
 loadValue lineNumber HeaderIntegerValue byteString = case (readInteger byteString) of
     Just (value, remainingByteString) -> case LBS.null remainingByteString of
         True -> Left $ IntegerValue value
-        False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable $ "Bytes were left over after parsing integer value: " ++ show remainingByteString
+        False -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable $ "Bytes were left over after parsing integer value: " ++ show byteString ++ " -> " ++ show remainingByteString
     Nothing -> Right $ PLYFileGenerationError (Just lineNumber) $ ValueUnparseable "Couldn't parse value"
 
 -- |Access a 'Double' property from an 'Element'. Returns 'Nothing' if the property is not a property containing a single real number.
