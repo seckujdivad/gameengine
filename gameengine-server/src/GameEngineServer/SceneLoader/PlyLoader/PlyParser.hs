@@ -68,7 +68,7 @@ parser file = catMaybes parsedLinesWithIndexMaybes
         parsedLineMaybes = map parseLine lines
         parsedLinesWithIndexMaybes :: [Maybe (Int, Parse)]
         parsedLinesWithIndexMaybes = mapWithIndex (\(lineNum, parseMaybe) -> case parseMaybe of
-            Just parse -> Just (lineNum, parse)
+            Just parse -> Just (lineNum + 1, parse)
             Nothing -> Nothing) parsedLineMaybes
 
 -- |Check if the last element in a 'ByteString' is the given 'Char'. If the 'ByteString' is empty, return 'False'
