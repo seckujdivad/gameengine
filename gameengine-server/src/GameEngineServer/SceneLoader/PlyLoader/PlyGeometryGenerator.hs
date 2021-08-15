@@ -61,10 +61,10 @@ plyVertexFromVertexElement element = do
 geometryFromValues :: [PLYVertex] -> [[Integer]] -> Geometry
 geometryFromValues allVertices faceVertexIndices = Polygonal faces
     where
-        verticesByFace = map (map $ genericIndex allVertices) faceVertexIndices
+        faces = map (\indices -> faceFromValues $ map (genericIndex allVertices) indices) faceVertexIndices
 
-        faceVertexNormals = map (map plyvNormal) verticesByFace
-        faceNormalSums = map (foldr (+) (V3 0 0 0)) faceVertexNormals
-        faceNormals = map normalize faceNormalSums
-
-        faces = zipWith (\vertices normal -> Face {faceNormal = normal, faceVertices = map plyvPos vertices}) verticesByFace faceNormals
+-- |Generate a 'Face' from a list of 'PLYVertex'
+faceFromValues :: [PLYVertex] -> Face
+faceFromValues vertices = Face {faceNormal = normalize normal, faceVertices =  map plyvPos vertices}
+    where
+        normal = foldr (\left right -> plyvNormal left + right) (V3 0 0 0) vertices
