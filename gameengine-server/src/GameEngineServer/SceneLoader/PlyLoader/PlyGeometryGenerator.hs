@@ -13,14 +13,12 @@ import Data.Maybe (mapMaybe, fromMaybe)
 import Data.List (genericIndex)
 
 import GameEngineServer.State.Scene.Model.Geometry (Geometry (Polygonal), Face (..))
-import GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PLYFileGenerationError (..), PLYFile (..), Element (..), getDoubleFromElement, getIntegerListFromElement)
-import GameEngineServer.SceneLoader.PlyLoader.PlyParser (Parse)
+import GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (PLYFileGenerationError (..), PLYFile (..), Element (..), getDoubleFromElement, getIntegerListFromElement)
 
 
 -- |Generates 'Polygonal' 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
-generateGeometry :: [(Int, Parse)] -> Either Geometry (Either String PLYFileGenerationError)
-generateGeometry parses = case generatePLYFile parses of
-    Left (PLYFile elementMap) -> case Data.Map.lookup "vertex" elementMap of --Right $ PLYFileGenerationError Nothing UnexpectedEOF -- TODO
+generateGeometry :: PLYFile -> Either Geometry (Either String PLYFileGenerationError)
+generateGeometry (PLYFile elementMap) = case Data.Map.lookup "vertex" elementMap of
         Just verticesElements -> case Data.Map.lookup "face" elementMap of
             Just faceElements -> Left $ geometryFromValues vertices vertexIndices
                 where
@@ -29,7 +27,6 @@ generateGeometry parses = case generatePLYFile parses of
 
             Nothing -> Right $ Left "PLY file must contain element \"vertex_indices\""
         Nothing -> Right $ Left "PLY file must contain element \"vertex\""
-    Right genError -> Right $ Right genError
 
 -- |Utility type that contains a vertex from the Blender layout of .PLY files
 data PLYVertex =

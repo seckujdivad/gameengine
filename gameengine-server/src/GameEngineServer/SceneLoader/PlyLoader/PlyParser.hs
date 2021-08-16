@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module GameEngineServer.SceneLoader.PlyLoader.PlyParser (parser, Parse (..), ElementType (..), ParseError (..)) where
+module GameEngineServer.SceneLoader.PlyLoader.PlyParser (plyParser, Parse (..), ElementType (..), ParseError (..)) where
 
 import Prelude hiding (lines)
 
@@ -58,8 +58,8 @@ data ParseError =
     deriving (Show)
 
 -- |Parse a 'ByteString' containing a PLY file into a list of 'Parse' objects representing every meaningful line alongside their line number
-parser :: ByteString -> [(Int, Parse)]
-parser file = catMaybes parsedLinesWithIndexMaybes
+plyParser :: ByteString -> [(Int, Parse)]
+plyParser file = catMaybes parsedLinesWithIndexMaybes
     where
         linesWithReturn = splitWith (== '\n') file --might contain carriage returns
         hasCarriageReturn = or $ map (byteStringEndsInChar '\r') linesWithReturn -- check file for carriage returns
