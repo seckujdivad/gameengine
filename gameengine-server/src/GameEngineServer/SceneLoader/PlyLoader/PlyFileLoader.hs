@@ -15,7 +15,7 @@ import GameEngineServer.SceneLoader.PlyLoader.PLYFile (PLYFile (..), Element (..
 -- |Generates 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
 generatePLYFile :: [(Int, PlyParser.Parse)] -> Either PLYFile PLYFileGenerationError
 generatePLYFile parses = case null parseErrors of
-        True -> generatePLYFileInner parses geometryGeneratorinitialState
+        True -> generatePLYFileInner parses geometryGeneratorInitialState
         False -> Right $ ParsingErrors parseErrors
     where
         parseErrors = mapMaybe (\(lineNumber, parse) -> case parse of
@@ -128,8 +128,8 @@ data GeometryGeneratorState =
     | EndOfFile PLYFile
 
 -- |Initial state of 'generatePLYFileInner'
-geometryGeneratorinitialState :: GeometryGeneratorState
-geometryGeneratorinitialState = Preamble False False
+geometryGeneratorInitialState :: GeometryGeneratorState
+geometryGeneratorInitialState = Preamble False False
 
 -- |Represents an element declaration from a .PLY file header. Contains the name of the element, the number of elements expected in the body and the properties of the element
 data HeaderElement =
