@@ -35,12 +35,11 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
                     generateError $ BadPreamble "Format was seen before FileType"
                 else
                     doNextParse (Preamble True formatSeen))
-        PlyParser.Format isCorrect -> if (not fileTypeSeen) || formatSeen then
-                generateError $ BadPreamble $ (if not fileTypeSeen then "Format appeared before FileType in the preamble" else "") ++ (if not fileTypeSeen && formatSeen then ". " else "") ++ (if formatSeen then "Format appeared twice in the preamble" else "")
-            else (if isCorrect then
-                    doNextParse (Header [])
-                else
-                    generateError $ BadPreamble "Incorrect format in preamble")
+        PlyParser.Format isCorrect -> case (not fileTypeSeen) || formatSeen of
+                True -> generateError $ BadPreamble $ (if not fileTypeSeen then "Format appeared before FileType in the preamble" else "") ++ (if not fileTypeSeen && formatSeen then ". " else "") ++ (if formatSeen then "Format appeared twice in the preamble" else "")
+                False -> case isCorrect of
+                    True -> doNextParse (Header [])
+                    False -> generateError $ BadPreamble "Incorrect format in preamble"
         _ ->  generateError $ BadPreamble "Preamble must only contain FileType and Format"
     
     Header headerElements -> case parse of
