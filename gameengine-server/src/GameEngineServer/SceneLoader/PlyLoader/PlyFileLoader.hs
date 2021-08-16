@@ -58,16 +58,22 @@ generatePLYFileInner ((lineNumber, parse):remainingParses) state = case state of
 
         _ -> generateError $ BadHeader "Header must only contain Element, Property, ListProperty or EndHeader"
     
-    Body (headerElement:headerElements) numOfElementProcessed (PLYFile elementMap) -> case parse of
+    Body (headerElement:headerElements) numOfElementProcessed plyFileWithoutElement -> case parse of
         PlyParser.Body byteStrings -> case loadElement lineNumber headerElement byteStrings of
                 Left element -> case moveToNextElement of
                         True -> case null headerElements of
-                            True -> doNextParse $ EndOfFile newPLYFile
-                            False -> doNextParse $ Body headerElements 0 newPLYFile
-                        False -> doNextParse $ Body (headerElement:headerElements) (numOfElementProcessed + 1) newPLYFile
+                            True -> doNextParse $ EndOfFile plyFileWithElement
+                            False -> doNextParse $ Body headerElements 0 plyFileWithElement
+                        False -> doNextParse $ Body (headerElement:headerElements) (numOfElementProcessed + 1) plyFileWithElement
                     where
-                        newPLYFile = PLYFile (if member elementName elementMap then adjust (\elements -> element:elements) elementName elementMap else insert elementName [element] elementMap)
                         moveToNextElement = numOfElementProcessed + 1 >= elementCount
+
+                        elementMapWithoutElement = plyfElements plyFileWithoutElement
+                        elementMapHasElementName = member elementName elementMapWithoutElement
+                        elementMapWithElement = case elementMapHasElementName of
+                            True -> adjust (\elements -> elements ++ [element]) elementName elementMapWithoutElement
+                            False -> insert elementName [element] elementMapWithoutElement
+                        plyFileWithElement = PLYFile elementMapWithElement
                 
                 Right genError -> Right genError
             where
