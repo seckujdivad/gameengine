@@ -2,13 +2,14 @@ module GameEngineServer.SceneLoader.PlyLoader.PlyFileLoader (generatePLYFile, PL
 
 import Data.Maybe (mapMaybe)
 
-import Data.Map (Map, empty, insert, adjust, member, lookup)
+import Data.Map (empty, insert, adjust, member, lookup)
 
 import qualified Data.ByteString.Lazy as LBS (ByteString, null, fromStrict, fromStrict, toStrict)
 import Data.ByteString.Lex.Fractional (readDecimal, readSigned)
 import Data.ByteString.Lazy.Char8 (readInteger)
 
 import qualified GameEngineServer.SceneLoader.PlyLoader.PlyParser as PlyParser (ParseError, Parse (..), ElementType (..))
+import GameEngineServer.SceneLoader.PlyLoader.PLYFile (PLYFile (..), Element (..), Property (..), Value (..), emptyPLYFile)
 
     
 -- |Generates 'Geometry' from a parsed PLY file in the form of a list of 'Parse' with line indices
@@ -155,34 +156,6 @@ elementTypeToHeaderValue elementType = case elementType of
     PlyParser.FloatingPoint -> HeaderDoubleValue
     PlyParser.Integer -> HeaderIntegerValue
     PlyParser.UnsignedInteger -> HeaderIntegerValue
-
--- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
-data PLYFile =
-    -- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
-    PLYFile (Map LBS.ByteString [Element])
-
--- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
-data Element =
-    -- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
-    Element (Map LBS.ByteString Property)
-
--- |A property in a .PLY file. Logically is the child of an 'Element'. Stores either a single 'Value' or a list of 'Value's.
-data Property =
-    -- |A property in a .PLY file. Logically is the child of an 'Element'. Stores a single 'Value'.
-    ValueProperty Value
-    -- |A property in a .PLY file. Logically is the child of an 'Element'. Stores a list of 'Value's.
-    | ListProperty [Value]
-
--- |A value in a .PLY file. Logically is the child of a 'Property'. Stores either a 'Double' or an 'Integer'
-data Value =
-    -- |A value in a .PLY file. Logically is the child of a 'Property'. Stores a 'Double'.
-    DoubleValue Double
-    -- |A value in a .PLY file. Logically is the child of a 'Property'. Stores an 'Integer'.
-    | IntegerValue Integer
-
--- |Represents the base state of a 'PLYFile'. Contains no elements.
-emptyPLYFile :: PLYFile
-emptyPLYFile = PLYFile empty
 
 -- |Applies a function to the final element in a list.
 modifyLast :: (a -> a) -> [a] -> [a]
