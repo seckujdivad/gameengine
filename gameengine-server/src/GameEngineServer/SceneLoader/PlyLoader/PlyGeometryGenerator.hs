@@ -62,6 +62,6 @@ geometryFromValues allVertices faceVertexIndices = Polygonal faces
 
 -- |Generate a 'Face' from a list of 'PLYVertex'
 faceFromValues :: [PLYVertex] -> Face
-faceFromValues vertices = Face {faceNormal = normalize normal, faceVertices =  map plyvPos vertices}
+faceFromValues vertices = Face {faceNormal = normalize normal, faceVertices = map plyvPos vertices}
     where
         normal = foldr (\left right -> plyvNormal left + right) (V3 0 0 0) vertices
