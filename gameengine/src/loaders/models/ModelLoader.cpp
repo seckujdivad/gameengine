@@ -132,7 +132,7 @@ ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json
 	//get the shared_ptrs for all the models and the Geometry that they all require
 	for (auto it = layout.begin(); it != layout.end(); ++it)
 	{
-		std::string identifier = it.value()["identifier"].get<std::string>();
+		std::string identifier = it.key();
 
 		std::shared_ptr<Model> model = nullptr;
 		for (const std::shared_ptr<Model>& model_candidate : scene.GetModels())

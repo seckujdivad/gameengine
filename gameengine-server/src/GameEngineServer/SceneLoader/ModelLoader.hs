@@ -23,11 +23,10 @@ import GameEngineServer.SceneLoader.ListOrValue (listOrValueToList)
 -- |Information on how to load a model that hasn't yet been loaded
 data UnloadedModel =
     -- |Information on how to load a model that hasn't yet been loaded
-    UnloadedModel (V3 Double) (V3 Double) (V3 Double) String [String]
+    UnloadedModel (V3 Double) (V3 Double) (V3 Double) [String]
 
 instance FromJSON UnloadedModel where
     parseJSON = withObject "UnloadedModel" $ \obj -> do
-        identifierMaybe <- obj .:? "identifier"
         positionMaybeWrapped <- obj .:? "position"
         rotationMaybeWrapped <- obj .:? "rotation"
         scaleMaybeWrapped <- obj .:? "scale"
@@ -42,10 +41,10 @@ instance FromJSON UnloadedModel where
 
         let geometryNames = (fromMaybe [] (fmap listOrValueToList singleGeoms)) ++ (fromMaybe [] (fmap listOrValueToList pluralGeoms))
 
-        return $ UnloadedModel (fromMaybe (V3 0 0 0) positionMaybe) (fromMaybe (V3 0 0 0) rotationMaybe) (fromMaybe (V3 0 0 0) scaleMaybe) (fromMaybe "" identifierMaybe) geometryNames
+        return $ UnloadedModel (fromMaybe (V3 0 0 0) positionMaybe) (fromMaybe (V3 0 0 0) rotationMaybe) (fromMaybe (V3 0 0 0) scaleMaybe) geometryNames
 
 -- |Look up the unloaded geometry of an 'UnloadedModel', turning it into a 'Model' (failing if any model strings can't be resolved)
 loadModel :: GeometryTable -> UnloadedModel -> Maybe Model
-loadModel (GeometryTable loadedGeometry) (UnloadedModel position rotation scale identifier geometryNames) = do
+loadModel (GeometryTable loadedGeometry) (UnloadedModel position rotation scale geometryNames) = do
     geometries <- mapM (\name -> lookup (pack name) loadedGeometry) geometryNames
-    return $ Model position rotation scale identifier (concat geometries)
+    return $ Model position rotation scale (concat geometries)

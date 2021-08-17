@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <nlohmann/json.hpp>
 
@@ -137,7 +138,7 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 	}
 
 	//load models without reflections in materials
-	std::vector<std::shared_ptr<Model>> models; //models stored in the order that they appear in in the scene file
+	std::unordered_map<std::string, std::shared_ptr<Model>> models; //models stored in the order that they appear in in the scene file
 	{
 		//function to apply an ssr config specified in json to a MaterialSSRConfig struct
 		auto ApplySSRConfig = [&perf_data](MaterialSSRConfig config, const nlohmann::json& data)
@@ -186,16 +187,13 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 		MaterialSSRConfig default_ssr_config = ApplySSRConfig(MaterialSSRConfig(), scene_data["ssr defaults"]);;
 
 		//load all models with correct materials
-		if (scene_data["layout"].is_array())
+		if (scene_data["layout"].is_object())
 		{
 			for (auto& el : scene_data["layout"].items())
 			{
 				std::shared_ptr<Model> model = std::make_shared<Model>(scene.GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), &scene);
 
-				if (el.value()["identifier"].is_string())
-				{
-					model->SetIdentifier(el.value()["identifier"].get<std::string>());
-				}
+				model->SetIdentifier(el.key());
 
 				model->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 				model->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
@@ -306,7 +304,7 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 				}
 
 				scene.Add(model);
-				models.push_back(model);
+				models.insert(std::pair(model->GetIdentifier(), model));
 			}
 		}
 	}
@@ -345,21 +343,20 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 	}
 
 	//load reflection ptrs into all models that require them for reflections
-	if (scene_data["layout"].is_array())
+	if (scene_data["layout"].is_object())
 	{
-		for (int i = 0; i < (int)scene_data["layout"].size(); i++)
+		for (const auto& el : scene_data["layout"].items())
 		{
-			auto& el = scene_data["layout"][i];
-			std::shared_ptr<Model> model = models.at(i);
+			std::shared_ptr<Model> model = models.at(el.key());
 
-			if (el["reflections"].is_object() && el["reflections"]["alternative"].is_object())
+			if (el.value()["reflections"].is_object() && el.value()["reflections"]["alternative"].is_object())
 			{
 				model->GetMaterial().reflections_enabled = true;
 
 				ReflectionMode mode;
-				if (el["reflections"]["alternative"]["mode"].is_string())
+				if (el.value()["reflections"]["alternative"]["mode"].is_string())
 				{
-					std::string mode_name = el["reflections"]["alternative"]["mode"].get<std::string>();
+					std::string mode_name = el.value()["reflections"]["alternative"]["mode"].get<std::string>();
 					if (mode_name == "simple")
 					{
 						mode = ReflectionMode::Simple;
@@ -379,13 +376,13 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 				}
 
 				std::vector<std::string> refl_names;
-				if (el["reflections"]["alternative"]["reflection"].is_string())
+				if (el.value()["reflections"]["alternative"]["reflection"].is_string())
 				{
-					refl_names.push_back(el["reflections"]["alternative"]["reflection"].get<std::string>());
+					refl_names.push_back(el.value()["reflections"]["alternative"]["reflection"].get<std::string>());
 				}
-				else if (el["reflections"]["alternative"]["reflection"].is_array())
+				else if (el.value()["reflections"]["alternative"]["reflection"].is_array())
 				{
-					for (auto& el2 : (el["reflections"]["alternative"]["reflection"].items()))
+					for (auto& el2 : (el.value()["reflections"]["alternative"]["reflection"].items()))
 					{
 						if (el2.value().is_string())
 						{

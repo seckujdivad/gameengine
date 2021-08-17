@@ -227,7 +227,7 @@
       "additionalProperties": false
     },
     "layout": {
-      "type": "array",
+      "type": "object",
       "description": "The layout of the objects in the scene",
       "items": {
         "type": "object",
@@ -264,10 +264,6 @@
                 }
               }
             ]
-          },
-          "identifier": {
-            "type": "string",
-            "description": "Descriptive name of the model"
           },
           "position": {
             "description": "Position of the object",

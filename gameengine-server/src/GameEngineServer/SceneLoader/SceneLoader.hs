@@ -4,15 +4,15 @@ module GameEngineServer.SceneLoader.SceneLoader (loadScene) where
 
 import Prelude hiding (readFile)
 
-import Data.Aeson (FromJSON, parseJSON, (.:), withObject, withArray, eitherDecode)
+import Data.Aeson (FromJSON, parseJSON, (.:), withObject, eitherDecode)
 
 import System.FilePath ((</>))
 
 import Data.ByteString.Lazy (readFile)
 
-import Data.Vector (toList)
-
 import Data.Maybe (mapMaybe)
+
+import Data.HashMap.Strict (toList)
 
 import GameEngineServer.State.Scene.Scene (Scene (..))
 import GameEngineServer.SceneLoader.ModelLoader (UnloadedModel (..), loadModel)
@@ -27,8 +27,8 @@ data UnloadedScene =
 instance FromJSON UnloadedScene where
     parseJSON = withObject "UnloadedScene" $ \obj -> do
         modelConfigs <- obj .: "layout"
-        modelValues <- withArray "UnloadedScene layout" (return . toList) modelConfigs
-        models <- foldr (\value modelsParser -> do
+        modelValues <- withObject "UnloadedScene layout" (return . toList) modelConfigs
+        models <- foldr (\(_, value) modelsParser -> do
             models <- modelsParser
             model <- parseJSON value
             return (model:models)) (return []) modelValues

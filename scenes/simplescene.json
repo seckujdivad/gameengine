@@ -32,10 +32,9 @@
       }
     }
   },
-  "layout": [
-    {
+  "layout": {
+    "blender suzanne": {
       "model": "suzanne",
-      "identifier": "blender suzanne",
       "position": [ -2, -2, 0 ],
       "material": {
         "diffuse": 0.2,
@@ -67,9 +66,8 @@
       },
       "visboxes": [ "level section 2" ]
     },
-    {
+    "level": {
       "model": "level",
-      "identifier": "level",
       "scale": [ 5, 5, 5 ],
       "material": {
         "diffuse": 0.2,
@@ -90,9 +88,8 @@
       },
       "visboxes": [ "level section 1", "level section 2", "level section 3" ]
     },
-    {
+    "simple cube": {
       "model": "cube",
-      "identifier": "simple cube",
       "position": [ 20, 8, -3 ],
       "material": {
         "diffuse": 0.2,
@@ -117,9 +114,8 @@
       },
       "visboxes": [ "level section 3" ]
     },
-    {
+    "utah teapot": {
       "model": "teapot",
-      "identifier": "utah teapot",
       "position": [ -1, 4, -1 ],
       "material": {
         "diffuse": 1.0,
@@ -141,9 +137,8 @@
       },
       "visboxes": [ "level section 2" ]
     },
-    {
+    "parallax plane": {
       "model": "flat plane",
-      "identifier": "parallax plane",
       "position": [ 0, 9, -4 ],
       "scale": [ 2, 2, 1 ],
       "material": {
@@ -170,7 +165,7 @@
       },
       "visboxes": [ "level section 1" ]
     }
-  ],
+  },
   "lighting": {
     "ambient": 0.3,
     "point lights": [
