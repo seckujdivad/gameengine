@@ -22,7 +22,6 @@ serverMainloop mainloopIn config = do
     sceneMaybe <- loadScene (cfglvlRoot $ cfgInitialScene config) (cfglvlFile $ cfgInitialScene config)
     case sceneMaybe of
         Just scene -> do
-            print scene
             putStrLn "Awaiting connections..."
             serverMainloopInner mainloopIn config ((initialServerState config) {ssScene = scene})
             putStrLn "Mainloop stopped"
