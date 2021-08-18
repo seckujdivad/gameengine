@@ -6,6 +6,7 @@
 #include <memory>
 #include <optional>
 #include <mutex>
+#include <unordered_map>
 
 #include "OrientedBoundingBox.h"
 #include "Nameable.h"
@@ -28,7 +29,7 @@ private:
 	glm::vec4 m_clear_colour = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
 	//scene components - all are managed by the scene
-	std::vector<std::shared_ptr<Model>> m_models;
+	std::unordered_map<ModelReference, std::shared_ptr<Model>> m_models;
 	std::vector<std::shared_ptr<PointLight>> m_pointlights;
 	std::vector<std::shared_ptr<Reflection>> m_reflections;
 	std::vector<std::shared_ptr<Skybox>> m_skyboxes;
@@ -50,9 +51,10 @@ public:
 	void RemoveModel(ModelReference reference);
 	std::optional<std::shared_ptr<Model>> GetModel(ModelReference reference) const;
 	std::optional<std::shared_ptr<Model>> GetModel(std::string identifier) const;
-	const std::vector<std::shared_ptr<Model>>& GetModels() const;
+	std::vector<std::shared_ptr<Model>> GetModels() const;
 	std::vector<std::shared_ptr<Model>> GetModels(std::vector<ModelReference> references) const;
 	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderTargetMode mode, std::vector<Model*> model_pool) const; //the result should not be stored (as there are no guarantees for how long it will be valid). Therefore, there should be no ownership of the results of this method
+	std::vector<Model*> GetRawModelPointers() const;
 
 	void Add(std::shared_ptr<PointLight> pointlight);
 	std::optional<std::shared_ptr<PointLight>> GetPointLight(RenderTextureReference reference) const;

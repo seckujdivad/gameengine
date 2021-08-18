@@ -134,16 +134,9 @@ ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json
 	{
 		std::string identifier = it.key();
 
-		std::shared_ptr<Model> model = nullptr;
-		for (const std::shared_ptr<Model>& model_candidate : scene.GetModels())
-		{
-			if (model_candidate->GetIdentifier() == identifier)
-			{
-				model = model_candidate;
-			}
-		}
+		std::optional<std::shared_ptr<Model>> model = scene.GetModel(identifier);
 
-		if (model.get() == nullptr)
+		if (!model.has_value())
 		{
 			throw std::invalid_argument("Model \"" + identifier + "\" has not been loaded");
 		}
@@ -214,7 +207,7 @@ ModelLoader::ModelLoader(std::string root, nlohmann::json layout, nlohmann::json
 					{
 						this->m_models.insert(std::pair(geometry_name, std::vector<std::shared_ptr<Model>>()));
 					}
-					this->m_models.at(geometry_name).push_back(model);
+					this->m_models.at(geometry_name).push_back(model.value());
 
 					this->m_to_load.push(geometry_name);
 				}

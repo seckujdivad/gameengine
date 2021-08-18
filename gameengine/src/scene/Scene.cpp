@@ -20,16 +20,12 @@ Scene::Scene() : Nameable()
 
 void Scene::Add(std::shared_ptr<Model> model)
 {
-	this->m_models.push_back(model);
+	this->m_models.insert(std::pair(model->GetReference(), model));
 }
 
 void Scene::Remove(std::shared_ptr<Model> model)
 {
-	std::vector<std::shared_ptr<Model>>::iterator it = std::find(this->m_models.begin(), this->m_models.end(), model);
-	if (it != this->m_models.end())
-	{
-		this->m_models.erase(it);
-	}
+	this->m_models.erase(model->GetReference());
 
 	for (const std::shared_ptr<Cubemap>& cubemaps : this->GetCubemaps())
 	{
@@ -45,29 +41,25 @@ void Scene::Remove(std::shared_ptr<Model> model)
 
 void Scene::RemoveModel(ModelReference reference)
 {
-	std::optional<std::shared_ptr<Model>> model = this->GetModel(reference);
-	if (model.has_value())
-	{
-		this->Remove(model.value());
-	}
+	this->Remove(this->m_models.at(reference));
 }
 
 std::optional<std::shared_ptr<Model>> Scene::GetModel(ModelReference reference) const
 {
-	for (const std::shared_ptr<Model>& model : this->m_models)
+	auto it = this->m_models.find(reference);
+	if (it == this->m_models.end())
 	{
-		if (model->GetReference() == reference)
-		{
-			return model;
-		}
+		return std::optional<std::shared_ptr<Model>>();
 	}
-
-	return std::optional<std::shared_ptr<Model>>();
+	else
+	{
+		return it->second;
+	}
 }
 
 std::optional<std::shared_ptr<Model>> Scene::GetModel(std::string identifier) const
 {
-	for (const std::shared_ptr<Model>& model : this->m_models)
+	for (const auto& [reference, model] : this->m_models)
 	{
 		if (model->GetIdentifier() == identifier)
 		{
@@ -78,9 +70,17 @@ std::optional<std::shared_ptr<Model>> Scene::GetModel(std::string identifier) co
 	return std::optional<std::shared_ptr<Model>>();
 }
 
-const std::vector<std::shared_ptr<Model>>& Scene::GetModels() const
+std::vector<std::shared_ptr<Model>> Scene::GetModels() const
 {
-	return this->m_models;
+	std::vector<std::shared_ptr<Model>> result;
+	result.reserve(this->m_models.size());
+
+	for (const auto& [reference, model] : this->m_models)
+	{
+		result.push_back(model);
+	}
+
+	return result;
 }
 
 std::vector<std::shared_ptr<Model>> Scene::GetModels(std::vector<ModelReference> references) const
@@ -186,7 +186,7 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 
 		if (enclosed_visboxes.size() == 0) //player is outside of level, draw everything (for navigating back to the level if nothing else)
 		{
-			for (const std::shared_ptr<Model>& model : this->m_models)
+			for (const auto& [reference, model] : this->m_models)
 			{
 				visible_models.insert(model.get());
 			}
@@ -222,6 +222,19 @@ std::vector<Model*> Scene::GetVisibleModels(glm::dvec3 position, RenderTargetMod
 	{
 		throw std::runtime_error("Unsupported shading mode");
 	}
+}
+
+std::vector<Model*> Scene::GetRawModelPointers() const
+{
+	std::vector<Model*> result;
+	result.reserve(this->m_models.size());
+
+	for (const auto& [reference, model] : this->m_models)
+	{
+		result.push_back(model.get());
+	}
+
+	return result;
 }
 
 void Scene::Add(std::shared_ptr<PointLight> pointlight)
@@ -306,7 +319,7 @@ void Scene::Remove(std::shared_ptr<Reflection> reflection)
 		this->m_reflections.erase(it);
 	}
 
-	for (const std::shared_ptr<Model>& model : this->GetModels())
+	for (const auto& [reference, model] : this->m_models)
 	{
 		Material& material = model->GetMaterial();
 
@@ -367,7 +380,7 @@ void Scene::Remove(std::shared_ptr<Skybox> skybox)
 		this->m_skyboxes.erase(it);
 	}
 
-	for (const std::shared_ptr<Model>& model : this->GetModels())
+	for (const auto& [reference, model] : this->m_models)
 	{
 		if (model->GetSkybox() == skybox)
 		{
