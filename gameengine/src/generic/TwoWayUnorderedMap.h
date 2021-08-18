@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <tuple>
+#include <optional>
 
 template<typename Left, typename Right>
 class TwoWayUnorderedMap
@@ -60,6 +61,25 @@ public:
 		this->m_key_to_both.insert(std::pair(key, std::tuple(left, right)));
 	}
 
+	inline Right LeftToRight(Left value) const
+	{
+		Key key = this->m_left_to_key.at(value);
+		return std::get<1>(this->m_key_to_both.at(key));
+	}
+
+	inline std::optional<Right> LeftToRightMaybe(Left value) const
+	{
+		auto it = this->m_left_to_key.find(value);
+		if (it == this->m_left_to_key.end())
+		{
+			return {};
+		}
+		else
+		{
+			return std::get<1>(this->m_key_to_both.at(it->second));
+		}
+	}
+
 	inline bool LeftHas(Left value) const
 	{
 		return this->m_left_to_key.count(value) != 0;
@@ -68,6 +88,25 @@ public:
 	inline void LeftRemove(Left value)
 	{
 		this->RemoveByKey(this->m_left_to_key.at(value));
+	}
+
+	inline Left RightToLeft(Right value) const
+	{
+		Key key = this->m_right_to_key.at(value);
+		return std::get<0>(this->m_key_to_both.at(key));
+	}
+
+	inline std::optional<Left> RightToLeftMaybe(Right value) const
+	{
+		auto it = this->m_right_to_key.find(value);
+		if (it == this->m_right_to_key.end())
+		{
+			return {};
+		}
+		else
+		{
+			return std::get<0>(this->m_key_to_both.at(it->second));
+		}
 	}
 
 	inline bool RightHas(Right value) const
