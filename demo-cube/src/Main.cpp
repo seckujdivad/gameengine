@@ -150,7 +150,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	//set window title
 	this->SetTitle("Render Test: no scene");
 
-	this->SetSelectedModel(-1);
+	this->SetSelectedModel(NullModelReference);
 
 	//start the render loop
 	this->Bind(wxEVT_IDLE, &Main::Mainloop, this);
@@ -398,7 +398,7 @@ void Main::lb_models_OnChar(wxKeyEvent& evt)
 {
 	if (evt.GetKeyCode() == WXK_ESCAPE)
 	{
-		this->SetSelectedModel(-1);
+		this->SetSelectedModel(NullModelReference);
 	}
 	evt.Skip();
 }

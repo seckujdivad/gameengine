@@ -4,6 +4,10 @@ using ModelReference = int;
 using TextureReference = int;
 using RenderTextureReference = int;
 
+constexpr ModelReference NullModelReference = -1;
+constexpr TextureReference NullTextureReference = -1;
+constexpr RenderTextureReference NullRenderTextureReference = -1;
+
 template<class ReferenceType>
 class Referenceable
 {
