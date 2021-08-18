@@ -13,7 +13,6 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 	:
 	Positionable(),
 	Rotatable(),
-	Nameable(),
 	Scalable(),
 	Referenceable<ModelReference>(reference),
 	SceneChild(scene),

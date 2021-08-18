@@ -18,7 +18,7 @@ class Scene;
 class Skybox;
 class Geometry;
 
-class Model : public Positionable, public Rotatable, public Scalable, public Nameable, public Referenceable<ModelReference>, public SceneChild
+class Model : public Positionable, public Rotatable, public Scalable, public Referenceable<ModelReference>, public SceneChild
 {
 private:
 	std::vector<std::shared_ptr<Geometry>> m_geometry;

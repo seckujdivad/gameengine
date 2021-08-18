@@ -192,8 +192,8 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 			for (auto& el : scene_data["layout"].items())
 			{
 				std::shared_ptr<Model> model = std::make_shared<Model>(scene.GetNewModelReference(), std::vector<std::shared_ptr<Geometry>>(), &scene);
-
-				model->SetIdentifier(el.key());
+				
+				scene.SetModelIdentifier(model->GetReference(), el.key());
 
 				model->SetPosition(GetVector(el.value()["position"], glm::dvec3(0.0)));
 				model->SetRotation(GetVector(el.value()["rotation"], glm::dvec3(0.0)));
@@ -304,7 +304,7 @@ std::thread SceneFromJSON(Scene& scene, SceneLoaderConfig config)
 				}
 
 				scene.Add(model);
-				models.insert(std::pair(model->GetIdentifier(), model));
+				models.insert(std::pair(el.key(), model));
 			}
 		}
 	}

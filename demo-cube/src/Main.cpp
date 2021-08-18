@@ -150,7 +150,7 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Render Test")
 	//set window title
 	this->SetTitle("Render Test: no scene");
 
-	this->SetModel(nullptr);
+	this->SetSelectedModel(-1);
 
 	//start the render loop
 	this->Bind(wxEVT_IDLE, &Main::Mainloop, this);
@@ -180,15 +180,41 @@ Main::~Main()
 	}
 }
 
-void Main::SetModel(std::shared_ptr<Model> model)
+void Main::SetSelectedModel(ModelReference reference)
 {
-	if (this->m_model_selected != nullptr)
+	if (this->m_model_selected.has_value())
 	{
-		this->m_model_selected->SetCurrentWireframeIndex(0);
+		std::optional<std::shared_ptr<Model>> old_model = this->m_scene.GetModel(this->m_model_selected.value());
+		if (old_model.has_value())
+		{
+			old_model.value()->SetCurrentWireframeIndex(0);
+		}
 	}
-	this->m_model_selected = model;
 
-	if (model == nullptr)
+	this->m_model_selected = reference;
+
+	std::optional<std::shared_ptr<Model>> model = this->m_scene.GetModel(reference);
+	if (model.has_value())
+	{
+		model.value()->SetCurrentWireframeIndex(1);
+
+		for (std::size_t i = 0; i < this->m_models_list_order.size(); i++)
+		{
+			if (reference == this->m_models_list_order.at(i))
+			{
+				this->m_lb_models->SetSelection(static_cast<int>(i));
+			}
+		}
+
+		this->m_vct_position->Enable();
+		this->m_vct_rotation->Enable();
+		this->m_vct_scale->Enable();
+
+		this->m_vct_position->SetValues(GetSTDVector(model.value()->GetPosition()));
+		this->m_vct_rotation->SetValues(GetSTDVector(model.value()->GetRotation()));
+		this->m_vct_scale->SetValues(GetSTDVector(model.value()->GetScale()));
+	}
+	else
 	{
 		this->m_lb_models->SetSelection(wxNOT_FOUND);
 
@@ -199,27 +225,6 @@ void Main::SetModel(std::shared_ptr<Model> model)
 		this->m_vct_position->Disable();
 		this->m_vct_rotation->Disable();
 		this->m_vct_scale->Disable();
-	}
-	else
-	{
-		model->SetCurrentWireframeIndex(1);
-			
-		std::vector<std::shared_ptr<Model>> models = this->m_scene.GetModels();
-		for (size_t i = 0; i < models.size(); i++)
-		{
-			if (models.at(i) == model)
-			{
-				this->m_lb_models->SetSelection(static_cast<int>(i));
-			}
-		}
-
-		this->m_vct_position->Enable();
-		this->m_vct_rotation->Enable();
-		this->m_vct_scale->Enable();
-
-		this->m_vct_position->SetValues(GetSTDVector(this->m_model_selected->GetPosition()));
-		this->m_vct_rotation->SetValues(GetSTDVector(this->m_model_selected->GetRotation()));
-		this->m_vct_scale->SetValues(GetSTDVector(this->m_model_selected->GetScale()));
 	}
 }
 
@@ -326,9 +331,20 @@ void Main::LoadScene(const SceneLoaderConfig& scene_config)
 
 	//load scene info into UI
 	this->m_lb_models->Clear();
+	this->m_models_list_order.clear();
 	for (const std::shared_ptr<Model> model : this->m_scene.GetModels())
 	{
-		this->m_lb_models->Append(model->GetIdentifier());
+		std::optional<std::string> identifier = this->m_scene.GetModelIdentifier(model->GetReference());
+		if (identifier.has_value())
+		{
+			this->m_lb_models->Append(identifier.value());
+		}
+		else
+		{
+			this->m_lb_models->Append("(no identifier)");
+		}
+		
+		this->m_models_list_order.push_back(model->GetReference());
 	}
 
 	this->SetTitle("Render Test: viewing " + this->m_scene.GetIdentifier());
@@ -374,8 +390,7 @@ void Main::lb_models_OnSelection(wxCommandEvent& evt)
 	int selection_index = this->m_lb_models->GetSelection();
 	if (selection_index != wxNOT_FOUND)
 	{
-		const std::vector<std::shared_ptr<Model>>& models = this->m_scene.GetModels();
-		this->SetModel(models.at(selection_index));
+		this->SetSelectedModel(this->m_models_list_order.at(selection_index));
 	}
 }
 
@@ -383,7 +398,7 @@ void Main::lb_models_OnChar(wxKeyEvent& evt)
 {
 	if (evt.GetKeyCode() == WXK_ESCAPE)
 	{
-		this->SetModel(nullptr);
+		this->SetSelectedModel(-1);
 	}
 	evt.Skip();
 }
@@ -417,27 +432,39 @@ void Main::rdobx_render_mode_OnChanged(wxCommandEvent& evt)
 
 void Main::vct_position_OnChange(VectorCtrlEvent& evt)
 {
-	if (this->m_model_selected != nullptr)
+	if (this->m_model_selected.has_value())
 	{
-		this->m_model_selected->SetPosition(GetGLMVector<3>(this->m_vct_position->GetValues()));
+		std::optional<std::shared_ptr<Model>> model = this->m_scene.GetModel(this->m_model_selected.value());
+		if (model.has_value())
+		{
+			model.value()->SetPosition(GetGLMVector<3>(this->m_vct_position->GetValues()));
+		}
 	}
 	evt.Skip();
 }
 
 void Main::vct_rotation_OnChange(VectorCtrlEvent& evt)
 {
-	if (this->m_model_selected != nullptr)
+	if (this->m_model_selected.has_value())
 	{
-		this->m_model_selected->SetRotation(GetGLMVector<3>(this->m_vct_rotation->GetValues()));
+		std::optional<std::shared_ptr<Model>> model = this->m_scene.GetModel(this->m_model_selected.value());
+		if (model.has_value())
+		{
+			model.value()->SetRotation(GetGLMVector<3>(this->m_vct_rotation->GetValues()));
+		}
 	}
 	evt.Skip();
 }
 
 void Main::vct_scale_OnChange(VectorCtrlEvent& evt)
 {
-	if (this->m_model_selected != nullptr)
+	if (this->m_model_selected.has_value())
 	{
-		this->m_model_selected->SetScale(GetGLMVector<3>(this->m_vct_scale->GetValues()));
+		std::optional<std::shared_ptr<Model>> model = this->m_scene.GetModel(this->m_model_selected.value());
+		if (model.has_value())
+		{
+			model.value()->SetScale(GetGLMVector<3>(this->m_vct_scale->GetValues()));
+		}
 	}
 	evt.Skip();
 }

@@ -14,6 +14,12 @@
 #include "model/geometry/PresetGeometry.h"
 #include "light/PointLight.h"
 
+void Scene::RemoveModelByReference(ModelReference reference)
+{
+	this->m_models.erase(reference);
+	this->m_model_identifiers.LeftRemove(reference);
+}
+
 Scene::Scene() : Nameable()
 {
 }
@@ -25,7 +31,7 @@ void Scene::Add(std::shared_ptr<Model> model)
 
 void Scene::Remove(std::shared_ptr<Model> model)
 {
-	this->m_models.erase(model->GetReference());
+	this->RemoveModelByReference(model->GetReference());
 
 	for (const std::shared_ptr<Cubemap>& cubemaps : this->GetCubemaps())
 	{
@@ -59,15 +65,15 @@ std::optional<std::shared_ptr<Model>> Scene::GetModel(ModelReference reference) 
 
 std::optional<std::shared_ptr<Model>> Scene::GetModel(std::string identifier) const
 {
-	for (const auto& [reference, model] : this->m_models)
+	std::optional<ModelReference> reference = this->GetModelReference(identifier);
+	if (reference.has_value())
 	{
-		if (model->GetIdentifier() == identifier)
-		{
-			return model;
-		}
+		return this->GetModel(reference.value());
 	}
-
-	return std::optional<std::shared_ptr<Model>>();
+	else
+	{
+		return {};
+	}
 }
 
 std::vector<std::shared_ptr<Model>> Scene::GetModels() const
@@ -235,6 +241,21 @@ std::vector<Model*> Scene::GetRawModelPointers() const
 	}
 
 	return result;
+}
+
+void Scene::SetModelIdentifier(ModelReference reference, std::string identifier)
+{
+	this->m_model_identifiers.Add(reference, identifier);
+}
+
+std::optional<std::string> Scene::GetModelIdentifier(ModelReference reference) const
+{
+	return this->m_model_identifiers.LeftToRightMaybe(reference);
+}
+
+std::optional<ModelReference> Scene::GetModelReference(std::string identifier) const
+{
+	return this->m_model_identifiers.RightToLeftMaybe(identifier);
 }
 
 void Scene::Add(std::shared_ptr<PointLight> pointlight)

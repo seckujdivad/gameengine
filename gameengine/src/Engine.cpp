@@ -418,8 +418,15 @@ void Engine::Render(bool continuous_draw)
 				{
 					if (this->m_geometry.count(geometry) == 0)
 					{
+						std::optional<std::string> identifier_maybe = this->GetScene()->GetModelIdentifier(model->GetReference());
+						std::string identifier = "(no identifier)";
+						if (identifier_maybe.has_value())
+						{
+							identifier = identifier_maybe.value();
+						}
+
 						std::shared_ptr<GLGeometry> loaded_geometry = std::make_shared<GLGeometry>(geometry->GetPrimitives(), geometry->GetRenderInfo());
-						loaded_geometry->SetLabel(model->GetIdentifier() + ": " + GetPrimitiveTypeName(loaded_geometry->GetRenderInfo().primitive_type));
+						loaded_geometry->SetLabel(identifier + ": " + GetPrimitiveTypeName(loaded_geometry->GetRenderInfo().primitive_type));
 
 						this->m_geometry.insert(std::pair(geometry, loaded_geometry));
 					}

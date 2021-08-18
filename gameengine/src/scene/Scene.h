@@ -12,6 +12,7 @@
 #include "Nameable.h"
 #include "Referenceable.h"
 #include "../render/rendertarget/target/RenderTargetMode.h"
+#include "../generic/TwoWayUnorderedMap.h"
 
 class Model;
 class PointLight;
@@ -43,6 +44,10 @@ private:
 
 	std::mutex m_scene_mutex; //allows one thread to take exclusive ownership of the Scene when rendering or doing operations that can't take place while rendering - the scene itself won't bother trying to acquire this mutex
 
+	TwoWayUnorderedMap<ModelReference, std::string> m_model_identifiers;
+
+	void RemoveModelByReference(ModelReference reference);
+
 public:
 	Scene();
 
@@ -55,6 +60,10 @@ public:
 	std::vector<std::shared_ptr<Model>> GetModels(std::vector<ModelReference> references) const;
 	std::vector<Model*> GetVisibleModels(glm::dvec3 position, RenderTargetMode mode, std::vector<Model*> model_pool) const; //the result should not be stored (as there are no guarantees for how long it will be valid). Therefore, there should be no ownership of the results of this method
 	std::vector<Model*> GetRawModelPointers() const;
+
+	void SetModelIdentifier(ModelReference reference, std::string identifier);
+	std::optional<std::string> GetModelIdentifier(ModelReference reference) const;
+	std::optional<ModelReference> GetModelReference(std::string identifier) const;
 
 	void Add(std::shared_ptr<PointLight> pointlight);
 	std::optional<std::shared_ptr<PointLight>> GetPointLight(RenderTextureReference reference) const;

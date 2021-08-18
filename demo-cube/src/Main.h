@@ -3,6 +3,7 @@
 #include <memory>
 #include <thread>
 #include <optional>
+#include <vector>
 
 #include <wx/frame.h>
 
@@ -38,7 +39,7 @@ private:
 	Scene m_scene;
 	std::unique_ptr<Camera> m_camera;
 
-	std::shared_ptr<Model> m_model_selected = nullptr;
+	std::optional<ModelReference> m_model_selected;
 
 	std::shared_ptr<EngineConnection> m_connection;
 
@@ -60,6 +61,7 @@ private:
 	EngineCanvasController* m_glcanvas_controller;
 
 	wxListBox* m_lb_models;
+	std::vector<ModelReference> m_models_list_order;
 
 	VectorCtrl* m_vct_position;
 	VectorCtrl* m_vct_rotation;
@@ -89,7 +91,7 @@ public:
 	Main();
 	~Main();
 
-	void SetModel(std::shared_ptr<Model> model);
+	void SetSelectedModel(ModelReference reference);
 
 	void ReloadSettings();
 	nlohmann::json& GetSettings();
