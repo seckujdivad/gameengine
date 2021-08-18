@@ -444,6 +444,9 @@
     <ClInclude Include="src\loaders\models\PLYData.h">
       <Filter>Header Files\loaders\models</Filter>
     </ClInclude>
+    <ClInclude Include="src\generic\TwoWayUnorderedMap.h">
+      <Filter>Header Files\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -691,6 +694,9 @@
     </ClCompile>
     <ClCompile Include="src\loaders\models\PLYData.cpp">
       <Filter>Source Files\loaders\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generic\TwoWayUnorderedMap.cpp">
+      <Filter>Source Files\generic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -240,6 +240,7 @@
     <ClInclude Include="src\generic\SplitOnChar.h" />
     <ClInclude Include="src\generic\std_glm.h" />
     <ClInclude Include="src\generic\ThreadNamer.h" />
+    <ClInclude Include="src\generic\TwoWayUnorderedMap.h" />
     <ClInclude Include="src\GLComponents.h" />
     <ClInclude Include="src\loaders\ConfigureCubemap.h" />
     <ClInclude Include="src\loaders\GetTexture.h" />
@@ -330,6 +331,7 @@
     <ClCompile Include="src\generic\SplitOnChar.cpp" />
     <ClCompile Include="src\generic\std_glm.cpp" />
     <ClCompile Include="src\generic\ThreadNamer.cpp" />
+    <ClCompile Include="src\generic\TwoWayUnorderedMap.cpp" />
     <ClCompile Include="src\GLComponents.cpp" />
     <ClCompile Include="src\loaders\ConfigureCubemap.cpp" />
     <ClCompile Include="src\loaders\GetTexture.cpp" />
