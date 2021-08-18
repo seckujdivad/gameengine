@@ -12,16 +12,13 @@ public:
 	class Iterator
 	{
 	public:
-		using WrappedIterator = std::unordered_map<Key, std::tuple<Left, Right>>::iterator;
+		using WrappedIterator = typename std::unordered_map<Key, std::tuple<Left, Right>>::iterator;
 
 	private:
 		WrappedIterator m_wrapped;
 
 	public:
-		inline Iterator(WrappedIterator wrapped) : m_wrapped(wrapped)
-		{
-
-		}
+		inline Iterator(WrappedIterator wrapped) : m_wrapped(wrapped) {}
 
 		inline Iterator& operator++()
 		{
@@ -29,7 +26,7 @@ public:
 			return *this;
 		}
 
-		inline const std::tuple<Left, Right>& operator*() const
+		inline constexpr std::tuple<Left, Right>& operator*() const
 		{
 			return this->m_wrapped->second;
 		}
