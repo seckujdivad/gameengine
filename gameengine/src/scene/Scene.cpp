@@ -14,12 +14,6 @@
 #include "model/geometry/PresetGeometry.h"
 #include "light/PointLight.h"
 
-void Scene::RemoveModelByReference(ModelReference reference)
-{
-	this->m_models.erase(reference);
-	this->m_model_identifiers.LeftRemove(reference);
-}
-
 Scene::Scene() : Nameable()
 {
 }
@@ -31,23 +25,24 @@ void Scene::Add(std::shared_ptr<Model> model)
 
 void Scene::Remove(std::shared_ptr<Model> model)
 {
-	this->RemoveModelByReference(model->GetReference());
-
-	for (const std::shared_ptr<Cubemap>& cubemaps : this->GetCubemaps())
-	{
-		cubemaps->RemoveStaticModel(model->GetReference());
-		cubemaps->RemoveDynamicModel(model->GetReference());
-	}
-
-	for (const std::shared_ptr<VisBox>& visbox : this->GetVisBoxes())
-	{
-		visbox->RemoveMemberModel(model);
-	}
+	this->RemoveModel(model->GetReference());
 }
 
 void Scene::RemoveModel(ModelReference reference)
 {
-	this->Remove(this->m_models.at(reference));
+	this->m_models.erase(reference);
+	this->m_model_identifiers.LeftRemove(reference);
+
+	for (const std::shared_ptr<Cubemap>& cubemaps : this->GetCubemaps())
+	{
+		cubemaps->RemoveStaticModel(reference);
+		cubemaps->RemoveDynamicModel(reference);
+	}
+
+	for (const std::shared_ptr<VisBox>& visbox : this->GetVisBoxes())
+	{
+		visbox->RemoveMemberModel(this->m_models.at(reference));
+	}
 }
 
 std::optional<std::shared_ptr<Model>> Scene::GetModel(ModelReference reference) const

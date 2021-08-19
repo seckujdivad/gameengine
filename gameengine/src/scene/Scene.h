@@ -46,8 +46,6 @@ private:
 
 	TwoWayUnorderedMap<ModelReference, std::string> m_model_identifiers;
 
-	void RemoveModelByReference(ModelReference reference);
-
 public:
 	Scene();
 
