@@ -21,7 +21,7 @@ When applied to a 'Client' in a 'ServerState', the result will have the followin
 
 When either result causes the 'Client' to be removed, the 'Socket' associated with that client is also closed.
 -}
-data ClientApplicator =
+newtype ClientApplicator =
     -- |See type documentation
     ClientApplicator (Client -> IO (Either (Maybe Client) String))
 
