@@ -6,7 +6,7 @@ import Data.Map (Map, empty)
 
 
 -- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
-data PLYFile =
+newtype PLYFile =
     -- |Logically represents the structure of a .PLY file. Maps the names of elements onto lists of those elements.
     PLYFile {
         -- |Maps the names of elements onto lists of those elements
@@ -17,7 +17,7 @@ instance Show PLYFile where
     show (PLYFile elementsMap) = show elementsMap
 
 -- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
-data Element =
+newtype Element =
     -- |An element in a .PLY file. Logically is the child of a 'PLYFile'. Maps the names of properties onto properties which store their values.
     Element (Map ByteString Property)
 
