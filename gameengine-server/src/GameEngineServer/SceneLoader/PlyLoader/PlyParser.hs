@@ -4,8 +4,8 @@ module GameEngineServer.SceneLoader.PlyLoader.PlyParser (plyParser, Parse (..), 
 
 import Prelude hiding (lines)
 
-import Data.ByteString.Lazy (ByteString, reverse, null, tail)
-import Data.ByteString.Lazy.Char8 (splitWith, head, readInteger)
+import Data.ByteString (ByteString, reverse, null, tail)
+import Data.ByteString.Char8 (splitWith, head, readInteger)
 
 import Data.Maybe (catMaybes)
 
@@ -63,7 +63,7 @@ plyParser file = catMaybes parsedLinesWithIndexMaybes
     where
         linesWithReturn = splitWith (== '\n') file --might contain carriage returns
         hasCarriageReturn = or $ map (byteStringEndsInChar '\r') linesWithReturn -- check file for carriage returns
-        lines = if hasCarriageReturn then map (\line -> if Data.ByteString.Lazy.null line then line else Data.ByteString.Lazy.reverse $ Data.ByteString.Lazy.tail $ Data.ByteString.Lazy.reverse line) linesWithReturn else linesWithReturn --strip off carriage return if the file had it
+        lines = if hasCarriageReturn then map (\line -> if Data.ByteString.null line then line else Data.ByteString.reverse $ Data.ByteString.tail $ Data.ByteString.reverse line) linesWithReturn else linesWithReturn --strip off carriage return if the file had it
 
         parsedLineMaybes = map parseLine lines
         parsedLinesWithIndexMaybes :: [Maybe (Int, Parse)]
@@ -73,7 +73,7 @@ plyParser file = catMaybes parsedLinesWithIndexMaybes
 
 -- |Check if the last element in a 'ByteString' is the given 'Char'. If the 'ByteString' is empty, return 'False'
 byteStringEndsInChar :: Char -> ByteString -> Bool
-byteStringEndsInChar c bs = if Data.ByteString.Lazy.null bs then False else c == Data.ByteString.Lazy.Char8.head (Data.ByteString.Lazy.reverse bs)
+byteStringEndsInChar c bs = if Data.ByteString.null bs then False else c == Data.ByteString.Char8.head (Data.ByteString.reverse bs)
 
 -- |Parse one line from a PLY file
 parseLine :: ByteString -> Maybe Parse
@@ -97,7 +97,7 @@ parseLine line = if Prelude.null $ splitOnSpaces then
 
             "element" -> Just $ if length splitOnSpaces == 3 then
                     case readInteger (splitOnSpaces !! 2) of
-                        Just (numElements, remaining) -> if Data.ByteString.Lazy.null remaining then Element (splitOnSpaces !! 1) numElements else Malformed IntegerUnparseable
+                        Just (numElements, remaining) -> if Data.ByteString.null remaining then Element (splitOnSpaces !! 1) numElements else Malformed IntegerUnparseable
                         Nothing -> Malformed IntegerUnparseable
                 else
                     Malformed $ WrongNumberOfTokens "When the first token is element, there must be exactly 2 other tokens"

@@ -2,7 +2,7 @@
 
 module GameEngineServer.SceneLoader.PlyLoader.PlyLoader (loadPolygonalFromPLY) where
 
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString (ByteString)
 
 import GameEngineServer.State.Scene.Model.Geometry (Geometry)
 import GameEngineServer.SceneLoader.PlyLoader.PlyGeometryGenerator (generateGeometry)

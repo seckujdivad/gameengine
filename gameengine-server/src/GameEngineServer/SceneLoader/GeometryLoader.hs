@@ -19,7 +19,7 @@ import Linear.V3 (V3 (..))
 
 import Data.Maybe (fromMaybe, mapMaybe)
 
-import Data.ByteString.Lazy (readFile)
+import Data.ByteString (readFile)
 
 import GameEngineServer.State.Scene.Model.Geometry (Geometry (..), invertNormals, snapVerticesToGrid, mergeVertices)
 import GameEngineServer.SceneLoader.VectorLoader (extractJSONableV3)

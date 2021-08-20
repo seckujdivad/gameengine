@@ -1,6 +1,6 @@
 module GameEngineServer.SceneLoader.PlyLoader.PLYFile (PLYFile (..), Element (..), Property (..), Value (..), emptyPLYFile) where
 
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString (ByteString)
 
 import Data.Map (Map, empty)
 
