@@ -4,15 +4,20 @@ module GameEngineServer.SceneLoader.SceneLoader (loadScene) where
 
 import Prelude hiding (readFile)
 
-import Data.Aeson (FromJSON, parseJSON, (.:), withObject, eitherDecode)
+import Data.Aeson (FromJSON, parseJSON, (.:), withObject, eitherDecode, Value)
+import Data.Aeson.Types (Parser)
 
 import System.FilePath ((</>))
 
 import Data.ByteString.Lazy (readFile)
 
-import Data.Maybe (mapMaybe)
-
 import Data.HashMap.Strict (toList)
+
+import Data.Text (Text)
+
+import Data.Map (Map, empty, insert, mapMaybe)
+
+--import Data.Attoparsec.ByteString (Parser)
 
 import GameEngineServer.State.Scene.Scene (Scene (..))
 import GameEngineServer.SceneLoader.ModelLoader (UnloadedModel (..), loadModel)
@@ -22,16 +27,20 @@ import GameEngineServer.SceneLoader.GeometryLoader (GeometryInfoTable (..), crea
 -- |Contains all the information taken from a scene file required to load a 'Scene'
 data UnloadedScene =
     -- |Contains all the information taken from a scene file required to load a 'Scene'
-    UnloadedScene [UnloadedModel] GeometryInfoTable
+    UnloadedScene (Map Text UnloadedModel) GeometryInfoTable
 
 instance FromJSON UnloadedScene where
     parseJSON = withObject "UnloadedScene" $ \obj -> do
         modelConfigs <- obj .: "layout"
         modelValues <- withObject "UnloadedScene layout" (return . toList) modelConfigs
-        models <- foldr (\(_, value) modelsParser -> do
-            models <- modelsParser
-            model <- parseJSON value
-            return (model:models)) (return []) modelValues
+
+        let
+            modelFolder :: (Text, Value) -> Parser (Map Text UnloadedModel) -> Parser (Map Text UnloadedModel)
+            modelFolder (key, value) modelsMapParser = do
+                modelsMap <- modelsMapParser
+                model <- parseJSON value
+                return $ insert key model modelsMap
+        models <- foldr modelFolder (return empty) modelValues
         
         geometryInfoTable <- obj .: "models"
 

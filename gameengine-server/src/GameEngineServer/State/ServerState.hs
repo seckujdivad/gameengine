@@ -29,7 +29,7 @@ data ServerState =
 
 -- |The 'ServerState' when the server starts
 initialServerState :: Config -> ServerState
-initialServerState config = ServerState empty (cfgInitialScene config) (Scene [])
+initialServerState config = ServerState empty (cfgInitialScene config) (Scene empty)
 
 -- |Apply a function to each 'Client'. If 'Nothing' is returned, that 'Client' is removed (cleanup is not handled)
 applyToAllClients :: (Client -> IO (Maybe Client)) -> ServerState -> IO ServerState
