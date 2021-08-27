@@ -7,7 +7,10 @@
 
 #include <stdint.h>
 
+#include <glm/glm.hpp>
+
 #include "serialiser/Field.h"
+#include "ModelVectorProperty.h"
 
 /*
 * To add a new Packet type:
@@ -29,7 +32,8 @@ public: //type definitions
 		ClientChatMessage,
 		ServerChatMessage,
 		SetClientName,
-		SetScene
+		SetScene,
+		SetModelVectorProperty
 	};
 
 	struct PacketInner {};
@@ -71,8 +75,17 @@ public: //type definitions
 		std::string file;
 	};
 
+	struct SetModelVectorProperty : public PacketInner
+	{
+		inline SetModelVectorProperty(std::string name, ModelVectorProperty property, glm::dvec3 vector) : name(name), property(property), vector(vector) {};
+
+		std::string name;
+		ModelVectorProperty property;
+		glm::dvec3 vector;
+	};
+
 private:
-	std::variant<ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName, SetScene> m_data;
+	std::variant<ConnEstablished, ClientChatMessage, ServerChatMessage, SetClientName, SetScene, SetModelVectorProperty> m_data;
 
 	static std::vector<Serialiser::Field> GetFields(Type type);
 	std::vector<Serialiser::Field> GetFields() const;
@@ -103,10 +116,11 @@ public:
 	void Deserialise(std::vector<char> bytes);
 };
 
-constexpr std::array<Packet::Type, 3> RECEIVABLE_PACKET_TYPES = {
+constexpr std::array<Packet::Type, 4> RECEIVABLE_PACKET_TYPES = {
 	Packet::Type::ConnEstablished,
 	Packet::Type::ServerChatMessage,
-	Packet::Type::SetScene
+	Packet::Type::SetScene,
+	Packet::Type::SetModelVectorProperty
 };
 
 constexpr std::array<Packet::Type, 2> SENDABLE_PACKET_TYPES = {

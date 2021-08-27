@@ -40,6 +40,14 @@ std::vector<Serialiser::Field> Packet::GetFields(Type type)
 			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(SetScene, file))
 			});
 	}
+	else if (type == Type::SetModelVectorProperty)
+	{
+		return std::vector<Serialiser::Field>({
+			Serialiser::Field(Serialiser::Type::Int32, offsetof(SetModelVectorProperty, property)),
+			Serialiser::Field(Serialiser::Type::DoubleVec3, offsetof(SetModelVectorProperty, vector)),
+			Serialiser::Field(Serialiser::Type::UnlimitedString, offsetof(SetModelVectorProperty, name))
+			});
+	}
 	else
 	{
 		throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(type)));
@@ -77,6 +85,10 @@ void Packet::SetType(Type type)
 	else if (type == Type::SetScene)
 	{
 		this->m_data = SetScene();
+	}
+	else if (type == Type::SetModelVectorProperty)
+	{
+		this->m_data = SetModelVectorProperty("", ModelVectorProperty::Position, glm::dvec3(0.0));
 	}
 	else
 	{
@@ -152,6 +164,10 @@ void Packet::Deserialise(std::vector<char> bytes)
 		else if (this->GetType() == Type::SetScene)
 		{
 			this->m_data = Serialiser::Deserialise<SetScene>(bytes, fields, 1);
+		}
+		else if (this->GetType() == Type::SetModelVectorProperty)
+		{
+			this->m_data = Serialiser::Deserialise<SetModelVectorProperty>(bytes, fields, 1);
 		}
 		else
 		{

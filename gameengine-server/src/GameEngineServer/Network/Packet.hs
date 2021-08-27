@@ -3,11 +3,15 @@ module GameEngineServer.Network.Packet (Packet (..), serialise, deserialise, Pac
 import qualified Data.ByteString
 import qualified Data.ByteString.Lazy
 import Data.ByteString.Char8 (unpack)
-import Data.ByteString.Builder (toLazyByteString, Builder, string8, word8, int32LE, char8)
+import Data.ByteString.Builder (toLazyByteString, Builder, string8, word8, int32LE, char8, doubleLE)
 
 import Data.Binary.Get (Get, runGet, getWord8, getRemainingLazyByteString)
 
 import Data.Int (Int64)
+
+import Linear.V3 (V3 (..))
+
+import GameEngineServer.Network.ModelVectorProperty (ModelVectorProperty)
 
 {-
 Checklist for adding new Packet types:
@@ -31,13 +35,16 @@ data Packet =
     | SetClientName String
     -- |Sent by the server containing the new root and relative path to the scene file
     | SetScene String String
+    -- |Set a vector property of a model
+    | SetModelVectorProperty String ModelVectorProperty (V3 Double)
 
 instance Show Packet where
     show (ConnEstablished uid) = "ConnEstablished {uid: " ++ show uid ++ "}"
     show (ClientChatMessage message) = "ClientChatMessage {message: \"" ++ message ++ "\"}"
     show (ServerChatMessage name message) = "ChatMessage {name: \"" ++ name ++ "\", " ++ "message: \"" ++ message ++ "\"}"
     show (SetClientName name) = "SetClientName {name: \"" ++ name ++ "\"}"
-    show (SetScene root relative) = "SetClientName {root: \"" ++ root ++ "\", relative: \"" ++ relative ++ "\"}"
+    show (SetScene root relative) = "SetScene {root: \"" ++ root ++ "\", relative: \"" ++ relative ++ "\"}"
+    show (SetModelVectorProperty name property vec) = "SetModelVectorProperty {name: \"" ++ name ++ "\", property: \"" ++ show property ++ ", vector: \"" ++ show vec ++ "\"}"
 
 -- |Turn a 'Packet' into a 'ByteString' with the correct header and delimiter ready to be broadcasted
 serialise :: Packet -> Data.ByteString.ByteString
@@ -53,6 +60,7 @@ serialiseInner (ClientChatMessage _) = error "Server can't ClientChatMessage"
 serialiseInner (ServerChatMessage name message) = mconcat [string8 name, char8 '\0', string8 message]
 serialiseInner (SetClientName _) = error "Server can't send SetClientName"
 serialiseInner (SetScene root relative) = mconcat [string8 root, char8 '\0', string8 relative]
+serialiseInner (SetModelVectorProperty name property (V3 x y z)) = mconcat [int32LE $ fromIntegral $ fromEnum property, doubleLE x, doubleLE y, doubleLE z, string8 name]
 
 -- |Turn a 'ByteString' into a 'Packet' if it conforms to the correct layout
 deserialise :: Data.ByteString.ByteString -> Packet
@@ -78,7 +86,7 @@ getRemainingString :: Get String
 getRemainingString = fmap (unpack . Data.ByteString.Lazy.toStrict) getRemainingLazyByteString
 
 -- |Enumerators representing constructors for 'Packet'
-data PacketType = TypeConnEstablished | TypeClientChatMessage | TypeServerChatMessage | TypeSetClientName | TypeSetScene deriving (Show, Eq, Enum)
+data PacketType = TypeConnEstablished | TypeClientChatMessage | TypeServerChatMessage | TypeSetClientName | TypeSetScene | TypeSetModelVectorProperty deriving (Show, Eq, Enum)
 
 -- |Convert a 'Packet' to a 'PacketType' enumerator
 packetToPacketType :: Packet -> PacketType
@@ -87,6 +95,7 @@ packetToPacketType (ClientChatMessage _) = TypeClientChatMessage
 packetToPacketType (ServerChatMessage _ _) = TypeServerChatMessage
 packetToPacketType (SetClientName _) = TypeSetClientName
 packetToPacketType (SetScene _ _) = TypeSetScene
+packetToPacketType (SetModelVectorProperty _ _ _) = TypeSetModelVectorProperty
 
 -- |Convert a 'PacketType' to some 'Num' that can be used when serialising and deserialising
 packetTypeToNum :: Num a => PacketType -> a
