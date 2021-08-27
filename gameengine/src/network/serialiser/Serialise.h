@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include <glm/glm.hpp>
+
 #include "Field.h"
 
 namespace Serialiser
@@ -22,7 +24,7 @@ namespace Serialiser
 			}
 			else if ((field.type == Type::NullTerminatedString) || (field.type == Type::UnlimitedString))
 			{
-				const std::string& target_string = *reinterpret_cast<const std::string*>(reinterpret_cast<const char*>(&source) + field.offset);
+				const std::string& target_string = GetProperty<std::string>(source, field.offset);
 				for (char c : target_string)
 				{
 					result.push_back(c);
@@ -33,8 +35,26 @@ namespace Serialiser
 					result.push_back('\0');
 				}
 			}
+			else if (field.type == Type::DoubleVec3)
+			{
+				const glm::dvec3& vec = GetProperty<glm::dvec3>(source, field.offset);
+				for (int dimension = 0; dimension < 3; dimension++)
+				{
+					const char* dimension_value = static_cast<const char*>(&vec[dimension]);
+					for (std::size_t byte = 0; byte < sizeof(double); byte++)
+					{
+						result.push_back(dimension_value[byte]);
+					}
+				}
+			}
 		}
 
 		return result;
+	}
+
+	template<class Source, typename Property>
+	inline const Property& GetProperty(const Source& source, std::size_t offset)
+	{
+		return *reinterpret_cast<const Property*>(reinterpret_cast<const char*>(&source) + offset);
 	}
 }

@@ -82,6 +82,22 @@ namespace Serialiser
 					}
 				}
 			}
+			else if (field.type == Type::DoubleVec3)
+			{
+				if (bytes.size() - bytes_read < sizeof(double) * 3)
+				{
+					throw std::invalid_argument("Not enough bytes to read");
+				}
+
+				double values[3] = { 0.0, 0.0, 0.0 };
+				for (std::size_t dimension_index = 0; dimension_index < 3; dimension_index++)
+				{
+					values[dimension_index] = *reinterpret_cast<double*>(&bytes.at(bytes_read));
+					bytes_read += sizeof(double);
+				}
+
+				result = glm::dvec3(values[0], values[1], values[2]);
+			}
 			else
 			{
 				throw std::invalid_argument("Unknown type: " + std::to_string(static_cast<int>(field.type)));
