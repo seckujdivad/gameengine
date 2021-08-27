@@ -447,6 +447,9 @@
     <ClInclude Include="src\generic\TwoWayUnorderedMap.h">
       <Filter>Header Files\generic</Filter>
     </ClInclude>
+    <ClInclude Include="src\network\ModelVectorProperty.h">
+      <Filter>Header Files\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

@@ -254,6 +254,7 @@
     <ClInclude Include="src\network\Connection.h" />
     <ClInclude Include="src\network\ConnectionTarget.h" />
     <ClInclude Include="src\network\EngineConnection.h" />
+    <ClInclude Include="src\network\ModelVectorProperty.h" />
     <ClInclude Include="src\network\NetworkEvent.h" />
     <ClInclude Include="src\network\Packet.h" />
     <ClInclude Include="src\network\serialiser\Deserialise.h" />

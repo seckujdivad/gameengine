@@ -10,14 +10,14 @@
 namespace Serialiser
 {
 	template<typename T, class D>
-	inline void DeserialiseValue(D& destination, std::vector<char> bytes, std::size_t& bytes_read, Field field)
+	inline void DeserialiseValue(D& destination, std::vector<char> bytes, std::size_t& bytes_read, std::size_t offset)
 	{
-		if (sizeof(T) + field.offset > sizeof(D))
+		if (sizeof(T) + offset > sizeof(D))
 		{
 			throw std::invalid_argument("The section of memory to be written to extends beyond the destination type");
 		}
 
-		if (field.offset < 0)
+		if (offset < 0)
 		{
 			throw std::invalid_argument("Offset must be greater than or equal to zero");
 		}
@@ -27,7 +27,7 @@ namespace Serialiser
 			throw std::invalid_argument("The type provided extends past the end of the bytes to read from");
 		}
 
-		*reinterpret_cast<T*>(reinterpret_cast<char*>(&destination) + field.offset) = *reinterpret_cast<T*>(bytes.data() + bytes_read);
+		*reinterpret_cast<T*>(reinterpret_cast<char*>(&destination) + offset) = *reinterpret_cast<T*>(bytes.data() + bytes_read);
 		bytes_read += sizeof(T);
 	}
 
@@ -41,7 +41,7 @@ namespace Serialiser
 		{
 			if (field.type == Type::Int32)
 			{
-				DeserialiseValue<std::int32_t>(result, bytes, bytes_read, field);
+				DeserialiseValue<std::int32_t>(result, bytes, bytes_read, field.offset);
 			}
 			else if ((field.type == Type::NullTerminatedString) || (field.type == Type::UnlimitedString))
 			{
@@ -92,11 +92,8 @@ namespace Serialiser
 				double values[3] = { 0.0, 0.0, 0.0 };
 				for (std::size_t dimension_index = 0; dimension_index < 3; dimension_index++)
 				{
-					values[dimension_index] = *reinterpret_cast<double*>(&bytes.at(bytes_read));
-					bytes_read += sizeof(double);
+					DeserialiseValue<double>(result, bytes, bytes_read, field.offset);
 				}
-
-				result = glm::dvec3(values[0], values[1], values[2]);
 			}
 			else
 			{

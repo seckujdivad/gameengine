@@ -77,7 +77,7 @@ public: //type definitions
 
 	struct SetModelVectorProperty : public PacketInner
 	{
-		inline SetModelVectorProperty(std::string name, ModelVectorProperty property, glm::dvec3 vector) : name(name), property(property), vector(vector) {};
+		inline SetModelVectorProperty(std::string name = "", ModelVectorProperty property = ModelVectorProperty::Position, glm::dvec3 vector = glm::dvec3(0.0)) : name(name), property(property), vector(vector) {};
 
 		std::string name;
 		ModelVectorProperty property;

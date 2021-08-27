@@ -88,7 +88,7 @@ void Packet::SetType(Type type)
 	}
 	else if (type == Type::SetModelVectorProperty)
 	{
-		this->m_data = SetModelVectorProperty("", ModelVectorProperty::Position, glm::dvec3(0.0));
+		this->m_data = SetModelVectorProperty();
 	}
 	else
 	{

@@ -9,6 +9,12 @@
 
 namespace Serialiser
 {
+	template<typename Property, class Source>
+	inline const Property& GetProperty(const Source& source, std::size_t offset)
+	{
+		return *reinterpret_cast<const Property*>(reinterpret_cast<const char*>(&source) + offset);
+	}
+
 	template<class Source>
 	inline std::vector<char> Serialise(const Source& source, std::vector<Field> layout)
 	{
@@ -40,7 +46,7 @@ namespace Serialiser
 				const glm::dvec3& vec = GetProperty<glm::dvec3>(source, field.offset);
 				for (int dimension = 0; dimension < 3; dimension++)
 				{
-					const char* dimension_value = static_cast<const char*>(&vec[dimension]);
+					const char* dimension_value = reinterpret_cast<const char*>(&vec[dimension]);
 					for (std::size_t byte = 0; byte < sizeof(double); byte++)
 					{
 						result.push_back(dimension_value[byte]);
@@ -50,11 +56,5 @@ namespace Serialiser
 		}
 
 		return result;
-	}
-
-	template<class Source, typename Property>
-	inline const Property& GetProperty(const Source& source, std::size_t offset)
-	{
-		return *reinterpret_cast<const Property*>(reinterpret_cast<const char*>(&source) + offset);
 	}
 }
