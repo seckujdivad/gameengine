@@ -44,6 +44,7 @@ public:
 	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene);
 
 	Material& GetMaterial();
+	const Material& GetMaterial() const;
 
 	void AddGeometry(std::shared_ptr<Geometry> geometry);
 	void AddGeometry(std::vector<std::shared_ptr<Geometry>> geometry);

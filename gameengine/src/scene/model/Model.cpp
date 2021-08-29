@@ -1,9 +1,5 @@
 #include "Model.h"
 
-#include <array>
-#include <cmath>
-#include <set>
-#include <map>
 #include <stdexcept>
 
 #include "../Scene.h"
@@ -29,6 +25,11 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 }
 
 Material& Model::GetMaterial()
+{
+	return this->m_material;
+}
+
+const Material& Model::GetMaterial() const
 {
 	return this->m_material;
 }
