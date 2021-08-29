@@ -13,12 +13,8 @@ private:
 public:
 	Positionable();
 
-	void SetPosition(double x, double y, double z);
-	void SetPosition(int index, double value);
 	void SetPosition(glm::dvec3 position);
-
 	glm::dvec3 GetPosition() const;
-	double GetPosition(int index) const;
 
 	glm::dmat4 GetTranslationMatrix() const;
 	glm::dmat4 GetTranslationMatrixInverse() const;
