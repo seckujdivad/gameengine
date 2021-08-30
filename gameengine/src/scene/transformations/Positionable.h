@@ -21,3 +21,5 @@ public:
 
 	bool CheckIfRepositioned(bool reset = true);
 };
+
+glm::dmat4 GetTranslationMatrix(glm::dvec3 translation);
