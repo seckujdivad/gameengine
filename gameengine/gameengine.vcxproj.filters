@@ -450,6 +450,9 @@
     <ClInclude Include="src\network\ModelVectorProperty.h">
       <Filter>Header Files\network</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\MotionDescriptor.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

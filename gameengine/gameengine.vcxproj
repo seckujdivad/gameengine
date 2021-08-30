@@ -304,6 +304,7 @@
     <ClInclude Include="src\scene\model\Material.h" />
     <ClInclude Include="src\scene\model\Model.h" />
     <ClInclude Include="src\scene\model\Reflection.h" />
+    <ClInclude Include="src\scene\MotionDescriptor.h" />
     <ClInclude Include="src\scene\Nameable.h" />
     <ClInclude Include="src\scene\OrientedBoundingBox.h" />
     <ClInclude Include="src\scene\Referenceable.h" />
