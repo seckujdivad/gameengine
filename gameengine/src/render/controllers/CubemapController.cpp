@@ -88,7 +88,7 @@ CubemapController::~CubemapController()
 {
 }
 
-void CubemapController::Render(bool continuous_draw)
+void CubemapController::Render(std::clock_t draw_time, bool continuous_draw)
 {
 	int redraw_level = -1; //the texture that the redraw starts at - -1 means no redraw at all
 
@@ -149,7 +149,7 @@ void CubemapController::Render(bool continuous_draw)
 
 	if (redraw_level != -1)
 	{
-		this->m_cumulative_texture->Render(redraw_level);
+		this->m_cumulative_texture->Render(draw_time, redraw_level);
 	}
 }
 

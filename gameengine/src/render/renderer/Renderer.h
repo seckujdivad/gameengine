@@ -3,15 +3,17 @@
 #include <vector>
 #include <tuple>
 #include <unordered_set>
+#include <ctime>
 
 #include "../../scene/Referenceable.h"
+#include "../renderable/Renderable.h"
 
 class Engine;
 class RenderTarget;
 class Camera;
 class Model;
 
-class Renderer
+class Renderer : public Renderable
 {
 private:
 	Engine* m_engine;
@@ -35,5 +37,5 @@ public:
 
 	virtual std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const = 0;
 
-	virtual void Render(std::vector<Model*> models, bool continuous_draw = false) = 0;
+	virtual void Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw = false) = 0;
 };

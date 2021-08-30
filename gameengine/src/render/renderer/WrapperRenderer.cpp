@@ -26,7 +26,7 @@ std::unordered_set<RenderTextureReference> WrapperRenderer::GetRenderTextureDepe
 	return this->GetTarget()->GetRenderTextureDependencies();
 }
 
-void WrapperRenderer::Render(std::vector<Model*> models, bool continuous_draw)
+void WrapperRenderer::Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw)
 {
-	this->GetTarget()->Render(models, continuous_draw);
+	this->GetTarget()->Render(models, draw_time, continuous_draw);
 }

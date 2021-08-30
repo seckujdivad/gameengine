@@ -12,7 +12,10 @@ Model::Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> ge
 	Scalable(),
 	Referenceable<ModelReference>(reference),
 	SceneChild(scene),
-	m_geometry(geometry)
+	m_geometry(geometry),
+	m_motion_position(glm::dvec3(0.0), glm::dvec3(0.0)),
+	m_motion_rotation(glm::dvec3(0.0), glm::dvec3(0.0)),
+	m_motion_scale(glm::dvec3(0.0), glm::dvec3(0.0))
 {
 	this->m_texture_colour = Texture(scene->GetNewTextureReference());
 	this->m_texture_reflection = Texture(scene->GetNewTextureReference());
@@ -182,4 +185,34 @@ void Model::SetSkybox(std::shared_ptr<Skybox> skybox)
 std::shared_ptr<Skybox> Model::GetSkybox() const
 {
 	return this->m_skybox;
+}
+
+MotionDescriptor<glm::dvec3>& Model::GetPositionMotionDescriptor()
+{
+	return this->m_motion_position;
+}
+
+const MotionDescriptor<glm::dvec3>& Model::GetPositionMotionDescriptor() const
+{
+	return this->m_motion_position;
+}
+
+MotionDescriptor<glm::dvec3>& Model::GetRotationMotionDescriptor()
+{
+	return this->m_motion_rotation;
+}
+
+const MotionDescriptor<glm::dvec3>& Model::GetRotationMotionDescriptor() const
+{
+	return this->m_motion_rotation;
+}
+
+MotionDescriptor<glm::dvec3>& Model::GetScaleMotionDescriptor()
+{
+	return this->m_motion_scale;
+}
+
+const MotionDescriptor<glm::dvec3>& Model::GetScaleMotionDescriptor() const
+{
+	return this->m_motion_scale;
 }

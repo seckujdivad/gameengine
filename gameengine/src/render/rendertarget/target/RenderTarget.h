@@ -24,7 +24,7 @@ class ShaderProgram;
 class RenderTarget : public Renderable
 {
 public:
-	using ControllerFunction = std::function<void(std::vector<Model*> model_pool)>;
+	using ControllerFunction = std::function<std::vector<Model*>(std::vector<Model*> model_pool)>;
 
 private:
 	GLFramebuffer m_fbo = GLFramebuffer(0, false);
@@ -59,11 +59,13 @@ protected:
 	bool RenderModeIsModelRendering() const;
 	bool RenderModeIsFSQuadRendering() const;
 
+	void RenderScene(std::vector<Model*> models, std::clock_t draw_time);
+
 	//rendering stages
 	std::vector<Model*> Render_GetModels_Model(std::vector<Model*> model_pool);
 	void Render_Setup_Model(std::vector<Model*> models);
 	void Render_Setup_FSQuad();
-	void Render_ForEachModel_Model(Model* model);
+	void Render_ForEachModel_Model(Model* model, std::clock_t draw_time);
 	void Render_ForEachModel_FSQuad();
 
 	void DoClear() const;
@@ -96,8 +98,7 @@ public:
 	bool FramebufferContainsRenderOutput() const;
 	bool IsFBOClearedOnRender() const;
 
-	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
-	void RenderScene(std::vector<Model*> models); //only for calling by lambdas passed in through SetRenderFunction
+	void Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw = false) override;
 
 	virtual bool SwapBuffers() = 0;
 

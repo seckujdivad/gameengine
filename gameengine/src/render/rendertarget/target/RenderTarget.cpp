@@ -26,7 +26,7 @@
 #include "../texture/RenderTexture.h"
 #include "../texture/RenderTextureGroup.h"
 
-void RenderTarget::RenderScene(std::vector<Model*> models)
+void RenderTarget::RenderScene(std::vector<Model*> models, std::clock_t draw_time)
 {
 	if (this->GetRenderMode() == RenderTargetMode::Default)
 	{
@@ -148,7 +148,7 @@ void RenderTarget::RenderScene(std::vector<Model*> models)
 
 			for (Model* model : models)
 			{
-				this->Render_ForEachModel_Model(model);
+				this->Render_ForEachModel_Model(model, draw_time);
 
 				if (!has_cleared)
 				{
@@ -524,11 +524,11 @@ void RenderTarget::Render_Setup_FSQuad()
 	}
 }
 
-void RenderTarget::Render_ForEachModel_Model(Model* model)
+void RenderTarget::Render_ForEachModel_Model(Model* model, std::clock_t draw_time)
 {
-	this->m_shader_program->SetUniform("mdl_translate", glm::vec4(model->GetPosition(), 0.0f));
-	this->m_shader_program->SetUniform("mdl_rotate", model->GetRotationMatrix());
-	this->m_shader_program->SetUniform("mdl_scale", model->GetScaleMatrix());
+	this->m_shader_program->SetUniform("mdl_translate", glm::vec4(model->GetPosition() + model->GetPositionMotionDescriptor().GetCurrentDisplacement(draw_time), 0.0f));
+	this->m_shader_program->SetUniform("mdl_rotate", GetRotationMatrix(model->GetRotation() + model->GetRotationMotionDescriptor().GetCurrentDisplacement(draw_time)));
+	this->m_shader_program->SetUniform("mdl_scale", GetScaleMatrix(model->GetScale() + model->GetScaleMotionDescriptor().GetCurrentDisplacement(draw_time)));
 
 	if ((this->GetRenderMode() == RenderTargetMode::Normal_Draw)
 		|| (this->GetRenderMode() == RenderTargetMode::Textured))
@@ -716,7 +716,7 @@ RenderTarget::RenderTarget(Engine* engine, RenderTargetConfig config) : m_engine
 
 	this->m_render_function = [this](std::vector<Model*> model_pool)
 	{
-		this->RenderScene(model_pool);
+		return model_pool;
 	};
 
 	this->m_shader_program = std::make_unique<ShaderProgram>();
@@ -742,7 +742,7 @@ Engine* RenderTarget::GetEngine() const
 	return this->m_engine;
 }
 
-void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
+void RenderTarget::Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw)
 {
 	if (this->m_engine->GetScene() != nullptr)
 	{
@@ -752,7 +752,8 @@ void RenderTarget::Render(std::vector<Model*> models, bool continuous_draw)
 		}
 		this->PreRenderEvent();
 
-		this->m_render_function(models);
+		std::vector<Model*> processed_models = this->m_render_function(models);
+		this->RenderScene(processed_models, draw_time);
 
 		if (!continuous_draw)
 		{

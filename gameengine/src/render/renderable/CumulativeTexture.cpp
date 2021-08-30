@@ -21,12 +21,12 @@ CumulativeTexture::CumulativeTexture(std::vector<Renderer*> renderers) : m_rende
 		});
 }
 
-void CumulativeTexture::Render(std::vector<Model*> models, bool continuous_draw)
+void CumulativeTexture::Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw)
 {
-	this->Render(0, continuous_draw, models);
+	this->Render(draw_time, 0, continuous_draw, models);
 }
 
-void CumulativeTexture::Render(int index, bool continuous_draw, std::optional<std::vector<Model*>> models) const
+void CumulativeTexture::Render(std::clock_t draw_time, int index, bool continuous_draw, std::optional<std::vector<Model*>> models) const
 {
 	if (this->m_renderers.size() == 0)
 	{
@@ -60,7 +60,7 @@ void CumulativeTexture::Render(int index, bool continuous_draw, std::optional<st
 				this->m_renderers.at(i - 1)->CopyTo(this->m_renderers.at(i));
 			}
 
-			this->m_renderers.at(i)->Render(models_to_draw, continuous_draw);
+			this->m_renderers.at(i)->Render(models_to_draw, draw_time, continuous_draw);
 			propagate_draws = true;
 		}
 	}

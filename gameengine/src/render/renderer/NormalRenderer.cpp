@@ -189,7 +189,7 @@ std::unordered_set<RenderTextureReference> NormalRenderer::GetRenderTextureDepen
 	return references;
 }
 
-void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
+void NormalRenderer::Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw)
 {
 	const RenderTargetConfig& target_config = this->GetTarget()->GetConfig();
 
@@ -213,17 +213,17 @@ void NormalRenderer::Render(std::vector<Model*> models, bool continuous_draw)
 	this->m_rt_draw->SetCamera(this->GetTarget()->GetCamera());
 	this->m_rt_draw->SetOutputSize(this->GetTarget()->GetOutputSize());
 
-	this->m_rt_depth_only->Render(models, continuous_draw);
+	this->m_rt_depth_only->Render(models, draw_time, continuous_draw);
 
-	this->m_rt_draw->Render(models, continuous_draw);
+	this->m_rt_draw->Render(models, draw_time, continuous_draw);
 	this->GetTarget()->Render(std::vector<Model*>(), continuous_draw);
 
 	if (this->GetDrawTarget()->GetConfig().Data<RenderTargetConfig::Normal_Draw>().draw_reflections)
 	{
-		this->m_rt_ssrquality->Render(std::vector<Model*>(), continuous_draw);
+		this->m_rt_ssrquality->Render(std::vector<Model*>(), draw_time, continuous_draw);
 		for (const std::unique_ptr<RenderTexture>& render_texture : this->m_rt_ssrquality_boxblur)
 		{
-			render_texture->Render(std::vector<Model*>(), continuous_draw);
+			render_texture->Render(std::vector<Model*>(), draw_time, continuous_draw);
 		}
 	}
 }

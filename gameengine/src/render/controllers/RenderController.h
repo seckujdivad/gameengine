@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include <memory>
+#include <ctime>
 
 #include "../../scene/Referenceable.h"
 
@@ -25,7 +26,7 @@ public:
 	RenderController(Engine* engine, RenderTextureReference reference);
 	virtual ~RenderController();
 
-	virtual void Render(bool continuous_draw = false) = 0;
+	virtual void Render(std::clock_t draw_time, bool continuous_draw = false) = 0;
 	virtual void PostRender();
 
 	virtual std::shared_ptr<RenderTextureGroup> GetRenderTexture() const = 0;

@@ -37,7 +37,7 @@ private:
 public:
 	EngineCanvasController(Engine* engine, RenderTextureReference reference, EngineCanvas* canvas, std::vector<CompositeLayer> composites);
 
-	void Render(bool continuous_draw) override;
+	void Render(std::clock_t draw_time, bool continuous_draw) override;
 	std::shared_ptr<RenderTextureGroup> GetRenderTexture() const override;
 	RenderControllerType GetType() const override;
 

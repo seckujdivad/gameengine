@@ -13,6 +13,7 @@
 #include "../transformations/Positionable.h"
 #include "../transformations/Rotatable.h"
 #include "../transformations/Scalable.h"
+#include "../MotionDescriptor.h"
 
 class Scene;
 class Skybox;
@@ -39,6 +40,11 @@ private:
 
 	//skybox
 	std::shared_ptr<Skybox> m_skybox = nullptr;
+
+	//motion descriptors
+	MotionDescriptor<glm::dvec3> m_motion_position;
+	MotionDescriptor<glm::dvec3> m_motion_rotation;
+	MotionDescriptor<glm::dvec3> m_motion_scale;
 
 public:
 	Model(ModelReference reference, std::vector<std::shared_ptr<Geometry>> geometry, Scene* scene);
@@ -74,4 +80,11 @@ public:
 
 	void SetSkybox(std::shared_ptr<Skybox> skybox);
 	std::shared_ptr<Skybox> GetSkybox() const;
+
+	MotionDescriptor<glm::dvec3>& GetPositionMotionDescriptor();
+	const MotionDescriptor<glm::dvec3>& GetPositionMotionDescriptor() const;
+	MotionDescriptor<glm::dvec3>& GetRotationMotionDescriptor();
+	const MotionDescriptor<glm::dvec3>& GetRotationMotionDescriptor() const;
+	MotionDescriptor<glm::dvec3>& GetScaleMotionDescriptor();
+	const MotionDescriptor<glm::dvec3>& GetScaleMotionDescriptor() const;
 };

@@ -94,7 +94,7 @@ EngineCanvasController::EngineCanvasController(Engine* engine, RenderTextureRefe
 	this->m_canvas->SetConfig(canvas_config);
 }
 
-void EngineCanvasController::Render(bool continuous_draw)
+void EngineCanvasController::Render(std::clock_t draw_time, bool continuous_draw)
 {
 	//resize textures to make sure that all textures in the chain are the same size/drawing at the same resolution
 	std::tuple new_output_size = this->m_canvas->GetOutputSize();
@@ -107,14 +107,14 @@ void EngineCanvasController::Render(bool continuous_draw)
 	//redraw all textures
 	std::vector<Model*> model_ptrs = this->m_engine->GetScene()->GetRawModelPointers();
 
-	for (std::unique_ptr<Renderer>& factory : this->m_renderers)
+	for (std::unique_ptr<Renderer>& renderer : this->m_renderers)
 	{
-		factory->SetCamera(this->m_canvas->GetControlledCamera());
-		factory->Render(model_ptrs, continuous_draw);
+		renderer->SetCamera(this->m_canvas->GetControlledCamera());
+		renderer->Render(model_ptrs, draw_time, continuous_draw);
 	}
 
-	this->m_texture_final->Render({}, continuous_draw);
-	this->m_canvas->Render({}, continuous_draw);
+	this->m_texture_final->Render({}, draw_time, continuous_draw);
+	this->m_canvas->Render({}, draw_time, continuous_draw);
 }
 
 std::shared_ptr<RenderTextureGroup> EngineCanvasController::GetRenderTexture() const

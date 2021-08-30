@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <mutex>
 #include <set>
+#include <ctime>
 
 #include <wx/image.h>
 
@@ -487,9 +488,10 @@ void Engine::Render(bool continuous_draw)
 			}
 
 			//tell controllers to redraw themselves (if required)
+			std::clock_t draw_time = std::clock();
 			for (RenderController* render_controller : to_draw)
 			{
-				render_controller->Render(continuous_draw);
+				render_controller->Render(draw_time, continuous_draw);
 			}
 
 			for (RenderController* render_controller : to_draw)

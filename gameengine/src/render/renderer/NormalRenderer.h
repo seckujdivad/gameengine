@@ -24,7 +24,7 @@ public:
 	std::unordered_set<RenderTextureReference> GetRenderTextureDependencies() const override;
 
 	bool SetOutputSize(std::tuple<int, int> dimensions) override;
-	void Render(std::vector<Model*> models, bool continuous_draw = false) override;
+	void Render(std::vector<Model*> models, std::clock_t draw_time, bool continuous_draw = false) override;
 
 	RenderTexture* GetDepthOnlyTarget() const;
 	RenderTexture* GetDrawTarget() const;
