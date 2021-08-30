@@ -32,8 +32,8 @@ TEST(CameraTests, MatrixGeneration)
 {
 	Camera cam;
 	cam.SetFOV(90.0);
-	cam.SetPosition(10.0, -1.0, 5.0);
-	cam.SetRotation(90.0, 90.0, 90.0);
+	cam.SetPosition(glm::dvec3(10.0, -1.0, 5.0));
+	cam.SetRotation(glm::dvec3(90.0, 90.0, 90.0));
 	cam.SetClips(std::tuple<double, double>(0.1, 50.0));
 	cam.SetViewportDimensions(std::tuple<int, int>(1920, 1080));
 
