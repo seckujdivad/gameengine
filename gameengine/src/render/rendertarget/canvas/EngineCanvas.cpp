@@ -81,8 +81,10 @@ void EngineCanvas::CameraControlMainloop(wxTimerEvent& evt)
 			float rotation_z = fov_fraction_x * fov;
 			float rotation_x = fov_fraction_y * fov;
 
-			this->GetControlledCamera()->SetRotation(0, this->GetControlledCamera()->GetRotation(0) - rotation_x);
-			this->GetControlledCamera()->SetRotation(2, this->GetControlledCamera()->GetRotation(2) - rotation_z);
+			glm::dvec3 camera_rotation = this->GetControlledCamera()->GetRotation();
+			camera_rotation.x -= rotation_x;
+			camera_rotation.z -= rotation_z;
+			this->GetControlledCamera()->SetRotation(camera_rotation);
 
 			this->WarpPointer(screen_centre[0], screen_centre[1]);
 		}

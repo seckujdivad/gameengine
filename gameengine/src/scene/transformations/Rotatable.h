@@ -13,11 +13,7 @@ private:
 public:
 	Rotatable();
 
-	void SetRotation(double x, double y, double z);
-	void SetRotation(int index, double value);
-	void SetRotation(glm::dvec3 scale);
-
-	double GetRotation(int index) const;
+	void SetRotation(glm::dvec3 rotation);
 	glm::dvec3 GetRotation() const;
 
 	glm::dmat4 GetRotationMatrix() const;
@@ -25,3 +21,5 @@ public:
 
 	bool CheckIfRotated(bool reset = true);
 };
+
+glm::dmat4 GetRotationMatrix(glm::dvec3 rotation);

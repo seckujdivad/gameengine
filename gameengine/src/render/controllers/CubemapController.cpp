@@ -26,7 +26,7 @@ void CubemapController::DerivedClassConstructedEvent()
 	//initialise camera
 	this->m_camera = std::make_unique<Camera>();
 	this->m_camera->SetPosition(this->m_cubemap->GetPosition());
-	this->m_camera->SetRotation(0.0, 0.0, 0.0);
+	this->m_camera->SetRotation(glm::dvec3(0.0, 0.0, 0.0));
 	this->m_camera->SetClips(this->m_cubemap->GetClips());
 	this->m_camera->SetFOV(90.0);
 	this->m_camera->SetViewportDimensions(this->m_cubemap->GetTextureDimensions());
