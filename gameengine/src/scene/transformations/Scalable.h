@@ -13,11 +13,7 @@ private:
 public:
 	Scalable();
 
-	void SetScale(double x, double y, double z);
-	void SetScale(int index, double value);
 	void SetScale(glm::dvec3 scale);
-
-	double GetScale(int index) const;
 	glm::dvec3 GetScale() const;
 
 	glm::dmat4 GetScaleMatrix() const;
@@ -25,3 +21,5 @@ public:
 
 	bool CheckIfRescaled(bool reset = true);
 };
+
+glm::dmat4 GetScaleMatrix(glm::dvec3 scale);
