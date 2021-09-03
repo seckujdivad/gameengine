@@ -3,5 +3,6 @@
     "initial scene": {
         "root": "scenes",
         "file": "simplescene.json"
-    }
+    },
+    "tickrate": 64
 }

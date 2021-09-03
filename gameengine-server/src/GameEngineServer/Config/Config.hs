@@ -9,15 +9,18 @@ data Config =
     -- |Stores configuration options for the server
     Config {
         -- |Information on the scene to load when the server loads
-        cfgInitialScene :: CfgLevel
+        cfgInitialScene :: CfgLevel,
+        -- |Processing steps per second, > 0
+        cfgTickrate :: Int
     }
 
 instance FromJSON Config where
     parseJSON = withObject "Config" $ \obj -> Config
         <$> obj .: "initial scene"
+        <*> obj .: "tickrate"
 
 instance Show Config where
-    show (Config initialScene) = "Config {initial scene: " ++ show initialScene ++ "}"
+    show (Config initialScene tickrate) = "Config {initial scene: " ++ show initialScene ++ ", tickrate: " ++ show tickrate ++ "}"
 
 -- |Stores information on a scene file
 data CfgLevel =

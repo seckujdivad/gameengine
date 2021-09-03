@@ -24,18 +24,18 @@ import GameEngineServer.SceneLoader.SceneLoader (loadScene)
 
 
 -- |Handles inter-client communication and the server state
-serverMainloop :: Integral a => a -> TChan MainloopMessage -> Config -> IO ()
-serverMainloop tickrate mainloopIn config = do
+serverMainloop ::  TChan MainloopMessage -> Config -> IO ()
+serverMainloop mainloopIn config = do
     sceneMaybe <- loadScene (cfglvlRoot $ cfgInitialScene config) (cfglvlFile $ cfgInitialScene config)
     case sceneMaybe of
         Just scene -> do
             putStrLn "Awaiting connections..."
-            serverMainloopInner tickrate mainloopIn config ((initialServerState config) {ssScene = scene})
+            serverMainloopInner mainloopIn config ((initialServerState config) {ssScene = scene})
             putStrLn "Mainloop stopped"
         Nothing -> putStrLn "Couldn't load scene"
 
-serverMainloopInner :: Integral a => a -> TChan MainloopMessage -> Config -> ServerState -> IO ()
-serverMainloopInner tickrate mainloopIn config serverState = do
+serverMainloopInner :: TChan MainloopMessage -> Config -> ServerState -> IO ()
+serverMainloopInner mainloopIn config serverState = do
     startTime <- getSystemTime
 
     -- process all messages
@@ -61,7 +61,9 @@ serverMainloopInner tickrate mainloopIn config serverState = do
         microsecondsDelay = round (secondsDelay * (fromInteger $ fromIntegral secondsToMicroseconds))
     threadDelay microsecondsDelay
 
-    serverMainloopInner tickrate mainloopIn config newServerState
+    serverMainloopInner mainloopIn config newServerState
+    where
+        tickrate = cfgTickrate config
 
 -- |Process a single 'MainloopMessage'
 mainloopMessageProcessor :: Config -> MainloopMessage -> ServerState -> IO ServerState

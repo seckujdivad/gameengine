@@ -42,7 +42,7 @@ main = do
     case configMaybe of
         Just config -> do
             mainloopIn <- atomically newTChan
-            _ <- forkIO (serverMainloop (64 :: Int) mainloopIn config)
+            _ <- forkIO (serverMainloop mainloopIn config)
             runTCPServer Nothing "4321" (connHandler mainloopIn)
 
         Nothing -> putStrLn "Couldn't load config file"

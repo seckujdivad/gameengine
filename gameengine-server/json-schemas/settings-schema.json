@@ -21,7 +21,14 @@
       },
       "required": ["file", "root"],
       "additionalProperties": false
+    },
+    "tickrate": {
+      "type": "integer",
+      "description": "Processing steps per second",
+      "minimum": 0,
+      "exclusiveMinimum": true
     }
   },
+  "required": ["initial scene", "tickrate"],
   "additionalProperties": false
 }
