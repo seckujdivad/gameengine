@@ -1,19 +1,12 @@
-module GameEngineServer.AtomicTChan (sendToTChan, readFromTChan, readAllFromTChan) where
+module GameEngineServer.AtomicTChan (readAllFromTChan) where
 
-import Control.Monad.STM (atomically, STM)
-import Control.Concurrent.STM.TChan (TChan, writeTChan, readTChan, isEmptyTChan)
+import Control.Monad.STM (STM)
+import Control.Concurrent.STM.TChan (TChan, readTChan, isEmptyTChan)
 
--- |Transactionally write some data to a 'TChan'
-sendToTChan :: TChan a -> a -> IO ()
-sendToTChan channel = atomically . writeTChan channel
-
--- |Transactionally read some data from a 'TChan'
-readFromTChan :: TChan a -> IO a
-readFromTChan = atomically . readTChan
 
 -- |Read each item from a 'TChan' until it is empty
-readAllFromTChan :: TChan a -> IO [a]
-readAllFromTChan channel = atomically $ do
+readAllFromTChan :: TChan a -> STM [a]
+readAllFromTChan channel = do
     startedEmpty <- isEmptyTChan channel
     if startedEmpty then
         return []

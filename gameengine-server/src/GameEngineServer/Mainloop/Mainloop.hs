@@ -1,5 +1,6 @@
 module GameEngineServer.Mainloop.Mainloop (serverMainloop) where
 
+import Control.Monad.STM (atomically)
 import Control.Concurrent.STM.TChan (TChan)
 
 import Data.Map.Strict (insert, update, lookup)
@@ -39,7 +40,7 @@ serverMainloopInner mainloopIn config serverState = do
     startTime <- getSystemTime
 
     -- process all messages
-    messages <- readAllFromTChan mainloopIn
+    messages <- atomically $ readAllFromTChan mainloopIn
     newServerState <- foldr (\message serverStateIO -> serverStateIO >>= (mainloopMessageProcessor config message)) (return serverState) messages
 
     -- delay to keep a constant tick rate

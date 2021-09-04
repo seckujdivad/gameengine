@@ -5,7 +5,7 @@ import Network.Socket.ByteString (recv)
 
 import Control.Monad.STM (atomically)
 import Control.Concurrent (forkIO)
-import Control.Concurrent.STM.TChan (TChan, newTChan)
+import Control.Concurrent.STM.TChan (TChan, newTChan, writeTChan)
 import Control.Exception (catch, IOException)
 
 import qualified Data.ByteString (null)
@@ -13,7 +13,6 @@ import qualified Data.ByteString (null)
 import System.Environment (getArgs)
 import System.Directory (setCurrentDirectory)
 
-import GameEngineServer.AtomicTChan (sendToTChan)
 import GameEngineServer.Network.TCPServer (runTCPServer, ConnInfo (..))
 import GameEngineServer.Network.Packet (deserialise)
 import GameEngineServer.Mainloop.Mainloop (serverMainloop)
@@ -51,7 +50,7 @@ main = do
 connHandler :: TChan MainloopMessage -> Socket -> ConnInfo -> IO ()
 connHandler mainloopIn connection connInfo = do
     putStrLn ("New connection: " ++ show connInfo)
-    sendToTChan mainloopIn (ReceiverMsg connInfo (ClientConnEstablished connection))
+    atomically $ writeTChan mainloopIn (ReceiverMsg connInfo (ClientConnEstablished connection))
     connReceiver mainloopIn connection connInfo
 
 -- |Listens to a client
@@ -70,4 +69,4 @@ connReceiver mainloopIn connection connInfo = catch (
     (\exception -> sendMessage $ ReceiverException (show (exception :: IOException)))
     where
         sendMessage :: ReceiverMsgInner -> IO ()
-        sendMessage message = sendToTChan mainloopIn (ReceiverMsg connInfo message)
+        sendMessage message = atomically $ writeTChan mainloopIn (ReceiverMsg connInfo message)
