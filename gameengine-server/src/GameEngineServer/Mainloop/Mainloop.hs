@@ -49,22 +49,20 @@ serverMainloopInner mainloopIn config serverState = do
         timeElapsed = diffUTCTime (systemToUTCTime endTime) (systemToUTCTime startTime)
         secondsElapsed = nominalDiffTimeToSeconds timeElapsed
 
-        targetTime :: Pico
-        targetTime = 1 / (fromInteger $ fromIntegral tickrate)
-
         secondsDelay :: Pico
         secondsDelay = targetTime - secondsElapsed
 
-        secondsToMicroseconds :: Int
-        secondsToMicroseconds = (10 :: Int) ^ (6 :: Int)
-
         microsecondsDelay :: Int
-        microsecondsDelay = round (secondsDelay * (fromInteger $ fromIntegral secondsToMicroseconds))
+        microsecondsDelay = round (secondsDelay * secondsToMicrosecondsFactor)
     threadDelay microsecondsDelay
 
     serverMainloopInner mainloopIn config newServerState
+    
     where
         tickrate = cfgTickrate config
+        targetTime = 1 / (fromInteger $ fromIntegral tickrate)
+
+        secondsToMicrosecondsFactor = fromInteger ((10 :: Integer) ^ (6 :: Integer))
 
 -- |Process a single 'MainloopMessage'
 mainloopMessageProcessor :: Config -> MainloopMessage -> ServerState -> IO ServerState
