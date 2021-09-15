@@ -6,7 +6,7 @@ import Control.Concurrent.STM.TChan (TChan)
 import Data.Map.Strict (insert, update, lookup)
 
 import Data.Time.Clock (nominalDiffTimeToSeconds, diffUTCTime)
-import Data.Time.Clock.System (getSystemTime, systemToUTCTime)
+import Data.Time.Clock.System (getSystemTime, systemToUTCTime, SystemTime)
 
 import Control.Concurrent (threadDelay)
 
@@ -21,6 +21,7 @@ import GameEngineServer.Config.Config (Config (..), CfgLevel (..))
 import GameEngineServer.State.ServerState (ServerState (..), initialServerState)
 import GameEngineServer.State.ClientApplicators (applyToAllClients, applyToClient)
 import GameEngineServer.State.Client (Client (Client), getClientIdentifier, showClientMessage)
+import GameEngineServer.State.Scene.RigidBody.RigidBodyProcessor (processRigidBodies)
 import GameEngineServer.SceneLoader.SceneLoader (loadScene)
 
 
@@ -31,23 +32,28 @@ serverMainloop mainloopIn config = do
     case sceneMaybe of
         Just scene -> do
             putStrLn "Awaiting connections..."
-            serverMainloopInner mainloopIn config ((initialServerState config) {ssScene = scene})
+            startTime <- getSystemTime
+            serverMainloopInner mainloopIn config startTime ((initialServerState config) {ssScene = scene})
             putStrLn "Mainloop stopped"
         Nothing -> putStrLn "Couldn't load scene"
 
-serverMainloopInner :: TChan MainloopMessage -> Config -> ServerState -> IO ()
-serverMainloopInner mainloopIn config serverState = do
+serverMainloopInner :: TChan MainloopMessage -> Config -> SystemTime -> ServerState -> IO ()
+serverMainloopInner mainloopIn config lastLoopTime serverState = do
     startTime <- getSystemTime
+    
+    -- process rigid body collisions
+    let
+        scenePostCollisions = processRigidBodies (diffSystemTime startTime lastLoopTime) (ssScene serverState)
+        serverStatePostCollisions = serverState {ssScene = scenePostCollisions}
 
     -- process all messages
     messages <- atomically $ readAllFromTChan mainloopIn
-    newServerState <- foldr (\message serverStateIO -> serverStateIO >>= (mainloopMessageProcessor config message)) (return serverState) messages
+    newServerState <- foldr (\message serverStateIO -> serverStateIO >>= (mainloopMessageProcessor config message)) (return serverStatePostCollisions) messages
 
     -- delay to keep a constant tick rate
     endTime <- getSystemTime
     let
-        timeElapsed = diffUTCTime (systemToUTCTime endTime) (systemToUTCTime startTime)
-        secondsElapsed = nominalDiffTimeToSeconds timeElapsed
+        secondsElapsed = diffSystemTime endTime startTime
 
         secondsDelay :: Pico
         secondsDelay = targetTime - secondsElapsed
@@ -56,7 +62,7 @@ serverMainloopInner mainloopIn config serverState = do
         microsecondsDelay = round (secondsDelay * secondsToMicrosecondsFactor)
     threadDelay microsecondsDelay
 
-    serverMainloopInner mainloopIn config newServerState
+    serverMainloopInner mainloopIn config startTime newServerState
     
     where
         tickrate = cfgTickrate config
@@ -113,3 +119,8 @@ handlePacket _ serverState client packet = case packet of
     
     where
         Client _ (ConnInfo uid _) _ = client
+
+
+-- |Calculate the difference between two 'SystemTime's in seconds
+diffSystemTime :: SystemTime -> SystemTime -> Pico
+diffSystemTime end start = nominalDiffTimeToSeconds $ diffUTCTime (systemToUTCTime end) (systemToUTCTime start)
