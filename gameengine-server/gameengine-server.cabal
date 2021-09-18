@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1855ba6063d243e5bacbbe3c9ea84535bc9bea5f80aa6173913add51e074de14
+-- hash: 2491e28d45d02a76aab12bf9a2b0b633d9c7950c72d2739c35e72be43ede872c
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -43,8 +43,10 @@ library
       GameEngineServer.SceneLoader.VectorLoader
       GameEngineServer.State.Client
       GameEngineServer.State.ClientApplicators
+      GameEngineServer.State.Scene.Collision
       GameEngineServer.State.Scene.Model.Geometry
       GameEngineServer.State.Scene.Model.Model
+      GameEngineServer.State.Scene.Motion
       GameEngineServer.State.Scene.Positionable
       GameEngineServer.State.Scene.RigidBody.RigidBodyProcessor
       GameEngineServer.State.Scene.Rotatable
