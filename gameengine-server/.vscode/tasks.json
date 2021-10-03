@@ -30,6 +30,11 @@
             "type": "shell",
             "command": "stack build --dry-run",
             "problemMatcher": []
+        },
+        {
+            "label": "Open GHCi",
+            "type": "shell",
+            "command": "stack ghci --no-load --no-copy-bins"
         }
     ]
 }
