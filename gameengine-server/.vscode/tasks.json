@@ -34,7 +34,8 @@
         {
             "label": "Open GHCi",
             "type": "shell",
-            "command": "stack ghci --no-load --no-copy-bins"
+            "command": "stack ghci --no-load --no-copy-bins",
+            "problemMatcher": []
         }
     ]
 }
