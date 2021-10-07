@@ -2,7 +2,7 @@ module GameEngineServer.State.Scene.RigidBody.RigidBodyProcessor (processRigidBo
 
 import Data.Fixed (Pico)
 
-import Data.Map.Strict (Map, keys)
+import Data.Map.Strict (Map, keys, lookup)
 
 import Data.Text (Text)
 
@@ -18,4 +18,16 @@ processModels :: Pico -> Map Text Model -> Map Text Model
 processModels timestep models = foldr (processModel timestep) models (keys models)
 
 processModel :: Pico -> Text -> Map Text Model -> Map Text Model 
-processModel timestep modelName models = models
+processModel timestep modelName models = case Data.Map.Strict.lookup modelName models of
+    Just model -> models
+    Nothing -> models
+
+{-
+trace model forward to time step
+find first collision in that path
+if collision exists:
+    process collision
+    go to top - trace from time of collision to end of time step
+
+two key algorithms: collision tracer and collision processor
+-}
