@@ -20,7 +20,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "stack build",
+            "command": "stack build --test --no-run-tests",
             "problemMatcher": [
                 {
                     "owner": "haskell",
