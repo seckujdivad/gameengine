@@ -36,6 +36,12 @@
             "type": "shell",
             "command": "stack ghci --no-load --no-copy-bins",
             "problemMatcher": []
+        },
+        {
+            "label": "Build and test",
+            "type": "shell",
+            "command": "stack test --no-copy-bins",
+            "problemMatcher": []
         }
     ]
 }

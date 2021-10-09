@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: cd66878a5a151c8ec4fdd090bfb77b2de4058298943b2908ceaf8aa1395f7c67
+-- hash: 49506399dcd80b5d9b77e4802463c30e78a442912f021d03ae730aed880c4153
 
 name:           gameengine-server
 version:        0.1.0.0
@@ -106,14 +106,16 @@ executable gameengine-server
 
 test-suite gameengine-server-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: Main.hs
   other-modules:
+      GameEngineServerTest.State.Scene.Model.GeometryIntersection
       Paths_gameengine_server
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson ==1.5.*
+      HUnit ==1.6.*
+    , aeson ==1.5.*
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring

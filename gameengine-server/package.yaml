@@ -51,7 +51,7 @@ executables:
 
 tests:
   gameengine-server-test:
-    main: Spec.hs
+    main: Main.hs
     source-dirs: test
     ghc-options:
     - -threaded
@@ -59,3 +59,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - gameengine-server
+    - HUnit >= 1.6 && < 1.7
