@@ -57,6 +57,8 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wall
+    - -Wincomplete-uni-patterns
     dependencies:
     - gameengine-server
     - HUnit >= 1.6 && < 1.7

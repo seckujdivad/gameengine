@@ -6,8 +6,10 @@
         {
             "label": "Build and run",
             "type": "shell",
-            "command": "./.vscode/buildrun.ps1",
-            "problemMatcher": []
+            "command": ".\\build\\gameengine-server.exe --cwd app-root",
+            "problemMatcher": [],
+            "dependsOn": ["Build"],
+            "dependsOrder": "sequence",
         },
         {
             "label": "Run interpreted",
@@ -19,7 +21,26 @@
             "label": "Build",
             "type": "shell",
             "command": "stack build",
-            "problemMatcher": [],
+            "problemMatcher": [
+                {
+                    "owner": "haskell",
+                    "fileLocation": ["relative", "${workspaceFolder}"],
+                    "pattern": [
+                        {
+                            "regexp": "^((?:\\S+(?:\\\\))+\\S+):(\\d+):(\\d+): (?:(warning|error):(?: \\[(.+)\\])?)$",
+                            "file": 1,
+                            "line": 2,
+                            "column": 3,
+                            "severity": 4,
+                            "code": 5
+                        },
+                        {
+                            "regexp": "^    (.+)$",
+                            "message": 1
+                        }
+                    ]
+                }
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
