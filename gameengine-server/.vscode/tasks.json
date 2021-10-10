@@ -25,6 +25,7 @@
                 {
                     "owner": "haskell",
                     "fileLocation": ["relative", "${workspaceFolder}"],
+                    "source": "ghc",
                     "pattern": [
                         {
                             "regexp": "^((?:\\S+(?:\\\\))+\\S+):(\\d+):(\\d+): (?:(warning|error):(?: \\[(.+)\\])?)$",
@@ -62,7 +63,8 @@
             "label": "Build and test",
             "type": "shell",
             "command": "stack test --no-copy-bins",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": "test"
         }
     ]
 }
